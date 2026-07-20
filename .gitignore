@@ -48,4 +48,5 @@ graphify-out/
 
 .android-sdk/
 result/
-TMPDIR:-/
+release-artifacts/
+TMPDIR*
