@@ -183,6 +183,20 @@ fun YouTubeSearchScreen(
                         }
                     }
                 }
+                uiState.hasSearched -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No results for \"${uiState.query}\"",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 else -> {
                     YouTubeSearchHistorySection(
                         historyItems = uiState.searchHistory,

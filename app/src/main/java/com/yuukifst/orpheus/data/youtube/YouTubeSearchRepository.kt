@@ -26,10 +26,16 @@ class YouTubeSearchRepository @Inject constructor() {
     }
 }
 
+internal fun extractYouTubeVideoId(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    return runCatching {
+        ServiceList.YouTube.streamLHFactory.fromUrl(url).id
+    }.getOrNull()?.takeIf { it.isNotBlank() }
+}
+
 private fun InfoItem.toYouTubeTrack(): YouTubeTrack? {
     if (this !is StreamInfoItem) return null
-    val id = url?.substringAfter("v=")?.substringBefore("&")?.takeIf { it.isNotBlank() }
-        ?: return null
+    val id = extractYouTubeVideoId(url) ?: return null
     return YouTubeTrack(
         videoId = id,
         title = name.orEmpty(),

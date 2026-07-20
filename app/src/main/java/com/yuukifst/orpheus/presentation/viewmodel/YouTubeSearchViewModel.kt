@@ -29,6 +29,7 @@ data class YouTubeSearchUiState(
     val searchHistory: List<SearchHistoryItem> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false,
+    val hasSearched: Boolean = false,
     val error: String? = null,
     val downloadingVideoIds: Set<String> = emptySet(),
     val snackbarMessage: String? = null,
@@ -65,15 +66,16 @@ class YouTubeSearchViewModel @Inject constructor(
         val trimmed = query.trim()
         _uiState.update { it.copy(query = trimmed, error = null) }
         if (trimmed.isBlank()) {
-            _uiState.update { it.copy(results = emptyList(), isLoading = false) }
+            _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
             runCatching {
                 searchRepository.search(trimmed)
             }.onSuccess { results ->
+                searchHistoryDao.deleteByQuery(trimmed)
                 searchHistoryDao.insert(
                     SearchHistoryEntity(query = trimmed, timestamp = System.currentTimeMillis()),
                 )
