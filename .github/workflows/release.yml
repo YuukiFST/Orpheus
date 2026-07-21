@@ -65,7 +65,7 @@ jobs:
           mkdir -p release-artifacts
           VERSION="${GITHUB_REF_NAME#v}"
           for apk in app/build/outputs/apk/release/app-*-release.apk; do
-            abi=$(basename "$apk" | sed -E 's/app-([^-]+)-release.apk/\1/')
+            abi=$(basename "$apk" .apk | sed -E 's/^app-(.+)-release$/\1/')
             cp "$apk" "release-artifacts/Orpheus-${VERSION}-${abi}.apk"
           done
           ls -la release-artifacts/
