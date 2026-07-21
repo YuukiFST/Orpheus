@@ -42,7 +42,9 @@ import com.yuukifst.orpheus.data.model.StorageFilter
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.ui.theme.GenreThemeUtils
+import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
 import com.yuukifst.orpheus.utils.DirectoryFilterUtils
+import com.yuukifst.orpheus.utils.isYouTubeMediaId
 import com.yuukifst.orpheus.utils.LogUtils
 import com.yuukifst.orpheus.utils.StorageType
 import com.yuukifst.orpheus.utils.StorageUtils
@@ -88,7 +90,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val favoritesDao: FavoritesDao,
     private val artistImageRepository: ArtistImageRepository,
-    private val folderTreeBuilder: FolderTreeBuilder
+    private val folderTreeBuilder: FolderTreeBuilder,
+    private val youTubeCachedTrackRepository: YouTubeCachedTrackRepository,
 ) : MusicRepository {
 
     companion object {
@@ -649,10 +652,21 @@ class MusicRepositoryImpl @Inject constructor(
     override fun getSongsByIds(songIds: List<String>): Flow<List<Song>> {
         if (songIds.isEmpty()) return flowOf(emptyList())
         val longIds = songIds.mapNotNull { it.toLongOrNull() }
-        if (longIds.isEmpty()) return flowOf(emptyList())
-        return musicDao.getSongsByIds(longIds, emptyList(), false).map { entities ->
-            val songMap = entities.associate { it.id.toString() to it.toSong() }
-            // Preserve the requested order
+        val youtubeIds = songIds.filter { it.isYouTubeMediaId() }
+        val localFlow = if (longIds.isEmpty()) {
+            flowOf(emptyList<Song>())
+        } else {
+            musicDao.getSongsByIds(longIds, emptyList(), false).map { entities ->
+                entities.map { it.toSong() }
+            }
+        }
+        val youtubeFlow = if (youtubeIds.isEmpty()) {
+            flowOf(emptyList<Song>())
+        } else {
+            youTubeCachedTrackRepository.observeSongsByMediaIds(youtubeIds)
+        }
+        return combine(localFlow, youtubeFlow) { localSongs, youtubeSongs ->
+            val songMap = (localSongs + youtubeSongs).associateBy { it.id }
             songIds.mapNotNull { songMap[it] }
         }.flowOn(Dispatchers.IO)
     }
@@ -749,6 +763,10 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setFavoriteStatus(songId: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
+        if (songId.isYouTubeMediaId()) {
+            youTubeCachedTrackRepository.setFavoriteByMediaId(songId, isFavorite)
+            return@withContext
+        }
         val id = songId.toLongOrNull() ?: return@withContext
         if (isFavorite) {
             favoritesDao.setFavorite(
@@ -762,19 +780,31 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun setYouTubeFavorite(song: Song, isFavorite: Boolean) = withContext(Dispatchers.IO) {
+        youTubeCachedTrackRepository.setFavoriteFromSong(song, isFavorite)
+    }
+
     override suspend fun getFavoriteSongIdsOnce(): Set<String> = withContext(Dispatchers.IO) {
-        favoritesDao.getFavoriteSongIdsOnce()
-            .map { it.toString() }
-            .toSet()
+        val local = favoritesDao.getFavoriteSongIdsOnce().map { it.toString() }.toSet()
+        val youtube = youTubeCachedTrackRepository.getFavoriteMediaIdsOnce()
+        local + youtube
     }
 
     override fun getFavoriteSongIdsFlow(): Flow<Set<String>> {
-        return favoritesDao.getFavoriteSongIds()
-            .map { ids -> ids.asSequence().map(Long::toString).toSet() }
+        return combine(
+            favoritesDao.getFavoriteSongIds().map { ids -> ids.asSequence().map(Long::toString).toSet() },
+            youTubeCachedTrackRepository.observeFavoriteMediaIds(),
+        ) { local, youtube -> local + youtube }
             .distinctUntilChanged()
     }
 
     override suspend fun toggleFavoriteStatus(songId: String): Boolean = withContext(Dispatchers.IO) {
+        if (songId.isYouTubeMediaId()) {
+            val isFav = youTubeCachedTrackRepository.getFavoriteMediaIdsOnce().contains(songId)
+            val newFav = !isFav
+            youTubeCachedTrackRepository.setFavoriteByMediaId(songId, newFav)
+            return@withContext newFav
+        }
         val id = songId.toLongOrNull() ?: return@withContext false
         val isFav = favoritesDao.isFavorite(id) ?: false
         val newFav = !isFav

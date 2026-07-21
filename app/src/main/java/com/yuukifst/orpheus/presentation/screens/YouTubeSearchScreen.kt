@@ -101,6 +101,14 @@ fun YouTubeSearchScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        playerViewModel.youTubeChannelSearchRequests.collect { channelName ->
+            if (channelName.isBlank()) return@collect
+            searchQuery = channelName
+            viewModel.searchChannel(channelName)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

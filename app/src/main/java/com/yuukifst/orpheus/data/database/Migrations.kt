@@ -94,3 +94,27 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         db.execSQL("DROP TABLE IF EXISTS `jellyfin_playlists`")
     }
 }
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+                CREATE TABLE IF NOT EXISTS `youtube_cached_tracks` (
+                    `video_id` TEXT NOT NULL,
+                    `title` TEXT NOT NULL,
+                    `channel_name` TEXT NOT NULL,
+                    `thumbnail_url` TEXT NOT NULL,
+                    `duration_ms` INTEGER NOT NULL,
+                    `display_title` TEXT,
+                    `is_favorite` INTEGER NOT NULL DEFAULT 0,
+                    `last_played_at` INTEGER NOT NULL DEFAULT 0,
+                    `favorited_at` INTEGER,
+                    PRIMARY KEY(`video_id`)
+                )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS `index_youtube_cached_tracks_video_id` ON `youtube_cached_tracks` (`video_id`)",
+        )
+    }
+}

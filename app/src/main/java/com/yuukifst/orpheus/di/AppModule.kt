@@ -24,7 +24,9 @@ import com.yuukifst.orpheus.data.database.LyricsDao
 import com.yuukifst.orpheus.data.database.LocalPlaylistDao
 import com.yuukifst.orpheus.data.database.MIGRATION_1_2
 import com.yuukifst.orpheus.data.database.MIGRATION_2_3
+import com.yuukifst.orpheus.data.database.MIGRATION_3_4
 import com.yuukifst.orpheus.data.database.YouTubeDownloadDao
+import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.database.MusicDao
 import com.yuukifst.orpheus.data.database.OrpheusDatabase
@@ -46,6 +48,7 @@ import com.yuukifst.orpheus.data.repository.SongRepository
 import com.yuukifst.orpheus.data.repository.TransitionRepository
 import com.yuukifst.orpheus.data.repository.TransitionRepositoryImpl
 import com.yuukifst.orpheus.data.repository.FolderTreeBuilder
+import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -127,7 +130,7 @@ object AppModule {
             "orpheus_database"
         )
             .addCallback(OrpheusDatabase.createRuntimeArtifactsCallback())
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
 
         // P2-4: Only allow destructive recreation in debug builds.
@@ -199,6 +202,12 @@ object AppModule {
     @Provides
     fun provideYouTubePlaylistDao(database: OrpheusDatabase): YouTubePlaylistDao {
         return database.youTubePlaylistDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideYouTubeCachedTrackDao(database: OrpheusDatabase): YouTubeCachedTrackDao {
+        return database.youTubeCachedTrackDao()
     }
 
     @Provides
@@ -291,7 +300,8 @@ object AppModule {
         songRepository: SongRepository,
         favoritesDao: FavoritesDao,
         artistImageRepository: ArtistImageRepository,
-        folderTreeBuilder: FolderTreeBuilder
+        folderTreeBuilder: FolderTreeBuilder,
+        youTubeCachedTrackRepository: YouTubeCachedTrackRepository,
     ): MusicRepository {
         return MusicRepositoryImpl(
             context = context,
@@ -303,7 +313,8 @@ object AppModule {
             songRepository = songRepository,
             favoritesDao = favoritesDao,
             artistImageRepository = artistImageRepository,
-            folderTreeBuilder = folderTreeBuilder
+            folderTreeBuilder = folderTreeBuilder,
+            youTubeCachedTrackRepository = youTubeCachedTrackRepository,
         )
 
     }

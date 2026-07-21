@@ -29,6 +29,27 @@ interface YouTubeDownloadDao {
 }
 
 @Dao
+interface YouTubeCachedTrackDao {
+    @Query("SELECT * FROM youtube_cached_tracks WHERE video_id = :videoId LIMIT 1")
+    suspend fun getByVideoId(videoId: String): YouTubeCachedTrackEntity?
+
+    @Query("SELECT * FROM youtube_cached_tracks WHERE video_id IN (:videoIds)")
+    suspend fun getByVideoIds(videoIds: List<String>): List<YouTubeCachedTrackEntity>
+
+    @Query("SELECT * FROM youtube_cached_tracks WHERE video_id IN (:videoIds)")
+    fun observeByVideoIds(videoIds: List<String>): Flow<List<YouTubeCachedTrackEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(entity: YouTubeCachedTrackEntity)
+
+    @Query("SELECT video_id FROM youtube_cached_tracks WHERE is_favorite = 1")
+    fun observeFavoriteVideoIds(): Flow<List<String>>
+
+    @Query("SELECT video_id FROM youtube_cached_tracks WHERE is_favorite = 1")
+    suspend fun getFavoriteVideoIdsOnce(): List<String>
+}
+
+@Dao
 interface YouTubePlaylistDao {
     @Query("SELECT * FROM playlist_youtube_tracks WHERE playlist_id = :playlistId ORDER BY sort_order ASC")
     fun observeForPlaylist(playlistId: String): Flow<List<PlaylistYouTubeTrackEntity>>

@@ -1,0 +1,1 @@
+Fix YouTube playback crashes on network errors, faster track switching, working previous button and likes, recent plays, artist channel search, and quieter search cancellation errors.

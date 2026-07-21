@@ -72,6 +72,13 @@ class YouTubeSearchViewModel @Inject constructor(
                 _uiState.update { it.copy(playlists = playlists) }
             }
         }
+        viewModelScope.launch {
+            playbackController.playbackErrors.collect { message ->
+                if (message.isNotBlank()) {
+                    _uiState.update { it.copy(snackbarMessage = message) }
+                }
+            }
+        }
     }
 
     fun updateQuery(query: String) {
@@ -166,13 +173,22 @@ class YouTubeSearchViewModel @Inject constructor(
             throw e
         } catch (error: Exception) {
             if (requestId != latestSearchRequestId.get()) return
+            val message = error.message.orEmpty()
+            if (message.contains("cancel", ignoreCase = true)) {
+                _uiState.update { it.copy(isLoading = false) }
+                return
+            }
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    error = error.message ?: "Search failed",
+                    error = message.ifBlank { "Search failed" },
                 )
             }
         }
+    }
+
+    fun searchChannel(channelName: String) {
+        search(channelName)
     }
 
     fun playOnce(track: YouTubeTrack) {

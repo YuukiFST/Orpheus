@@ -74,6 +74,7 @@ import com.yuukifst.orpheus.utils.LyricsUtils
 import com.yuukifst.orpheus.utils.StorageType
 import com.yuukifst.orpheus.utils.StorageUtils
 import com.yuukifst.orpheus.utils.traceSection
+import com.yuukifst.orpheus.utils.isYouTubeMediaId
 import com.yuukifst.orpheus.utils.ZipShareHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -274,7 +275,8 @@ class PlayerViewModel @Inject constructor(
     val multiSelectionStateHolder: MultiSelectionStateHolder,
     val playlistSelectionStateHolder: PlaylistSelectionStateHolder,
     private val sessionToken: SessionToken,
-    private val mediaControllerFactory: com.yuukifst.orpheus.data.media.MediaControllerFactory
+    private val mediaControllerFactory: com.yuukifst.orpheus.data.media.MediaControllerFactory,
+    private val youTubePlaybackController: YouTubePlaybackController,
 ) : ViewModel() {
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
@@ -572,6 +574,8 @@ class PlayerViewModel @Inject constructor(
     val albumNavigationRequests = _albumNavigationRequests.asSharedFlow()
     private val _artistNavigationRequests = MutableSharedFlow<Long>(extraBufferCapacity = 1)
     val artistNavigationRequests = _artistNavigationRequests.asSharedFlow()
+    private val _youTubeChannelSearchRequests = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val youTubeChannelSearchRequests = _youTubeChannelSearchRequests.asSharedFlow()
     private val _searchNavDoubleTapEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val searchNavDoubleTapEvents = _searchNavDoubleTapEvents.asSharedFlow()
     
@@ -940,6 +944,35 @@ class PlayerViewModel @Inject constructor(
                         lyricsStateHolder.loadLyricsForSong(hydratedSong, lyricsSourcePreference.value)
                     }
                 }
+        }
+
+        viewModelScope.launch {
+            youTubePlaybackController.queueUpdates.collect { update ->
+                applyYouTubeQueueUpdate(update)
+            }
+        }
+        viewModelScope.launch {
+            youTubePlaybackController.playbackErrors.collect { message ->
+                if (message.isNotBlank()) {
+                    sendToast(message)
+                }
+            }
+        }
+    }
+
+    private fun applyYouTubeQueueUpdate(update: YouTubePlaybackQueueUpdate) {
+        _playerUiState.update { state ->
+            state.copy(
+                currentPlaybackQueue = update.songs.toPersistentList(),
+                currentQueueSourceName = update.queueName,
+            )
+        }
+        playbackStateHolder.updateStablePlayerState { state ->
+            state.copy(currentMediaItemIndex = update.currentIndex)
+        }
+        _isSheetVisible.value = true
+        if (_sheetState.value == PlayerSheetState.EXPANDED) {
+            _sheetState.value = PlayerSheetState.COLLAPSED
         }
     }
 
@@ -2188,6 +2221,16 @@ class PlayerViewModel @Inject constructor(
             }
 
             if (resolvedId == 0L || resolvedId == -1L) {
+                val channelName = currentSong?.artist?.takeIf { it.isNotBlank() }
+                if (currentSong?.id?.isYouTubeMediaId() == true && !channelName.isNullOrBlank()) {
+                    collapsePlayerSheet()
+                    withTimeoutOrNull(900) {
+                        awaitSheetState(PlayerSheetState.COLLAPSED)
+                        awaitPlayerCollapse()
+                    }
+                    _youTubeChannelSearchRequests.emit(channelName)
+                    return@launch
+                }
                 Timber.tag("ArtistDebug").d("triggerArtistNavigationFromPlayer: could not resolve artistId for name=${currentSong?.artist}")
                 return@launch
             }
@@ -3200,6 +3243,11 @@ class PlayerViewModel @Inject constructor(
     fun toggleFavorite() {
         val currentSong = playbackStateHolder.stablePlayerState.value.currentSong ?: return
         viewModelScope.launch {
+            if (currentSong.id.isYouTubeMediaId()) {
+                val currentlyFavorite = favoriteSongIds.value.contains(currentSong.id)
+                musicRepository.setYouTubeFavorite(currentSong, !currentlyFavorite)
+                return@launch
+            }
             val favoriteSongId = resolveFavoriteSongId(currentSong) ?: return@launch
             val currentlyFavorite = favoriteSongIds.value.contains(favoriteSongId)
             setFavoriteStatusEverywhere(favoriteSongId, !currentlyFavorite)
@@ -3208,6 +3256,12 @@ class PlayerViewModel @Inject constructor(
 
     fun toggleFavoriteSpecificSong(song: Song, removing: Boolean = false) {
         viewModelScope.launch {
+            if (song.id.isYouTubeMediaId()) {
+                val currentlyFavorite = favoriteSongIds.value.contains(song.id)
+                val targetFavoriteState = if (removing) false else !currentlyFavorite
+                musicRepository.setYouTubeFavorite(song, targetFavoriteState)
+                return@launch
+            }
             val favoriteSongId = resolveFavoriteSongId(song) ?: return@launch
             val currentlyFavorite = favoriteSongIds.value.contains(favoriteSongId)
             val targetFavoriteState = if (removing) false else !currentlyFavorite
@@ -3217,6 +3271,9 @@ class PlayerViewModel @Inject constructor(
 
     private suspend fun resolveFavoriteSongId(song: Song?): String? {
         song ?: return null
+        if (song.id.isYouTubeMediaId()) {
+            return song.id
+        }
         if (song.id.toLongOrNull() != null) {
             return song.id
         }

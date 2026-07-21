@@ -266,6 +266,8 @@ interface MusicRepository {
      */
     suspend fun setFavoriteStatus(songId: String, isFavorite: Boolean)
 
+    suspend fun setYouTubeFavorite(song: Song, isFavorite: Boolean)
+
     /**
      * Returns favorite song IDs directly from Room (favorites table).
      */

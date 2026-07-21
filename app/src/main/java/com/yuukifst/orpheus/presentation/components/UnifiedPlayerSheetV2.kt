@@ -61,6 +61,7 @@ import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.preferences.sanitizeNavBarCornerRadius
 import com.yuukifst.orpheus.presentation.components.scoped.PlayerAlbumNavigationEffect
 import com.yuukifst.orpheus.presentation.components.scoped.PlayerArtistNavigationEffect
+import com.yuukifst.orpheus.presentation.components.scoped.PlayerYouTubeChannelSearchEffect
 import com.yuukifst.orpheus.presentation.components.scoped.PlayerSheetPredictiveBackHandler
 import com.yuukifst.orpheus.presentation.components.scoped.QueueSheetRuntimeEffects
 import com.yuukifst.orpheus.presentation.components.scoped.SheetMotionController
@@ -252,6 +253,12 @@ fun UnifiedPlayerSheetV2(
         sheetCollapsedTargetY = sheetCollapsedTargetY,
         sheetMotionController = sheetMotionController,
         playerViewModel = playerViewModel
+    )
+    PlayerYouTubeChannelSearchEffect(
+        navController = navController,
+        sheetCollapsedTargetY = sheetCollapsedTargetY,
+        sheetMotionController = sheetMotionController,
+        playerViewModel = playerViewModel,
     )
     PlayerAlbumNavigationEffect(
         navController = navController,
