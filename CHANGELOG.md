@@ -2,6 +2,12 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.7] - 2026-07-21
+
+### Fixed
+- Library crash from collecting the same Paging 3 flow twice (`pageEventFlow` IllegalStateException) when opening songs/albums/artists/liked tabs.
+- Removed duplicate `cachedIn` subscription on `songsPagingFlow` in `PlayerViewModel` and simplified repository `Pager` wiring.
+
 ## [1.0.6] - 2026-07-21
 
 ### Changed

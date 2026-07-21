@@ -1,0 +1,1 @@
+Fix library crash when opening songs, albums, artists, or liked tabs (Paging 3 double collection).

@@ -334,14 +334,6 @@ class PlayerViewModel @Inject constructor(
     private val _playlistPickerStorageFilter = MutableStateFlow(com.yuukifst.orpheus.data.model.StorageFilter.OFFLINE)
     val playlistPickerStorageFilter: StateFlow<com.yuukifst.orpheus.data.model.StorageFilter> = _playlistPickerStorageFilter.asStateFlow()
 
-    /**
-     * Paginated songs for efficient display in LibraryScreen.
-     * Uses Paging 3 for memory-efficient loading of large libraries.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val paginatedSongs: Flow<PagingData<Song>> = libraryStateHolder.songsPagingFlow
-        .cachedIn(viewModelScope)
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val playlistPickerFavoriteSongs: Flow<PagingData<Song>> = combine(
         libraryStateHolder.currentSongSortOption,
@@ -1300,10 +1292,6 @@ class PlayerViewModel @Inject constructor(
     }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlayerConfigSlice())
-
-    // Library State - delegated to LibraryStateHolder
-    // Favorites now use paginated flow from LibraryStateHolder (DB-level sort & filter)
-    val favoritesPagingFlow = libraryStateHolder.favoritesPagingFlow
 
     // Daily mix state is now managed by DailyMixStateHolder
     val dailyMixSongs: StateFlow<ImmutableList<Song>> = dailyMixStateHolder.dailyMixSongs

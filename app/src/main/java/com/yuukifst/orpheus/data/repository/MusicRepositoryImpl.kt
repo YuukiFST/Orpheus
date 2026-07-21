@@ -180,24 +180,20 @@ class MusicRepositoryImpl @Inject constructor(
         ) { allowedDirs, blockedDirs ->
             allowedDirs to blockedDirs
         }.flatMapLatest { (allowedDirs, blockedDirs) ->
-            flow {
-                val (allowedParentDirs, applyDirectoryFilter) =
-                    computeAllowedDirs(allowedDirs, blockedDirs)
-                emit(
-                    Pager(
-                        config = defaultLibraryPagingConfig,
-                        pagingSourceFactory = {
-                            musicDao.getAlbumsPaginated(
-                                allowedParentDirs = allowedParentDirs,
-                                applyDirectoryFilter = applyDirectoryFilter,
-                                filterMode = storageFilter.toFilterMode(),
-                                sortOrder = sortOption.storageKey,
-                                minTracks = minTracks
-                            )
-                        }
-                    ).flow
-                )
-            }.flatMapLatest { it }
+            val (allowedParentDirs, applyDirectoryFilter) =
+                computeAllowedDirs(allowedDirs, blockedDirs)
+            Pager(
+                config = defaultLibraryPagingConfig,
+                pagingSourceFactory = {
+                    musicDao.getAlbumsPaginated(
+                        allowedParentDirs = allowedParentDirs,
+                        applyDirectoryFilter = applyDirectoryFilter,
+                        filterMode = storageFilter.toFilterMode(),
+                        sortOrder = sortOption.storageKey,
+                        minTracks = minTracks
+                    )
+                }
+            ).flow
         }.map { pagingData ->
             pagingData.map { entity -> entity.toAlbum() }
         }.flowOn(Dispatchers.IO)
@@ -215,34 +211,30 @@ class MusicRepositoryImpl @Inject constructor(
         ) { allowedDirs, blockedDirs, groupByAlbumArtist ->
             Triple(allowedDirs, blockedDirs, groupByAlbumArtist)
         }.flatMapLatest { (allowedDirs, blockedDirs, groupByAlbumArtist) ->
-            flow {
-                val (allowedParentDirs, applyDirectoryFilter) =
-                    computeAllowedDirs(allowedDirs, blockedDirs)
-                emit(
-                    Pager(
-                        config = defaultLibraryPagingConfig,
-                        pagingSourceFactory = {
-                            // "Group by Album Artist" collapses the tab onto each song's effective
-                            // album artist; otherwise it lists every track-level artist as before.
-                            if (groupByAlbumArtist) {
-                                musicDao.getArtistsPaginatedByAlbumArtist(
-                                    allowedParentDirs = allowedParentDirs,
-                                    applyDirectoryFilter = applyDirectoryFilter,
-                                    filterMode = storageFilter.toFilterMode(),
-                                    sortOrder = sortOption.storageKey
-                                )
-                            } else {
-                                musicDao.getArtistsPaginated(
-                                    allowedParentDirs = allowedParentDirs,
-                                    applyDirectoryFilter = applyDirectoryFilter,
-                                    filterMode = storageFilter.toFilterMode(),
-                                    sortOrder = sortOption.storageKey
-                                )
-                            }
-                        }
-                    ).flow
-                )
-            }.flatMapLatest { it }
+            val (allowedParentDirs, applyDirectoryFilter) =
+                computeAllowedDirs(allowedDirs, blockedDirs)
+            Pager(
+                config = defaultLibraryPagingConfig,
+                pagingSourceFactory = {
+                    // "Group by Album Artist" collapses the tab onto each song's effective
+                    // album artist; otherwise it lists every track-level artist as before.
+                    if (groupByAlbumArtist) {
+                        musicDao.getArtistsPaginatedByAlbumArtist(
+                            allowedParentDirs = allowedParentDirs,
+                            applyDirectoryFilter = applyDirectoryFilter,
+                            filterMode = storageFilter.toFilterMode(),
+                            sortOrder = sortOption.storageKey
+                        )
+                    } else {
+                        musicDao.getArtistsPaginated(
+                            allowedParentDirs = allowedParentDirs,
+                            applyDirectoryFilter = applyDirectoryFilter,
+                            filterMode = storageFilter.toFilterMode(),
+                            sortOrder = sortOption.storageKey
+                        )
+                    }
+                }
+            ).flow
         }.map { pagingData ->
             pagingData.map { entity -> entity.toArtist() }
         }.flowOn(Dispatchers.IO)

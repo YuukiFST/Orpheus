@@ -470,23 +470,19 @@ class MediaStoreSongRepository @Inject constructor(
         ) { allowedDirs, blockedDirs ->
             allowedDirs to blockedDirs
         }.flatMapLatest { (allowedDirs, blockedDirs) ->
-            kotlinx.coroutines.flow.flow {
-                val (allowedParentDirs, applyDirectoryFilter) =
-                    computeAllowedDirs(allowedDirs, blockedDirs)
-                emit(
-                    androidx.paging.Pager(
-                        config = defaultPagingConfig,
-                        pagingSourceFactory = {
-                            musicDao.getSongsPaginated(
-                                allowedParentDirs = allowedParentDirs,
-                                applyDirectoryFilter = applyDirectoryFilter,
-                                sortOrder = sortOption.storageKey,
-                                filterMode = storageFilter.value
-                            )
-                        }
-                    ).flow
-                )
-            }.flatMapLatest { it }
+            val (allowedParentDirs, applyDirectoryFilter) =
+                computeAllowedDirs(allowedDirs, blockedDirs)
+            androidx.paging.Pager(
+                config = defaultPagingConfig,
+                pagingSourceFactory = {
+                    musicDao.getSongsPaginated(
+                        allowedParentDirs = allowedParentDirs,
+                        applyDirectoryFilter = applyDirectoryFilter,
+                        sortOrder = sortOption.storageKey,
+                        filterMode = storageFilter.value
+                    )
+                }
+            ).flow
         }.map { pagingData ->
             pagingData.map { entity -> entity.toSong() }
         }
@@ -503,23 +499,19 @@ class MediaStoreSongRepository @Inject constructor(
         ) { allowedDirs, blockedDirs ->
             allowedDirs to blockedDirs
         }.flatMapLatest { (allowedDirs, blockedDirs) ->
-            kotlinx.coroutines.flow.flow {
-                val (allowedParentDirs, applyDirectoryFilter) =
-                    computeAllowedDirs(allowedDirs, blockedDirs)
-                emit(
-                    androidx.paging.Pager(
-                        config = defaultPagingConfig,
-                        pagingSourceFactory = {
-                            musicDao.getFavoriteSongsPaginated(
-                                allowedParentDirs = allowedParentDirs,
-                                applyDirectoryFilter = applyDirectoryFilter,
-                                sortOrder = sortOption.storageKey,
-                                filterMode = storageFilter.value
-                            )
-                        }
-                    ).flow
-                )
-            }.flatMapLatest { it }
+            val (allowedParentDirs, applyDirectoryFilter) =
+                computeAllowedDirs(allowedDirs, blockedDirs)
+            androidx.paging.Pager(
+                config = defaultPagingConfig,
+                pagingSourceFactory = {
+                    musicDao.getFavoriteSongsPaginated(
+                        allowedParentDirs = allowedParentDirs,
+                        applyDirectoryFilter = applyDirectoryFilter,
+                        sortOrder = sortOption.storageKey,
+                        filterMode = storageFilter.value
+                    )
+                }
+            ).flow
         }.map { pagingData ->
             pagingData.map { entity -> entity.toSong().copy(isFavorite = true) }
         }
