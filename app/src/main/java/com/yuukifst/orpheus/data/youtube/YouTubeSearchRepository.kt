@@ -19,8 +19,8 @@ class YouTubeSearchRepository @Inject constructor() {
         YouTubeInitializer.ensureInitialized()
         val handler = YoutubeSearchQueryHandlerFactory.getInstance()
             .fromQuery(query, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
-        val extractor = ServiceList.YouTube.getSearchExtractor(handler)
-        val searchInfo = SearchInfo.getInfo(extractor)
+        // Must use the service overload so NewPipe calls fetchPage() before reading results.
+        val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
         searchInfo.relatedItems
             .mapNotNull { item -> item.toYouTubeTrack() }
     }

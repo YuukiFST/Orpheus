@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -48,6 +50,11 @@ class YouTubeSearchViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(YouTubeSearchUiState())
     val uiState: StateFlow<YouTubeSearchUiState> = _uiState.asStateFlow()
+    private var debouncedSearchJob: Job? = null
+
+    private companion object {
+        const val SEARCH_DEBOUNCE_MS = 300L
+    }
 
     init {
         refreshSearchHistory()
@@ -59,35 +66,51 @@ class YouTubeSearchViewModel @Inject constructor(
     }
 
     fun updateQuery(query: String) {
-        _uiState.update { it.copy(query = query) }
+        _uiState.update { it.copy(query = query, error = null) }
+        debouncedSearchJob?.cancel()
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) {
+            _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
+            return
+        }
+        debouncedSearchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_MS)
+            executeSearch(trimmed, saveHistory = false)
+        }
     }
 
     fun search(query: String) {
+        debouncedSearchJob?.cancel()
         val trimmed = query.trim()
         _uiState.update { it.copy(query = trimmed, error = null) }
         if (trimmed.isBlank()) {
             _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
             return
         }
-
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
-            runCatching {
-                searchRepository.search(trimmed)
-            }.onSuccess { results ->
+            executeSearch(trimmed, saveHistory = true)
+        }
+    }
+
+    private suspend fun executeSearch(trimmed: String, saveHistory: Boolean) {
+        _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
+        runCatching {
+            searchRepository.search(trimmed)
+        }.onSuccess { results ->
+            if (saveHistory) {
                 searchHistoryDao.deleteByQuery(trimmed)
                 searchHistoryDao.insert(
                     SearchHistoryEntity(query = trimmed, timestamp = System.currentTimeMillis()),
                 )
                 refreshSearchHistory()
-                _uiState.update { it.copy(results = results, isLoading = false) }
-            }.onFailure { error ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = error.message ?: "Search failed",
-                    )
-                }
+            }
+            _uiState.update { it.copy(results = results, isLoading = false) }
+        }.onFailure { error ->
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    error = error.message ?: "Search failed",
+                )
             }
         }
     }
