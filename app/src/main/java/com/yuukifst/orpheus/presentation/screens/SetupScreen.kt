@@ -205,7 +205,7 @@ fun SetupScreen(
     }
 
     val pages = remember {
-        buildSetupPages(Build.VERSION.SDK_INT)
+        buildSetupPages()
     }
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
@@ -326,7 +326,7 @@ fun SetupScreen(
             ) {
                 when (page) {
                     SetupPage.Welcome -> WelcomePage()
-                    SetupPage.MediaPermission -> MediaPermissionPage(
+                    SetupPage.Permissions -> PermissionsPage(
                         uiState = uiState,
                         onPermissionStateUpdated = { setupViewModel.checkPermissions(context) }
                     )
@@ -361,16 +361,6 @@ fun SetupScreen(
                         onToggleAllowed = setupViewModel::toggleDirectoryAllowed,
                         onSelectionFinished = setupViewModel::applyPendingDirectoryRuleChanges,
                         onStorageSelected = setupViewModel::selectStorage
-                    )
-                    SetupPage.NotificationsPermission -> NotificationsPermissionPage(
-                        uiState = uiState,
-                        onPermissionStateUpdated = { setupViewModel.checkPermissions(context) }
-                    )
-                    SetupPage.AlarmsPermission -> AlarmsPermissionPage(
-                        uiState = uiState,
-                        onSkip = {
-                            navigateToPage(pagerState.currentPage + 1)
-                        }
                     )
                     SetupPage.ThemeSelection -> ThemeSelectionPage(
                         uiState = uiState,
@@ -535,42 +525,27 @@ fun DirectorySelectionPage(
 
 sealed class SetupPage {
     object Welcome : SetupPage()
-    object MediaPermission : SetupPage()
+    object Permissions : SetupPage()
     object BackupRestore : SetupPage()
     object DirectorySelection : SetupPage()
     object ExternalServices : SetupPage()
     object ThemeSelection : SetupPage()
-    object NotificationsPermission : SetupPage()
-    object AlarmsPermission : SetupPage()
     object LibraryLayout : SetupPage()
     object NavBarLayout : SetupPage()
     object Finish : SetupPage()
 }
 
-private fun buildSetupPages(sdkInt: Int): List<SetupPage> {
-    val pages = mutableListOf<SetupPage>(
-        SetupPage.Welcome,
-        SetupPage.MediaPermission
-    )
-
-    if (sdkInt >= Build.VERSION_CODES.TIRAMISU) {
-        pages += SetupPage.NotificationsPermission
-    }
-
-    pages += SetupPage.BackupRestore
-    pages += SetupPage.DirectorySelection
-    pages += SetupPage.ExternalServices
-    pages += SetupPage.ThemeSelection
-    pages += SetupPage.LibraryLayout
-    pages += SetupPage.NavBarLayout
-
-    if (sdkInt >= Build.VERSION_CODES.S) {
-        pages += SetupPage.AlarmsPermission
-    }
-
-    pages += SetupPage.Finish
-    return pages
-}
+private fun buildSetupPages(): List<SetupPage> = listOf(
+    SetupPage.Welcome,
+    SetupPage.Permissions,
+    SetupPage.BackupRestore,
+    SetupPage.DirectorySelection,
+    SetupPage.ExternalServices,
+    SetupPage.ThemeSelection,
+    SetupPage.LibraryLayout,
+    SetupPage.NavBarLayout,
+    SetupPage.Finish
+)
 
 private fun firstBlockedForwardPageIndex(
     pages: List<SetupPage>,
@@ -591,17 +566,7 @@ private fun isPermissionGateSatisfied(
     uiState: SetupUiState
 ): Boolean {
     return when (page) {
-        SetupPage.MediaPermission -> {
-            uiState.mediaPermissionGranted || hasMediaPermissionNow(context)
-        }
-        SetupPage.NotificationsPermission -> {
-            uiState.notificationsPermissionGranted ||
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-        }
+        SetupPage.Permissions -> allRequiredPermissionsGrantedNow(context)
         else -> true
     }
 }
@@ -750,122 +715,213 @@ fun WelcomePage() {
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MediaPermissionPage(
+fun PermissionsPage(
     uiState: SetupUiState,
     onPermissionStateUpdated: () -> Unit
 ) {
-    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    val context = LocalContext.current
+    val mediaPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         listOf(Manifest.permission.READ_MEDIA_AUDIO)
     } else {
         listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
-    val permissionState = rememberMultiplePermissionsState(permissions = permissions)
-    val mediaIcons = persistentListOf(
-        R.drawable.rounded_music_note_24,
-        R.drawable.rounded_album_24,
-        R.drawable.rounded_library_music_24,
-        R.drawable.rounded_artist_24,
-        R.drawable.rounded_playlist_play_24
+    val mediaPermissionState = rememberMultiplePermissionsState(permissions = mediaPermissions)
+    val notificationsPermissionState = rememberMultiplePermissionsState(
+        permissions = listOf(Manifest.permission.POST_NOTIFICATIONS)
     )
 
-    // Sync the granted state with the ViewModel
-    val isGranted = uiState.mediaPermissionGranted || permissionState.allPermissionsGranted
+    val mediaGranted = uiState.mediaPermissionGranted || mediaPermissionState.allPermissionsGranted
+    val notificationsGranted = uiState.notificationsPermissionGranted ||
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        notificationsPermissionState.allPermissionsGranted
+    val alarmsGranted = uiState.alarmsPermissionGranted
 
-    LaunchedEffect(permissionState.allPermissionsGranted) {
+    LaunchedEffect(mediaPermissionState.allPermissionsGranted, notificationsPermissionState.allPermissionsGranted) {
         onPermissionStateUpdated()
     }
 
-    PermissionPageLayout(
-        title = stringResource(R.string.setup_permission_media_title),
-        granted = isGranted,
-        description = stringResource(R.string.setup_permission_media_description),
-        buttonText = if (isGranted) stringResource(R.string.setup_permission_granted) else stringResource(R.string.setup_grant_media_permission),
-        buttonEnabled = !isGranted,
-        icons = mediaIcons,
-        onGrantClicked = {
-            if (!isGranted) {
-                permissionState.launchMultiplePermissionRequest()
-            }
+    val batchRuntimePermissions = buildList {
+        addAll(mediaPermissions)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(Manifest.permission.POST_NOTIFICATIONS)
         }
-    )
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun NotificationsPermissionPage(
-    uiState: SetupUiState,
-    onPermissionStateUpdated: () -> Unit
-) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-
-    val permissionState = rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.POST_NOTIFICATIONS))
-    val notificationIcons = persistentListOf(
-        R.drawable.rounded_circle_notifications_24,
-        R.drawable.rounded_skip_next_24,
-        R.drawable.rounded_play_arrow_24,
-        R.drawable.rounded_pause_24,
-        R.drawable.rounded_skip_previous_24
-    )
-
-    // Sync the granted state with the ViewModel
-    val isGranted = uiState.notificationsPermissionGranted || permissionState.allPermissionsGranted
-
-    LaunchedEffect(permissionState.allPermissionsGranted) {
-        onPermissionStateUpdated()
     }
+    val batchPermissionState = rememberMultiplePermissionsState(permissions = batchRuntimePermissions)
+    val hasPendingRuntimePermissions = !mediaGranted ||
+        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsGranted)
 
-    PermissionPageLayout(
-        title = stringResource(R.string.setup_permission_notifications_title),
-        granted = isGranted,
-        description = stringResource(R.string.setup_permission_notifications_description),
-        buttonText = if (isGranted) stringResource(R.string.setup_permission_granted) else stringResource(R.string.setup_enable_notifications),
-        buttonEnabled = !isGranted,
-        icons = notificationIcons,
-        onGrantClicked = {
-            if (!isGranted) {
-                permissionState.launchMultiplePermissionRequest()
-            }
-        }
-    )
-}
-
-@Composable
-fun AlarmsPermissionPage(
-    uiState: SetupUiState,
-    onSkip: () -> Unit
-) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
-
-    val context = LocalContext.current
-    val icons = persistentListOf(
-        R.drawable.rounded_alarm_24,
-        R.drawable.rounded_schedule_24,
-        R.drawable.rounded_timer_24,
-        R.drawable.rounded_hourglass_empty_24,
-        R.drawable.rounded_notifications_active_24
-    )
-
-    val isGranted = uiState.alarmsPermissionGranted
-
-    PermissionPageLayout(
-        title = stringResource(R.string.setup_permission_alarms_title),
-        granted = isGranted,
-        description = stringResource(R.string.setup_permission_alarms_description),
-        buttonText = if (isGranted) stringResource(R.string.setup_permission_granted) else stringResource(R.string.setup_grant_permission_generic),
-        buttonEnabled = !isGranted,
-        icons = icons,
-        onGrantClicked = {
-            if (!isGranted) {
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                val uri = "package:${context.packageName}".toUri()
-                intent.data = uri
-                context.startActivity(intent)
-            }
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        if (!isGranted) {
-            TextButton(onClick = onSkip) {
-                Text(stringResource(R.string.skip_for_now), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            text = stringResource(R.string.setup_permissions_title),
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontFamily = RoundedSans,
+                fontSize = 32.sp
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.setup_permissions_subtitle),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            item {
+                PermissionOptionCard(
+                    title = stringResource(R.string.setup_permission_media_title),
+                    description = stringResource(R.string.setup_permission_media_description),
+                    required = true,
+                    granted = mediaGranted,
+                    iconRes = R.drawable.rounded_library_music_24,
+                    grantLabel = stringResource(R.string.setup_grant_media_permission),
+                    onGrantClicked = {
+                        if (!mediaGranted) {
+                            mediaPermissionState.launchMultiplePermissionRequest()
+                        }
+                    }
+                )
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                item {
+                    PermissionOptionCard(
+                        title = stringResource(R.string.setup_permission_notifications_title),
+                        description = stringResource(R.string.setup_permission_notifications_description),
+                        required = true,
+                        granted = notificationsGranted,
+                        iconRes = R.drawable.rounded_circle_notifications_24,
+                        grantLabel = stringResource(R.string.setup_enable_notifications),
+                        onGrantClicked = {
+                            if (!notificationsGranted) {
+                                notificationsPermissionState.launchMultiplePermissionRequest()
+                            }
+                        }
+                    )
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                item {
+                    PermissionOptionCard(
+                        title = stringResource(R.string.setup_permission_alarms_title),
+                        description = stringResource(R.string.setup_permission_alarms_description),
+                        required = false,
+                        granted = alarmsGranted,
+                        iconRes = R.drawable.rounded_alarm_24,
+                        grantLabel = stringResource(R.string.setup_grant_permission_generic),
+                        onGrantClicked = {
+                            if (!alarmsGranted) {
+                                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                                intent.data = "package:${context.packageName}".toUri()
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        if (hasPendingRuntimePermissions) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = { batchPermissionState.launchMultiplePermissionRequest() },
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 14.dp)
+            ) {
+                Text(stringResource(R.string.setup_grant_all_required_permissions))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PermissionOptionCard(
+    title: String,
+    description: String,
+    required: Boolean,
+    granted: Boolean,
+    iconRes: Int,
+    grantLabel: String,
+    onGrantClicked: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = stringResource(
+                            if (required) R.string.setup_permission_required else R.string.setup_permission_optional
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (required) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+                if (granted) {
+                    Icon(
+                        imageVector = Icons.Rounded.Check,
+                        contentDescription = stringResource(R.string.setup_permission_granted),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (!granted) {
+                FilledTonalButton(
+                    onClick = onGrantClicked,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(grantLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
             }
         }
     }
