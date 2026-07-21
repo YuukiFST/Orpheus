@@ -10,8 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,7 +17,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.yuukifst.orpheus.presentation.viewmodel.ColorSchemePair
@@ -69,42 +66,61 @@ fun OrpheusStatusBarStyle(
 }
 
 val DarkColorScheme = darkColorScheme(
-    primary = OrpheusPurplePrimary,
-    secondary = OrpheusPink,
-    tertiary = OrpheusOrange,
-    background = OrpheusPurpleDark,
-    surface = OrpheusSurface,
-    onPrimary = OrpheusWhite,
-    onSecondary = OrpheusWhite,
-    onTertiary = OrpheusWhite,
-    onBackground = OrpheusWhite,
-    onSurface = OrpheusLightPurple, // Text on surfaces
-    error = Color(0xFFFF5252),
-    onError = OrpheusWhite
+    primary = VantaAccent,
+    onPrimary = VantaBlack,
+    primaryContainer = VantaGray0,
+    onPrimaryContainer = VantaWhite,
+    secondary = VantaGray2,
+    onSecondary = VantaBlack,
+    secondaryContainer = VantaGray0,
+    onSecondaryContainer = VantaGray4,
+    tertiary = VantaGray3,
+    onTertiary = VantaBlack,
+    background = VantaBlack,
+    onBackground = VantaWhite,
+    surface = VantaBlack,
+    onSurface = VantaGray4,
+    surfaceVariant = VantaGray0,
+    onSurfaceVariant = VantaGray2,
+    outline = VantaGray1,
+    outlineVariant = VantaGray0,
+    surfaceTint = VantaAccent,
+    error = Color(0xFFA4A4A4),
+    onError = VantaBlack,
+    surfaceContainerLowest = VantaBlack,
+    surfaceContainerLow = Color(0xFF141414),
+    surfaceContainer = VantaGray0,
+    surfaceContainerHigh = Color(0xFF333333),
+    surfaceContainerHighest = Color(0xFF4A4A4A),
 )
 
 val LightColorScheme = lightColorScheme(
-    primary = LightPrimary,
-    onPrimary = OrpheusWhite,
-    primaryContainer = LightPrimaryContainer,
-    onPrimaryContainer = LightOnPrimaryContainer,
-    secondary = OrpheusPink,
-    onSecondary = OrpheusWhite,
-    secondaryContainer = OrpheusPink.copy(alpha = 0.15f),
-    onSecondaryContainer = OrpheusPink.copy(alpha = 0.85f),
-    tertiary = OrpheusOrange,
-    onTertiary = OrpheusBlack,
-    background = LightBackground,
-    onBackground = LightOnSurface,
-    surface = LightSurface,
-    onSurface = LightOnSurface,
-    surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = LightOnSurfaceVariant,
-    outline = LightOutline,
-    outlineVariant = LightOutline.copy(alpha = 0.6f),
-    surfaceTint = LightPrimary,
-    error = Color(0xFFD32F2F),
-    onError = OrpheusWhite
+    primary = VantaGray0,
+    onPrimary = VantaWhite,
+    primaryContainer = VantaGray4,
+    onPrimaryContainer = VantaBlack,
+    secondary = VantaAccent,
+    onSecondary = VantaWhite,
+    secondaryContainer = VantaGray4,
+    onSecondaryContainer = VantaGray0,
+    tertiary = VantaGray1,
+    onTertiary = VantaWhite,
+    background = VantaWhite,
+    onBackground = VantaBlack,
+    surface = VantaWhite,
+    onSurface = VantaBlack,
+    surfaceVariant = VantaGray4,
+    onSurfaceVariant = VantaGray1,
+    outline = VantaAccent,
+    outlineVariant = VantaGray4,
+    surfaceTint = VantaGray0,
+    error = Color(0xFF5C5C5C),
+    onError = VantaWhite,
+    surfaceContainerLowest = VantaWhite,
+    surfaceContainerLow = Color(0xFFF5F5F5),
+    surfaceContainer = VantaGray4,
+    surfaceContainerHigh = Color(0xFFE0E0E0),
+    surfaceContainerHighest = Color(0xFFD0D0D0),
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -114,22 +130,10 @@ fun OrpheusTheme(
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
     val finalColorScheme = when {
-        colorSchemePairOverride == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            // System dynamic theme as priority if there is no override
-            try {
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            } catch (e: Exception) {
-                // Fall back to the defaults if dynamic colors fail (rare, but possible on some devices)
-                if (darkTheme) DarkColorScheme else LightColorScheme
-            }
-        }
         colorSchemePairOverride != null -> {
-            // Use the album scheme if one is provided
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
-        // Final fallback to the defaults if there is no override or applicable dynamic colors
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -142,7 +146,7 @@ fun OrpheusTheme(
     CompositionLocalProvider(LocalOrpheusDarkTheme provides darkTheme) {
         MaterialTheme(
             colorScheme = finalColorScheme,
-            motionScheme = MotionScheme.expressive(),
+            motionScheme = MotionScheme.standard(),
             typography = Typography,
             shapes = Shapes,
             content = content

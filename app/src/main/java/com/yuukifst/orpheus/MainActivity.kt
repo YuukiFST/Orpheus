@@ -267,18 +267,8 @@ class MainActivity : ComponentActivity() {
             OrpheusTheme(
                 darkTheme = useDarkTheme
             ) {
-                var contentVisible by remember { mutableStateOf(false) }
-                val contentAlpha by animateFloatAsState(
-                    targetValue = if (contentVisible) 1f else 0f,
-                    animationSpec = tween(600, easing = LinearOutSlowInEasing),
-                    label = "AppContentAlpha"
-                )
-
-                LaunchedEffect(Unit) {
-                    // Delay slightly to ensure first frame layout is done behind Splash
-                    delay(100)
-                    contentVisible = true
-                }
+                var contentVisible by remember { mutableStateOf(true) }
+                val contentAlpha = if (contentVisible) 1f else 0f
 
                 Surface(
                     modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }, 

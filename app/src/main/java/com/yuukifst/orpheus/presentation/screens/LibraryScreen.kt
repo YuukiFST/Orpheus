@@ -636,53 +636,20 @@ fun LibraryScreen(
         showAlbumMultiSelectionSheet = false
     }
 
-    val fabState by remember { derivedStateOf { currentTabIndex } } // UI unchanged
-    val transition = updateTransition(
-        targetState = fabState,
-        label = "Action Button Icon Transition"
-    ) // UI unchanged
-
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val navBarCompactMode by playerViewModel.navBarCompactMode.collectAsStateWithLifecycle()
     val bottomBarHeightDp = resolveNavBarOccupiedHeight(systemNavBarInset, navBarCompactMode)
     val bottomGradientHeight = resolveMainScreenBottomGradientHeight(navBarCompactMode)
 
-    val dm = LocalOrpheusDarkTheme.current
-
-    val iconRotation by transition.animateFloat(
-        label = "Action Button Icon Rotation",
-        transitionSpec = {
-            tween(durationMillis = 300, easing = FastOutSlowInEasing)
-        }
-    ) { page ->
-        when (tabTitles.getOrNull(page)?.toLibraryTabIdOrNull()) {
-            LibraryTabId.PLAYLISTS -> 0f // Playlist icon (PlaylistAdd) usually doesn't rotate
-            else -> 360f // Shuffle icon animates
-        }
-    }
-
-    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-    val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
-    val gradientColorsDark = remember(primaryContainer) {
-        listOf(primaryContainer.copy(alpha = 0.5f), Color.Transparent).toImmutableList()
-    }
-    val gradientColorsLight = remember(onPrimaryContainer) {
-        listOf(onPrimaryContainer.copy(alpha = 0.2f), Color.Transparent).toImmutableList()
-    }
-
-    val gradientColors = if (dm) gradientColorsDark else gradientColorsLight
-
-    val gradientBrush = remember(gradientColors) {
-        Brush.verticalGradient(colors = gradientColors)
-    }
+    val iconRotation = 0f
 
     val currentTab = tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull() ?: currentTabId
     val currentTabTitle = currentTab.displayTitle()
 
-    val headerContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+    val headerContainerColor = MaterialTheme.colorScheme.background
 
     Scaffold(
-        modifier = Modifier.background(brush = gradientBrush),
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
             Column(
                 modifier = Modifier.background(headerContainerColor)
@@ -760,7 +727,7 @@ fun LibraryScreen(
                                 selectedIndex = currentTabIndex,
                                 onClick = {
                                     scope.launch {
-                                        pagerState.animateScrollToPage(
+                                        pagerState.scrollToPage(
                                             targetPageForTabIndex(
                                                 currentPage = pagerState.currentPage,
                                                 targetTabIndex = index,
@@ -1685,7 +1652,7 @@ fun LibraryScreen(
             currentIndex = currentTabIndex,
             onTabSelected = { index ->
                 scope.launch {
-                    pagerState.animateScrollToPage(
+                    pagerState.scrollToPage(
                         targetPageForTabIndex(
                             currentPage = pagerState.currentPage,
                             targetTabIndex = index,
@@ -1985,19 +1952,9 @@ fun LibraryNavigationPill(
     val textMeasurer = rememberTextMeasurer()
     var availableWidthPx by remember { mutableStateOf(0) }
 
-    val animatedArrowCorner by animateDpAsState(
-        targetValue = if (isExpanded) pillRadius else innerRadius,
-        label = "ArrowCornerAnimation"
-    )
-    val arrowRotation by animateFloatAsState(
-        targetValue = if (isExpanded) 180f else 0f,
-        label = "ArrowRotation"
-    )
-    val targetArrowHorizontalPadding = LibraryNavigationPillArrowPaddingExpanded
-    val animatedArrowHorizontalPadding by animateDpAsState(
-        targetValue = targetArrowHorizontalPadding,
-        label = "LibraryPillArrowPadding"
-    )
+    val arrowCorner = if (isExpanded) pillRadius else innerRadius
+    val arrowRotation = if (isExpanded) 180f else 0f
+    val arrowHorizontalPadding = LibraryNavigationPillArrowPaddingExpanded
 
     Box(
         modifier = modifier
@@ -2006,9 +1963,7 @@ fun LibraryNavigationPill(
             .onSizeChanged { availableWidthPx = it.width },
         contentAlignment = Alignment.CenterStart
     ) {
-        val baseTitleStyle = rememberLibraryNavigationPillTitleStyle(
-            widthAxis = LibraryNavigationPillTitleWidthMax
-        )
+        val baseTitleStyle = rememberLibraryNavigationPillTitleStyle()
         val idealTextWidth = with(density) {
             textMeasurer.measure(
                 text = AnnotatedString(title),
@@ -2017,7 +1972,7 @@ fun LibraryNavigationPill(
                 softWrap = false,
             ).size.width.toDp()
         }
-        val targetArrowWidth = arrowContentWidth + (targetArrowHorizontalPadding * 2)
+        val targetArrowWidth = arrowContentWidth + (arrowHorizontalPadding * 2)
         val availableWidth = if (availableWidthPx > 0) {
             with(density) { availableWidthPx.toDp() }
         } else {
@@ -2034,27 +1989,10 @@ fun LibraryNavigationPill(
                 titleHorizontalPadding * 2 +
                         titleIconSize +
                         titleIconSpacing +
-                        LibraryNavigationPillMinimumTextWidth
+                        56.dp
                 ).coerceAtMost(maxTitleWidth)
         val targetTitleWidth = naturalTitleWidth.coerceAtLeast(minCompressedTitleWidth)
-        val widthCompressionRatio = if (idealTitleWidth.value > 0f) {
-            (targetTitleWidth.value / idealTitleWidth.value).coerceIn(0f, 1f)
-        } else {
-            1f
-        }
-        val widthAxisBySpace = LibraryNavigationPillTitleWidthMin +
-                (LibraryNavigationPillTitleWidthMax - LibraryNavigationPillTitleWidthMin) *
-                widthCompressionRatio.coerceIn(0f, 1f)
-        val targetWidthAxis = widthAxisBySpace
-        val animatedTitleWidth by animateDpAsState(
-            targetValue = targetTitleWidth,
-            label = "LibraryPillTitleWidth"
-        )
-        val animatedWidthAxis by animateFloatAsState(
-            targetValue = targetWidthAxis,
-            label = "LibraryPillTitleAxis"
-        )
-        val titleStyle = rememberLibraryNavigationPillTitleStyle(widthAxis = animatedWidthAxis)
+        val titleStyle = rememberLibraryNavigationPillTitleStyle()
 
         Row(
             modifier = Modifier.height(pillHeight),
@@ -2071,7 +2009,7 @@ fun LibraryNavigationPill(
                 tonalElevation = 8.dp,
                 color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
-                    .width(animatedTitleWidth)
+                    .width(targetTitleWidth)
                     .height(pillHeight)
                     .clip(
                         RoundedCornerShape(
@@ -2089,47 +2027,16 @@ fun LibraryNavigationPill(
                 ) {
                     AnimatedContent(
                         targetState = PillState(pageIndex = pageIndex, iconRes = iconRes, title = title),
-                        transitionSpec = {
-                            // Calculate direction based on shortest path for potentially infinite/large page indices
-                            val diff = targetState.pageIndex - initialState.pageIndex
-                            val direction = when {
-                                diff == 0 -> 0
-                                // If the absolute difference is very large, it's likely a wrap-around or a direct jump
-                                // We treat jumps as "forward" if positive, but we could also check a threshold
-                                abs(diff) > 1 -> diff.coerceIn(-1, 1)
-                                else -> diff
-                            }
-
-                            val slideIn = slideInHorizontally { fullWidth ->
-                                if (direction >= 0) fullWidth else -fullWidth
-                            } + fadeIn(animationSpec = tween(220))
-
-                            val slideOut = slideOutHorizontally { fullWidth ->
-                                if (direction >= 0) -fullWidth else fullWidth
-                            } + fadeOut(animationSpec = tween(220))
-
-                            slideIn.togetherWith(slideOut)
-                        },
+                        transitionSpec = { fadeIn(tween(0)) togetherWith fadeOut(tween(0)) },
                         label = "LibraryPillTitle"
                     ) { targetState ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = titleVerticalPadding)
-                                .animateContentSize(),
+                                .padding(vertical = titleVerticalPadding),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            AnimatedVisibility(
-                                visible = showIcon,
-                                enter = expandHorizontally(
-                                    animationSpec = tween(durationMillis = 220),
-                                    expandFrom = Alignment.Start
-                                ) + fadeIn(animationSpec = tween(durationMillis = 180)),
-                                exit = shrinkHorizontally(
-                                    animationSpec = tween(durationMillis = 220),
-                                    shrinkTowards = Alignment.Start
-                                ) + fadeOut(animationSpec = tween(durationMillis = 160))
-                            ) {
+                            if (showIcon) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -2145,12 +2052,12 @@ fun LibraryNavigationPill(
                             Text(
                                 modifier = Modifier
                                     .weight(1f, fill = false)
-                                    .padding(end = 4.dp), // Add slight end padding for safety
+                                    .padding(end = 4.dp),
                                 text = targetState.title,
                                 style = titleStyle,
                                 maxLines = 1,
                                 softWrap = false,
-                                overflow = TextOverflow.Visible, // Change to Visible to prevent early ellipsis
+                                overflow = TextOverflow.Visible,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -2160,8 +2067,8 @@ fun LibraryNavigationPill(
 
             Surface(
                 shape = RoundedCornerShape(
-                    topStart = animatedArrowCorner,
-                    bottomStart = animatedArrowCorner,
+                    topStart = arrowCorner,
+                    bottomStart = arrowCorner,
                     topEnd = pillRadius,
                     bottomEnd = pillRadius
                 ),
@@ -2171,8 +2078,8 @@ fun LibraryNavigationPill(
                     .height(pillHeight)
                     .clip(
                         RoundedCornerShape(
-                            topStart = animatedArrowCorner,
-                            bottomStart = animatedArrowCorner,
+                            topStart = arrowCorner,
+                            bottomStart = arrowCorner,
                             topEnd = pillRadius,
                             bottomEnd = pillRadius
                         )
@@ -2185,7 +2092,7 @@ fun LibraryNavigationPill(
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = animatedArrowHorizontalPadding)
+                        .padding(horizontal = arrowHorizontalPadding)
                         .width(arrowContentWidth),
                     contentAlignment = Alignment.Center
                 ) {
@@ -2201,38 +2108,17 @@ fun LibraryNavigationPill(
     }
 }
 
-private const val LibraryNavigationPillTitleWidthMin = 18f
-private const val LibraryNavigationPillTitleWidthMax = 100f
-private val LibraryNavigationPillMinimumTextWidth = 56.dp
 private val LibraryNavigationPillArrowPaddingExpanded = 10.dp
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
-private fun rememberLibraryNavigationPillTitleStyle(widthAxis: Float): TextStyle {
-    return remember(widthAxis) {
-        TextStyle(
-            fontFamily = FontFamily(
-                Font(
-                    resId = R.font.gflex_variable,
-                    variationSettings = FontVariation.Settings(
-                        FontVariation.weight(400),
-                        FontVariation.width(widthAxis.coerceIn(
-                            LibraryNavigationPillTitleWidthMin,
-                            LibraryNavigationPillTitleWidthMax
-                        )),
-                        FontVariation.Setting("ROND", 100f),
-                        FontVariation.Setting("XTRA", 520f),
-                        FontVariation.Setting("YOPQ", 90f),
-                        FontVariation.Setting("YTLC", 505f)
-                    )
-                )
-            ),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 26.sp,
-            lineHeight = 28.sp,
-            letterSpacing = (-0.2).sp
-        )
-    }
+private fun rememberLibraryNavigationPillTitleStyle(): TextStyle {
+    return MaterialTheme.typography.titleLarge.copy(
+        fontFamily = RoundedSans,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

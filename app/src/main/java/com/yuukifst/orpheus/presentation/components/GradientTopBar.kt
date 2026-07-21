@@ -1,7 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -109,14 +107,8 @@ fun HomeGradientTopBar(
 
     OrpheusStatusBarStyle(color = surfaceContainerHigh)
 
-    val animatedAlpha by animateFloatAsState(
-        targetValue = if (isScrolled) 1f else 0f,
-        animationSpec = tween(durationMillis = 300),
-        label = "topbar_alpha_transition"
-    )
-
     TopAppBar(
-        modifier = Modifier.background(surfaceContainerHigh.copy(alpha = animatedAlpha)),
+        modifier = Modifier.background(surfaceContainerHigh.copy(alpha = if (isScrolled) 1f else 0f)),
         title = { /* nada, usamos solo acciones */ },
         navigationIcon = {
             Row(
