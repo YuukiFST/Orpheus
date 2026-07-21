@@ -1,0 +1,1 @@
+Fix library crash when opening liked/songs tabs after liking YouTube tracks (Paging 3 double collection).

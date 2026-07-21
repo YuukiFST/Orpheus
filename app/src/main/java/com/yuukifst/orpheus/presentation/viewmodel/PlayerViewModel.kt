@@ -661,6 +661,17 @@ class PlayerViewModel @Inject constructor(
         return resolvePlaybackQueueFromSortedIds(sortedIds)
     }
 
+    suspend fun getFavoriteSongsForSelection(): List<Song> {
+        val baseFilter = playerUiState.value.currentStorageFilter
+        val hideLocal = playerUiState.value.hideLocalMedia
+        val storageFilter = if (hideLocal) {
+            com.yuukifst.orpheus.data.model.StorageFilter.ONLINE
+        } else {
+            baseFilter
+        }
+        return musicRepository.getFavoriteSongsOnce(storageFilter)
+    }
+
     private fun launchLatestFullQueuePlayback(
         song: Song,
         queueName: String,

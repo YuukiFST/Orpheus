@@ -2,6 +2,11 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.8] - 2026-07-21
+
+### Fixed
+- Library crash (`pageEventFlow` double collection) when opening Library after liking a YouTube track: cache paging flows in `LibraryStateHolder`, collect only per visible tab, and merge YouTube favorites without re-subscribing to the local pager.
+
 ## [1.0.7] - 2026-07-21
 
 ### Fixed

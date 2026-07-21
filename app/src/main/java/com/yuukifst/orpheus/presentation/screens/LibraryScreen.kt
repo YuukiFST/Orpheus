@@ -823,10 +823,6 @@ fun LibraryScreen(
 
                         val playlistUiState by playlistViewModel.uiState.collectAsStateWithLifecycle()
                         val visiblePlaylists = playlistUiState.playlists
-                        val allSongsLazyPagingItems = libraryViewModel.songsPagingFlow.collectAsLazyPagingItems()
-                        val albumsLazyPagingItems = libraryViewModel.albumsPagingFlow.collectAsLazyPagingItems()
-                        val artistsLazyPagingItems = libraryViewModel.artistsPagingFlow.collectAsLazyPagingItems()
-                        val favoritePagingItems = libraryViewModel.favoritesPagingFlow.collectAsLazyPagingItems()
                         val isLibraryLoading by libraryViewModel.isLoadingLibrary.collectAsStateWithLifecycle()
                         val hasCurrentSong by remember(playerViewModel) {
                             playerViewModel.stablePlayerState
@@ -932,7 +928,10 @@ fun LibraryScreen(
                                         onSelectAll = {
                                             when (tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull()) {
                                                 LibraryTabId.LIKED -> {
-                                                    multiSelectionState.selectAll(favoritePagingItems.itemSnapshotList.items)
+                                                    scope.launch {
+                                                        val songsToSelect = playerViewModel.getFavoriteSongsForSelection()
+                                                        multiSelectionState.selectAll(songsToSelect)
+                                                    }
                                                 }
                                                 LibraryTabId.FOLDERS -> {
                                                     val songsToSelect =
@@ -1166,6 +1165,8 @@ fun LibraryScreen(
                                 )
                                 when (tabTitles.getOrNull(tabIndex)?.toLibraryTabIdOrNull()) {
                                     LibraryTabId.SONGS -> {
+                                        val allSongsLazyPagingItems =
+                                            libraryViewModel.songsPagingFlow.collectAsLazyPagingItems()
                                         LibrarySongsTab(
                                             songs = allSongsLazyPagingItems,
                                             isLoading = isLibraryLoading,
@@ -1190,6 +1191,8 @@ fun LibraryScreen(
                                         )
                                     }
                                     LibraryTabId.ALBUMS -> {
+                                        val albumsLazyPagingItems =
+                                            libraryViewModel.albumsPagingFlow.collectAsLazyPagingItems()
                                         val isLoading = playerUiState.isLoadingLibraryCategories
 
                                         val stableOnAlbumClick: (Long) -> Unit = remember(navController) {
@@ -1220,6 +1223,8 @@ fun LibraryScreen(
                                     }
 
                                     LibraryTabId.ARTISTS -> {
+                                        val artistsLazyPagingItems =
+                                            libraryViewModel.artistsPagingFlow.collectAsLazyPagingItems()
                                         val isLoading = playerUiState.isLoadingLibraryCategories
 
                                         LibraryArtistsTab(
@@ -1259,6 +1264,8 @@ fun LibraryScreen(
                                     }
 
                                     LibraryTabId.LIKED -> {
+                                        val favoritePagingItems =
+                                            libraryViewModel.favoritesPagingFlow.collectAsLazyPagingItems()
                                         LibraryFavoritesTab(
                                             favoriteSongs = favoritePagingItems,
                                             playerViewModel = playerViewModel,

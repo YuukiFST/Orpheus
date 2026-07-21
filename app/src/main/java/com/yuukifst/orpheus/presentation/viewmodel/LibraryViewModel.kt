@@ -1,7 +1,5 @@
 package com.yuukifst.orpheus.presentation.viewmodel
 
-import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -11,13 +9,13 @@ class LibraryViewModel @Inject constructor(
     private val libraryStateHolder: LibraryStateHolder
 ) : ViewModel() {
 
-    val songsPagingFlow = libraryStateHolder.songsPagingFlow.cachedIn(viewModelScope)
+    val songsPagingFlow = libraryStateHolder.songsPagingFlow
 
-    val albumsPagingFlow = libraryStateHolder.albumsPagingFlow.cachedIn(viewModelScope)
+    val albumsPagingFlow = libraryStateHolder.albumsPagingFlow
 
-    val artistsPagingFlow = libraryStateHolder.artistsPagingFlow.cachedIn(viewModelScope)
+    val artistsPagingFlow = libraryStateHolder.artistsPagingFlow
 
-    val favoritesPagingFlow = libraryStateHolder.favoritesPagingFlow.cachedIn(viewModelScope)
+    val favoritesPagingFlow = libraryStateHolder.favoritesPagingFlow
 
     val favoriteSongCountFlow = libraryStateHolder.favoriteSongCountFlow
 

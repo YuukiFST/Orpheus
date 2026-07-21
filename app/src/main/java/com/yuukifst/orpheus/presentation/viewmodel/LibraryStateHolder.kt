@@ -18,9 +18,11 @@ import com.yuukifst.orpheus.data.repository.MusicRepository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -47,6 +49,10 @@ class LibraryStateHolder @Inject constructor(
     private val musicRepository: MusicRepository,
     private val userPreferencesRepository: UserPreferencesRepository
 ) {
+
+    // Paging flows must be cached once at the singleton holder so LibraryScreen
+    // recompositions and tab switches never double-collect the same Pager.flow.
+    private val pagingScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     // --- State ---
     private val _allSongs = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
@@ -109,6 +115,7 @@ class LibraryStateHolder @Inject constructor(
             musicRepository.getPaginatedSongs(sortOption, filter)
         }
         .flowOn(Dispatchers.IO)
+        .cachedIn(pagingScope)
 
     private val _currentAlbumSortOption = MutableStateFlow<SortOption>(SortOption.AlbumTitleAZ)
     val currentAlbumSortOption = _currentAlbumSortOption.asStateFlow()
@@ -134,6 +141,7 @@ class LibraryStateHolder @Inject constructor(
             musicRepository.getPaginatedAlbums(sortOption, filter, minTracks)
         }
         .flowOn(Dispatchers.IO)
+        .cachedIn(pagingScope)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val artistsPagingFlow: kotlinx.coroutines.flow.Flow<androidx.paging.PagingData<Artist>> =
@@ -143,6 +151,7 @@ class LibraryStateHolder @Inject constructor(
             musicRepository.getPaginatedArtists(sortOption, filter)
         }
         .flowOn(Dispatchers.IO)
+        .cachedIn(pagingScope)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val favoritesPagingFlow: kotlinx.coroutines.flow.Flow<androidx.paging.PagingData<Song>> =
@@ -152,6 +161,7 @@ class LibraryStateHolder @Inject constructor(
             musicRepository.getPaginatedFavoriteSongs(sortOption, storageFilter)
         }
         .flowOn(Dispatchers.IO)
+        .cachedIn(pagingScope)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val favoriteSongCountFlow: kotlinx.coroutines.flow.Flow<Int> = effectiveStorageFilter

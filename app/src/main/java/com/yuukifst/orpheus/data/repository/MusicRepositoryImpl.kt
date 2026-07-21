@@ -62,6 +62,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -248,9 +250,31 @@ class MusicRepositoryImpl @Inject constructor(
         val youtubeFavorites = youTubeCachedTrackRepository.observeFavoriteSongs(sortOption)
         return when (storageFilter) {
             StorageFilter.ONLINE -> youtubeFavorites.map { songs -> PagingData.from(songs) }
-            StorageFilter.ALL -> combine(localFavorites, youtubeFavorites) { pagingData, youtubeSongs ->
-                youtubeSongs.asReversed().fold(pagingData) { merged, song ->
-                    merged.insertHeaderItem(item = song)
+            StorageFilter.ALL -> channelFlow {
+                var latestYoutube = emptyList<Song>()
+                var latestPaging: PagingData<Song>? = null
+
+                fun emitMerged() {
+                    val paging = latestPaging ?: return
+                    val merged = latestYoutube.asReversed().fold(paging) { acc, song ->
+                        acc.insertHeaderItem(item = song)
+                    }
+                    trySend(merged)
+                }
+
+                val youtubeJob = launch {
+                    youtubeFavorites.collect { songs ->
+                        latestYoutube = songs
+                        emitMerged()
+                    }
+                }
+                try {
+                    localFavorites.collect { pagingData ->
+                        latestPaging = pagingData
+                        emitMerged()
+                    }
+                } finally {
+                    youtubeJob.cancel()
                 }
             }
         }.flowOn(Dispatchers.IO)
