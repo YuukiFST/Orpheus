@@ -13,21 +13,25 @@ import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
+import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
 data class YouTubeSearchUiState(
     val query: String = "",
     val results: List<YouTubeTrack> = emptyList(),
+    val suggestions: List<String> = emptyList(),
     val searchHistory: List<SearchHistoryItem> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false,
@@ -40,6 +44,7 @@ data class YouTubeSearchUiState(
 @HiltViewModel
 class YouTubeSearchViewModel @Inject constructor(
     private val searchRepository: YouTubeSearchRepository,
+    private val suggestionRepository: YouTubeSuggestionRepository,
     private val searchHistoryDao: SearchHistoryDao,
     private val downloadRepository: YouTubeDownloadRepository,
     private val youTubePlaylistDao: YouTubePlaylistDao,
@@ -51,9 +56,13 @@ class YouTubeSearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(YouTubeSearchUiState())
     val uiState: StateFlow<YouTubeSearchUiState> = _uiState.asStateFlow()
     private var debouncedSearchJob: Job? = null
+    private var debouncedSuggestionJob: Job? = null
+    private val latestSearchRequestId = AtomicLong(0L)
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MS = 300L
+        const val SEARCH_DEBOUNCE_MS = 200L
+        const val SUGGESTION_DEBOUNCE_MS = 150L
+        const val MIN_QUERY_LENGTH = 2
     }
 
     init {
@@ -68,23 +77,57 @@ class YouTubeSearchViewModel @Inject constructor(
     fun updateQuery(query: String) {
         _uiState.update { it.copy(query = query, error = null) }
         debouncedSearchJob?.cancel()
+        debouncedSuggestionJob?.cancel()
+
         val trimmed = query.trim()
         if (trimmed.isBlank()) {
-            _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
+            _uiState.update {
+                it.copy(
+                    results = emptyList(),
+                    suggestions = emptyList(),
+                    isLoading = false,
+                    hasSearched = false,
+                )
+            }
             return
         }
+
+        debouncedSuggestionJob = viewModelScope.launch {
+            delay(SUGGESTION_DEBOUNCE_MS)
+            if (trimmed.length < MIN_QUERY_LENGTH) {
+                _uiState.update { it.copy(suggestions = emptyList()) }
+                return@launch
+            }
+            val suggestions = suggestionRepository.suggestions(trimmed)
+            _uiState.update { state ->
+                if (state.query.trim() != trimmed) state else state.copy(suggestions = suggestions)
+            }
+        }
+
         debouncedSearchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_MS)
+            if (trimmed.length < MIN_QUERY_LENGTH) {
+                _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
+                return@launch
+            }
             executeSearch(trimmed, saveHistory = false)
         }
     }
 
     fun search(query: String) {
         debouncedSearchJob?.cancel()
+        debouncedSuggestionJob?.cancel()
         val trimmed = query.trim()
         _uiState.update { it.copy(query = trimmed, error = null) }
         if (trimmed.isBlank()) {
-            _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
+            _uiState.update {
+                it.copy(
+                    results = emptyList(),
+                    suggestions = emptyList(),
+                    isLoading = false,
+                    hasSearched = false,
+                )
+            }
             return
         }
         viewModelScope.launch {
@@ -92,11 +135,23 @@ class YouTubeSearchViewModel @Inject constructor(
         }
     }
 
+    fun searchSuggestion(text: String) {
+        debouncedSearchJob?.cancel()
+        debouncedSuggestionJob?.cancel()
+        val trimmed = text.trim()
+        _uiState.update { it.copy(query = trimmed, error = null) }
+        if (trimmed.isBlank()) return
+        viewModelScope.launch {
+            executeSearch(trimmed, saveHistory = true)
+        }
+    }
+
     private suspend fun executeSearch(trimmed: String, saveHistory: Boolean) {
+        val requestId = latestSearchRequestId.incrementAndGet()
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
-        runCatching {
-            searchRepository.search(trimmed)
-        }.onSuccess { results ->
+        try {
+            val results = searchRepository.search(trimmed)
+            if (requestId != latestSearchRequestId.get()) return
             if (saveHistory) {
                 searchHistoryDao.deleteByQuery(trimmed)
                 searchHistoryDao.insert(
@@ -104,8 +159,13 @@ class YouTubeSearchViewModel @Inject constructor(
                 )
                 refreshSearchHistory()
             }
-            _uiState.update { it.copy(results = results, isLoading = false) }
-        }.onFailure { error ->
+            _uiState.update {
+                it.copy(results = results, isLoading = false, suggestions = emptyList())
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (error: Exception) {
+            if (requestId != latestSearchRequestId.get()) return
             _uiState.update {
                 it.copy(
                     isLoading = false,

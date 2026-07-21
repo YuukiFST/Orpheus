@@ -40,6 +40,7 @@ import com.yuukifst.orpheus.R
 
 val SmartImageCompactListTargetSize = Size(96, 96)
 val SmartImageListTargetSize = Size(128, 128)
+val SmartImageYouTubeListTargetSize = Size(240, 240)
 private val DefaultSmartImageSize = Size(300, 300)
 
 @Composable

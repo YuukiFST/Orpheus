@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.data.youtube
 
+import android.util.LruCache
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,15 +15,34 @@ import javax.inject.Singleton
 @Singleton
 class YouTubeSearchRepository @Inject constructor() {
 
+    private val searchCache = LruCache<String, List<YouTubeTrack>>(32)
+
     suspend fun search(query: String): List<YouTubeTrack> = withContext(Dispatchers.IO) {
-        if (query.isBlank()) return@withContext emptyList()
+        val key = query.trim().lowercase()
+        if (key.isBlank()) return@withContext emptyList()
+        searchCache.get(key)?.let { return@withContext it }
+
         YouTubeInitializer.ensureInitialized()
         val handler = YoutubeSearchQueryHandlerFactory.getInstance()
-            .fromQuery(query, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
+            .fromQuery(query.trim(), listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
         // Must use the service overload so NewPipe calls fetchPage() before reading results.
         val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
-        searchInfo.relatedItems
+        val results = searchInfo.relatedItems
             .mapNotNull { item -> item.toYouTubeTrack() }
+        searchCache.put(key, results)
+        results
+    }
+
+    internal fun clearSearchCacheForTests() {
+        searchCache.evictAll()
+    }
+
+    internal fun seedSearchCacheForTests(query: String, results: List<YouTubeTrack>) {
+        searchCache.put(query.trim().lowercase(), results)
+    }
+
+    internal fun searchCachedOnly(query: String): List<YouTubeTrack>? {
+        return searchCache.get(query.trim().lowercase())
     }
 }
 
@@ -40,7 +60,7 @@ private fun InfoItem.toYouTubeTrack(): YouTubeTrack? {
         videoId = id,
         title = name.orEmpty(),
         channelName = uploaderName.orEmpty(),
-        thumbnailUrl = thumbnails.firstOrNull()?.url.orEmpty(),
+        thumbnailUrl = selectBestThumbnailUrl(thumbnails, id),
         durationMs = duration * 1000L,
     )
 }

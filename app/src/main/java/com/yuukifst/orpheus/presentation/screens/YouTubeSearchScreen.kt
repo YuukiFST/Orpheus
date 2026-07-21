@@ -67,7 +67,7 @@ import com.yuukifst.orpheus.data.model.SearchHistoryItem
 import com.yuukifst.orpheus.data.model.isSmartPlaylist
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import com.yuukifst.orpheus.presentation.components.SmartImage
-import com.yuukifst.orpheus.presentation.components.SmartImageListTargetSize
+import com.yuukifst.orpheus.presentation.components.SmartImageYouTubeListTargetSize
 import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.YouTubeSearchViewModel
@@ -141,14 +141,6 @@ fun YouTubeSearchScreen(
             }
 
             when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
                 uiState.error != null -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -181,6 +173,63 @@ fun YouTubeSearchScreen(
                                 onDownload = { viewModel.download(track) },
                             )
                         }
+                    }
+                }
+                uiState.suggestions.isNotEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 12.dp,
+                            bottom = bottomBarHeightDp + 16.dp,
+                        ),
+                    ) {
+                        if (uiState.isLoading) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                }
+                            }
+                        }
+                        items(uiState.suggestions, key = { it }) { suggestion ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        searchQuery = suggestion
+                                        viewModel.searchSuggestion(suggestion)
+                                    }
+                                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    Icons.Rounded.History,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = suggestion,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
+                }
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
                 uiState.hasSearched -> {
@@ -331,7 +380,7 @@ private fun YouTubeSearchResultItem(
             modifier = Modifier
                 .size(72.dp)
                 .clip(RoundedCornerShape(8.dp)),
-            targetSize = SmartImageListTargetSize,
+            targetSize = SmartImageYouTubeListTargetSize,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

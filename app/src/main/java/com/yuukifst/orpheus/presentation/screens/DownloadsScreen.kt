@@ -54,7 +54,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import com.yuukifst.orpheus.presentation.components.SmartImage
-import com.yuukifst.orpheus.presentation.components.SmartImageListTargetSize
+import com.yuukifst.orpheus.presentation.components.SmartImageYouTubeListTargetSize
 import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
 import com.yuukifst.orpheus.presentation.viewmodel.DownloadsViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
@@ -178,7 +178,7 @@ private fun DownloadedTrackItem(
             modifier = Modifier
                 .size(72.dp)
                 .clip(RoundedCornerShape(8.dp)),
-            targetSize = SmartImageListTargetSize,
+            targetSize = SmartImageYouTubeListTargetSize,
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
