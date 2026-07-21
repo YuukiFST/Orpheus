@@ -98,7 +98,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceAtLeast
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material3.Slider
@@ -133,7 +133,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import timber.log.Timber
 import java.util.Locale
 import kotlin.math.roundToLong
@@ -728,7 +728,7 @@ fun FullPlayerContent(
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(playerOnAccentColor.copy(alpha = 0.7f))
                                     .clickable(onClick = onCollapse),
                                 contentAlignment = Alignment.Center
@@ -752,7 +752,7 @@ fun FullPlayerContent(
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(playerOnAccentColor.copy(alpha = 0.7f))
                                     .clickable {
                                         showSongInfoBottomSheet = true
@@ -1396,7 +1396,7 @@ private fun SongMetadataDisplaySection(
             )
         ) {
             Surface(
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 color = chipColor,
                 modifier = Modifier.padding(end = 8.dp)
             ) {
@@ -1421,12 +1421,7 @@ private fun SongMetadataDisplaySection(
                     modifier = Modifier
                         .size(height = 42.dp, width = 50.dp)
                         .clip(
-                            RoundedCornerShape(
-                                topStart = 50.dp,
-                                topEnd = 6.dp,
-                                bottomStart = 50.dp,
-                                bottomEnd = 6.dp
-                            )
+                            TerminalCornerShape
                         )
                         .background(chipColor)
                         .clickable { onClickLyrics() },
@@ -1442,12 +1437,7 @@ private fun SongMetadataDisplaySection(
                     modifier = Modifier
                         .size(height = 42.dp, width = 50.dp)
                         .clip(
-                            RoundedCornerShape(
-                                topStart = 6.dp,
-                                topEnd = 50.dp,
-                                bottomStart = 6.dp,
-                                bottomEnd = 50.dp
-                            )
+                            TerminalCornerShape
                         )
                         .background(chipColor)
                         .clickable { onClickQueue() },
@@ -1810,7 +1800,7 @@ private fun EfficientTimeLabels(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(horizontal = 58.dp),
-                shape = RoundedCornerShape(999.dp),
+                shape = TerminalCornerShape,
                 color = textColor.copy(alpha = 0.14f),
                 contentColor = textColor.copy(alpha = 0.96f)
             ) {
@@ -2098,7 +2088,7 @@ private fun PlaceholderBox(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(cornerRadius),
+        shape = TerminalCornerShape,
         color = color,
         tonalElevation = 0.dp
     ) {}
@@ -2115,7 +2105,7 @@ private fun AlbumPlaceholder(
         modifier = modifier
             .fillMaxWidth()
             .height(height),
-        shape = RoundedCornerShape(18.dp),
+        shape = TerminalCornerShape,
         color = color,
         tonalElevation = 0.dp
     ) {
@@ -2178,23 +2168,13 @@ private fun MetadataPlaceholder(
             ) {
                 Surface(
                     modifier = Modifier.size(height = 42.dp, width = 50.dp),
-                    shape = RoundedCornerShape(
-                        topStart = 50.dp,
-                        topEnd = 6.dp,
-                        bottomStart = 50.dp,
-                        bottomEnd = 6.dp
-                    ),
+                    shape = TerminalCornerShape,
                     color = onColor,
                     tonalElevation = 0.dp
                 ) {}
                 Surface(
                     modifier = Modifier.size(height = 42.dp, width = 50.dp),
-                    shape = RoundedCornerShape(
-                        topStart = 6.dp,
-                        topEnd = 50.dp,
-                        bottomStart = 6.dp,
-                        bottomEnd = 50.dp
-                    ),
+                    shape = TerminalCornerShape,
                     color = onColor,
                     tonalElevation = 0.dp
                 ) {}
@@ -2326,16 +2306,7 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTL = rowCorners,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusBL = rowCorners,
-                        smoothnessAsPercentTL = 60,
-                        cornerRadiusTR = rowCorners,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusBR = rowCorners,
-                        smoothnessAsPercentBR = 60
-                    ),
+                    shape = TerminalCornerShape,
                     color = color,
                     tonalElevation = 0.dp
                 ) {}
@@ -2359,7 +2330,7 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                 .padding(bottom = 6.dp)
                 .background(
                     color = onColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(rowCorners)
+                    shape = TerminalCornerShape
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -2423,16 +2394,7 @@ private fun BottomToggleRow(
     Box(
         modifier = modifier.background(
             color = LocalMaterialTheme.current.surfaceContainerLowest.copy(alpha = 0.7f),
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusBL = rowCorners,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusBR = rowCorners,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusTL = rowCorners,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusTR = rowCorners,
-                smoothnessAsPercentTL = 60
-            )
+            shape = TerminalCornerShape
         )
     ) {
         Row(
@@ -2440,16 +2402,7 @@ private fun BottomToggleRow(
                 .fillMaxWidth()
                 .padding(6.dp)
                 .clip(
-                    AbsoluteSmoothCornerShape(
-                        cornerRadiusBL = rowCorners,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusBR = rowCorners,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusTL = rowCorners,
-                        smoothnessAsPercentBR = 60,
-                        cornerRadiusTR = rowCorners,
-                        smoothnessAsPercentTL = 60
-                    )
+                    TerminalCornerShape
                 )
                 .background(Color.Transparent),
             horizontalArrangement = Arrangement.spacedBy(6.dp),

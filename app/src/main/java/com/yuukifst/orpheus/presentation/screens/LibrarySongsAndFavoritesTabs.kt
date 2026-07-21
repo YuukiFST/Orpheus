@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -233,12 +234,7 @@ fun LibraryFavoritesTab(
                             .align(Alignment.TopCenter)
                             .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
                             .clip(
-                                RoundedCornerShape(
-                                    topStart = 26.dp,
-                                    topEnd = 26.dp,
-                                    bottomStart = PlayerSheetCollapsedCornerRadius,
-                                    bottomEnd = PlayerSheetCollapsedCornerRadius
-                                )
+                                TerminalCornerShape
                             ),
                         state = listState,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -318,12 +314,7 @@ fun LibrarySongsTabPaginated(
                 modifier = Modifier
                     .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
                     .clip(
-                        RoundedCornerShape(
-                            topStart = 26.dp,
-                            topEnd = 26.dp,
-                            bottomStart = PlayerSheetCollapsedCornerRadius,
-                            bottomEnd = PlayerSheetCollapsedCornerRadius
-                        )
+                        TerminalCornerShape
                     )
                     .fillMaxSize(),
                 state = listState,
@@ -415,12 +406,7 @@ fun LibrarySongsTabPaginated(
                             modifier = Modifier
                                 .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = 26.dp,
-                                        topEnd = 26.dp,
-                                        bottomStart = PlayerSheetCollapsedCornerRadius,
-                                        bottomEnd = PlayerSheetCollapsedCornerRadius
-                                    )
+                                    TerminalCornerShape
                                 ),
                             state = listState,
                             verticalArrangement = Arrangement.spacedBy(8.dp),

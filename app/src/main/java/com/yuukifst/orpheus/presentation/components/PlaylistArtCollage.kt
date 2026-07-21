@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
@@ -39,7 +40,7 @@ fun PlaylistArtCollage(
         Box(
             modifier = modifier
                 .aspectRatio(1f)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer),
             contentAlignment = Alignment.Center
         ) {
@@ -70,7 +71,7 @@ fun PlaylistArtCollage(
                         targetSize = Size(256, 256),
                         modifier = imageModifier
                             .fillMaxSize()
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                     )
                 }
                 2 -> {
@@ -87,7 +88,7 @@ fun PlaylistArtCollage(
                             modifier = imageModifier
                                 .weight(1f)
                                 .aspectRatio(1f)
-                                .clip(CircleShape)
+                                .clip(TerminalCornerShape)
                         )
                         SmartImage(
                             model = songs[1].albumArtUriString,
@@ -97,7 +98,7 @@ fun PlaylistArtCollage(
                             modifier = imageModifier
                                 .weight(1f)
                                 .aspectRatio(1f)
-                                .clip(CircleShape)
+                                .clip(TerminalCornerShape)
                         )
                     }
                 }
@@ -110,7 +111,7 @@ fun PlaylistArtCollage(
                                     contentDescription = song.title,
                                     contentScale = ContentScale.Crop,
                                     targetSize = Size(128, 128),
-                                    modifier = imageModifier.clip(CircleShape)
+                                    modifier = imageModifier.clip(TerminalCornerShape)
                                 )
                             }
                         },
@@ -178,7 +179,7 @@ fun PlaylistArtCollage(
                                 modifier = imageModifier
                                     .weight(1f)
                                     .aspectRatio(1f)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                             )
                             SmartImage(
                                 model = songs[1].albumArtUriString,
@@ -188,7 +189,7 @@ fun PlaylistArtCollage(
                                 modifier = imageModifier
                                     .weight(1f)
                                     .aspectRatio(1f)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                             )
                         }
                         Row(
@@ -203,7 +204,7 @@ fun PlaylistArtCollage(
                                 modifier = imageModifier
                                     .weight(1f)
                                     .aspectRatio(1f)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                             )
                             SmartImage(
                                 model = songs[3].albumArtUriString,
@@ -213,7 +214,7 @@ fun PlaylistArtCollage(
                                 modifier = imageModifier
                                     .weight(1f)
                                     .aspectRatio(1f)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                             )
                         }
                     }

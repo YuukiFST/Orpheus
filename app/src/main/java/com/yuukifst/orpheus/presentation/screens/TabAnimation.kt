@@ -1,9 +1,10 @@
 package com.yuukifst.orpheus.presentation.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
@@ -37,10 +38,15 @@ fun TabAnimation(
     Tab(
         modifier = modifier
             .padding(all = 5.dp)
-            .clip(CircleShape)
+            .clip(RectangleShape)
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(50)
+                shape = RectangleShape
+            )
+            .border(
+                width = if (isSelected) 1.dp else 0.dp,
+                color = selectedColor,
+                shape = RectangleShape
             ),
         selected = isSelected,
         text = content,

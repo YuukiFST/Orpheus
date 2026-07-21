@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DragIndicator
@@ -58,7 +58,7 @@ import com.yuukifst.orpheus.presentation.utils.performAppCompatHapticFeedback
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.ui.res.stringResource
@@ -202,7 +202,7 @@ fun ReorderTabsSheet(
                                 Surface(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(CircleShape),
+                                        .clip(TerminalCornerShape),
                                     shadowElevation = if (isDragging) 4.dp else 0.dp,
                                     color = MaterialTheme.colorScheme.surfaceContainerLowest
                                 ) {
@@ -235,16 +235,7 @@ fun FloatingToolBar(
     onDismiss: () -> Unit,
     onClick: () -> Unit,
 ){
-    val backgroundShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = 22.dp,
-        smoothnessAsPercentTL = 60,
-        cornerRadiusTL = 22.dp,
-        smoothnessAsPercentTR = 60,
-        cornerRadiusBR = 22.dp,
-        smoothnessAsPercentBL = 60,
-        cornerRadiusBL = 22.dp,
-        smoothnessAsPercentBR = 60
-    )
+    val backgroundShape = TerminalCornerShape
     Box(
         modifier = modifier
             .padding(8.dp)
@@ -274,7 +265,7 @@ fun FloatingToolBar(
             MediumExtendedFloatingActionButton(
                 modifier = Modifier
                     .align(Alignment.CenterVertically),
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 onClick = onClick,
                 icon = { Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.action_done)) },
                 text = { Text(stringResource(R.string.action_done)) }

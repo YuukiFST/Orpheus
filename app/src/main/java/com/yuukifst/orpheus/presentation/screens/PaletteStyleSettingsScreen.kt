@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -23,8 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -197,7 +196,7 @@ fun PaletteStyleSettingsScreen(
 
             Surface(
                 color = previewScheme.surfaceContainer,
-                shape = RoundedCornerShape(34.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -246,7 +245,7 @@ fun PaletteStyleSettingsScreen(
                             .fillMaxWidth()
                             .background(
                                 color = previewScheme.tertiaryContainer,
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             )
                     ) {
                         Text(
@@ -314,7 +313,7 @@ private fun PaletteStyleHeader(
             FilledTonalButton(
                 onClick = onApplyClick,
                 enabled = applyEnabled,
-                shape = RoundedCornerShape(22.dp),
+                shape = TerminalCornerShape,
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = scheme.secondaryContainer,
@@ -351,7 +350,7 @@ private fun MiniFullPlayerSkeletonPreview(
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Surface(
             color = scheme.primaryContainer,
-            shape = RoundedCornerShape(scaled(34.dp)),
+            shape = TerminalCornerShape,
             modifier = Modifier.fillMaxWidth(cardWidthFraction)
         ) {
             Column(
@@ -368,14 +367,14 @@ private fun MiniFullPlayerSkeletonPreview(
                     Box(
                         modifier = Modifier
                             .size(scaled(42.dp))
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(topBarButtonColor)
                     )
                     Box(
                         modifier = Modifier
                             .width(scaled(92.dp))
                             .height(scaled(42.dp))
-                            .clip(RoundedCornerShape(scaled(50.dp)))
+                            .clip(TerminalCornerShape)
                             .background(topBarButtonColor)
                     )
                 }
@@ -384,7 +383,7 @@ private fun MiniFullPlayerSkeletonPreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(scaled(190.dp))
-                        .clip(RoundedCornerShape(scaled(22.dp)))
+                        .clip(TerminalCornerShape)
                         .background(placeholderColor)
                 )
 
@@ -401,14 +400,14 @@ private fun MiniFullPlayerSkeletonPreview(
                             modifier = Modifier
                                 .fillMaxWidth(0.78f)
                                 .height(scaled(18.dp))
-                                .clip(RoundedCornerShape(scaled(6.dp)))
+                                .clip(TerminalCornerShape)
                                 .background(placeholderColor)
                         )
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.46f)
                                 .height(scaled(12.dp))
-                                .clip(RoundedCornerShape(scaled(6.dp)))
+                                .clip(TerminalCornerShape)
                                 .background(placeholderOnColor)
                         )
                     }
@@ -416,7 +415,7 @@ private fun MiniFullPlayerSkeletonPreview(
                     Box(
                         modifier = Modifier
                             .size(scaled(40.dp))
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(chipColor)
                     )
                 }
@@ -425,7 +424,7 @@ private fun MiniFullPlayerSkeletonPreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(scaled(6.dp))
-                        .clip(RoundedCornerShape(scaled(99.dp)))
+                        .clip(TerminalCornerShape)
                         .background(inactiveTrackColor)
                 )
                 Row(
@@ -437,7 +436,7 @@ private fun MiniFullPlayerSkeletonPreview(
                         modifier = Modifier
                             .fillMaxWidth(0.12f)
                             .height(scaled(6.dp))
-                            .clip(RoundedCornerShape(scaled(99.dp)))
+                            .clip(TerminalCornerShape)
                             .background(scheme.primary.copy(alpha = 0.35f))
                     )
 
@@ -445,7 +444,7 @@ private fun MiniFullPlayerSkeletonPreview(
                         modifier = Modifier
                             .fillMaxWidth(0.12f)
                             .height(scaled(6.dp))
-                            .clip(RoundedCornerShape(scaled(99.dp)))
+                            .clip(TerminalCornerShape)
                             .background(scheme.primary.copy(alpha = 0.35f))
                     )
                 }
@@ -459,21 +458,21 @@ private fun MiniFullPlayerSkeletonPreview(
                         modifier = Modifier
                             .height(scaled(50.dp))
                             .width(scaled(58.dp))
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(scheme.onPrimary)
                     )
                     Box(
                         modifier = Modifier
                             .height(scaled(50.dp))
                             .width(scaled(58.dp))
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(scheme.primary)
                     )
                     Box(
                         modifier = Modifier
                             .height(scaled(50.dp))
                             .width(scaled(58.dp))
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(scheme.onPrimary)
                     )
                 }
@@ -488,7 +487,7 @@ private fun MiniFullPlayerSkeletonPreview(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(scaled(48.dp))
-                            .clip(RoundedCornerShape(scaled(50.dp)))
+                            .clip(TerminalCornerShape)
                             .background(toggleRowColor)
                             .padding(
                                 horizontal = scaled(6.dp),
@@ -506,21 +505,21 @@ private fun MiniFullPlayerSkeletonPreview(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(scaled(40.dp))
-                                    .clip(RoundedCornerShape(scaled(18.dp)))
+                                    .clip(TerminalCornerShape)
                                     .background(scheme.primary)
                             )
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(scaled(40.dp))
-                                    .clip(RoundedCornerShape(scaled(18.dp)))
+                                    .clip(TerminalCornerShape)
                                     .background(scheme.secondary)
                             )
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(scaled(40.dp))
-                                    .clip(RoundedCornerShape(scaled(18.dp)))
+                                    .clip(TerminalCornerShape)
                                     .background(scheme.tertiary)
                             )
                         }
@@ -564,7 +563,7 @@ private fun PaletteSwatchSquare(
         Surface(
             onClick = onClick,
             color = scheme.surfaceContainerHighest,
-            shape = RoundedCornerShape(outerCorner),
+            shape = TerminalCornerShape,
             border = if (borderWidth > 0.dp) BorderStroke(borderWidth, scheme.primary) else null,
             modifier = Modifier.fillMaxSize() 
         ) {
@@ -575,7 +574,7 @@ private fun PaletteSwatchSquare(
             ) {
                 Surface(
                     color = scheme.surface,
-                    shape = RoundedCornerShape(innerCorner),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -661,7 +660,7 @@ private fun PaletteAccuracySlider(
                 modifier = Modifier
                     .background(
                         color = scheme.primaryContainer,
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     )
             ) {
                 Text(

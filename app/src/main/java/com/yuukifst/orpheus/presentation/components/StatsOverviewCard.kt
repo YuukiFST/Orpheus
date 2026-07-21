@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -41,7 +41,7 @@ import com.yuukifst.orpheus.data.stats.StatsTimeRange
 import com.yuukifst.orpheus.presentation.stats.displayNameRes
 import com.yuukifst.orpheus.utils.formatListeningDurationCompact
 import com.yuukifst.orpheus.utils.formatListeningDurationLong
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.runtime.remember
@@ -54,16 +54,7 @@ fun StatsOverviewCard(
     onClick: () -> Unit
 ) {
     val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-    val shape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 28.dp,
-        smoothnessAsPercentTR = 60,
-        cornerRadiusBR = 28.dp,
-        smoothnessAsPercentTL = 60,
-        cornerRadiusBL = 28.dp,
-        smoothnessAsPercentBR = 60,
-        cornerRadiusTR = 28.dp,
-        smoothnessAsPercentBL = 60,
-    )
+    val shape = TerminalCornerShape
 
     Card(
         modifier = modifier
@@ -106,7 +97,7 @@ fun StatsOverviewCard(
                         modifier = Modifier
                             .padding(end = 24.dp)
                             .size(40.dp)
-                            .clip(CircleShape)//RoundedCornerShape(12.dp))
+                            .clip(TerminalCornerShape)//TerminalCornerShape)
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
@@ -246,7 +237,7 @@ private fun MiniListeningTimeline(summary: PlaybackStatsRepository.PlaybackStats
                     modifier = Modifier
                         .fillMaxWidth()
                         .height((70.dp * heightFraction).coerceAtLeast(10.dp))
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(
                             color = MaterialTheme.colorScheme.primary
 //                            Brush.verticalGradient(
@@ -303,14 +294,14 @@ private fun MonthlyHorizontalListeningTimeline(
                     modifier = Modifier
                         .weight(1f)
                         .height(12.dp)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(widthFraction)
                             .height(12.dp)
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(MaterialTheme.colorScheme.primary)
                     )
                 }
@@ -325,7 +316,7 @@ private fun PlaceholderLine(width: Dp) {
         modifier = Modifier
             .width(width)
             .height(18.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
     )
 }

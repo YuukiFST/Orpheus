@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudUpload
@@ -57,7 +58,6 @@ import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.repository.LyricsSearchResult
 import com.yuukifst.orpheus.presentation.viewmodel.LyricsSearchUiState
 import com.yuukifst.orpheus.utils.ProviderText
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -82,7 +82,7 @@ fun FetchLyricsDialog(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth(),
-            shape = RoundedCornerShape(32.dp), // Heavily rounded shape (Expressive)
+            shape = TerminalCornerShape, // Heavily rounded shape (Expressive)
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp
         ) {
@@ -151,12 +151,7 @@ private fun IdleContent(
     Box(
         modifier = Modifier
             .size(72.dp)
-            .clip(RoundedStarShape(
-                sides = 8,
-                curve = 0.1,
-                rotation = 0f,
-                //iterations = 45
-            )) // Pleasant "Squircle" shape
+            .clip(TerminalCornerShape) // Pleasant "Squircle" shape
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center
     ) {
@@ -207,7 +202,7 @@ private fun IdleContent(
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
@@ -252,7 +247,7 @@ private fun IdleContent(
         Button(
             onClick = onSearch,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = CircleShape
+            shape = TerminalCornerShape
         ) {
             Icon(Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
@@ -262,7 +257,7 @@ private fun IdleContent(
         Button(
             onClick = onImport,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(12.dp),
+            shape = TerminalCornerShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -277,7 +272,7 @@ private fun IdleContent(
         TextButton(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(18.dp)
+            shape = TerminalCornerShape
         ) {
             Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -358,7 +353,7 @@ private fun ResultItemCard(
     
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -370,7 +365,7 @@ private fun ResultItemCard(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(
                         if (hasSyncedLyrics) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surfaceVariant
@@ -404,7 +399,7 @@ private fun ResultItemCard(
                     )
                     if (hasSyncedLyrics) {
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = TerminalCornerShape,
                             color = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ) {
@@ -454,7 +449,7 @@ fun NotFoundContent(
     Box(
         modifier = Modifier
             .size(72.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center
     ) {
@@ -539,7 +534,7 @@ fun NotFoundContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            shape = RoundedCornerShape(18.dp)
+            shape = TerminalCornerShape
         ) {
             Icon(Icons.Rounded.Search, null)
             Spacer(Modifier.width(8.dp))
@@ -549,7 +544,7 @@ fun NotFoundContent(
         TextButton(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(18.dp)
+            shape = TerminalCornerShape
         ) {
             Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -564,7 +559,7 @@ private fun ErrorContent(
     Box(
         modifier = Modifier
             .size(72.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.errorContainer),
         contentAlignment = Alignment.Center
     ) {
@@ -602,7 +597,7 @@ private fun ErrorContent(
             containerColor = MaterialTheme.colorScheme.error,
             contentColor = MaterialTheme.colorScheme.onError
         ),
-        shape = RoundedCornerShape(18.dp)
+        shape = TerminalCornerShape
     ) {
         Text(stringResource(R.string.ok), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }

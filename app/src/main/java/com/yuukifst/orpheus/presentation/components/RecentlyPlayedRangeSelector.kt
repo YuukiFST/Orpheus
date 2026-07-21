@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -17,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -119,7 +120,7 @@ private fun RecentlyPlayedRangeChip(
         onClick = onClick,
         modifier = modifier
             .semantics { role = Role.Tab },
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = containerColor,
         contentColor = contentColor,
         border = BorderStroke(

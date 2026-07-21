@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MediumExtendedFloatingActionButton
@@ -48,7 +48,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.subcomps.SineWaveLine
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 data class ChangelogSection(
     @StringRes val titleRes: Int,
@@ -142,16 +142,7 @@ fun ChangelogBottomSheet(
 
         MediumExtendedFloatingActionButton(
             onClick = { openUrl(context, changelogUrl) },
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusBR = fabCornerRadius,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBL = fabCornerRadius,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusTR = fabCornerRadius,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusTL = fabCornerRadius,
-                smoothnessAsPercentTL = 60
-            ),
+            shape = TerminalCornerShape,
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
             icon = {
@@ -215,7 +206,7 @@ fun ChangelogCategory(section: ChangelogSection) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(22.dp),
+        shape = TerminalCornerShape,
         tonalElevation = 6.dp
     ) {
         Column(
@@ -239,7 +230,7 @@ fun ChangelogCategory(section: ChangelogSection) {
                         modifier = Modifier
                             .padding(top = 6.dp)
                             .size(8.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            .background(MaterialTheme.colorScheme.primary, TerminalCornerShape)
                     )
                     val linkColor = MaterialTheme.colorScheme.primary
                     val annotatedText = buildAnnotatedString {
@@ -290,7 +281,7 @@ fun VersionBadge(
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = CircleShape
+                shape = TerminalCornerShape
             )
     ) {
         Text(

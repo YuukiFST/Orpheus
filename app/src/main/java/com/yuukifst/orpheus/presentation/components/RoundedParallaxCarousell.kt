@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.FloatRange
 import androidx.compose.animation.core.*
@@ -277,7 +278,7 @@ private fun RoundedCarousel(
         val scope = remember { CarouselItemScopeImpl(itemInfo = carouselItemInfo) }
 
         val cachedShape = remember(itemCornerRadius) {
-            RoundedCornerShape(itemCornerRadius)
+            TerminalCornerShape
         }
 
         val clipShape = remember(cachedShape) {

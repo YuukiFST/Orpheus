@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
@@ -99,7 +100,6 @@ import com.yuukifst.orpheus.presentation.viewmodel.AlbumDetailViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
 import com.yuukifst.orpheus.utils.formatSongCount
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.ui.res.stringResource
@@ -617,7 +617,7 @@ private fun SharedAlbumTopBarProbe(
 
         LargeExtendedFloatingActionButton(
             onClick = onPlayClick,
-            shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
+            shape = TerminalCornerShape,
             modifier = Modifier
                 .align(shuffleAlignment)
                 .statusBarsPadding()
@@ -792,7 +792,7 @@ private fun CollapsingAlbumTopBar(
 
                 LargeExtendedFloatingActionButton(
                     onClick = onPlayClick,
-                    shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)

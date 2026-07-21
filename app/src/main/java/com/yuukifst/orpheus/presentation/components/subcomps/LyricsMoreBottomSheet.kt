@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -107,7 +108,7 @@ fun LyricsMoreBottomSheet(
         sheetState = sheetState,
         containerColor = containerColor,
         contentColor = contentColor,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = TerminalCornerShape,
         contentWindowInsets = { WindowInsets(top = 0, bottom = 0) }
     ) {
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -148,7 +149,7 @@ fun LyricsMoreBottomSheet(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 8.dp, bottomEnd = 8.dp))
+                            .clip(TerminalCornerShape)
                             .background(itemBackgroundColor)
                             .clickable {
                                 onDismissRequest()
@@ -164,9 +165,9 @@ fun LyricsMoreBottomSheet(
 
                 // Reset imported lyrics
                 val resetShape = if (lyrics != null) {
-                    RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 18.dp, bottomEnd = 18.dp)
+                    TerminalCornerShape
                 } else {
-                    RoundedCornerShape(24.dp)
+                    TerminalCornerShape
                 }
 
                 ListItem(
@@ -236,7 +237,7 @@ fun LyricsMoreBottomSheet(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(TerminalCornerShape)
                         .background(itemBackgroundColor)
                         .padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -349,12 +350,7 @@ fun LyricsMoreBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = 18.dp,
-                                        topEnd = 18.dp,
-                                        bottomStart = if (isSyncLast) 24.dp else 8.dp,
-                                        bottomEnd = if (isSyncLast) 24.dp else 8.dp
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(itemBackgroundColor)
                                 .clickable {
@@ -393,12 +389,7 @@ fun LyricsMoreBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = if (isRomanizationFirst) 18.dp else 8.dp,
-                                        topEnd = if (isRomanizationFirst) 18.dp else 8.dp,
-                                        bottomStart = if (isRomanizationLast) 24.dp else 8.dp,
-                                        bottomEnd = if (isRomanizationLast) 24.dp else 8.dp
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(itemBackgroundColor)
                                 .clickable { onShowRomanizationChange(!showRomanization) },
@@ -434,12 +425,7 @@ fun LyricsMoreBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = if (isTranslationFirst) 18.dp else 8.dp,
-                                        topEnd = if (isTranslationFirst) 18.dp else 8.dp,
-                                        bottomStart = if (isTranslationLast) 24.dp else 8.dp,
-                                        bottomEnd = if (isTranslationLast) 24.dp else 8.dp
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(itemBackgroundColor)
                                 .clickable { onShowTranslationChange(!showTranslation) },
@@ -479,12 +465,7 @@ fun LyricsMoreBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = 8.dp,
-                                        topEnd = 8.dp,
-                                        bottomStart = if (isImmersiveLast) 24.dp else 8.dp,
-                                        bottomEnd = if (isImmersiveLast) 24.dp else 8.dp
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(itemBackgroundColor),
                             colors = ListItemDefaults.colors(
@@ -520,12 +501,7 @@ fun LyricsMoreBottomSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = 8.dp,
-                                        topEnd = 8.dp,
-                                        bottomStart = 24.dp,
-                                        bottomEnd = 24.dp
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(itemBackgroundColor)
                                 .clickable { onKeepScreenOnChange(!keepScreenOn) },
@@ -545,7 +521,7 @@ fun LyricsMoreBottomSheet(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(TerminalCornerShape)
                     .padding(vertical = 0.dp, horizontal = 0.dp)
             ) {
                  BottomToggleRow(

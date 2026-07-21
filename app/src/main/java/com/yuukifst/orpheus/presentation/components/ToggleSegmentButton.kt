@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -206,7 +207,7 @@ private fun ToggleSegmentButtonContainer(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(cornerRadius))
+            .clip(TerminalCornerShape)
             .background(bgColor)
             .clickable(enabled = enabled, onClick = onClick)
             .semantics { stateDescription = if (active) stateOn else stateOff },

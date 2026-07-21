@@ -1,8 +1,6 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
 
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
@@ -18,8 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.MoreVert
@@ -59,6 +57,7 @@ import com.yuukifst.orpheus.presentation.components.ShimmerBox
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.SmartImage
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 @Immutable
 private data class EnhancedSongAnimationTarget(
@@ -119,58 +118,42 @@ fun EnhancedSongListItem(
     // Share one transition across the item and derive the visual properties from a
     // couple of progress values instead of animating each color/radius independently.
     val highlightProgress by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = 400) },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationFast) },
         label = "highlightProgress"
     ) { state ->
         if (state.isHighlighted) 1f else 0f
     }
     val selectionVisualProgress by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = 250) },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick) },
         label = "selectionVisualProgress"
     ) { state ->
         if (state.isSelected) 1f else 0f
     }
     val selectionScaleProgress by transition.animateFloat(
-        transitionSpec = {
-            spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick) },
         label = "selectionScaleProgress"
     ) { state ->
         if (state.isSelected) 1f else 0f
     }
 
-    val animatedCornerRadius = lerpDp(22.dp, 50.dp, highlightProgress)
-    val animatedAlbumCornerRadius = lerpDp(10.dp, 50.dp, highlightProgress)
-    val selectionScale = lerpFloat(1f, 0.98f, selectionScaleProgress)
-    val selectionBorderWidth = lerpDp(0.dp, 2.5.dp, selectionVisualProgress)
-
-    val surfaceShape = remember(animatedCornerRadius, customShape, isHighlighted) {
-        if (customShape != null && !isHighlighted) {
-            customShape
-        } else {
-            RoundedCornerShape(animatedCornerRadius)
-        }
+    val surfaceShape = remember(customShape) {
+        customShape ?: RectangleShape
     }
 
-    val albumShape = remember(animatedAlbumCornerRadius) {
-        RoundedCornerShape(animatedAlbumCornerRadius)
-    }
+    val albumShape = RectangleShape
 
     val colors = MaterialTheme.colorScheme
-    val baseContainerColor = containerColorOverride ?: colors.surfaceContainerLow
-    val playbackContainerColor = lerpColor(baseContainerColor, colors.primaryContainer, highlightProgress)
-    val containerColor = lerpColor(playbackContainerColor, colors.secondaryContainer, selectionVisualProgress)
+    val baseContainerColor = containerColorOverride ?: colors.surface
+    val containerColor = lerpColor(baseContainerColor, colors.surfaceContainerLow, selectionVisualProgress * 0.35f)
 
     val baseContentColor = colors.onSurface
-    val playbackContentColor = lerpColor(baseContentColor, colors.onPrimaryContainer, highlightProgress)
-    val contentColor = lerpColor(playbackContentColor, colors.onSecondaryContainer, selectionVisualProgress)
+    val contentColor = lerpColor(baseContentColor, colors.primary, highlightProgress)
+    val titleColor = lerpColor(baseContentColor, colors.primary, highlightProgress)
 
-    val selectionBorderColor = lerpColor(colors.primary.copy(alpha = 0f), colors.primary, selectionVisualProgress)
-    val mvContainerColor = lerpColor(colors.onSurface, colors.primaryContainer, highlightProgress)
-    val mvContentColor = lerpColor(colors.surfaceContainerHigh, colors.onPrimaryContainer, highlightProgress)
+    val selectionBorderColor = lerpColor(colors.outline.copy(alpha = 0f), colors.primary, selectionVisualProgress)
+    val selectionBorderWidth = lerpDp(0.dp, 1.dp, selectionVisualProgress)
+    val highlightBorderWidth = lerpDp(0.dp, 2.dp, highlightProgress)
+    val selectionScale = lerpFloat(1f, 0.96f, selectionScaleProgress)
     val selectionOverlayColor = lerpColor(
         Color.Transparent,
         colors.primary.copy(alpha = 0.7f),
@@ -202,7 +185,7 @@ fun EnhancedSongListItem(
                     ShimmerBox(
                         modifier = Modifier
                             .size(albumArtSize)
-                            .clip(CircleShape)
+                            .clip(RectangleShape)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
@@ -216,28 +199,28 @@ fun EnhancedSongListItem(
                         modifier = Modifier
                             .fillMaxWidth(0.7f)
                             .height(20.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(0.dp))
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(0.dp))
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.3f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(RoundedCornerShape(0.dp))
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 ShimmerBox(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(CircleShape)
+                        .clip(RectangleShape)
                 )
             }
         }
@@ -248,6 +231,11 @@ fun EnhancedSongListItem(
                 .fillMaxWidth()
                 .scale(selectionScale)
                 .clip(surfaceShape)
+                .border(
+                    width = highlightBorderWidth,
+                    color = colors.primary.copy(alpha = highlightProgress),
+                    shape = surfaceShape
+                )
                 .then(
                     if (showSelectionDecoration) {
                         Modifier.border(
@@ -258,6 +246,11 @@ fun EnhancedSongListItem(
                     } else {
                         Modifier
                     }
+                )
+                .border(
+                    width = 1.dp,
+                    color = colors.outline.copy(alpha = 0.5f),
+                    shape = surfaceShape
                 )
                 // Expose a button + click/long-click actions to TalkBack (the raw
                 // pointerInput gestures below are invisible to the a11y tree). Merge the
@@ -303,7 +296,8 @@ fun EnhancedSongListItem(
                     Box(
                         modifier = Modifier
                             .size(albumArtSize)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                            .border(1.dp, colors.outline, RectangleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RectangleShape)
                     ) {
                         SmartImage(
                             model = song.albumArtUriString,
@@ -365,7 +359,7 @@ fun EnhancedSongListItem(
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
-                            color = contentColor,
+                            color = titleColor,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
@@ -400,9 +394,10 @@ fun EnhancedSongListItem(
                     FilledIconButton(
                         onClick = { onMoreOptionsClick(song) },
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = mvContentColor,
-                            contentColor = mvContainerColor
+                            containerColor = colors.surfaceContainerHigh,
+                            contentColor = colors.onSurface
                         ),
+                        shape = RectangleShape,
                         modifier = Modifier
                             .size(36.dp)
                             .padding(end = 4.dp)

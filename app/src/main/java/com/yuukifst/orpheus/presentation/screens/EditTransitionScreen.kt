@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -83,7 +83,7 @@ import com.yuukifst.orpheus.data.model.Curve
 import com.yuukifst.orpheus.data.model.TransitionMode
 import com.yuukifst.orpheus.data.model.TransitionSettings
 import com.yuukifst.orpheus.presentation.viewmodel.TransitionViewModel
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import java.util.concurrent.TimeUnit
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
@@ -251,7 +251,7 @@ private fun TransitionSummaryCard(
     enabled: Boolean
 ) {
     ElevatedCard(
-        shape = RoundedCornerShape(28.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -264,7 +264,7 @@ private fun TransitionSummaryCard(
                         .size(48.dp)
                         .background(
                             color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = CircleShape
+                            shape = TerminalCornerShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -295,7 +295,7 @@ private fun TransitionSummaryCard(
 
             AnimatedVisibility(visible = isPlaylistScope) {
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -368,7 +368,7 @@ private fun ExpressiveMorphingToggle(
     onOptionSelected: (TransitionMode) -> Unit
 ) {
     val selectedIndex = if (selectedOption == TransitionMode.OVERLAP) 1 else 0
-    val shape = CircleShape //RoundedCornerShape(16.dp) // Less rounded for more structure, or 50 for a capsule
+    val shape = TerminalCornerShape //TerminalCornerShape // Less rounded for more structure, or 50 for a capsule
     val crossfadeLabel = stringResource(R.string.presentation_batch_d_transition_mode_crossfade)
     val noneLabel = stringResource(R.string.presentation_batch_d_transition_mode_none)
 
@@ -396,7 +396,7 @@ private fun ExpressiveMorphingToggle(
                 .width(indicatorWidth)
                 .fillMaxSize()
                 .offset(x = indicatorOffset)
-                .clip(CircleShape) // A bit smaller than the container
+                .clip(TerminalCornerShape) // A bit smaller than the container
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         )
 
@@ -409,7 +409,7 @@ private fun ExpressiveMorphingToggle(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .clickable { onOptionSelected(mode) },
                     contentAlignment = Alignment.Center
                 ) {
@@ -441,7 +441,7 @@ private fun TransitionDurationSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow, RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow, TerminalCornerShape)
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -486,7 +486,7 @@ private fun TransitionDurationSection(
                 Box(
                     modifier = Modifier
                         .size(height = 36.dp, width = 8.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        .background(MaterialTheme.colorScheme.primary, TerminalCornerShape)
                 )
             }
         )
@@ -537,7 +537,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                         .height(8.dp)
                         .background(
                             color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
+                            shape = TerminalCornerShape
                         )
                 ) {
                     // Visual extension of the top bar (Song 1 Ending)
@@ -552,7 +552,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                         .height(8.dp)
                         .background(
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)
+                            shape = TerminalCornerShape
                         )
                 )
             }
@@ -563,7 +563,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                 modifier = Modifier
                     .fillMaxWidth(0.1f + (overlapFactor * 0.4f)) // Visual minimum + factor
                     .background(
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         color = MaterialTheme.colorScheme.surfaceContainerLow//.copy(alpha = 0.8f) // Masking effect
                     )
                     .height(32.dp)
@@ -576,16 +576,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                             .fillMaxSize()
                             .background(
                                 color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f),
-                                shape = AbsoluteSmoothCornerShape(
-                                    cornerRadiusTR = 0.dp,
-                                    smoothnessAsPercentTL = 60,
-                                    cornerRadiusTL = 50.dp,
-                                    smoothnessAsPercentTR = 60,
-                                    cornerRadiusBR = 0.dp,
-                                    smoothnessAsPercentBL = 60,
-                                    cornerRadiusBL = 50.dp,
-                                    smoothnessAsPercentBR = 60
-                                )
+                                shape = TerminalCornerShape
                             )
                     )
                     Box(
@@ -594,16 +585,7 @@ private fun CrossfadeVisualizer(durationMs: Int) {
                             .fillMaxSize()
                             .background(
                                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                                shape = AbsoluteSmoothCornerShape(
-                                    cornerRadiusTR = 50.dp,
-                                    smoothnessAsPercentTL = 60,
-                                    cornerRadiusTL = 0.dp,
-                                    smoothnessAsPercentTR = 60,
-                                    cornerRadiusBR = 50.dp,
-                                    smoothnessAsPercentBL = 60,
-                                    cornerRadiusBL = 0.dp,
-                                    smoothnessAsPercentBR = 60
-                                )
+                                shape = TerminalCornerShape
                             )
                     )
                 }
@@ -686,7 +668,7 @@ private fun CurveSelectionColumn(
 ) {
     ElevatedCard(
         modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -705,7 +687,7 @@ private fun CurveSelectionColumn(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(TerminalCornerShape)
                             .background(if (isSelected) activeColor else Color.Transparent)
                             .clickable { onCurveSelected(curve) }
                             .padding(horizontal = 12.dp, vertical = 10.dp)

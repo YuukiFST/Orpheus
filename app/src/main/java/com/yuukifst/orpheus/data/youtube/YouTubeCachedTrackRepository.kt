@@ -3,8 +3,10 @@ package com.yuukifst.orpheus.data.youtube
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.mediaId
 import com.yuukifst.orpheus.data.database.toCachedTrackEntity
+import com.yuukifst.orpheus.data.database.YouTubeCachedTrackEntity
 import com.yuukifst.orpheus.data.database.toSong
 import com.yuukifst.orpheus.data.model.Song
+import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -95,5 +97,36 @@ class YouTubeCachedTrackRepository @Inject constructor(
 
     suspend fun getFavoriteMediaIdsOnce(): Set<String> = withContext(Dispatchers.IO) {
         dao.getFavoriteVideoIdsOnce().map { videoId -> "youtube_$videoId" }.toSet()
+    }
+
+    fun observeFavoriteSongs(sortOption: SortOption): Flow<List<Song>> {
+        return dao.observeFavoriteTracks().map { entities ->
+            sortFavoriteEntities(entities, sortOption).map { it.toSong().copy(isFavorite = true) }
+        }
+    }
+
+    suspend fun getFavoriteSongsOnce(sortOption: SortOption): List<Song> = withContext(Dispatchers.IO) {
+        sortFavoriteEntities(dao.getFavoriteTracksOnce(), sortOption)
+            .map { it.toSong().copy(isFavorite = true) }
+    }
+
+    private fun sortFavoriteEntities(
+        entities: List<YouTubeCachedTrackEntity>,
+        sortOption: SortOption,
+    ): List<YouTubeCachedTrackEntity> {
+        val titleCmp = compareBy<YouTubeCachedTrackEntity> {
+            (it.displayTitle?.takeIf { title -> title.isNotBlank() } ?: it.title).lowercase()
+        }
+        val artistCmp = compareBy<YouTubeCachedTrackEntity> { it.channelName.lowercase() }
+        val dateCmp = compareBy<YouTubeCachedTrackEntity> { it.favoritedAt ?: 0L }
+        return when (sortOption) {
+            SortOption.LikedSongTitleZA -> entities.sortedWith(titleCmp.reversed())
+            SortOption.LikedSongArtist -> entities.sortedWith(artistCmp.then(titleCmp))
+            SortOption.LikedSongArtistDesc -> entities.sortedWith(artistCmp.reversed().then(titleCmp))
+            SortOption.LikedSongAlbum -> entities.sortedWith(titleCmp)
+            SortOption.LikedSongAlbumDesc -> entities.sortedWith(titleCmp.reversed())
+            SortOption.LikedSongDateLikedAsc -> entities.sortedWith(dateCmp)
+            else -> entities.sortedWith(dateCmp.reversed())
+        }
     }
 }

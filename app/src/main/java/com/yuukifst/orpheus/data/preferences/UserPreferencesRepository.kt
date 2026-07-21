@@ -1249,7 +1249,7 @@ constructor(
 
     val navBarCornerRadiusFlow: Flow<Int> =
             dataStore.data.map { preferences ->
-                sanitizeNavBarCornerRadius(preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS] ?: 32)
+                sanitizeNavBarCornerRadius(preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS] ?: 0)
             }
 
     suspend fun setNavBarCornerRadius(radius: Int) {

@@ -63,7 +63,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LightMode
@@ -154,7 +154,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -631,7 +631,7 @@ fun WelcomePage() {
         }
         Spacer(modifier = Modifier.height(10.dp))
         Surface(
-            shape = CircleShape,
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 2.dp,
@@ -660,7 +660,7 @@ fun WelcomePage() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(240.dp)
-                .clip(RoundedCornerShape(20.dp))
+                .clip(TerminalCornerShape)
         ){
             MaterialYouVectorDrawable(
                 modifier = Modifier.fillMaxSize(),
@@ -873,7 +873,7 @@ private fun PermissionOptionCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
                     modifier = Modifier.size(40.dp)
                 ) {
@@ -960,7 +960,7 @@ fun BackupRestorePage(
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(20.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateContentSize()
@@ -1115,7 +1115,7 @@ private fun ThemeModeOptionCard(
                 MaterialTheme.colorScheme.surfaceContainer
             }
         ),
-        shape = RoundedCornerShape(24.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -1131,7 +1131,7 @@ private fun ThemeModeOptionCard(
                 } else {
                     MaterialTheme.colorScheme.secondaryContainer
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier.size(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -1168,7 +1168,7 @@ private fun ThemeModeOptionCard(
                         } else {
                             MaterialTheme.colorScheme.onPrimaryContainer
                         },
-                        shape = RoundedCornerShape(999.dp)
+                        shape = TerminalCornerShape
                     ) {
                         Text(
                             text = stringResource(R.string.setup_recommended),
@@ -1196,7 +1196,7 @@ private fun ThemeModeOptionCard(
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                shape = CircleShape
+                shape = TerminalCornerShape
             ) {
                 Box(
                     modifier = Modifier.size(28.dp),
@@ -1212,7 +1212,7 @@ private fun ThemeModeOptionCard(
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .clip(CircleShape)
+                                .clip(TerminalCornerShape)
                                 .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
                         )
                     }
@@ -1296,7 +1296,7 @@ private fun ExternalServiceToggleCard(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = RoundedCornerShape(24.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -1318,7 +1318,7 @@ private fun ExternalServiceToggleCard(
                 } else {
                     MaterialTheme.colorScheme.onSecondaryContainer
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier.size(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -1407,7 +1407,7 @@ fun LibraryLayoutPage(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
-                shape = RoundedCornerShape(24.dp),
+                shape = TerminalCornerShape,
                 onClick = { onModeSelected(if (isCompact) "tab_row" else "compact_pill") }
             ) {
                 Row(
@@ -1461,12 +1461,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
     )
     
     Card(
-        shape = RoundedCornerShape(
-            topStart = 24.dp,
-            topEnd = 24.dp,
-            bottomStart = 0.dp,
-            bottomEnd = 0.dp
-        ),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -1531,7 +1526,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 Box(
                                     modifier = Modifier.background(
                                         MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = CircleShape
+                                        shape = TerminalCornerShape
                                     )
                                 ) {
                                     Text(
@@ -1549,7 +1544,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                         .height(3.dp)
                                         .background(
                                             MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(100)
+                                            TerminalCornerShape
                                         )
                                 )
                             }
@@ -1559,7 +1554,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 Box(
                                     modifier = Modifier.background(
                                         MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = CircleShape
+                                        shape = TerminalCornerShape
                                     )
                                 ) {
                                     Text(
@@ -1577,7 +1572,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                         .height(3.dp)
                                         .background(
                                             Color.Transparent,
-                                            RoundedCornerShape(100)
+                                            TerminalCornerShape
                                         )
                                 )
                             }
@@ -1587,7 +1582,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 Box(
                                     modifier = Modifier.background(
                                         MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = CircleShape
+                                        shape = TerminalCornerShape
                                     )
                                 ) {
                                     Text(
@@ -1605,7 +1600,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                         .height(3.dp)
                                         .background(
                                             Color.Transparent,
-                                            RoundedCornerShape(100)
+                                            TerminalCornerShape
                                         )
                                 )
                             }
@@ -1825,7 +1820,7 @@ private fun SetupRestoreDialog(
 
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shape = RoundedCornerShape(24.dp),
+                        shape = TerminalCornerShape,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -1879,7 +1874,7 @@ private fun SetupRestoreDialog(
                         plan.warnings.forEach { warning ->
                             Surface(
                                 color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f),
-                                shape = RoundedCornerShape(18.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
@@ -1936,10 +1931,10 @@ private fun SetupRestoreSectionRow(
         } else {
             MaterialTheme.colorScheme.surfaceContainer
         },
-        shape = RoundedCornerShape(22.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(TerminalCornerShape)
             .clickable(enabled = enabled, onClick = onClick)
     ) {
         Row(
@@ -1957,7 +1952,7 @@ private fun SetupRestoreSectionRow(
 
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(14.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier.size(42.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -2034,23 +2029,13 @@ fun LibraryNavigationPillSetupShow(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Surface(
-            shape = RoundedCornerShape(
-                topStart = pillRadius,
-                bottomStart = pillRadius,
-                topEnd = innerRadius,
-                bottomEnd = innerRadius
-            ),
+            shape = TerminalCornerShape,
             tonalElevation = 8.dp,
             color = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier
                 .fillMaxHeight()
                 .clip(
-                    RoundedCornerShape(
-                        topStart = pillRadius,
-                        bottomStart = pillRadius,
-                        topEnd = innerRadius,
-                        bottomEnd = innerRadius
-                    )
+                    TerminalCornerShape
                 )
                 .clickable(onClick = onClick)
         ) {
@@ -2091,23 +2076,13 @@ fun LibraryNavigationPillSetupShow(
 
         // --- PART 2: ARROW (changes shape based on state) ---
         Surface(
-            shape = RoundedCornerShape(
-                topStart = animatedArrowCorner.dp, // Animates between 4.dp and 26.dp
-                bottomStart = animatedArrowCorner.dp, // Animates between 4.dp and 26.dp
-                topEnd = pillRadius,
-                bottomEnd = pillRadius
-            ),
+            shape = TerminalCornerShape,
             tonalElevation = 8.dp,
             color = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier
                 .fillMaxHeight()
                 .clip(
-                    RoundedCornerShape(
-                        topStart = animatedArrowCorner.dp, // Animates between 4.dp and 26.dp
-                        bottomStart = animatedArrowCorner.dp, // Animates between 4.dp and 26.dp
-                        topEnd = pillRadius,
-                        bottomEnd = pillRadius
-                    )
+                    TerminalCornerShape
                 )
                 .clickable(
                     indication = ripple(),
@@ -2179,27 +2154,13 @@ fun SetupBottomBar(
         label = "Rotation"
     )
 
-    val shape = RoundedCornerShape(
-        topEnd = 38.dp,
-        topStart = 38.dp,
-        bottomEnd = 0.dp,
-        bottomStart = 0.dp
-    )
+    val shape = TerminalCornerShape
 
     Surface(
         modifier = modifier
             .shadow(elevation = 8.dp, shape = shape, clip = true),
         color = MaterialTheme.colorScheme.surfaceContainer,
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 36.dp,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusTL = 36.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBR = 0.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBL = 0.dp,
-            smoothnessAsPercentTR = 60
-        )
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier
@@ -2264,16 +2225,7 @@ fun SetupBottomBar(
                 // 4. Apply the animated shape and rotation to the button
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTL = animatedTopStart.toInt().dp,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusTR = animatedTopEnd.toInt().dp,
-                        smoothnessAsPercentTL = 60,
-                        cornerRadiusBL = animatedBottomStart.toInt().dp,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusBR = animatedBottomEnd.toInt().dp,
-                        smoothnessAsPercentBR = 60,
-                    ),
+                    shape = TerminalCornerShape,
                     elevation = FloatingActionButtonDefaults.elevation(0.dp),
                     containerColor = containerColor,
                     contentColor = contentColor,
@@ -2367,7 +2319,7 @@ fun NavBarLayoutPage(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
-                shape = RoundedCornerShape(24.dp),
+                shape = TerminalCornerShape,
                 onClick = { onModeSelected(if (isDefault) "full_width" else "default") }
             ) {
                 Column(
@@ -2447,7 +2399,7 @@ fun NavBarPreview(isDefault: Boolean) {
     
     // Simulate the bottom of a screen
     Card(
-        shape = RoundedCornerShape(24.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
@@ -2473,7 +2425,7 @@ fun NavBarPreview(isDefault: Boolean) {
                          modifier = Modifier
                              .fillMaxWidth(if(it==1) 0.7f else 1f)
                              .height(12.dp)
-                             .clip(RoundedCornerShape(6.dp))
+                             .clip(TerminalCornerShape)
                              .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                      )
                  }
@@ -2498,16 +2450,7 @@ fun NavBarPreview(isDefault: Boolean) {
                                 .fillMaxWidth()
                                 .padding(16.dp)
                                 .height(80.dp),
-                            shape = AbsoluteSmoothCornerShape(
-                                cornerRadiusTL = 28.dp,
-                                cornerRadiusTR = 28.dp,
-                                cornerRadiusBL = 28.dp,
-                                cornerRadiusBR = 28.dp,
-                                smoothnessAsPercentTL = 60,
-                                smoothnessAsPercentTR = 60,
-                                smoothnessAsPercentBL = 60,
-                                smoothnessAsPercentBR = 60
-                            ),
+                            shape = TerminalCornerShape,
                             color = MaterialTheme.colorScheme.surfaceContainer,
                             tonalElevation = 6.dp
                         ) {
@@ -2530,16 +2473,7 @@ fun NavBarPreview(isDefault: Boolean) {
                             color = MaterialTheme.colorScheme.surfaceContainer,
                             tonalElevation = 6.dp,
                             // Simulated rounded top corners for preview if desired, or simplified
-                            shape = AbsoluteSmoothCornerShape(
-                                cornerRadiusTL = 28.dp, // Default preview radius
-                                smoothnessAsPercentTL = 60,
-                                cornerRadiusTR = 28.dp,
-                                smoothnessAsPercentTR = 60,
-                                cornerRadiusBL = 0.dp,
-                                smoothnessAsPercentBL = 60,
-                                cornerRadiusBR = 0.dp,
-                                smoothnessAsPercentBR = 60
-                            )
+                            shape = TerminalCornerShape
                         ) {
                              Row(
                                 modifier = Modifier.fillMaxSize(),

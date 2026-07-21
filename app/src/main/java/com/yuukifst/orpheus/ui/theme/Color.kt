@@ -2,15 +2,16 @@ package com.yuukifst.orpheus.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// VantaBlack palette — https://omarchytheme.com/themes/vantablack/
-val VantaBlack = Color(0xFF000000)
-val VantaWhite = Color(0xFFFFFFFF)
-val VantaAccent = Color(0xFF8D8D8D)
-val VantaGray0 = Color(0xFF404040)
-val VantaGray1 = Color(0xFF5C5C5C)
-val VantaGray2 = Color(0xFFA4A4A4)
-val VantaGray3 = Color(0xFFB0B0B0)
-val VantaGray4 = Color(0xFFECECEC)
+// Tactical telemetry CRT palette — single green accent, phosphor foreground
+val VantaBlack = Color(0xFF0A0A0A)
+val VantaWhite = Color(0xFFEAEAEA)
+val VantaAccent = Color(0xFF4AF626)
+val VantaGray0 = Color(0xFF121212)
+val VantaGray1 = Color(0xFF2A2A2A)
+val VantaGray2 = Color(0xFF666666)
+val VantaGray3 = Color(0xFF888888)
+val VantaGray4 = Color(0xFFB8B8B8)
+val VantaHazard = Color(0xFFFF2A2A)
 
 // Legacy aliases kept for any downstream references
 val OrpheusPurpleDark = VantaBlack

@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.components.BackupModuleSelectionDialog
@@ -1136,7 +1137,7 @@ fun SettingsCategoryScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(8.dp)
-                                .clip(RoundedCornerShape(50)),
+                                .clip(TerminalCornerShape),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                         )
@@ -1373,7 +1374,7 @@ private fun BackupInfoNoticeCard(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
-        shape = RoundedCornerShape(20.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -1566,7 +1567,7 @@ private fun BackupSectionSelectionDialog(
                                         modifier = Modifier
                                             .padding(end = 6.dp)
                                             .height(48.dp),
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = TerminalCornerShape,
                                         containerColor = if (operation == BackupOperationType.EXPORT) {
                                             MaterialTheme.colorScheme.tertiaryContainer
                                         } else {
@@ -1625,7 +1626,7 @@ private fun BackupSectionSelectionDialog(
                         ) {
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.62f),
-                                shape = RoundedCornerShape(18.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 12.dp)
@@ -1728,7 +1729,7 @@ private fun BackupSectionSelectableCard(
     Surface(
         onClick = onToggle,
         enabled = enabled,
-        shape = RoundedCornerShape(22.dp),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         border = BorderStroke(width = borderWidth, color = borderColor),
         tonalElevation = if (selected) 2.dp else 0.dp,
@@ -1747,7 +1748,7 @@ private fun BackupSectionSelectableCard(
             ) {
                 Surface(
                     color = iconContainerColor,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -1881,7 +1882,7 @@ private fun BackupTransferProgressDialog(progress: BackupTransferProgressUpdate)
         )
     ) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
+            shape = TerminalCornerShape,
             tonalElevation = 6.dp,
             color = MaterialTheme.colorScheme.surface
         ) {
@@ -1930,7 +1931,7 @@ private fun BackupTransferProgressDialog(progress: BackupTransferProgressUpdate)
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .clip(RoundedCornerShape(50)),
+                        .clip(TerminalCornerShape),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
@@ -2077,7 +2078,7 @@ private fun ImportFileSelectionDialog(
                                     ExtendedFloatingActionButton(
                                         onClick = onBrowseFile,
                                         modifier = Modifier.height(48.dp),
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = TerminalCornerShape,
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     ) {
@@ -2115,7 +2116,7 @@ private fun ImportFileSelectionDialog(
                         ) {
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.62f),
-                                shape = RoundedCornerShape(18.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 12.dp)
@@ -2150,7 +2151,7 @@ private fun ImportFileSelectionDialog(
                                     item {
                                         Surface(
                                             color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                            shape = RoundedCornerShape(18.dp),
+                                            shape = TerminalCornerShape,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
                                             Column(
@@ -2217,7 +2218,7 @@ private fun BackupHistoryCard(
 
     Surface(
         onClick = onSelect,
-        shape = RoundedCornerShape(22.dp),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -2234,7 +2235,7 @@ private fun BackupHistoryCard(
             ) {
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -2404,7 +2405,7 @@ private fun PaletteRegenerateSongSheetContent(
                 item {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = TerminalCornerShape,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
@@ -2419,10 +2420,10 @@ private fun PaletteRegenerateSongSheetContent(
                 items(songs, key = { it.id }) { song ->
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = TerminalCornerShape,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(TerminalCornerShape)
                             .clickable(enabled = !isRunning) { onSongClick(song) }
                     ) {
                         Column(
@@ -2482,7 +2483,7 @@ private fun SettingsSubsection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(TerminalCornerShape)
             .background(Color.Transparent),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {

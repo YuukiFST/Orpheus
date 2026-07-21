@@ -11,7 +11,7 @@ import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -68,7 +68,7 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import dev.shreyaspatil.capturable.capturable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.rounded.Restore
@@ -258,16 +258,7 @@ private fun EditSongContent(
     )
 
     // Shape definition for the TextFields
-    val textFieldShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 10.dp,
-        smoothnessAsPercentBL = 60,
-        cornerRadiusTR = 10.dp,
-        smoothnessAsPercentBR = 60,
-        cornerRadiusBL = 10.dp,
-        smoothnessAsPercentTL = 60,
-        cornerRadiusBR = 10.dp,
-        smoothnessAsPercentTR = 60
-    )
+    val textFieldShape = TerminalCornerShape
 
     val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
         exitDirection = FloatingToolbarExitDirection.Bottom
@@ -307,7 +298,7 @@ private fun EditSongContent(
                     FilledTonalIconButton(
                         modifier = Modifier.padding(end = 10.dp),
                         onClick = { showInfoDialog = true },
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     ) {
                         Icon(Icons.Rounded.Info, contentDescription = stringResource(R.string.cd_show_metadata_info))
                     }
@@ -709,16 +700,7 @@ private fun CoverArtEditorCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 12.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusTR = 12.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBL = 12.dp,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusBR = 12.dp,
-            smoothnessAsPercentTR = 60,
-        ),
+        shape = TerminalCornerShape,
         tonalElevation = 6.dp,
         color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
@@ -743,7 +725,7 @@ private fun CoverArtEditorCard(
                 Box(
                     modifier = Modifier
                         .size(cropSize)
-                        .clip(RoundedCornerShape(22.dp))
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center
                 ) {
@@ -902,7 +884,7 @@ fun CoverArtCropperDialog(
         }
     ) {
         Surface(
-            shape = RoundedCornerShape(32.dp),
+            shape = TerminalCornerShape,
             tonalElevation = 6.dp,
             color = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
@@ -936,14 +918,14 @@ fun CoverArtCropperDialog(
                         modifier = Modifier
                             .size(cropSide)
                             .align(Alignment.Center)
-                            .clip(RoundedCornerShape(32.dp))
+                            .clip(TerminalCornerShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                             .padding(12.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(28.dp))
+                                .clip(TerminalCornerShape)
                                 .background(MaterialTheme.colorScheme.surfaceDim)
                                 .clipToBounds()
                         ) {
@@ -972,7 +954,7 @@ fun CoverArtCropperDialog(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .clip(RoundedCornerShape(28.dp))
+                                            .clip(TerminalCornerShape)
                                             .background(MaterialTheme.colorScheme.surface)
                                             .clipToBounds()
                                             .capturable(controller = captureController)

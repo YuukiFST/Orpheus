@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -167,7 +168,7 @@ private fun DownloadedTrackItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(TerminalCornerShape)
             .clickable(onClick = onPlay)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -177,7 +178,7 @@ private fun DownloadedTrackItem(
             contentDescription = track.effectiveTitle,
             modifier = Modifier
                 .size(72.dp)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(TerminalCornerShape),
             targetSize = SmartImageYouTubeListTargetSize,
         )
         Spacer(modifier = Modifier.width(12.dp))

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import kotlinx.coroutines.CoroutineScope
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 internal data class SheetInteractionState(
     val playerShadowShape: Shape,
@@ -148,16 +148,7 @@ private class PlayerSheetDynamicShape(
         }
 
         val shape =
-            AbsoluteSmoothCornerShape(
-                cornerRadiusTL = topRadius,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusTR = topRadius,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBR = bottomRadius,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusBL = bottomRadius,
-                smoothnessAsPercentTR = 60
-            )
+            TerminalCornerShape
         return shape.createOutline(size, layoutDirection, density)
     }
 }

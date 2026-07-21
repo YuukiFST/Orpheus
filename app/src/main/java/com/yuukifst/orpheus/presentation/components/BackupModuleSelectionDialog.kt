@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -224,7 +225,7 @@ fun BackupModuleSelectionDialog(
                                         modifier = Modifier
                                             .padding(end = 6.dp)
                                             .height(48.dp),
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = TerminalCornerShape,
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     ) {
@@ -266,7 +267,7 @@ fun BackupModuleSelectionDialog(
                         ) {
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.62f),
-                                shape = RoundedCornerShape(18.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 12.dp)
@@ -380,7 +381,7 @@ fun BackupModuleSelectionDialog(
                                 plan.warnings.forEach { warning ->
                                     Surface(
                                         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
-                                        shape = RoundedCornerShape(14.dp),
+                                        shape = TerminalCornerShape,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Row(
@@ -478,7 +479,7 @@ private fun BackupSectionSelectableCardShared(
     Surface(
         onClick = onToggle,
         enabled = enabled,
-        shape = RoundedCornerShape(22.dp),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         border = BorderStroke(width = borderWidth, color = borderColor),
         tonalElevation = if (selected) 2.dp else 0.dp,
@@ -497,7 +498,7 @@ private fun BackupSectionSelectableCardShared(
             ) {
                 Surface(
                     color = iconContainerColor,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {

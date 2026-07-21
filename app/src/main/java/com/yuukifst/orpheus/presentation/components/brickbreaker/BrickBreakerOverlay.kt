@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.brickbreaker
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -21,7 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -542,7 +543,7 @@ fun BrickBreakerOverlay(
                 ) {
                     Surface(
                         color = colorScheme.tertiaryContainer,
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     ) {
                         Text(
                             text = stringResource(R.string.presentation_batch_g_brick_high, highScore),
@@ -577,7 +578,7 @@ fun BrickBreakerOverlay(
                 colors = CardDefaults.cardColors(
                     containerColor = colorScheme.secondaryContainer
                 ),
-                shape = RoundedCornerShape(16.dp)
+                shape = TerminalCornerShape
             ) {
                  Row(
                     modifier = Modifier
@@ -589,7 +590,7 @@ fun BrickBreakerOverlay(
                     GameStat(stringResource(R.string.presentation_batch_g_brick_stat_score), score.toString())
                     Surface(
                         color = colorScheme.primary,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         modifier = Modifier.height(30.dp)
                     ) {
                         Text(
@@ -610,7 +611,7 @@ fun BrickBreakerOverlay(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(16.dp)
-                    .clip(RoundedCornerShape(24.dp)) // Uniform radius
+                    .clip(TerminalCornerShape) // Uniform radius
                     .background(colorScheme.surfaceContainerLow)
                     .onSizeChanged { areaSize = it }
             ) {
@@ -772,7 +773,7 @@ fun BrickBreakerOverlay(
                             .align(Alignment.Center)
                             .padding(bottom = 100.dp),
                         color = colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         shadowElevation = 4.dp,
                     ) {
                         Text(
@@ -797,7 +798,7 @@ fun BrickBreakerOverlay(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp)
                         .height(MiniPlayerHeight)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(TerminalCornerShape)
                         .background(colorScheme.primaryContainer)
                         .clickable { onPlayRandom() },
                     contentAlignment = Alignment.Center
@@ -864,7 +865,7 @@ private fun PreLaunchMenu(
 ) {
     Card(
         modifier = modifier.padding(horizontal = 24.dp),
-        shape = RoundedCornerShape(28.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.97f)
         )
@@ -890,7 +891,7 @@ private fun PreLaunchMenu(
             )
             Surface(
                 color = MaterialTheme.colorScheme.tertiaryContainer,
-                shape = CircleShape
+                shape = TerminalCornerShape
             ) {
                 Text(
                     text = stringResource(R.string.presentation_batch_g_brick_high_score, highScore),
@@ -902,7 +903,7 @@ private fun PreLaunchMenu(
             }
             Button(
                 onClick = onPlayClick,
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary

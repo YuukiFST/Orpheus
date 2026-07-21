@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -192,7 +193,7 @@ fun ExperimentalSettingsScreen(
                     }
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(24.dp),
+                        shape = TerminalCornerShape,
                         color = Color.Transparent,
                         modifier = Modifier.padding(horizontal = 0.dp)
                     ) {
@@ -255,7 +256,7 @@ fun ExperimentalSettingsScreen(
                                             color = MaterialTheme.colorScheme.surfaceContainer,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clip(RoundedCornerShape(10.dp))
+                                                .clip(TerminalCornerShape)
                                         ) {
                                             Column(
                                                 modifier = Modifier
@@ -283,7 +284,7 @@ fun ExperimentalSettingsScreen(
                                                             )
                                                             Surface(
                                                                 color = MaterialTheme.colorScheme.secondaryContainer,
-                                                                shape = RoundedCornerShape(16.dp),
+                                                                shape = TerminalCornerShape,
                                                                 modifier = Modifier.height(24.dp)
                                                             ) {
                                                                 val strengthText = stringResource(
@@ -322,7 +323,7 @@ fun ExperimentalSettingsScreen(
                                 color = MaterialTheme.colorScheme.surfaceContainer,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
+                                    .clip(TerminalCornerShape)
                             ) {
                                 Text(
                                     text = stringResource(R.string.presentation_batch_f_exp_step1_delay_header),
@@ -419,7 +420,7 @@ fun ExperimentalSettingsScreen(
                                     color = MaterialTheme.colorScheme.surfaceContainer,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(TerminalCornerShape)
                                 ) {
                                     Text(
                                         text = stringResource(R.string.presentation_batch_f_exp_delay_all_active_hint),
@@ -434,7 +435,7 @@ fun ExperimentalSettingsScreen(
                                 color = MaterialTheme.colorScheme.surfaceContainer,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
+                                    .clip(TerminalCornerShape)
                             ) {
                                 Text(
                                     text = stringResource(R.string.presentation_batch_f_exp_step2_placeholders_header),
@@ -468,7 +469,7 @@ fun ExperimentalSettingsScreen(
                                         color = MaterialTheme.colorScheme.surfaceContainer,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(10.dp))
+                                            .clip(TerminalCornerShape)
                                     ) {
                                         Column(
                                             modifier = Modifier
@@ -525,7 +526,7 @@ fun ExperimentalSettingsScreen(
                                                 color = MaterialTheme.colorScheme.surfaceContainer,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(10.dp))
+                                                    .clip(TerminalCornerShape)
                                             ) {
                                                 Column(
                                                     modifier = Modifier
@@ -600,7 +601,7 @@ fun ExperimentalSettingsScreen(
                                                     color = MaterialTheme.colorScheme.surfaceContainer,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .clip(RoundedCornerShape(10.dp))
+                                                        .clip(TerminalCornerShape)
                                                 ) {
                                                     Column(
                                                         modifier = Modifier
@@ -663,7 +664,7 @@ fun ExperimentalSettingsScreen(
                                             color = MaterialTheme.colorScheme.surfaceContainer,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clip(RoundedCornerShape(10.dp))
+                                                .clip(TerminalCornerShape)
                                         ) {
                                             Text(
                                                 text = stringResource(R.string.presentation_batch_f_exp_drag_release_bypass),
@@ -730,7 +731,7 @@ fun ExperimentalSettingsScreen(
                     }
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(24.dp),
+                        shape = TerminalCornerShape,
                         color = Color.Transparent,
                         modifier = Modifier.padding(horizontal = 0.dp)
                     ) {
@@ -749,7 +750,7 @@ fun ExperimentalSettingsScreen(
                                
                                Surface(
                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                   shape = RoundedCornerShape(12.dp),
+                                   shape = TerminalCornerShape,
                                    modifier = Modifier.fillMaxWidth(),
                                    onClick = { settingsViewModel.setAlbumArtQuality(quality) }
                                ) {
@@ -843,10 +844,10 @@ private fun TriggerModeOptionCard(
 
     Surface(
         color = containerColor,
-        shape = RoundedCornerShape(12.dp),
+        shape = TerminalCornerShape,
         modifier = modifier
             .defaultMinSize(minHeight = 94.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(TerminalCornerShape)
             .clickable(enabled = enabled, onClick = onClick)
     ) {
         Column(

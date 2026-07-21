@@ -69,6 +69,7 @@ import java.io.File
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.insertHeaderItem
 import androidx.paging.map
 import androidx.paging.filter
 import kotlinx.coroutines.flow.conflate
@@ -249,11 +250,28 @@ class MusicRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getPaginatedFavoriteSongs(sortOption: SortOption, storageFilter: StorageFilter): Flow<PagingData<Song>> {
-        return songRepository.getPaginatedFavoriteSongs(sortOption, storageFilter)
+        val localFavorites = songRepository.getPaginatedFavoriteSongs(sortOption, storageFilter)
+        if (storageFilter == StorageFilter.OFFLINE) return localFavorites
+
+        val youtubeFavorites = youTubeCachedTrackRepository.observeFavoriteSongs(sortOption)
+        return when (storageFilter) {
+            StorageFilter.ONLINE -> youtubeFavorites.map { songs -> PagingData.from(songs) }
+            StorageFilter.ALL -> combine(localFavorites, youtubeFavorites) { pagingData, youtubeSongs ->
+                youtubeSongs.asReversed().fold(pagingData) { merged, song ->
+                    merged.insertHeaderItem(item = song)
+                }
+            }
+        }.flowOn(Dispatchers.IO)
     }
 
     override suspend fun getFavoriteSongsOnce(storageFilter: StorageFilter): List<Song> {
-        return songRepository.getFavoriteSongsOnce(storageFilter)
+        val local = songRepository.getFavoriteSongsOnce(storageFilter)
+        if (storageFilter == StorageFilter.OFFLINE) return local
+        val youtube = youTubeCachedTrackRepository.getFavoriteSongsOnce(SortOption.LikedSongDateLiked)
+        return when (storageFilter) {
+            StorageFilter.ONLINE -> youtube
+            StorageFilter.ALL -> youtube + local
+        }
     }
 
     override suspend fun getFavoriteSongsPage(
@@ -274,7 +292,14 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override fun getFavoriteSongCountFlow(storageFilter: StorageFilter): Flow<Int> {
-        return songRepository.getFavoriteSongCountFlow(storageFilter)
+        val localCount = songRepository.getFavoriteSongCountFlow(storageFilter)
+        if (storageFilter == StorageFilter.OFFLINE) return localCount
+
+        val youtubeCount = youTubeCachedTrackRepository.observeFavoriteMediaIds().map { it.size }
+        return when (storageFilter) {
+            StorageFilter.ONLINE -> youtubeCount
+            StorageFilter.ALL -> combine(localCount, youtubeCount) { local, youtube -> local + youtube }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getSongCountFlow(): Flow<Int> {

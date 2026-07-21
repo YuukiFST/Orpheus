@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.net.Uri
 import java.util.Locale
@@ -41,7 +42,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -128,7 +129,6 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import androidx.compose.material3.Slider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Outline
@@ -160,7 +160,6 @@ import androidx.compose.material3.SliderDefaults
 
 
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextGeometricTransform
@@ -521,7 +520,7 @@ private fun CreatePlaylistContent(
                         }
                     },
                     expanded = true,
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .padding(bottom = 8.dp, end = 8.dp)
                         .height(56.dp), // Standard height, feels substantial
@@ -551,7 +550,7 @@ private fun CreatePlaylistContent(
                         selectedTabIndex = selectedTabIndex,
                         modifier = Modifier
                             .weight(1f)
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(5.dp),
                         containerColor = Color.Transparent,
@@ -629,7 +628,7 @@ private fun CreatePlaylistContent(
                             )
                         },
                         modifier = Modifier.size(56.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = TerminalCornerShape,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -884,7 +883,7 @@ fun EditPlaylistContent(
                         )
                     },
                     expanded = true,
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .padding(bottom = 8.dp, end = 8.dp)
                         .height(56.dp),
@@ -987,7 +986,7 @@ private fun PlaylistFormContent(
              modifier = modifier
                  .fillMaxSize()
                  .padding(16.dp)
-                 .clip(RoundedCornerShape(24.dp))
+                 .clip(TerminalCornerShape)
                  .background(MaterialTheme.colorScheme.surface)
          ) {
              if (imageBitmap != null) {
@@ -1016,7 +1015,7 @@ private fun PlaylistFormContent(
                              .fillMaxWidth()
                              .aspectRatio(1f)
                              .padding(16.dp)
-                             .clip(RoundedCornerShape(32.dp))
+                             .clip(TerminalCornerShape)
                      ) {
                          ImageCropView(
                              imageBitmap = imageBitmap,
@@ -1037,7 +1036,7 @@ private fun PlaylistFormContent(
                             .align(Alignment.End)
                             .padding(24.dp)
                             .height(56.dp),
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     ) {
                         Icon(Icons.Rounded.Check, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -1078,7 +1077,7 @@ private fun PlaylistFormContent(
                             Box(
                                 modifier = Modifier
                                     .size(180.dp)
-                                    .clip(RoundedCornerShape(32.dp))
+                                    .clip(TerminalCornerShape)
                                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -1104,7 +1103,7 @@ private fun PlaylistFormContent(
                                  Box(
                                     modifier = Modifier
                                         .size(180.dp)
-                                        .clip(RoundedCornerShape(32.dp))
+                                        .clip(TerminalCornerShape)
                                         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                  ) {
                                      ImageCropView(
@@ -1149,7 +1148,7 @@ private fun PlaylistFormContent(
                              Box(
                                 modifier = Modifier
                                     .size(180.dp)
-                                    .clip(RoundedCornerShape(32.dp))
+                                    .clip(TerminalCornerShape)
                                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .clickable { imagePickerLauncher.launch("image/*") },
                                 contentAlignment = Alignment.Center
@@ -1177,17 +1176,8 @@ private fun PlaylistFormContent(
                              label = "shape_transition"
                          ) { currentShapeType ->
                              val currentShape: Shape = when(currentShapeType) {
-                                 PlaylistShapeType.Circle -> CircleShape
-                                 PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(
-                                     cornerRadiusTL = smoothRectCornerRadius.dp,
-                                     smoothnessAsPercentTR = smoothRectSmoothness.toInt(),
-                                     cornerRadiusTR = smoothRectCornerRadius.dp,
-                                     smoothnessAsPercentTL = smoothRectSmoothness.toInt(),
-                                     cornerRadiusBR = smoothRectCornerRadius.dp,
-                                     smoothnessAsPercentBR = smoothRectSmoothness.toInt(),
-                                     cornerRadiusBL = smoothRectCornerRadius.dp,
-                                     smoothnessAsPercentBL = smoothRectSmoothness.toInt(),
-                                 )
+                                 PlaylistShapeType.Circle -> TerminalCornerShape
+                                 PlaylistShapeType.SmoothRect -> TerminalCornerShape
                                  PlaylistShapeType.RotatedPill -> {
                                      androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
@@ -1197,11 +1187,7 @@ private fun PlaylistFormContent(
                                          addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                                      }
                                  }
-                                 PlaylistShapeType.Star -> RoundedStarShape(
-                                     sides = starSides,
-                                     curve = starCurve,
-                                     rotation = starRotation
-                                 )
+                                 PlaylistShapeType.Star -> TerminalCornerShape
                              }
                              
                              val shapeMod = if(currentShapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
@@ -1252,7 +1238,7 @@ private fun PlaylistFormContent(
                 onValueChange = onNameChange,
                 label = { Text(stringResource(R.string.presentation_batch_f_playlist_name_label)) },
                 placeholder = { Text(stringResource(R.string.presentation_batch_f_playlist_name_placeholder)) },
-                shape = RoundedCornerShape(16.dp),
+                shape = TerminalCornerShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
@@ -1313,7 +1299,7 @@ private fun PlaylistFormContent(
                                 selected = selectedSmartRule == rule,
                                 onClick = { onSmartRuleChange(rule) },
                                 label = { Text(smartPlaylistRuleTitle(rule)) },
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             )
                         }
                     }
@@ -1380,19 +1366,19 @@ private fun PlaylistFormContent(
                              Box(
                                  modifier = Modifier
                                      .size(52.dp)
-                                    .clip(RoundedCornerShape(cornerRadius))
+                                    .clip(TerminalCornerShape)
                                      .background(if (isSelected) Color(color) else Color.Transparent)
                                     .border(
                                         width = if (isSelected) 3.dp else 0.dp,
                                         color = if (isSelected) Color(color) else Color.Transparent,
-                                        shape = RoundedCornerShape(cornerRadius)
+                                        shape = TerminalCornerShape
                                     ),
                                  contentAlignment = Alignment.Center
                              ) {
                                   Box(
                                      modifier = Modifier
                                          .size(if (isSelected) 42.dp else 48.dp)
-                                        .clip(RoundedCornerShape(if (isSelected) 8.dp else cornerRadius))
+                                        .clip(TerminalCornerShape)
                                         .background(Color(color))
                                          .clickable { onColorChange(color) }
                                   )
@@ -1428,7 +1414,7 @@ private fun PlaylistFormContent(
                              Box(
                                  modifier = Modifier
                                      .size(52.dp)
-                                     .clip(RoundedCornerShape(cornerRadius))
+                                     .clip(TerminalCornerShape)
                                      .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
                                      .clickable { onIconChange(iconName) },
                                  contentAlignment = Alignment.Center
@@ -1461,8 +1447,8 @@ private fun PlaylistFormContent(
                              PlaylistShapeType.entries.forEach { shapeType ->
                                  val isSelected = selectedShapeType == shapeType
                                  val previewShape = when(shapeType) {
-                                     PlaylistShapeType.Circle -> CircleShape
-                                     PlaylistShapeType.SmoothRect -> AbsoluteSmoothCornerShape(12.dp, 60, 12.dp, 60, 12.dp, 60, 12.dp, 60)
+                                     PlaylistShapeType.Circle -> TerminalCornerShape
+                                     PlaylistShapeType.SmoothRect -> TerminalCornerShape
                                      PlaylistShapeType.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
                                          val w = size.width
                                          val h = size.height
@@ -1470,7 +1456,7 @@ private fun PlaylistFormContent(
                                          val offset = (w - pillW) / 2
                                          addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                                      }
-                                     PlaylistShapeType.Star -> RoundedStarShape(5, 0.15, 0f)
+                                     PlaylistShapeType.Star -> TerminalCornerShape
                                  }
 
                                  val rotationM = if(shapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
@@ -1481,7 +1467,7 @@ private fun PlaylistFormContent(
                                      Column(
                                          horizontalAlignment = Alignment.CenterHorizontally,
                                          modifier = Modifier
-                                             .clip(RoundedCornerShape(cornerRadius))
+                                             .clip(TerminalCornerShape)
                                              .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer)
                                              .clickable { onShapeTypeChange(shapeType) }
                                              .padding(12.dp)
@@ -1558,13 +1544,13 @@ fun ExpressiveButtonGroup(
 ) {
     Row(
         modifier = modifier
-            .clip(CircleShape)
-            .background(Color.Transparent, CircleShape), // Optional container background
+            .clip(TerminalCornerShape)
+            .background(Color.Transparent, TerminalCornerShape), // Optional container background
         horizontalArrangement = Arrangement.spacedBy(4.dp) // Gap between buttons
     ) {
         items.forEachIndexed { index, title ->
             val isSelected = selectedIndex == index
-            val shape = if (isSelected) CircleShape else RoundedCornerShape(10.dp) // Pill vs RoundedRect
+            val shape = if (isSelected) TerminalCornerShape else TerminalCornerShape // Pill vs RoundedRect
             val containerColor by animateColorAsState(
                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
                 label = "ButtonColor"
@@ -1619,7 +1605,7 @@ fun ShapeParameterCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -1675,7 +1661,7 @@ fun ThickSlider(
              Box(
                  modifier = Modifier
                     .size(width = 6.dp, height = 18.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .background(MaterialTheme.colorScheme.primary, TerminalCornerShape)
              )
         },
         track = { sliderState ->

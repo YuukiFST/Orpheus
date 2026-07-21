@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.viewmodel.SortOption
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +57,7 @@ fun GenreSortBottomSheet(
 
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier
@@ -90,7 +90,7 @@ fun GenreSortBottomSheet(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = AbsoluteSmoothCornerShape(16.dp, 60)
+                    shape = TerminalCornerShape
                 ) {
                     Icon(Icons.Rounded.Shuffle, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -155,7 +155,7 @@ fun SortOptionCard(
     Surface(
         onClick = onClick,
         color = containerColor,
-        shape = AbsoluteSmoothCornerShape(16.dp, 60),
+        shape = TerminalCornerShape,
         modifier = Modifier.fillMaxWidth().height(64.dp)
     ) {
         Row(

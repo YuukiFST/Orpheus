@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,7 @@ fun HomeOptionsBottomSheet(
             },
             modifier = Modifier
                 .padding(20.dp)
-                .clip(RoundedCornerShape(18.dp))
+                .clip(TerminalCornerShape)
                 .clickable(onClick = onNavigateToMashup)
         )
     }

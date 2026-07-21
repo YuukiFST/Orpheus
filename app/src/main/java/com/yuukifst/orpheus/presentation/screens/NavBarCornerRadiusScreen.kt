@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -67,7 +67,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.preferences.MAX_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.data.preferences.MIN_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.presentation.viewmodel.SettingsViewModel
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.presentation.components.resolveNavBarSurfaceHeight
 import androidx.compose.ui.res.stringResource
@@ -218,7 +218,7 @@ fun NavBarCornerRadiusContent(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                     ),
-                    shape = RoundedCornerShape(24.dp)
+                    shape = TerminalCornerShape
                 ) {
                     Column(
                         modifier = Modifier.padding(14.dp),
@@ -329,27 +329,9 @@ fun NavBarCornerRadiusContent(
                         .padding(horizontal = if (isFullWidth) 0.dp else bottomPadding), // Full Width: No horizontal padding
                     color = MaterialTheme.colorScheme.onBackground,
                     shape = if (isFullWidth) {
-                        AbsoluteSmoothCornerShape(
-                            cornerRadiusTL = sliderValue.dp, // Customize TOP
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusTR = sliderValue.dp, // Customize TOP
-                            smoothnessAsPercentTR = 60,
-                            cornerRadiusBL = 0.dp, // Fixed BOTTOM
-                            smoothnessAsPercentBL = 60,
-                            cornerRadiusBR = 0.dp, // Fixed BOTTOM
-                            smoothnessAsPercentBR = 60
-                        )
+                        TerminalCornerShape
                     } else {
-                        AbsoluteSmoothCornerShape(
-                            cornerRadiusTL = 10.dp,
-                            smoothnessAsPercentBL = 60,
-                            cornerRadiusTR = 10.dp,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusBR = sliderValue.dp,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusBL = sliderValue.dp,
-                            smoothnessAsPercentTR = 60
-                        )
+                        TerminalCornerShape
                     }
                 ) {
 

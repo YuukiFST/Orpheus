@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -37,8 +38,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoGraph
 import androidx.compose.material.icons.outlined.Bolt
@@ -121,13 +120,11 @@ import kotlin.math.roundToInt
 import kotlin.math.PI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.ui.unit.sp
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.presentation.stats.displayNameRes
 import androidx.compose.material.icons.outlined.Album
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.PlayCircleOutline
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
@@ -436,7 +433,7 @@ private fun HeroCard(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
+            .clip(TerminalCornerShape)
             .background(containerColor)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -467,7 +464,7 @@ private fun StatsEmptyState(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceContainer),
         contentAlignment = Alignment.Center
     ) {
@@ -479,7 +476,7 @@ private fun StatsEmptyState(
             Box(
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(RoundedStarShape(sides = 8, curve = 0.1, rotation = 0f))
+                    .clip(TerminalCornerShape)
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
@@ -520,7 +517,7 @@ private fun SummaryPill(
 ) {
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.85f))
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -547,7 +544,7 @@ private fun SummaryHeroTile(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
+            .clip(TerminalCornerShape)
             .background(
                 Brush.linearGradient(
                     listOf(
@@ -592,7 +589,7 @@ private fun SummaryProgressRow(
     val progressValue = progress.coerceIn(0f, 1f)
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.9f))
             .padding(horizontal = 20.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -619,7 +616,7 @@ private fun SummaryProgressRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)
-                .clip(RoundedCornerShape(50)),
+                .clip(TerminalCornerShape),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -695,7 +692,7 @@ private fun ListeningHabitsCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp), // Consistent with Hero
+        shape = TerminalCornerShape, // Consistent with Hero
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Column(
@@ -777,7 +774,7 @@ private fun HabitMetric(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -832,7 +829,7 @@ private fun HighlightRow(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
@@ -1095,7 +1092,7 @@ private fun ListeningTimelineSection(
                 StatsTimeRange.ALL -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.40f)
             }
             Card(
-                shape = RoundedCornerShape(28.dp),
+                shape = TerminalCornerShape,
                 colors = CardDefaults.cardColors(containerColor = cardColor)
             ) {
                 Column(
@@ -1286,7 +1283,7 @@ private fun CategoryMetricsSection(
             )
         } else {
             Card(
-                shape = RoundedCornerShape(28.dp),
+                shape = TerminalCornerShape,
                 colors = CardDefaults.cardColors(containerColor = palette.containerColor)
             ) {
                 Column(
@@ -1328,7 +1325,7 @@ private fun CategoryHorizontalBarChart(
                 palette.contentColor.copy(alpha = 0.06f)
             }
             Surface(
-                shape = RoundedCornerShape(22.dp),
+                shape = TerminalCornerShape,
                 color = rowColor
             ) {
                 Column(
@@ -1380,7 +1377,7 @@ private fun CategoryHorizontalBarChart(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
-                            .clip(CircleShape),
+                            .clip(TerminalCornerShape),
                         color = if (isTop) palette.accentColor else palette.accentColor.copy(alpha = 0.74f),
                         trackColor = palette.contentColor.copy(alpha = 0.18f)
                     )
@@ -1409,7 +1406,7 @@ private fun CategoryRankBadge(
         accentColor
     }
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = TerminalCornerShape,
         color = containerColor,
         contentColor = contentColor
     ) {
@@ -1440,7 +1437,7 @@ private fun TimelineMetricBadge(
     }
     Surface(
         modifier = modifier,
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = containerColor,
         contentColor = contentColor
     ) {
@@ -1556,7 +1553,7 @@ private fun VerticalTimelineBarChart(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(trackColor),
                                 contentAlignment = Alignment.BottomCenter
                             ) {
@@ -1564,7 +1561,7 @@ private fun VerticalTimelineBarChart(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillMaxHeight(if (progress == 0f) 0f else progress)
-                                        .clip(CircleShape)
+                                        .clip(TerminalCornerShape)
                                         .background(if (isPeak) highlightColor else regularColor)
                                 )
                             }
@@ -1638,7 +1635,7 @@ private fun HorizontalTimelineBarChart(
                         modifier = Modifier
                             .weight(1f)
                             .height(26.dp)
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(trackColor),
                         contentAlignment = Alignment.CenterStart
                     ) {
@@ -1646,7 +1643,7 @@ private fun HorizontalTimelineBarChart(
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .fillMaxWidth(if (progress == 0f) 0f else progress)
-                                .clip(CircleShape)
+                                .clip(TerminalCornerShape)
                                 .background(if (isPeak) highlightColor else regularColor)
                         )
                     }
@@ -1813,7 +1810,7 @@ private fun TopArtistsCard(
     val supportingColor = contentColor.copy(alpha = 0.76f)
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp), // Consistent with Hero
+        shape = TerminalCornerShape, // Consistent with Hero
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
@@ -1907,7 +1904,7 @@ private fun ArtistAvatar(
     Box(
         modifier = Modifier
             .size(48.dp)
-            .clip(CircleShape)
+            .clip(TerminalCornerShape)
             .background(containerColor),
         contentAlignment = Alignment.Center
     ) {
@@ -1930,7 +1927,7 @@ private fun TopAlbumsCard(
     val supportingColor = contentColor.copy(alpha = 0.76f)
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp), // Consistent with Hero
+        shape = TerminalCornerShape, // Consistent with Hero
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
@@ -1963,8 +1960,8 @@ private fun TopAlbumsCard(
                                     contentDescription = albumSummary.album,
                                     modifier = Modifier
                                         .size(56.dp)
-                                        .clip(RoundedCornerShape(16.dp)),
-                                    shape = RoundedCornerShape(16.dp)
+                                        .clip(TerminalCornerShape),
+                                    shape = TerminalCornerShape
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
@@ -2020,7 +2017,7 @@ private fun SongStatsCard(
     val supportingColor = MaterialTheme.colorScheme.onSurfaceVariant
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
@@ -2081,7 +2078,7 @@ private fun SongStatsCard(
                         }
 
                         Surface(
-                            shape = RoundedCornerShape(20.dp),
+                            shape = TerminalCornerShape,
                             color = rowContainerColor
                         ) {
                             Column(
@@ -2103,8 +2100,8 @@ private fun SongStatsCard(
                                         contentDescription = songSummary.title,
                                         modifier = Modifier
                                             .size(52.dp)
-                                            .clip(RoundedCornerShape(14.dp)),
-                                        shape = RoundedCornerShape(14.dp)
+                                            .clip(TerminalCornerShape),
+                                        shape = TerminalCornerShape
                                     )
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
@@ -2140,7 +2137,7 @@ private fun SongStatsCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(7.dp)
-                                        .clip(CircleShape),
+                                        .clip(TerminalCornerShape),
                                     color = accentColor,
                                     trackColor = supportingColor.copy(alpha = 0.20f)
                                 )
@@ -2152,14 +2149,14 @@ private fun SongStatsCard(
                 if (songs.size > 8) {
                     TextButton(
                         onClick = { showAll = !showAll },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = TerminalCornerShape,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                shape = RoundedCornerShape(16.dp),
+                                shape = TerminalCornerShape,
                                 color = MaterialTheme.colorScheme.surfaceContainerLow
                             )
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(TerminalCornerShape)
                     ) {
                         Text(
                             text = if (showAll) {
@@ -2186,7 +2183,7 @@ private fun TrackConcentrationCard(
     val songs = summary?.songs.orEmpty()
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
         Column(
@@ -2290,7 +2287,7 @@ private fun TrackDistributionOverview(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Surface(
-            shape = RoundedCornerShape(26.dp),
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surfaceContainerLowest
         ) {
             BoxWithConstraints(
@@ -2340,7 +2337,7 @@ private fun TrackDistributionOverview(
                 slices.forEach { slice ->
                     val share = (slice.durationMs.toFloat() / totalDurationMs.coerceAtLeast(1L).toFloat()).coerceIn(0f, 1f)
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = TerminalCornerShape,
                         color = MaterialTheme.colorScheme.surfaceContainerLowest
                     ) {
                         Row(
@@ -2353,7 +2350,7 @@ private fun TrackDistributionOverview(
                             Box(
                                 modifier = Modifier
                                     .size(10.dp)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(slice.color)
                             )
                             Text(
@@ -2411,7 +2408,7 @@ private fun TrackDistributionStats(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Surface(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(14.dp),
+                shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
             ) {
                 Column(
@@ -2432,7 +2429,7 @@ private fun TrackDistributionStats(
             }
             Surface(
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(14.dp),
+                shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.52f)
             ) {
                 Column(

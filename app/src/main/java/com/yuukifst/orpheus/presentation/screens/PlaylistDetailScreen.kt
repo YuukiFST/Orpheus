@@ -31,7 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -122,7 +122,7 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistSongsOrderMode
 import com.yuukifst.orpheus.utils.formatSongCount
 import com.yuukifst.orpheus.utils.formatTotalDuration
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import com.yuukifst.orpheus.presentation.components.LibrarySortBottomSheet
@@ -383,16 +383,7 @@ fun PlaylistDetailScreen(
                             .weight(1f)
                             .height(76.dp),
                         enabled = songsInPlaylist.isNotEmpty(),
-                        shape = AbsoluteSmoothCornerShape(
-                            cornerRadiusTL = 60.dp,
-                            smoothnessAsPercentTR = 60,
-                            cornerRadiusTR = 14.dp,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusBL = 60.dp,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusBR = 14.dp,
-                            smoothnessAsPercentBL = 60
-                        )
+                        shape = TerminalCornerShape
                     ) {
                         Icon(
                             Icons.Rounded.PlayArrow,
@@ -417,16 +408,7 @@ fun PlaylistDetailScreen(
                             .weight(1f)
                             .height(76.dp),
                         enabled = localReorderableSongs.isNotEmpty(),
-                        shape = AbsoluteSmoothCornerShape(
-                            cornerRadiusTL = 14.dp,
-                            smoothnessAsPercentTR = 60,
-                            cornerRadiusTR = 60.dp,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusBL = 14.dp,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusBR = 60.dp,
-                            smoothnessAsPercentBL = 60
-                        )
+                        shape = TerminalCornerShape
                     ) {
                         Icon(
                             Icons.Rounded.Shuffle,
@@ -474,7 +456,7 @@ fun PlaylistDetailScreen(
 
                         Button(
                             onClick = { showAddSongsSheet = true },
-                            shape = CircleShape,
+                            shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -499,7 +481,7 @@ fun PlaylistDetailScreen(
 
                         Button(
                             onClick = { isRemoveModeEnabled = !isRemoveModeEnabled },
-                            shape = RoundedCornerShape(removeCornerRadius),
+                            shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = removeButtonColor,
@@ -509,7 +491,7 @@ fun PlaylistDetailScreen(
                                 .weight(1f)
                                 .height(actionButtonsHeight)
                                 .animateContentSize()
-                                .clip(RoundedCornerShape(removeCornerRadius))
+                                .clip(TerminalCornerShape)
                         ) {
                             Icon(
                                 modifier = Modifier.size(18.dp),
@@ -528,7 +510,7 @@ fun PlaylistDetailScreen(
 
                         Button(
                             onClick = { isReorderModeEnabled = !isReorderModeEnabled },
-                            shape = RoundedCornerShape(reorderCornerRadius),
+                            shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = reorderButtonColor,
@@ -538,7 +520,7 @@ fun PlaylistDetailScreen(
                                 .weight(1f)
                                 .height(actionButtonsHeight)
                                 .animateContentSize()
-                                .clip(RoundedCornerShape(reorderCornerRadius))
+                                .clip(TerminalCornerShape)
                         ) {
                             Icon(
                                 modifier = Modifier.size(22.dp),
@@ -584,12 +566,7 @@ fun PlaylistDetailScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(
-                                    AbsoluteSmoothCornerShape(
-                                        cornerRadiusTR = 32.dp,
-                                        smoothnessAsPercentTR = 60,
-                                        cornerRadiusTL = 32.dp,
-                                        smoothnessAsPercentTL = 60,
-                                    )
+                                    TerminalCornerShape
                                 )
                                 .background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1041,7 +1018,7 @@ private fun PlaylistActionItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(18.dp))
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -1050,7 +1027,7 @@ private fun PlaylistActionItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center
         ) {
@@ -1085,7 +1062,7 @@ fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (
                 value = newName,
                 onValueChange = { newName = it },
                 label = { Text(newNameLabel) },
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )

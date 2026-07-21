@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -92,7 +92,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.ShapeCache
 import kotlinx.coroutines.flow.map
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -180,7 +180,7 @@ fun SongPickerContent(
                         selectedTabIndex = selectedTabIndex,
                         modifier = Modifier
                             .weight(1f)
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(5.dp),
                         containerColor = Color.Transparent,
@@ -227,7 +227,7 @@ fun SongPickerContent(
                     FilledIconButton(
                         onClick = { onConfirm(selectedSongIds.filterValues { it }.keys) },
                         modifier = Modifier.size(56.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = TerminalCornerShape,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -250,7 +250,7 @@ fun SongPickerContent(
                     LargeExtendedFloatingActionButton(
                         onClick = { onConfirm(selectedSongIds.filterValues { it }.keys) },
                         modifier = Modifier.align(Alignment.CenterEnd),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = TerminalCornerShape,
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     ) {
@@ -323,16 +323,7 @@ fun SongPickerSelectionPane(
 
     val animatedAlbumCornerRadius = 60.dp
     val albumShape = remember(animatedAlbumCornerRadius) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = animatedAlbumCornerRadius,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = animatedAlbumCornerRadius,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBL = animatedAlbumCornerRadius,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBR = animatedAlbumCornerRadius,
-            smoothnessAsPercentTL = 60
-        )
+        TerminalCornerShape
     }
 
     Column(
@@ -455,7 +446,7 @@ private fun SongPickerSearchField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         singleLine = true,
         leadingIcon = {
             Icon(Icons.Rounded.Search, contentDescription = null)
@@ -610,14 +601,14 @@ private fun SongPickerRow(
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(TerminalCornerShape)
             .clickable {
                 val currentSelection = selectedSongIds[song.id] ?: false
                 selectedSongIds[song.id] = !currentSelection
             }
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                shape = CircleShape
+                shape = TerminalCornerShape
             )
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -633,7 +624,7 @@ private fun SongPickerRow(
                 .size(36.dp)
                 .background(
                     MaterialTheme.colorScheme.surfaceVariant,
-                    CircleShape
+                    TerminalCornerShape
                 )
         ) {
             SmartImage(
@@ -662,10 +653,10 @@ private fun SongPickerPlaceholderRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(CircleShape)
+            .clip(TerminalCornerShape)
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                shape = CircleShape
+                shape = TerminalCornerShape
             )
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -675,7 +666,7 @@ private fun SongPickerPlaceholderRow() {
                 .size(24.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape
+                    shape = TerminalCornerShape
                 )
         )
         Spacer(Modifier.width(18.dp))
@@ -684,7 +675,7 @@ private fun SongPickerPlaceholderRow() {
                 .size(36.dp)
                 .background(
                     MaterialTheme.colorScheme.surfaceVariant,
-                    CircleShape
+                    TerminalCornerShape
                 )
         )
         Spacer(Modifier.width(16.dp))
@@ -695,7 +686,7 @@ private fun SongPickerPlaceholderRow() {
                     .height(14.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     )
             )
             Box(
@@ -704,7 +695,7 @@ private fun SongPickerPlaceholderRow() {
                     .height(12.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     )
             )
         }
@@ -741,7 +732,7 @@ fun SongPickerEmptyState(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Surface(
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f),
                 tonalElevation = 2.dp
             ) {
@@ -812,7 +803,7 @@ fun SongPickerList(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f),
                     tonalElevation = 2.dp
                 ) {

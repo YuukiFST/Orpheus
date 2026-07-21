@@ -20,6 +20,9 @@ val JetBrainsMonoNerd = FontFamily(
 val MontserratFamily = JetBrainsMonoNerd
 val RoundedSans = JetBrainsMonoNerd
 
+private const val TabularNums = "tnum"
+private const val LabelTrackingSp = 0.8f
+
 val ExpTitleTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = JetBrainsMonoNerd,
@@ -123,14 +126,16 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.sp,
+        fontFeatureSettings = TabularNums
     ),
     bodySmall = TextStyle(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.sp,
+        fontFeatureSettings = TabularNums
     ),
     labelLarge = TextStyle(
         fontFamily = JetBrainsMonoNerd,
@@ -144,13 +149,13 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.sp
+        letterSpacing = LabelTrackingSp.sp
     ),
     labelSmall = TextStyle(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.sp
+        letterSpacing = LabelTrackingSp.sp
     )
 )

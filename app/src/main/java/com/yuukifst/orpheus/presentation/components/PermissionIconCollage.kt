@@ -1,9 +1,10 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -66,11 +66,11 @@ fun PermissionIconCollage(
             value = withContext(Dispatchers.Default) {
                 val min = minOf(200.dp, height)
                 listOf(
-                    IconConfig(size = min * 0.8f, color = iconSndColor, align = Alignment.Center, rot = -15f, shape = RoundedCornerShape(20.dp), offsetX = 0.dp, offsetY = 0.dp),
-                    IconConfig(size = min * 0.4f, color = iconNrColor, align = Alignment.TopStart, rot = 15f, shape = CircleShape, offsetX = (300.dp * 0.05f), offsetY = (boxMaxHeight * 0.05f)),
-                    IconConfig(size = min * 0.4f, color = iconHighlightColor, align = Alignment.BottomEnd, rot = 5f, shape = CircleShape, offsetX = -(300.dp * 0.05f), offsetY = -(boxMaxHeight * 0.05f)),
-                    IconConfig(size = min * 0.5f, color = iconNrSdColor, align = Alignment.TopEnd, rot = -20f, shape = RoundedCornerShape(20.dp), offsetX = -(300.dp * 0.1f), offsetY = (boxMaxHeight * 0.1f)),
-                    IconConfig(size = min * 0.35f, color = iconTrdColor, align = Alignment.BottomStart, rot = 10f, shape = RoundedStarShape(sides = 8, curve = 0.1), offsetX = (300.dp * 0.1f), offsetY = -(boxMaxHeight * 0.1f))
+                    IconConfig(size = min * 0.8f, color = iconSndColor, align = Alignment.Center, rot = -15f, shape = TerminalCornerShape, offsetX = 0.dp, offsetY = 0.dp),
+                    IconConfig(size = min * 0.4f, color = iconNrColor, align = Alignment.TopStart, rot = 15f, shape = TerminalCornerShape, offsetX = (300.dp * 0.05f), offsetY = (boxMaxHeight * 0.05f)),
+                    IconConfig(size = min * 0.4f, color = iconHighlightColor, align = Alignment.BottomEnd, rot = 5f, shape = TerminalCornerShape, offsetX = -(300.dp * 0.05f), offsetY = -(boxMaxHeight * 0.05f)),
+                    IconConfig(size = min * 0.5f, color = iconNrSdColor, align = Alignment.TopEnd, rot = -20f, shape = TerminalCornerShape, offsetX = -(300.dp * 0.1f), offsetY = (boxMaxHeight * 0.1f)),
+                    IconConfig(size = min * 0.35f, color = iconTrdColor, align = Alignment.BottomStart, rot = 10f, shape = TerminalCornerShape, offsetX = (300.dp * 0.1f), offsetY = -(boxMaxHeight * 0.1f))
                 )
             }
         }

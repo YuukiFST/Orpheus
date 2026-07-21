@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.Animatable
@@ -36,7 +37,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PowerSettingsNew
@@ -413,7 +413,7 @@ fun EqualizerScreen(
                 FilledIconToggleButton(
                     checked = isEnabled,
                     onCheckedChange = { equalizerViewModel.toggleEqualizer() },
-                    shape = RoundedCornerShape(powerButtonCorner),
+                    shape = TerminalCornerShape,
                     colors = IconButtonDefaults.filledIconToggleButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -470,7 +470,7 @@ private fun PresetTabsRow(
                     width = 20.dp, // Fixed width for expressive dot? Or default width? Library used default.
                     // Library code: Modifier.tabIndicatorOffset(selectedTabIndex = pagerState.currentPage), height = 3.dp
                     // Let's stick to default width (match content) but custom height/color.
-                    shape = RoundedCornerShape(3.dp),
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.primary
                  )
             }
@@ -551,7 +551,7 @@ private fun BandSlidersSection(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(24.dp)
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp),
@@ -569,7 +569,7 @@ private fun BandSlidersSection(
                  
                  Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     onClick = onPresetsListClick,
                     enabled = isCustomOrSaved 
                 ) {
@@ -598,7 +598,7 @@ private fun BandSlidersSection(
                 if (currentPreset.name == "custom" && editingPresetName == null) {
                      Surface(
                         color = MaterialTheme.colorScheme.tertiaryContainer,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         onClick = onSaveClick
                     ) {
                           Row(
@@ -625,7 +625,7 @@ private fun BandSlidersSection(
                     // Update Option
                     Surface(
                         color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         onClick = onUpdateClick
                     ) {
                         Row(
@@ -650,7 +650,7 @@ private fun BandSlidersSection(
                     // Save New Option
                     Surface(
                         color = MaterialTheme.colorScheme.tertiaryContainer,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         onClick = onSaveClick
                     ) {
                         Row(
@@ -735,7 +735,7 @@ private fun BandSlidersSection(
                             Box(
                                 modifier = Modifier
                                     .padding(4.dp)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(color)
                                     .size(if (pagerState.currentPage == iteration) 10.dp else 8.dp)
                             )
@@ -798,7 +798,7 @@ private fun GraphBandSliders(
                         thumbColor = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         trackThickness = 4.dp, 
                         thumbSize = 16.dp,
-                        thumbShape = CircleShape
+                        thumbShape = TerminalCornerShape
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -907,7 +907,7 @@ private fun VerticalBandSlider(
         Box(
             modifier = Modifier
                 .size(38.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(
                     if (isEnabled) MaterialTheme.colorScheme.primaryContainer
                     else MaterialTheme.colorScheme.surfaceContainerHighest
@@ -996,7 +996,7 @@ private fun CustomVerticalSlider(
     }
     
     // Create the Path
-    val starShape = remember { com.yuukifst.orpheus.utils.shapes.RoundedStarShape(sides = 8, curve = 0.1) }
+    val starShape = remember { TerminalCornerShape }
     val finalShape = thumbShape ?: starShape
     
     val thumbPath = remember(thumbSizePx, finalShape) {
@@ -1034,7 +1034,7 @@ private fun CustomVerticalSlider(
         androidx.compose.foundation.Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(50))
+                .clip(TerminalCornerShape)
                 .pointerInput(enabled, valueRange.start, valueRange.endInclusive, safeTrackHeight, heightPx) {
                     if (!enabled) return@pointerInput
                     fun dispatchValue(touchY: Float, forceHaptic: Boolean = false) {
@@ -1260,7 +1260,7 @@ private fun EffectCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(24.dp)
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -1327,7 +1327,7 @@ private fun UnsupportedEffectCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
         ),
-        shape = RoundedCornerShape(24.dp)
+        shape = TerminalCornerShape
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             IconButton(
@@ -1381,7 +1381,7 @@ private fun UnsupportedEffectRow(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f) // Subtle warning
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = TerminalCornerShape
     ) {
         val resolvedMessage = if (message.isNotEmpty()) {
             message
@@ -1504,7 +1504,7 @@ private fun VolumeControlCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(24.dp)
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -1586,7 +1586,7 @@ private fun HybridBandSliders(
                 .fillMaxWidth()
                 .height(220.dp) // Enlarged from 140.dp
                 .padding(horizontal = 4.dp) // Reduced outer padding
-                .clip(RoundedCornerShape(24.dp))
+                .clip(TerminalCornerShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(16.dp)
         ) {
@@ -1655,7 +1655,7 @@ private fun HybridBandSliders(
                             modifier = Modifier.tabIndicatorOffset(selectedTabIndex = selectedTabIndex),
                             height = 3.dp,
                             width = 20.dp,
-                            shape = RoundedCornerShape(3.dp),
+                            shape = TerminalCornerShape,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }

@@ -121,6 +121,7 @@ import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.screens.SetupScreen
 import com.yuukifst.orpheus.presentation.viewmodel.MainViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.OrpheusTheme
 import com.yuukifst.orpheus.utils.CrashHandler
 import com.yuukifst.orpheus.utils.LogUtils
@@ -131,7 +132,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.presentation.utils.AppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.NoOpHapticFeedback
@@ -282,11 +283,11 @@ class MainActivity : ComponentActivity() {
                             transitionSpec = {
                                 if (targetState) {
                                     // Transition to Setup
-                                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                                    fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
                                 } else {
                                     // Transition from Setup to Main App
-                                    scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
-                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
+                                    scaleIn(initialScale = 0.95f, animationSpec = tween(OrpheusMotion.DurationSlow)) + fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith
+                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(OrpheusMotion.DurationQuick)) + fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
                                 }
                             },
                             label = "SetupTransition"
@@ -575,8 +576,6 @@ class MainActivity : ComponentActivity() {
                 Screen.DailyMixScreen.route,
                 Screen.RecentlyPlayed.route,
                 Screen.GenreDetail.route,
-                Screen.AlbumDetail.route,
-                Screen.ArtistDetail.route,
                 Screen.DJSpace.route,
                 Screen.NavBarCrRad.route,
                 Screen.About.route,
@@ -644,7 +643,7 @@ class MainActivity : ComponentActivity() {
         }
         val animatedBottomBarPadding by animateDpAsState(
             targetValue = if (navBarStyle == NavBarStyle.FULL_WIDTH) 0.dp else systemNavBarInset,
-            animationSpec = tween(400),
+            animationSpec = tween(OrpheusMotion.DurationFast),
             label = "BottomBarPadding"
         )
         val bottomBarPadding = animatedBottomBarPadding
@@ -727,13 +726,13 @@ class MainActivity : ComponentActivity() {
 
                         val animatedNavBarCornerRadius = animateDpAsState(
                             targetValue = navBarCornerRadius.dp,
-                            animationSpec = tween(400),
+                            animationSpec = tween(OrpheusMotion.DurationFast),
                             label = "NavBarCornerRadius"
                         )
 
                         val animatedDefaultTopCornerRadius = animateDpAsState(
-                            targetValue = if (showPlayerContentArea && !isMiniPlayerDismissing) 10.dp else navBarCornerRadius.dp,
-                            animationSpec = tween(400),
+                            targetValue = if (showPlayerContentArea && !isMiniPlayerDismissing) 0.dp else navBarCornerRadius.dp,
+                            animationSpec = tween(OrpheusMotion.DurationFast),
                             label = "NavBarDefaultTopCornerRadius"
                         )
 
@@ -793,11 +792,11 @@ class MainActivity : ComponentActivity() {
                                         val fraction = playerViewModel.playerContentExpansionFraction.value
                                         val topDp = when {
                                             navBarStyle == NavBarStyle.DEFAULT -> animatedDefaultTopCornerRadius.value
-                                            navBarStyle == NavBarStyle.FULL_WIDTH -> lerp(navBarCornerRadius.dp, 26.dp, fraction)
+                                            navBarStyle == NavBarStyle.FULL_WIDTH -> lerp(navBarCornerRadius.dp, 0.dp, fraction)
                                             showPlayerContentArea -> if (fraction < 0.2f) {
-                                                lerp(navBarCornerRadius.dp, 26.dp, (fraction / 0.2f).coerceIn(0f, 1f))
+                                                lerp(navBarCornerRadius.dp, 0.dp, (fraction / 0.2f).coerceIn(0f, 1f))
                                             } else {
-                                                26.dp
+                                                0.dp
                                             }
                                             else -> navBarCornerRadius.dp
                                         }
@@ -1074,7 +1073,7 @@ private class NavBarShapeCache {
 }
 
 /**
- * Fixed-radius corner shape. Swaps AbsoluteSmoothCornerShape for a plain
+ * Fixed-radius corner shape. Swaps Shape for a plain
  * RoundedCornerShape when smooth corners are disabled in settings. The radius
  * values are identical in both branches, so the animated radius behavior is
  * unchanged regardless of which delegate is active. The resulting Outline is
@@ -1100,25 +1099,12 @@ private class DynamicSmoothCornerShape(
             if (cachedSize == size && cachedLayoutDirection == layoutDirection) return it
         }
 
-        val delegate: androidx.compose.ui.graphics.Shape = if (useSmoothCorners) {
-            AbsoluteSmoothCornerShape(
-                cornerRadiusTL = topRadius,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusTR = topRadius,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusBL = bottomRadius,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusBR = bottomRadius,
-                smoothnessAsPercentBR = 60
-            )
-        } else {
-            RoundedCornerShape(
-                topStart = topRadius,
-                topEnd = topRadius,
-                bottomEnd = bottomRadius,
-                bottomStart = bottomRadius
-            )
-        }
+        val delegate: androidx.compose.ui.graphics.Shape = RoundedCornerShape(
+            topStart = topRadius,
+            topEnd = topRadius,
+            bottomEnd = bottomRadius,
+            bottomStart = bottomRadius
+        )
 
         return delegate.createOutline(size, layoutDirection, density).also {
             cachedSize = size

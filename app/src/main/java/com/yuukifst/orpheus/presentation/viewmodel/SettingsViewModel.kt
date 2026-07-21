@@ -50,12 +50,12 @@ import kotlinx.collections.immutable.toImmutableList
 
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
-    val appThemeMode: String = AppThemeMode.FOLLOW_SYSTEM,
-    val playerThemePreference: String = ThemePreference.ALBUM_ART,
+    val appThemeMode: String = AppThemeMode.DARK,
+    val playerThemePreference: String = ThemePreference.DEFAULT,
     val albumArtPaletteStyle: AlbumArtPaletteStyle = AlbumArtPaletteStyle.default,
     val albumArtColorAccuracy: Int = AlbumArtColorAccuracy.DEFAULT,
     val mockGenresEnabled: Boolean = false,
-    val navBarCornerRadius: Int = 32,
+    val navBarCornerRadius: Int = 0,
     val navBarStyle: String = NavBarStyle.DEFAULT,
     val navBarCompactMode: Boolean = false,
     val carouselStyle: String = CarouselStyle.NO_PEEK,

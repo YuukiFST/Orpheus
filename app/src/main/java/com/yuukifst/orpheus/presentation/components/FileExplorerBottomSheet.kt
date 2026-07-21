@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -32,7 +33,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -284,7 +285,7 @@ fun FileExplorerContent(
                 onClick = onDone,
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                shape = CircleShape,
+                shape = TerminalCornerShape,
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Done,
@@ -389,10 +390,7 @@ fun FileExplorerContent(
                                     .fillMaxSize()
                                     // Padding horizontal moved to parent Box
                                     .clip(
-                                        RoundedCornerShape(
-                                            topEnd = 20.dp,
-                                            topStart = 20.dp
-                                        )
+                                        TerminalCornerShape
                                     ),
                                 contentPadding = PaddingValues(
                                     bottom = 24.dp,
@@ -518,7 +516,7 @@ private fun FileExplorerItem(
     onToggleAllowed: () -> Unit,
     navigationEnabled: Boolean
 ) {
-    val shape = RoundedCornerShape(18.dp)
+    val shape = TerminalCornerShape
 
     val isAllowed = !isBlocked
 
@@ -586,7 +584,7 @@ private fun FileExplorerItem(
             )
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(TerminalCornerShape)
                     .background(badgeColor.copy(alpha = 0.16f))
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
@@ -760,7 +758,7 @@ private fun FileExplorerHeader(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .clickable(enabled = !isLast && navigationEnabled) {
                                         if (isRoot) onNavigateHome() else onNavigateTo(file)
                                     }
@@ -770,7 +768,7 @@ private fun FileExplorerHeader(
                                         } else {
                                             MaterialTheme.colorScheme.surfaceContainerHigh
                                         },
-                                        shape = CircleShape
+                                        shape = TerminalCornerShape
                                     )
                                     .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {

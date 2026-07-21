@@ -13,7 +13,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.yuukifst.orpheus.presentation.components.CoverArtCropperDialog
 import com.yuukifst.orpheus.presentation.components.CoverArtCropResult
@@ -37,7 +37,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.media.CoverArtUpdate
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.graphics.ImageBitmap
 import android.net.Uri
 import androidx.compose.ui.graphics.Brush
@@ -183,12 +183,7 @@ private fun EditMultipleSongsContent(
         disabledIndicatorColor = Color.Transparent,
     )
 
-    val textFieldShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 10.dp, smoothnessAsPercentBL = 60,
-        cornerRadiusTR = 10.dp, smoothnessAsPercentBR = 60,
-        cornerRadiusBL = 10.dp, smoothnessAsPercentTL = 60,
-        cornerRadiusBR = 10.dp, smoothnessAsPercentTR = 60
-    )
+    val textFieldShape = TerminalCornerShape
 
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
@@ -248,7 +243,7 @@ private fun EditMultipleSongsContent(
                 item {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = TerminalCornerShape,
                         tonalElevation = 2.dp,
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
@@ -512,12 +507,7 @@ private fun BatchCoverArtEditorCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 12.dp, smoothnessAsPercentBL = 60,
-            cornerRadiusTR = 12.dp, smoothnessAsPercentBR = 60,
-            cornerRadiusBL = 12.dp, smoothnessAsPercentTL = 60,
-            cornerRadiusBR = 12.dp, smoothnessAsPercentTR = 60,
-        ),
+        shape = TerminalCornerShape,
         tonalElevation = 6.dp,
         color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
@@ -542,7 +532,7 @@ private fun BatchCoverArtEditorCard(
                 Box(
                     modifier = Modifier
                         .size(cropSize)
-                        .clip(RoundedCornerShape(22.dp))
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center
                 ) {

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -47,7 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -124,7 +124,7 @@ fun TimerOptionsBottomSheet(
                 modifier = Modifier
                     .background(
                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     )
             ) {
                 Text(
@@ -161,12 +161,7 @@ fun TimerOptionsBottomSheet(
                         .padding(horizontal = 0.dp)
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(
-                                topEnd = 18.dp,
-                                topStart = 18.dp,
-                                bottomStart = 18.dp,
-                                bottomEnd = 18.dp
-                            )
+                            shape = TerminalCornerShape
                         )
                 ) {
                     Slider(
@@ -210,12 +205,7 @@ fun TimerOptionsBottomSheet(
                         .padding(horizontal = 0.dp)
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(
-                                bottomEnd = 18.dp,
-                                bottomStart = 18.dp,
-                                topEnd = 6.dp,
-                                topStart = 6.dp
-                            )
+                            shape = TerminalCornerShape
                         )
                 )
             }
@@ -247,7 +237,7 @@ fun TimerOptionsBottomSheet(
                         .padding(horizontal = 0.dp)
                         .background(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(18.dp)
+                            shape = TerminalCornerShape
                         )
                 ) {
                     Slider(
@@ -286,16 +276,7 @@ fun TimerOptionsBottomSheet(
                     .fillMaxWidth()
                     .padding(horizontal = 0.dp)
                     .clip(
-                        AbsoluteSmoothCornerShape(
-                            cornerRadiusBL = boxCornerRadius,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusTR = boxCornerRadius,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusTL = boxCornerRadius,
-                            smoothnessAsPercentBL = 60,
-                            cornerRadiusBR = boxCornerRadius,
-                            smoothnessAsPercentTR = 60
-                        )
+                        TerminalCornerShape
                     ) // Apply animated corner radius for clipping
                     .background(color = boxBackgroundColor)   // Apply animated background color
                     .clickable(
@@ -359,12 +340,7 @@ fun TimerOptionsBottomSheet(
                     onClick = {
                         showCustomTimePicker = true
                     },
-                    shape = RoundedCornerShape(
-                        topStart = 50.dp,
-                        bottomStart = 50.dp,
-                        topEnd = 8.dp,
-                        bottomEnd = 8.dp
-                    ),
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .weight(1f) // Give buttons equal space if desired
                         .height(buttonHeight)
@@ -377,12 +353,7 @@ fun TimerOptionsBottomSheet(
                         onDismiss()
                         onCancelCountedPlay()
                     },
-                    shape = RoundedCornerShape(
-                        topStart = 8.dp,
-                        bottomStart = 8.dp,
-                        topEnd = 50.dp,
-                        bottomEnd = 50.dp
-                    ),
+                    shape = TerminalCornerShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
                         contentColor = MaterialTheme.colorScheme.onErrorContainer

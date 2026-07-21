@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
@@ -92,7 +92,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.MemorySummary
 import com.yuukifst.orpheus.presentation.viewmodel.PlaybackCompatibilitySummary
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -284,7 +284,7 @@ private fun PlaybackReadinessCard(
     }
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = AbsoluteSmoothCornerShape(32.dp, 60),
+        shape = TerminalCornerShape,
         color = containerColor
     ) {
         Column(
@@ -725,7 +725,7 @@ private fun CapabilityCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = AbsoluteSmoothCornerShape(28.dp, 60),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 0.dp
     ) {
@@ -773,7 +773,7 @@ private fun StatusIcon(
 ) {
     Surface(
         modifier = modifier.size(44.dp),
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = containerColor
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -799,7 +799,7 @@ private fun HeroMetricTile(
         modifier = modifier
             .fillMaxHeight()
             .defaultMinSize(minHeight = 82.dp),
-        shape = AbsoluteSmoothCornerShape(18.dp, 60),
+        shape = TerminalCornerShape,
         color = containerColor
     ) {
         Column(
@@ -839,7 +839,7 @@ private fun InfoTile(
         modifier = modifier
             .fillMaxHeight()
             .defaultMinSize(minHeight = 86.dp),
-        shape = AbsoluteSmoothCornerShape(18.dp, 60),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(
@@ -907,7 +907,7 @@ private fun FormatSupportTile(
         modifier = modifier
             .fillMaxHeight()
             .defaultMinSize(minHeight = 112.dp),
-        shape = AbsoluteSmoothCornerShape(18.dp, 60),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(
@@ -929,7 +929,7 @@ private fun FormatSupportTile(
                     modifier = Modifier.weight(1f)
                 )
                 Surface(
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     color = statusColor
                 ) {
                     Icon(
@@ -1000,7 +1000,7 @@ private fun ProgressReadout(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-                .clip(CircleShape),
+                .clip(TerminalCornerShape),
             color = color,
             trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
         )
@@ -1030,7 +1030,7 @@ private fun OutputRouteRow(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = AbsoluteSmoothCornerShape(16.dp, 60),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(
@@ -1092,7 +1092,7 @@ private fun FindingRow(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = AbsoluteSmoothCornerShape(18.dp, 60),
+        shape = TerminalCornerShape,
         color = containerColor
     ) {
         Row(
@@ -1134,7 +1134,7 @@ private fun TonalChip(
 ) {
     Surface(
         modifier = modifier,
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = containerColor
     ) {
         Row(

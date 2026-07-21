@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -30,8 +30,7 @@ import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.model.PlaylistShapeType
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -43,14 +42,14 @@ fun PlaylistCover(
 ) {
     val shape = remember(playlist.coverShapeType, playlist.coverShapeDetail1, playlist.coverShapeDetail2, playlist.coverShapeDetail3, size) {
         when (playlist.coverShapeType) {
-            PlaylistShapeType.Circle.name -> CircleShape
+            PlaylistShapeType.Circle.name -> TerminalCornerShape
             PlaylistShapeType.SmoothRect.name -> {
                 val referenceSize = 200f
                 val currentSize = size.value
                 val scale = currentSize / referenceSize
                 val r = ((playlist.coverShapeDetail1 ?: 20f) * scale).dp
                 val s = (playlist.coverShapeDetail2 ?: 60f).toInt()
-                AbsoluteSmoothCornerShape(r, s, r, s, r, s, r, s)
+                TerminalCornerShape
             }
             PlaylistShapeType.RotatedPill.name -> {
                 androidx.compose.foundation.shape.GenericShape { size, _ ->
@@ -61,12 +60,8 @@ fun PlaylistCover(
                     addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
                 }
             }
-            PlaylistShapeType.Star.name -> RoundedStarShape(
-                sides = (playlist.coverShapeDetail4 ?: 5f).toInt(),
-                curve = (playlist.coverShapeDetail1 ?: 0.15f).toDouble(),
-                rotation = playlist.coverShapeDetail2 ?: 0f
-            )
-            else -> RoundedCornerShape(8.dp)
+            PlaylistShapeType.Star.name -> TerminalCornerShape
+            else -> TerminalCornerShape
         }
     }
 

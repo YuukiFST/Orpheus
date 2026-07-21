@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import androidx.compose.ui.graphics.Shape
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -42,7 +43,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Palette
@@ -104,7 +105,7 @@ import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 
 private data class Contributor(
@@ -388,7 +389,7 @@ private fun AboutHeroCard(
     onVersionLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val heroShape = AbsoluteSmoothCornerShape(30.dp, 60)
+    val heroShape = TerminalCornerShape
     val haptic = LocalHapticFeedback.current
 
     Surface(
@@ -410,7 +411,7 @@ private fun AboutHeroCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Surface(
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         color = MaterialTheme.colorScheme.primaryContainer,
                     ) {
                         Icon(
@@ -448,7 +449,7 @@ private fun AboutHeroCard(
 
                 Box(
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.tertiaryContainer)
                         .pointerInput(Unit) {
                             detectTapGestures(
@@ -492,7 +493,7 @@ private fun CommunitySignalsRow() {
     ) {
         labels.forEach { (label, icon) ->
             Surface(
-                shape = AbsoluteSmoothCornerShape(16.dp, 60),
+                shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
             ) {
                 Row(
@@ -524,7 +525,7 @@ private fun AboutSupportCard(
     onSponsorClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = AbsoluteSmoothCornerShape(30.dp, 60)
+    val shape = TerminalCornerShape
 
     Surface(
         modifier = modifier,
@@ -540,7 +541,7 @@ private fun AboutSupportCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.primary,
                 ) {
                     Icon(
@@ -589,7 +590,7 @@ private fun AboutSupportCard(
                     stringResource(R.string.about_support_chip_streaming),
                 ).forEach { label ->
                     Surface(
-                        shape = AbsoluteSmoothCornerShape(16.dp, 60),
+                        shape = TerminalCornerShape,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.10f),
                     ) {
                         Text(
@@ -653,7 +654,7 @@ private fun AboutSectionHeader(
 @Composable
 private fun AboutLinkCard(
     link: ProjectLink,
-    shape: AbsoluteSmoothCornerShape,
+    shape: Shape,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -678,7 +679,7 @@ private fun AboutLinkCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
             ) {
                 Icon(
@@ -728,7 +729,7 @@ private fun AboutLinkCard(
 @Composable
 private fun ContributorCard(
     contributor: Contributor,
-    shape: AbsoluteSmoothCornerShape,
+    shape: Shape,
     modifier: Modifier = Modifier,
     showContributionCount: Boolean,
     onCardClick: (() -> Unit)? = null,
@@ -835,7 +836,7 @@ private fun ContributorCard(
 @Composable
 private fun ContributorLabel(text: String) {
     Surface(
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Text(
@@ -865,7 +866,7 @@ private fun ContributorAvatar(
 
     Surface(
         modifier = modifier.size(48.dp),
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = containerColor,
         tonalElevation = 2.dp,
     ) {
@@ -886,7 +887,7 @@ private fun ContributorAvatar(
                         .build(),
                     contentDescription = stringResource(R.string.cd_contributor_avatar, name),
                     modifier = Modifier.fillMaxSize(),
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     contentScale = ContentScale.Crop,
                     placeholderResId = iconRes ?: R.drawable.ic_music_placeholder,
                     errorResId = R.drawable.rounded_broken_image_24,
@@ -952,33 +953,15 @@ private fun SocialIconButton(
     }
 }
 
-private fun expressiveListShape(index: Int, count: Int): AbsoluteSmoothCornerShape {
+private fun expressiveListShape(index: Int, count: Int): Shape {
     val outer = 22.dp
     val inner = 8.dp
 
     return when {
-        count <= 1 -> AbsoluteSmoothCornerShape(outer, 60)
-        index == 0 -> AbsoluteSmoothCornerShape(
-            cornerRadiusTL = outer,
-            cornerRadiusTR = outer,
-            cornerRadiusBL = inner,
-            cornerRadiusBR = inner,
-            smoothnessAsPercentTL = 60,
-            smoothnessAsPercentTR = 60,
-            smoothnessAsPercentBL = 60,
-            smoothnessAsPercentBR = 60,
-        )
-        index == count - 1 -> AbsoluteSmoothCornerShape(
-            cornerRadiusTL = inner,
-            cornerRadiusTR = inner,
-            cornerRadiusBL = outer,
-            cornerRadiusBR = outer,
-            smoothnessAsPercentTL = 60,
-            smoothnessAsPercentTR = 60,
-            smoothnessAsPercentBL = 60,
-            smoothnessAsPercentBR = 60,
-        )
-        else -> AbsoluteSmoothCornerShape(inner, 60)
+        count <= 1 -> TerminalCornerShape
+        index == 0 -> TerminalCornerShape
+        index == count - 1 -> TerminalCornerShape
+        else -> TerminalCornerShape
     }
 }
 

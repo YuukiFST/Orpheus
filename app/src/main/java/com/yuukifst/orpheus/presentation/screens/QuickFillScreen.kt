@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,7 +40,7 @@ import com.yuukifst.orpheus.presentation.components.SongPickerList
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.presentation.utils.GenreIconProvider
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import kotlinx.collections.immutable.ImmutableList
@@ -151,7 +151,7 @@ fun QuickFillContent(
                                    { IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Rounded.Clear, null) } }
                                } else null,
                                singleLine = true,
-                               shape = RoundedCornerShape(16.dp),
+                               shape = TerminalCornerShape,
                                colors = OutlinedTextFieldDefaults.colors(
                                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -171,7 +171,7 @@ fun QuickFillContent(
                             isLoading = false,
                             selectedSongIds = selectedSongIds,
                             modifier = Modifier.weight(1f),
-                            albumShape = CircleShape,
+                            albumShape = TerminalCornerShape,
                             contentPadding = PaddingValues(bottom = 100.dp) // Space for docked toolbar
                         )
                     }
@@ -199,7 +199,7 @@ fun QuickFillContent(
                 .fillMaxWidth()
                 .height(64.dp)
                 .imePadding(),
-            shape = AbsoluteSmoothCornerShape(32.dp, 60),
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surfaceContainerHighest,
             tonalElevation = 6.dp,
             shadowElevation = 4.dp
@@ -217,7 +217,7 @@ fun QuickFillContent(
                         // Select All (Left Segment)
                         FilledTonalButton(
                             onClick = { songs.forEach { selectedSongIds[it.id] = true } },
-                            shape = RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp, topEnd = 4.dp, bottomEnd = 4.dp),
+                            shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                             ),
@@ -233,7 +233,7 @@ fun QuickFillContent(
                         // Clear (Right Segment)
                         FilledTonalButton(
                             onClick = { selectedSongIds.clear() },
-                            shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 50.dp, bottomEnd = 50.dp),
+                            shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                             ),
@@ -281,7 +281,7 @@ fun QuickFillContent(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .height(44.dp)
                 ) {
@@ -344,7 +344,7 @@ fun GenreValidatorContent(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ),
-                shape = AbsoluteSmoothCornerShape(16.dp, 60),
+                shape = TerminalCornerShape,
                 modifier = Modifier.height(80.dp)
             ) {
                  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -367,7 +367,7 @@ fun GenreValidatorContent(
                     containerColor = containerColor,
                     contentColor = contentColor
                 ),
-                shape = AbsoluteSmoothCornerShape(16.dp, 60),
+                shape = TerminalCornerShape,
                 modifier = Modifier.height(80.dp)
             ) {
                 Row(
@@ -377,7 +377,7 @@ fun GenreValidatorContent(
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .clip(CircleShape)
+                            .clip(TerminalCornerShape)
                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
                     ) {
                         SmartImage(
@@ -435,7 +435,7 @@ fun GenreValidatorContent(
                             Box(
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(TerminalCornerShape)
                                     .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .clickable { selectedIcon = iconRes }
                                     .padding(10.dp),

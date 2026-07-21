@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
@@ -67,7 +67,7 @@ import androidx.compose.ui.zIndex
 import coil.size.Size
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 /**
  * Bottom sheet for batch operations on multiple selected songs.
@@ -117,12 +117,7 @@ fun MultiSelectionBottomSheet(
     }
     
     val evenCornerRadius = 26.dp
-    val buttonShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = evenCornerRadius, smoothnessAsPercentBR = 60, 
-        cornerRadiusBR = evenCornerRadius, smoothnessAsPercentTL = 60, 
-        cornerRadiusTL = evenCornerRadius, smoothnessAsPercentBL = 60,
-        cornerRadiusBL = evenCornerRadius, smoothnessAsPercentTR = 60
-    )
+    val buttonShape = TerminalCornerShape
 
     val favoriteButtonCornerRadius by animateDpAsState(
         targetValue = if (allAreLiked) evenCornerRadius else 60.dp,
@@ -138,11 +133,7 @@ fun MultiSelectionBottomSheet(
     )
 
     val favoriteButtonShape = remember(favoriteButtonCornerRadius) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = favoriteButtonCornerRadius, smoothnessAsPercentBR = 60, cornerRadiusBR = favoriteButtonCornerRadius,
-            smoothnessAsPercentTL = 60, cornerRadiusTL = favoriteButtonCornerRadius, smoothnessAsPercentBL = 60,
-            cornerRadiusBL = favoriteButtonCornerRadius, smoothnessAsPercentTR = 60
-        )
+        TerminalCornerShape
     }
     
     ModalBottomSheet(
@@ -313,7 +304,7 @@ fun MultiSelectionBottomSheet(
                                     onShareAll()
                                     onDismiss()
                                 },
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             ) {
                                 Icon(
                                     modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
@@ -342,7 +333,7 @@ fun MultiSelectionBottomSheet(
                                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                                 ),
                                 contentPadding = PaddingValues(horizontal = 0.dp),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onAddToQueue()
                                     onDismiss()
@@ -365,7 +356,7 @@ fun MultiSelectionBottomSheet(
                                     contentColor = MaterialTheme.colorScheme.onTertiary
                                 ),
                                 contentPadding = PaddingValues(horizontal = 0.dp),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onPlayNext()
                                     onDismiss()
@@ -398,7 +389,7 @@ fun MultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onAddToPlaylist()
                                     onDismiss()
@@ -420,7 +411,7 @@ fun MultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
                                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     val activity = (context as? Activity)
                                     if (activity != null) {
@@ -447,7 +438,7 @@ fun MultiSelectionBottomSheet(
 
 /**
  * Displays stacked album art images with overlap effect for the bottom sheet header.
- * Uses CircleShape with a border matching the sheet background color.
+ * Uses TerminalCornerShape with a border matching the sheet background color.
  */
 @Composable
 private fun StackedAlbumArts(
@@ -473,20 +464,20 @@ private fun StackedAlbumArts(
                     .zIndex((songs.size - index).toFloat())
                     .size(imageSize)
                     // "Border" created by background color
-                    .background(borderColor, CircleShape)
+                    .background(borderColor, TerminalCornerShape)
             ) {
                 // Inner image, inset by border width
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .padding(borderWidth)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     SmartImage(
                         model = song.albumArtUriString,
                         contentDescription = song.title,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         targetSize = Size(168, 168),
                         modifier = Modifier.matchParentSize()
                     )

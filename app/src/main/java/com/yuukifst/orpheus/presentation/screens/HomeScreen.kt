@@ -110,7 +110,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import com.yuukifst.orpheus.ui.theme.ShapeCache
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.presentation.components.rememberModalSheetState
 
@@ -603,16 +603,7 @@ private fun YourMixEmptyPlaceholder(
 
             FilledTonalButton(
                 onClick = onRefresh,
-                shape = AbsoluteSmoothCornerShape(
-                    cornerRadiusTL = 22.dp,
-                    smoothnessAsPercentTR = 60,
-                    cornerRadiusBR = 22.dp,
-                    smoothnessAsPercentTL = 60,
-                    cornerRadiusBL = 22.dp,
-                    smoothnessAsPercentBR = 60,
-                    cornerRadiusTR = 22.dp,
-                    smoothnessAsPercentBL = 60,
-                )
+                shape = TerminalCornerShape
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Refresh,
@@ -673,16 +664,7 @@ fun YourMixHeader(
             onClick = onPlayShuffled,
             containerColor = if (isShuffleEnabled) colors.primary else colors.tertiaryContainer,
             contentColor = if (isShuffleEnabled) colors.onPrimary else colors.onTertiaryContainer,
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTL = buttonCorners,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusBR = buttonCorners,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusBL = buttonCorners,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusTR = buttonCorners,
-                smoothnessAsPercentBL = 60,
-            )
+            shape = TerminalCornerShape
         ) {
             Icon(
                 painter = painterResource(R.drawable.rounded_shuffle_24),
@@ -714,7 +696,7 @@ fun SongListItemFavs(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(cardCorners),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
@@ -734,7 +716,7 @@ fun SongListItemFavs(
                     model = albumArtUrl,
                     contentDescription = stringResource(R.string.cd_album_art_for_title, title),
                     contentScale = ContentScale.Crop,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.size(48.dp)
                 )
                 Spacer(Modifier.width(16.dp))

@@ -2,8 +2,10 @@
 
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
+import com.yuukifst.orpheus.presentation.navigation.navigateToTopLevelSafely
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -77,13 +79,11 @@ import com.yuukifst.orpheus.presentation.components.SmartImageCompactListTargetS
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.presentation.components.SongInfoBottomSheet
 import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
-import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.viewmodel.ArtistDetailViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.ArtistAlbumSection
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
 import com.yuukifst.orpheus.utils.formatSongCount
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.coroutines.launch
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import kotlin.math.roundToInt
@@ -96,7 +96,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Size
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import kotlinx.collections.immutable.persistentListOf
@@ -113,6 +113,12 @@ fun ArtistDetailScreen(
     viewModel: ArtistDetailViewModel = hiltViewModel(),
     playlistViewModel: PlaylistViewModel = hiltViewModel()
 ) {
+    val navigateBackFromArtistDetail: () -> Unit = {
+        if (!navController.popBackStack()) {
+            navController.navigateToTopLevelSafely(Screen.Library.route)
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
     
@@ -420,7 +426,7 @@ fun ArtistDetailScreen(
                             headerHeight = currentTopBarHeightDp,
                             headerImageRequestSize = headerImageRequestSize,
                             hasCustomImage = !artist.customImageUri.isNullOrBlank(),
-                            onBackPressed = { navController.popBackStack() },
+                            onBackPressed = navigateBackFromArtistDetail,
                             onPlayClick = {
                                 if (songs.isNotEmpty()) {
                                     playerViewModel.playSongsShuffled(
@@ -442,7 +448,7 @@ fun ArtistDetailScreen(
                             collapseFraction = collapseFraction,
                             headerHeight = currentTopBarHeightDp,
                             headerImageRequestSize = headerImageRequestSize,
-                            onBackPressed = { navController.popBackStack() },
+                            onBackPressed = navigateBackFromArtistDetail,
                             onPlayClick = {
                                 if (songs.isNotEmpty()) {
                                     playerViewModel.playSongsShuffled(
@@ -589,14 +595,9 @@ private fun CollapsibleAlbumSectionHeader(
 
     val containerColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f)
     val shape = if (isExpanded) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 24.dp, smoothnessAsPercentTR = 60,
-            cornerRadiusTL = 24.dp, smoothnessAsPercentTL = 60,
-            cornerRadiusBR = 0.dp, smoothnessAsPercentBR = 0,
-            cornerRadiusBL = 0.dp, smoothnessAsPercentBL = 0
-        )
+        TerminalCornerShape
     } else {
-        AbsoluteSmoothCornerShape(24.dp, 60)
+        TerminalCornerShape
     }
 
     Box(
@@ -619,7 +620,7 @@ private fun CollapsibleAlbumSectionHeader(
                 targetSize = SmartImageCompactListTargetSize,
                 modifier = Modifier
                     .size(52.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(TerminalCornerShape)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -678,29 +679,14 @@ private fun ArtistAlbumSectionSongItem(
     val isLastSong = songIndex == songCount - 1
 
     val songItemShape = when {
-        songCount == 1 -> RoundedCornerShape(16.dp)
-        songIndex == 0 -> RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
-            bottomStart = 4.dp,
-            bottomEnd = 4.dp
-        )
-        isLastSong -> RoundedCornerShape(
-            topStart = 4.dp,
-            topEnd = 4.dp,
-            bottomStart = 16.dp,
-            bottomEnd = 16.dp
-        )
-        else -> RoundedCornerShape(4.dp)
+        songCount == 1 -> TerminalCornerShape
+        songIndex == 0 -> TerminalCornerShape
+        isLastSong -> TerminalCornerShape
+        else -> TerminalCornerShape
     }
 
     val containerShape = if (isLastSong) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 0.dp, smoothnessAsPercentTR = 0,
-            cornerRadiusTL = 0.dp, smoothnessAsPercentTL = 0,
-            cornerRadiusBR = 24.dp, smoothnessAsPercentBR = 60,
-            cornerRadiusBL = 24.dp, smoothnessAsPercentBL = 60
-        )
+        TerminalCornerShape
     } else {
         RectangleShape
     }
@@ -896,7 +882,7 @@ private fun SharedArtistTopBarProbe(
 
         LargeExtendedFloatingActionButton(
             onClick = onPlayClick,
-            shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
+            shape = TerminalCornerShape,
             modifier = Modifier
                 .align(shuffleAlignment)
                 .statusBarsPadding()
@@ -1118,7 +1104,7 @@ private fun CustomCollapsingTopBar(
                 // Play button
                 LargeExtendedFloatingActionButton(
                     onClick = onPlayClick,
-                    shape = RoundedStarShape(sides = 8, curve = 0.05, rotation = 0f),
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)

@@ -22,11 +22,11 @@ class ThemePreferencesRepository @Inject constructor(
     }
 
     val appThemeModeFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[Keys.APP_THEME_MODE] ?: AppThemeMode.FOLLOW_SYSTEM
+        preferences[Keys.APP_THEME_MODE] ?: AppThemeMode.DARK
     }
 
     val playerThemePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[Keys.PLAYER_THEME_PREFERENCE] ?: ThemePreference.ALBUM_ART
+        preferences[Keys.PLAYER_THEME_PREFERENCE] ?: ThemePreference.DEFAULT
     }
 
     val albumArtPaletteStyleFlow: Flow<AlbumArtPaletteStyle> = dataStore.data.map { preferences ->
@@ -51,6 +51,13 @@ class ThemePreferencesRepository @Inject constructor(
         dataStore.edit { preferences ->
             if (preferences[Keys.APP_THEME_MODE] == null) {
                 preferences[Keys.APP_THEME_MODE] = themeMode
+            }
+        }
+
+    suspend fun initializePlayerThemePreference(themeMode: String) =
+        dataStore.edit { preferences ->
+            if (preferences[Keys.PLAYER_THEME_PREFERENCE] == null) {
+                preferences[Keys.PLAYER_THEME_PREFERENCE] = themeMode
             }
         }
 

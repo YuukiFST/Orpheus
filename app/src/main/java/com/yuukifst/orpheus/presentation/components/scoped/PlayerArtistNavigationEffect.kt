@@ -1,6 +1,6 @@
 package com.yuukifst.orpheus.presentation.components.scoped
 
-import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
+import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,10 +24,7 @@ internal fun PlayerArtistNavigationEffect(
             sheetMotionController.snapCollapsed(latestSheetCollapsedTargetY)
             playerViewModel.collapsePlayerSheet()
 
-            navController.navigateSafelyReplacing(
-                route = Screen.ArtistDetail.createRoute(artistId),
-                patternToPop = Screen.ArtistDetail.route
-            )
+            navController.navigateSafely(Screen.ArtistDetail.createRoute(artistId))
         }
     }
 }

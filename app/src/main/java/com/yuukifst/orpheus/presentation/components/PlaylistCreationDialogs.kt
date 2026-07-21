@@ -34,7 +34,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -93,7 +93,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlin.math.max
 import kotlin.math.min
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,16 +106,7 @@ fun PlaylistCreationTypeDialog(
 ) {
     if (!visible) return
 
-    val dialogShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 24.dp,
-        smoothnessAsPercentTL = 60,
-        cornerRadiusTR = 24.dp,
-        smoothnessAsPercentTR = 60,
-        cornerRadiusBL = 40.dp,
-        smoothnessAsPercentBL = 60,
-        cornerRadiusBR = 40.dp,
-        smoothnessAsPercentBR = 60
-    )
+    val dialogShape = TerminalCornerShape
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -188,16 +179,7 @@ private fun CreationModeCard(
         onClick = onClick,
         enabled = enabled,
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 22.dp,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusTR = 22.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusBL = 22.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBR = 22.dp,
-            smoothnessAsPercentBR = 60
-        )
+        shape = TerminalCornerShape
     ) {
         Row(
             modifier = Modifier
@@ -207,16 +189,7 @@ private fun CreationModeCard(
         ) {
             Surface(
                 color = contentColor.copy(alpha = 0.16f),
-                shape = AbsoluteSmoothCornerShape(
-                    cornerRadiusTL = 12.dp,
-                    smoothnessAsPercentTL = 60,
-                    cornerRadiusTR = 18.dp,
-                    smoothnessAsPercentTR = 60,
-                    cornerRadiusBL = 18.dp,
-                    smoothnessAsPercentBL = 60,
-                    cornerRadiusBR = 12.dp,
-                    smoothnessAsPercentBR = 60
-                )
+                shape = TerminalCornerShape
             ) {
                 Row(modifier = Modifier.padding(10.dp)) {
                     icon()

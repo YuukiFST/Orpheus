@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.player
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -42,7 +43,6 @@ import com.yuukifst.orpheus.data.model.Artist
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 private data class PlayerArtistShortcutItem(
@@ -119,7 +119,7 @@ internal fun PlayerArtistPickerBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(26.dp)),
+                    .clip(TerminalCornerShape),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 shortcutItems.forEachIndexed { index, item ->
@@ -193,7 +193,7 @@ private fun PlayerArtistShortcutCard(
             Box(
                 modifier = Modifier
                     .size(avatarSize)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(avatarBackground),
                 contentAlignment = Alignment.Center
             ) {
@@ -203,7 +203,7 @@ private fun PlayerArtistShortcutCard(
                     modifier = Modifier.fillMaxSize(),
                     placeholderResId = R.drawable.rounded_artist_24,
                     errorResId = R.drawable.rounded_artist_24,
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     contentScale = ContentScale.Crop,
                     targetSize = Size(180, 180),
                     placeHolderBackgroundColor = Color.Transparent
@@ -226,7 +226,7 @@ private fun PlayerArtistShortcutCard(
 
                 Surface(
                     color = labelContainerColor,
-                    shape = CircleShape
+                    shape = TerminalCornerShape
                 ) {
                     Text(
                         text = stringResource(
@@ -246,7 +246,7 @@ private fun PlayerArtistShortcutCard(
             Box(
                 modifier = Modifier
                     .size(38.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(trailingContainerColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -267,19 +267,9 @@ private fun artistShortcutShape(
     val outerCorner = 26.dp
     val innerCorner = 10.dp
     return when {
-        count <= 1 -> RoundedCornerShape(outerCorner)
-        index == 0 -> RoundedCornerShape(
-            topStart = outerCorner,
-            topEnd = outerCorner,
-            bottomStart = innerCorner,
-            bottomEnd = innerCorner
-        )
-        index == count - 1 -> RoundedCornerShape(
-            topStart = innerCorner,
-            topEnd = innerCorner,
-            bottomStart = outerCorner,
-            bottomEnd = outerCorner
-        )
-        else -> RoundedCornerShape(innerCorner)
+        count <= 1 -> TerminalCornerShape
+        index == 0 -> TerminalCornerShape
+        index == count - 1 -> TerminalCornerShape
+        else -> TerminalCornerShape
     }
 }

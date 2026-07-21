@@ -13,6 +13,20 @@ enum class LibraryTabId(
     val label: String,
     val sortOptions: List<SortOption>
 ) {
+    Liked(
+        stableKey = "LIKED",
+        label = "LIKED",
+        sortOptions = listOf(
+            SortOption.LikedSongTitleAZ,
+            SortOption.LikedSongTitleZA,
+            SortOption.LikedSongArtist,
+            SortOption.LikedSongArtistDesc,
+            SortOption.LikedSongAlbum,
+            SortOption.LikedSongAlbumDesc,
+            SortOption.LikedSongDateLiked,
+            SortOption.LikedSongDateLikedAsc
+        )
+    ),
     Songs(
         stableKey = "SONGS",
         label = "SONGS",
@@ -72,20 +86,6 @@ enum class LibraryTabId(
             SortOption.FolderSongCountDesc,
             SortOption.FolderSubdirCountAsc,
             SortOption.FolderSubdirCountDesc
-        )
-    ),
-    Liked(
-        stableKey = "LIKED",
-        label = "LIKED",
-        sortOptions = listOf(
-            SortOption.LikedSongTitleAZ,
-            SortOption.LikedSongTitleZA,
-            SortOption.LikedSongArtist,
-            SortOption.LikedSongArtistDesc,
-            SortOption.LikedSongAlbum,
-            SortOption.LikedSongAlbumDesc,
-            SortOption.LikedSongDateLiked,
-            SortOption.LikedSongDateLikedAsc
         )
     );
 

@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -104,7 +105,7 @@ fun SettingsItem(
             color = MaterialTheme.colorScheme.surfaceContainer,
             modifier =
                     Modifier.fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(TerminalCornerShape)
                             .clickable(onClick = onClick)
     ) {
         Row(
@@ -153,7 +154,7 @@ fun SwitchSettingItem(
 
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
     ) {
         Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -242,7 +243,7 @@ fun ThemeSelectorItem(
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             modifier =
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable {
+                    Modifier.fillMaxWidth().clip(TerminalCornerShape).clickable {
                         showSheet = true
                     }
     ) {
@@ -274,7 +275,7 @@ fun ThemeSelectorItem(
                     // Selected Value Badge
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                        shape = androidx.compose.foundation.shape.CircleShape,
+                        shape = TerminalCornerShape,
                         modifier = Modifier.align(Alignment.Start)
                     ) {
                         Text(
@@ -320,7 +321,7 @@ fun ThemeSelectorItem(
                                 onSelectionChanged(key)
                                 showSheet = false
                             },
-                            shape = RoundedCornerShape(24.dp),
+                            shape = TerminalCornerShape,
                             color = containerColor,
                             modifier = Modifier.fillMaxWidth().height(72.dp)
                         ) {
@@ -361,7 +362,7 @@ fun ExpressiveSettingsGroup(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp)) // Large corners for the group
+            .clip(TerminalCornerShape) // Large corners for the group
             .background(Color.Transparent),
     ) {
         content()
@@ -380,7 +381,7 @@ fun SliderSettingsItem(
 ) {
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -425,7 +426,7 @@ fun RefreshLibraryItem(
 ) {
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -576,7 +577,7 @@ fun RefreshLyricsItem(
 ) {
     Surface(
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -660,7 +661,7 @@ fun ActionSettingsItem(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+        modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

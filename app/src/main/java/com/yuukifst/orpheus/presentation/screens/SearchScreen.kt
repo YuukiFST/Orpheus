@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.ShapeCache
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -123,7 +123,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import timber.log.Timber
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import androidx.compose.ui.res.stringResource
@@ -297,7 +297,7 @@ fun SearchScreen(
                                             },
                                             modifier = Modifier
                                                 .size(48.dp)
-                                                .clip(CircleShape)
+                                                .clip(TerminalCornerShape)
                                                 .background(
                                                     MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                                                 )
@@ -316,7 +316,7 @@ fun SearchScreen(
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
-                            .clip(RoundedCornerShape(searchbarCornerRadius)),
+                            .clip(TerminalCornerShape),
                         colors = SearchBarDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                             dividerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -742,10 +742,7 @@ fun SearchResultsList(
         modifier = Modifier
             .fillMaxSize()
             .clip(
-                RoundedCornerShape(
-                    topStart = 28.dp,
-                    topEnd = 28.dp
-                )
+                TerminalCornerShape
             ),
         contentPadding = PaddingValues(
             top = 8.dp,
@@ -911,16 +908,7 @@ fun SearchResultAlbumItem(
     onPlayClick: () -> Unit
 ) {
     val itemShape = remember {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 26.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = 26.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBR = 26.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBL = 26.dp,
-            smoothnessAsPercentTL = 60
-        )
+        TerminalCornerShape
     }
 
     Card(
@@ -968,7 +956,7 @@ fun SearchResultAlbumItem(
             FilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     contentColor = MaterialTheme.colorScheme.onSecondary
@@ -988,16 +976,7 @@ fun SearchResultArtistItem(
     onPlayClick: () -> Unit
 ) {
     val itemShape = remember {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 26.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = 26.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBR = 26.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBL = 26.dp,
-            smoothnessAsPercentTL = 60
-        )
+        TerminalCornerShape
     }
 
     Card(
@@ -1052,7 +1031,7 @@ fun SearchResultArtistItem(
             FilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f),
                     contentColor = MaterialTheme.colorScheme.onTertiary
@@ -1073,16 +1052,7 @@ fun SearchResultPlaylistItem(
     onPlayClick: () -> Unit
 ) {
     val itemShape = remember {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 26.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = 26.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBR = 26.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBL = 26.dp,
-            smoothnessAsPercentTL = 60
-        )
+        TerminalCornerShape
     }
 
     Card(
@@ -1122,7 +1092,7 @@ fun SearchResultPlaylistItem(
             FilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     contentColor = MaterialTheme.colorScheme.onPrimary

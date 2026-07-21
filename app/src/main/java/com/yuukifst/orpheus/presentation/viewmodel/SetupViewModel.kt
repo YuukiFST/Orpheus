@@ -16,6 +16,7 @@ import com.yuukifst.orpheus.data.backup.model.BackupSection
 import com.yuukifst.orpheus.data.backup.model.RestorePlan
 import com.yuukifst.orpheus.data.backup.model.RestoreResult
 import com.yuukifst.orpheus.data.preferences.AppThemeMode
+import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.ThemePreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.repository.MusicRepository
@@ -107,6 +108,7 @@ class SetupViewModel @Inject constructor(
         viewModelScope.launch {
             if (!userPreferencesRepository.initialSetupDoneFlow.first()) {
                 themePreferencesRepository.initializeAppThemeMode(AppThemeMode.DARK)
+                themePreferencesRepository.initializePlayerThemePreference(ThemePreference.DEFAULT)
             }
         }
 

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Button
@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
@@ -57,7 +57,7 @@ fun DismissUndoBar(
 
     Surface(
         modifier = modifier,
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 4.dp
     ) {
@@ -110,16 +110,7 @@ fun DismissUndoBar(
                     .fillMaxHeight()
                     .background(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                        shape = AbsoluteSmoothCornerShape(
-                            cornerRadiusTR = 12.dp,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusTL = 12.dp,
-                            smoothnessAsPercentTR = 60,
-                            cornerRadiusBR = 12.dp,
-                            smoothnessAsPercentBL = 60,
-                            cornerRadiusBL = 12.dp,
-                            smoothnessAsPercentBR = 60
-                        )
+                        shape = TerminalCornerShape
                     )
             )
         }

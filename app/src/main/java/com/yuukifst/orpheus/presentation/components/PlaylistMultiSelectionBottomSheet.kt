@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -58,7 +58,7 @@ import coil.compose.AsyncImage
 import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import kotlinx.collections.immutable.ImmutableList
@@ -88,12 +88,7 @@ fun PlaylistMultiSelectionBottomSheet(
 ) {
     val sheetState = rememberModalSheetState(skipPartiallyExpanded = true)
     val evenCornerRadius = 26.dp
-    val buttonShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = evenCornerRadius, smoothnessAsPercentBR = 60,
-        cornerRadiusBR = evenCornerRadius, smoothnessAsPercentTL = 60,
-        cornerRadiusTL = evenCornerRadius, smoothnessAsPercentBL = 60,
-        cornerRadiusBL = evenCornerRadius, smoothnessAsPercentTR = 60
-    )
+    val buttonShape = TerminalCornerShape
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -179,7 +174,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.errorContainer,
                                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onDeleteAll()
                                     onDismiss()
@@ -201,7 +196,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onExportAll()
                                     onDismiss()
@@ -234,7 +229,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onMergeAll()
                                     onDismiss()
@@ -256,7 +251,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 ),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 onClick = {
                                     onShareAll()
                                     onDismiss()
@@ -303,14 +298,14 @@ private fun StackedPlaylistCovers(
                     .offset { IntOffset(offsetX.dp.roundToPx(), 0) }
                     .zIndex((playlists.size - index).toFloat())
                     .size(imageSize)
-                    .background(borderColor, CircleShape)
+                    .background(borderColor, TerminalCornerShape)
             ) {
                 // Inner cover, inset by border width
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .padding(borderWidth)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     if (playlist.coverImageUri != null) {

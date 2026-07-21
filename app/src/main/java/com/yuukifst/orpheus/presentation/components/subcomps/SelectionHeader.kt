@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
@@ -23,7 +24,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -223,15 +224,15 @@ private fun StackedCoverArts(
                     .zIndex((songs.size - index).toFloat())
                     .graphicsLayer { scaleX = scale; scaleY = scale }
                     .size(imageSize)
-                    .shadow(2.dp, CircleShape)
-                    .clip(CircleShape)
-                    .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                    .shadow(2.dp, TerminalCornerShape)
+                    .clip(TerminalCornerShape)
+                    .border(2.dp, MaterialTheme.colorScheme.surface, TerminalCornerShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 SmartImage(
                     model = song.albumArtUriString,
                     contentDescription = song.title,
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     targetSize = Size(144, 144),
                     modifier = Modifier.matchParentSize()
                 )
@@ -246,8 +247,8 @@ private fun StackedCoverArts(
                     .offset { IntOffset(offsetX.dp.roundToPx(), 0) }
                     .zIndex(0f)
                     .size(imageSize)
-                    .shadow(2.dp, CircleShape)
-                    .clip(CircleShape)
+                    .shadow(2.dp, TerminalCornerShape)
+                    .clip(TerminalCornerShape)
                     .background(MaterialTheme.colorScheme.tertiaryContainer),
                 contentAlignment = Alignment.Center
             ) {

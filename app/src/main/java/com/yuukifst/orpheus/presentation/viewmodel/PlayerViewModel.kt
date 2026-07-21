@@ -416,10 +416,10 @@ class PlayerViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ThemePreference.ALBUM_ART
+            initialValue = ThemePreference.DEFAULT
         )
 
-    val navBarCornerRadius: StateFlow<Int> = userPreferencesRepository.navBarCornerRadiusFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 32)
+    val navBarCornerRadius: StateFlow<Int> = userPreferencesRepository.navBarCornerRadiusFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val navBarStyle: StateFlow<String> = userPreferencesRepository.navBarStyleFlow
         .stateIn(
@@ -1001,18 +1001,22 @@ class PlayerViewModel @Inject constructor(
                 try {
                     Json.decodeFromString<List<String>>(orderJson).toImmutableList()
                 } catch (e: Exception) {
-                    persistentListOf("SONGS", "ALBUMS", "ARTIST", "PLAYLISTS", "FOLDERS", "LIKED")
+                    LibraryTabId.DEFAULT_TAB_ORDER_KEYS.toImmutableList()
                 }
             } else {
-                persistentListOf("SONGS", "ALBUMS", "ARTIST", "PLAYLISTS", "FOLDERS", "LIKED")
+                LibraryTabId.DEFAULT_TAB_ORDER_KEYS.toImmutableList()
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), persistentListOf("SONGS", "ALBUMS", "ARTIST", "PLAYLISTS", "FOLDERS", "LIKED"))
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            LibraryTabId.DEFAULT_TAB_ORDER_KEYS.toImmutableList(),
+        )
 
     private val _loadedTabs = MutableStateFlow(emptySet<String>())
     private var lastBlockedDirectories: Set<String>? = null
 
-    private val _currentLibraryTabId = MutableStateFlow(LibraryTabId.SONGS)
+    private val _currentLibraryTabId = MutableStateFlow(LibraryTabId.LIKED)
     val currentLibraryTabId: StateFlow<LibraryTabId> = _currentLibraryTabId.asStateFlow()
 
     private val _isSortingSheetVisible = MutableStateFlow(false)
@@ -1252,13 +1256,13 @@ class PlayerViewModel @Inject constructor(
     // sheet recomposition when any preference changed.
     // ---------------------------------------------------------------------------
     data class PlayerConfigSlice(
-        val navBarCornerRadius: Int = 32,
+        val navBarCornerRadius: Int = 0,
         val navBarStyle: String = NavBarStyle.DEFAULT,
         val carouselStyle: String = CarouselStyle.NO_PEEK,
         val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
         val tapBackgroundClosesPlayer: Boolean = false,
-        val useSmoothCorners: Boolean = true,
-        val playerThemePreference: String = ThemePreference.ALBUM_ART
+        val useSmoothCorners: Boolean = false,
+        val playerThemePreference: String = ThemePreference.DEFAULT
     )
 
     private val playerConfigSlicePart1 = combine(

@@ -106,11 +106,11 @@ internal fun rememberSheetVisualState(
     ) {
         {
             val collapsedCornerTarget = if (isNavBarHidden) {
-                32.dp
+                0.dp
             } else if (navBarStyle == NavBarStyle.DEFAULT) {
                 navBarCornerRadiusDp
             } else if (navBarStyle == NavBarStyle.FULL_WIDTH) {
-                32.dp
+                0.dp
             } else {
                 navBarCornerRadiusDp
             }
@@ -125,7 +125,7 @@ internal fun rememberSheetVisualState(
                 } else if (navBarStyle == NavBarStyle.FULL_WIDTH) {
                     0.dp
                 } else if (isNavBarHidden) {
-                    60.dp
+                    0.dp
                 } else {
                     navBarCornerRadiusDp
                 }
@@ -154,11 +154,11 @@ internal fun rememberSheetVisualState(
     ) {
         {
             val collapsedRadius = if (isNavBarHidden) {
-                32.dp
+                0.dp
             } else if (navBarStyle == NavBarStyle.DEFAULT) {
-                10.dp
+                0.dp
             } else if (navBarStyle == NavBarStyle.FULL_WIDTH) {
-                32.dp
+                0.dp
             } else {
                 navBarCornerRadiusDp
             }
@@ -171,9 +171,9 @@ internal fun rememberSheetVisualState(
                 } else {
                     if (!isPlayingState.value || !hasCurrentSongState.value) {
                         if (isNavBarHidden) {
-                            32.dp
+                            0.dp
                         } else if (navBarStyle == NavBarStyle.DEFAULT) {
-                            10.dp
+                            0.dp
                         } else {
                             navBarCornerRadiusDp
                         }
@@ -190,9 +190,9 @@ internal fun rememberSheetVisualState(
                 playerContentExpansionFraction.value < 0.01f
             ) {
                 if (navBarStyle == NavBarStyle.DEFAULT) {
-                    lerp(10.dp, navBarCornerRadiusDp, swipeDismissProgress)
+                    lerp(0.dp, navBarCornerRadiusDp, swipeDismissProgress)
                 } else {
-                    val baseCollapsedRadius = if (isNavBarHidden) 32.dp else navBarCornerRadiusDp
+                    val baseCollapsedRadius = if (isNavBarHidden) 0.dp else navBarCornerRadiusDp
                     lerp(baseCollapsedRadius, navBarCornerRadiusDp, swipeDismissProgress)
                 }
             } else {

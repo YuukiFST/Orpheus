@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -282,7 +283,7 @@ private fun RecentlyPlayedPill(
         animationSpec = tween(durationMillis = 280),
         label = "pillArtistColor"
     )
-    val shape = RoundedCornerShape(animatedCorner)
+    val shape = TerminalCornerShape
     val artStartPadding = (HomeRecentlyPlayedPillHeight - HomeRecentlyPlayedPillArtSize) / 2
 
     Card(
@@ -306,7 +307,7 @@ private fun RecentlyPlayedPill(
                 model = item.song.albumArtUriString,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                shape = CircleShape,
+                shape = TerminalCornerShape,
                 targetSize = SmartImageCompactListTargetSize,
                 modifier = Modifier.size(HomeRecentlyPlayedPillArtSize)
             )

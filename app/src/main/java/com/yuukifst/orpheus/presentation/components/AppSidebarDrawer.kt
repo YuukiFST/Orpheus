@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +51,7 @@ fun AppSidebarDrawer(
                 modifier = Modifier
                     .width(300.dp)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp)),
+                    .clip(TerminalCornerShape),
                 drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
             ) {
                 DrawerContent(
@@ -122,7 +123,7 @@ private fun DrawerContent(
                 unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = TerminalCornerShape
         )
 
         NavigationDrawerItem(
@@ -149,7 +150,7 @@ private fun DrawerContent(
                 unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = TerminalCornerShape
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -183,7 +184,7 @@ private fun DrawerContent(
                 unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = TerminalCornerShape
         )
 
         Spacer(modifier = Modifier.height(24.dp))

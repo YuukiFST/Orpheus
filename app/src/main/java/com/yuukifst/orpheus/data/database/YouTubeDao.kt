@@ -47,6 +47,12 @@ interface YouTubeCachedTrackDao {
 
     @Query("SELECT video_id FROM youtube_cached_tracks WHERE is_favorite = 1")
     suspend fun getFavoriteVideoIdsOnce(): List<String>
+
+    @Query("SELECT * FROM youtube_cached_tracks WHERE is_favorite = 1")
+    fun observeFavoriteTracks(): Flow<List<YouTubeCachedTrackEntity>>
+
+    @Query("SELECT * FROM youtube_cached_tracks WHERE is_favorite = 1")
+    suspend fun getFavoriteTracksOnce(): List<YouTubeCachedTrackEntity>
 }
 
 @Dao

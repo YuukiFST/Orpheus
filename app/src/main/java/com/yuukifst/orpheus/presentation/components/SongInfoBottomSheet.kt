@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
@@ -73,8 +73,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.subcomps.AutoSizingTextToFill
 import com.yuukifst.orpheus.utils.formatDuration
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.yuukifst.orpheus.data.media.CoverArtUpdate
@@ -210,25 +209,13 @@ fun SongInfoBottomSheet(
     val evenCornerRadiusElems = 26.dp
 
     val listItemShape = remember {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 20.dp, smoothnessAsPercentBR = 60, cornerRadiusBR = 20.dp,
-            smoothnessAsPercentTL = 60, cornerRadiusTL = 20.dp, smoothnessAsPercentBL = 60,
-            cornerRadiusBL = 20.dp, smoothnessAsPercentTR = 60
-        )
+        TerminalCornerShape
     }
     val albumArtShape = remember(evenCornerRadiusElems) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = evenCornerRadiusElems, smoothnessAsPercentBR = 60, cornerRadiusBR = evenCornerRadiusElems,
-            smoothnessAsPercentTL = 60, cornerRadiusTL = evenCornerRadiusElems, smoothnessAsPercentBL = 60,
-            cornerRadiusBL = evenCornerRadiusElems, smoothnessAsPercentTR = 60
-        )
+        TerminalCornerShape
     }
     val playButtonShape = remember(evenCornerRadiusElems) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = evenCornerRadiusElems, smoothnessAsPercentBR = 60, cornerRadiusBR = evenCornerRadiusElems,
-            smoothnessAsPercentTL = 60, cornerRadiusTL = evenCornerRadiusElems, smoothnessAsPercentBL = 60,
-            cornerRadiusBL = evenCornerRadiusElems, smoothnessAsPercentTR = 60
-        )
+        TerminalCornerShape
     }
 
     val sheetState = rememberModalSheetState(
@@ -249,17 +236,13 @@ fun SongInfoBottomSheet(
         animationSpec = tween(durationMillis = 300), label = "FavoriteContentColorAnimation"
     )
     val favoriteButtonShape = remember(favoriteButtonCornerRadius) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = favoriteButtonCornerRadius, smoothnessAsPercentBR = 60, cornerRadiusBR = favoriteButtonCornerRadius,
-            smoothnessAsPercentTL = 60, cornerRadiusTL = favoriteButtonCornerRadius, smoothnessAsPercentBL = 60,
-            cornerRadiusBL = favoriteButtonCornerRadius, smoothnessAsPercentTR = 60
-        )
+        TerminalCornerShape
     }
     val infoSegmentContainerShape = remember {
-        RoundedCornerShape(20.dp)
+        TerminalCornerShape
     }
     val infoSegmentItemShape = remember {
-        RoundedCornerShape(8.dp)
+        TerminalCornerShape
     }
 
     val audioMetaLabel = remember(audioMeta) {
@@ -458,7 +441,7 @@ fun SongInfoBottomSheet(
                                                         ).show()
                                                         }
                                                     },
-                                                    shape = CircleShape
+                                                    shape = TerminalCornerShape
                                                 ) {
                                                     Icon(
                                                         modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
@@ -485,7 +468,7 @@ fun SongInfoBottomSheet(
                                                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                                                     ),
                                                     contentPadding = PaddingValues(horizontal = 0.dp),
-                                                    shape = CircleShape,
+                                                    shape = TerminalCornerShape,
                                                     onClick = onAddToQueue
                                                 ) {
                                                     Icon(
@@ -504,7 +487,7 @@ fun SongInfoBottomSheet(
                                                         contentColor = MaterialTheme.colorScheme.onTertiary
                                                     ),
                                                     contentPadding = PaddingValues(horizontal = 0.dp),
-                                                    shape = CircleShape,
+                                                    shape = TerminalCornerShape,
                                                     onClick = onAddNextToQueue
                                                 ) {
                                                     Icon(
@@ -533,7 +516,7 @@ fun SongInfoBottomSheet(
                                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                                     ),
-                                                    shape = CircleShape,
+                                                    shape = TerminalCornerShape,
                                                     onClick = onAddToPlayList
                                                 ) {
                                                     Icon(
@@ -552,7 +535,7 @@ fun SongInfoBottomSheet(
                                                         containerColor = MaterialTheme.colorScheme.errorContainer,
                                                         contentColor = MaterialTheme.colorScheme.onErrorContainer
                                                     ),
-                                                    shape = CircleShape,
+                                                    shape = TerminalCornerShape,
                                                     onClick = {
                                                         (context as? Activity)?.let { activity ->
                                                             onDeleteFromDevice(activity, song) { result ->
@@ -689,7 +672,7 @@ fun SongInfoBottomSheet(
                         .fillMaxWidth()
                         .navigationBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .padding(5.dp),
                     containerColor = Color.Transparent,
@@ -820,16 +803,7 @@ private fun ToneTargetPickerDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 32.dp,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBR = 32.dp,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusTL = 32.dp,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusBL = 32.dp,
-                smoothnessAsPercentTR = 60,
-            ),
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp,
         ) {
@@ -856,7 +830,7 @@ private fun ToneTargetPickerDialog(
                 )
 
                 Column(
-                    modifier = Modifier.clip(RoundedCornerShape(22.dp)),
+                    modifier = Modifier.clip(TerminalCornerShape),
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     ToneTarget.values().forEach { target ->
@@ -888,7 +862,7 @@ private fun ToneTargetOption(
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(4.dp))
+            .clip(shape = TerminalCornerShape)
             .clickable(onClick = onClick),
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -922,16 +896,7 @@ private fun ToneConfirmationDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 32.dp,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBR = 32.dp,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusTL = 32.dp,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusBL = 32.dp,
-                smoothnessAsPercentTR = 60,
-            ),
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp,
         ) {
@@ -986,7 +951,7 @@ private fun ToneDialogIcon(
 ) {
     Box(
         modifier = modifier
-            .clip(CircleShape)
+            .clip(TerminalCornerShape)
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center,
     ) {
@@ -1036,7 +1001,7 @@ private fun RingtoneActionButton(
             modifier = modifier,
             colors = colors,
             contentPadding = PaddingValues(horizontal = if (compactText) 12.dp else 18.dp),
-            shape = CircleShape,
+            shape = TerminalCornerShape,
             onClick = onClick,
         ) {
             Icon(
@@ -1060,7 +1025,7 @@ private fun RingtoneActionButton(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             ),
-            shape = CircleShape,
+            shape = TerminalCornerShape,
             onClick = onClick,
         ) {
             Icon(

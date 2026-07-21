@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -86,7 +87,7 @@ fun CrashReportDialog(
                 // Crash info card
                 Surface(
                     color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {

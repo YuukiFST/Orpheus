@@ -34,7 +34,7 @@ import com.yuukifst.orpheus.presentation.components.SmartImageListTargetSize
 import com.yuukifst.orpheus.utils.formatDuration
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @Composable
 fun ExpressiveSongListItem(
@@ -61,7 +61,7 @@ fun ExpressiveSongListItem(
                 targetSize = SmartImageListTargetSize,
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(AbsoluteSmoothCornerShape(12.dp, 60)),
+                    .clip(TerminalCornerShape),
             )
 
             Spacer(modifier = Modifier.width(16.dp))

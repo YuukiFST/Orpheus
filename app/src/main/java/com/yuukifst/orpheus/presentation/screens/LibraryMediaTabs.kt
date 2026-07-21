@@ -6,6 +6,8 @@
 
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -248,12 +250,7 @@ fun LibraryAlbumsTab(
                     modifier = Modifier
                         .padding(start = 14.dp, end = 14.dp, bottom = 6.dp)
                         .clip(
-                            RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp,
-                                bottomStart = PlayerSheetCollapsedCornerRadius,
-                                bottomEnd = PlayerSheetCollapsedCornerRadius
-                            )
+                            TerminalCornerShape
                         )
                         .fillMaxSize(),
                     state = listState,
@@ -274,12 +271,7 @@ fun LibraryAlbumsTab(
                     modifier = Modifier
                         .padding(start = 14.dp, end = 14.dp, bottom = 6.dp)
                         .clip(
-                            RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp,
-                                bottomStart = PlayerSheetCollapsedCornerRadius,
-                                bottomEnd = PlayerSheetCollapsedCornerRadius
-                            )
+                            TerminalCornerShape
                         )
                         .fillMaxSize(),
                     state = gridState,
@@ -330,12 +322,7 @@ fun LibraryAlbumsTab(
                                 modifier = Modifier
                                     .padding(start = 14.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 24.dp else 14.dp, bottom = 6.dp)
                                     .clip(
-                                        RoundedCornerShape(
-                                            topStart = 16.dp,
-                                            topEnd = 16.dp,
-                                            bottomStart = PlayerSheetCollapsedCornerRadius,
-                                            bottomEnd = PlayerSheetCollapsedCornerRadius
-                                        )
+                                        TerminalCornerShape
                                     ),
                                 state = listState,
                                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap + 4.dp),
@@ -402,12 +389,7 @@ fun LibraryAlbumsTab(
                                 modifier = Modifier
                                     .padding(start = 14.dp, end = if (gridState.canScrollForward || gridState.canScrollBackward) 24.dp else 14.dp, bottom = 6.dp)
                                     .clip(
-                                        RoundedCornerShape(
-                                            topStart = 16.dp,
-                                            topEnd = 16.dp,
-                                            bottomStart = PlayerSheetCollapsedCornerRadius,
-                                            bottomEnd = PlayerSheetCollapsedCornerRadius
-                                        )
+                                        TerminalCornerShape
                                     ),
                                 state = gridState,
                                 columns = GridCells.Fixed(2),
@@ -565,12 +547,7 @@ fun LibraryArtistsTab(
                 modifier = Modifier
                     .padding(start = 12.dp, end = 12.dp, bottom = 6.dp)
                     .clip(
-                        RoundedCornerShape(
-                            topStart = 26.dp,
-                            topEnd = 26.dp,
-                            bottomStart = PlayerSheetCollapsedCornerRadius,
-                            bottomEnd = PlayerSheetCollapsedCornerRadius
-                        )
+                        TerminalCornerShape
                     )
                     .fillMaxSize(),
                 state = listState,
@@ -619,12 +596,7 @@ fun LibraryArtistsTab(
                             modifier = Modifier
                                 .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
                                 .clip(
-                                    RoundedCornerShape(
-                                        topStart = 26.dp,
-                                        topEnd = 26.dp,
-                                        bottomStart = PlayerSheetCollapsedCornerRadius,
-                                        bottomEnd = PlayerSheetCollapsedCornerRadius
-                                    )
+                                    TerminalCornerShape
                                 ),
                             state = listState,
                             verticalArrangement = Arrangement.spacedBy(8.dp),

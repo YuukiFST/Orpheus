@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
@@ -14,8 +15,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
@@ -79,7 +78,6 @@ import com.yuukifst.orpheus.utils.formatSongCount
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import kotlin.math.roundToInt
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.toImmutableList
@@ -394,7 +392,7 @@ fun GenreDetailScreen(
                     onClick = { showSortSheet = true },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    shape = AbsoluteSmoothCornerShape(24.dp, 60)
+                    shape = TerminalCornerShape
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.MoreVert,
@@ -431,7 +429,7 @@ fun GenreDetailScreen(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                 ),
-                                shape = racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape(16.dp, 60)
+                                shape = TerminalCornerShape
                             ) {
                                 Icon(Icons.Rounded.AutoFixHigh, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -702,12 +700,7 @@ fun GenreArtistHeader(
     artistImageUrl: String?
 ) {
     val headerShape = remember {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 24.dp, smoothnessAsPercentTR = 60,
-            cornerRadiusTL = 24.dp, smoothnessAsPercentTL = 60,
-            cornerRadiusBR = 0.dp, smoothnessAsPercentBR = 0,
-            cornerRadiusBL = 0.dp, smoothnessAsPercentBL = 0
-        )
+        TerminalCornerShape
     }
 
     val context = LocalContext.current
@@ -736,7 +729,7 @@ fun GenreArtistHeader(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
@@ -784,12 +777,7 @@ fun GenreAlbumHeader(
         if (useArtistStyle) {
             RectangleShape
         } else {
-             AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 24.dp, smoothnessAsPercentTR = 60,
-                cornerRadiusTL = 24.dp, smoothnessAsPercentTL = 60,
-                cornerRadiusBR = 0.dp, smoothnessAsPercentBR = 0,
-                cornerRadiusBL = 0.dp, smoothnessAsPercentBL = 0
-            )
+             TerminalCornerShape
         }
     }
     
@@ -811,7 +799,7 @@ fun GenreAlbumHeader(
                 targetSize = SmartImageCompactListTargetSize,
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(TerminalCornerShape)
             )
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
@@ -869,21 +857,16 @@ fun GenreSongItemWrapper(
     // Optimization: Cache shapes to avoid reallocation during scroll
     val songItemShape = remember(isFirstInAlbum, isLastInAlbum) {
         when {
-            isFirstInAlbum && isLastInAlbum -> RoundedCornerShape(16.dp)
-            isFirstInAlbum -> RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
-            isLastInAlbum -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 16.dp, bottomEnd = 16.dp)
-            else -> RoundedCornerShape(4.dp)
+            isFirstInAlbum && isLastInAlbum -> TerminalCornerShape
+            isFirstInAlbum -> TerminalCornerShape
+            isLastInAlbum -> TerminalCornerShape
+            else -> TerminalCornerShape
         }
     }
     
     val containerShape = remember(isLastInAlbum, isLastAlbumInSection) {
         if (isLastInAlbum && isLastAlbumInSection) {
-            AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 0.dp, smoothnessAsPercentTR = 0,
-                cornerRadiusTL = 0.dp, smoothnessAsPercentTL = 0,
-                cornerRadiusBR = 24.dp, smoothnessAsPercentBR = 60,
-                cornerRadiusBL = 24.dp, smoothnessAsPercentBL = 60
-            ) 
+            TerminalCornerShape 
         } else {
            RectangleShape
         }

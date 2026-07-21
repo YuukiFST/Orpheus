@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
@@ -19,7 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -82,7 +83,6 @@ import com.yuukifst.orpheus.presentation.viewmodel.MainViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
 import com.yuukifst.orpheus.utils.formatDuration
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -257,12 +257,7 @@ fun DailyMixScreen(
                                 .weight(1f)
                                 .height(76.dp),
                             enabled = dailyMixSongs.isNotEmpty(),
-                            shape = RoundedCornerShape(
-                                topStart = 60.dp,
-                                topEnd = 14.dp,
-                                bottomStart = 60.dp,
-                                bottomEnd = 14.dp
-                            )
+                            shape = TerminalCornerShape
                         ) {
                             Icon(Icons.Rounded.PlayArrow, contentDescription = stringResource(R.string.cd_play), modifier = Modifier.size(
                                 ButtonDefaults.IconSize))
@@ -283,12 +278,7 @@ fun DailyMixScreen(
                                 .weight(1f)
                                 .height(76.dp),
                             enabled = dailyMixSongs.isNotEmpty(),
-                            shape = RoundedCornerShape(
-                                topStart = 14.dp,
-                                topEnd = 60.dp,
-                                bottomStart = 14.dp,
-                                bottomEnd = 60.dp
-                            )
+                            shape = TerminalCornerShape
                         ) {
                             Icon(Icons.Rounded.Shuffle, contentDescription = shuffleLabel, modifier = Modifier.size(
                                 ButtonDefaults.IconSize))
@@ -324,7 +314,7 @@ fun DailyMixScreen(
             modifier = Modifier
                 .statusBarsPadding()
                 .padding(start = 10.dp, top = 8.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,

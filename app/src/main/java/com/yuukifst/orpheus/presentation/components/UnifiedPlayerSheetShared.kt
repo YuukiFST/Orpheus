@@ -1,6 +1,7 @@
 @file:kotlin.OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +20,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SkipNext
@@ -96,7 +97,7 @@ internal fun MiniPlayerContentInternal(
                 SmartImage(
                     model = albumArtModel,
                     contentDescription = stringResource(R.string.cd_album_art_for_title, song.title),
-                    shape = CircleShape,
+                    shape = TerminalCornerShape,
                     targetSize = Size(150, 150),
                     modifier = Modifier.size(44.dp)
                 )
@@ -151,7 +152,7 @@ internal fun MiniPlayerContentInternal(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(LocalMaterialTheme.current.onPrimary)
                 .clickable(
                     interactionSource = previousInteraction,
@@ -181,7 +182,7 @@ internal fun MiniPlayerContentInternal(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .clip(RoundedCornerShape(playPauseCorner))
+                .clip(TerminalCornerShape)
                 .background(LocalMaterialTheme.current.primary)
                 .clickable(
                     interactionSource = playPauseInteraction,
@@ -205,7 +206,7 @@ internal fun MiniPlayerContentInternal(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(LocalMaterialTheme.current.onPrimary)
                 .clickable(
                     interactionSource = nextInteraction,

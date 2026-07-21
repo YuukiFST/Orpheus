@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalContentColor
@@ -81,10 +82,10 @@ fun PlayerSeekBar(
             .fillMaxWidth()
             .shadow(
                 elevation = 8.dp,          // shadow level
-                shape = CircleShape,       // the same clip shape
+                shape = TerminalCornerShape,       // the same clip shape
                 clip = false               // important: do NOT clip the shadow
             )
-            .clip(CircleShape)
+            .clip(TerminalCornerShape)
             .background(backgroundColor)
             .padding(horizontal = 16.dp, vertical = 0.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

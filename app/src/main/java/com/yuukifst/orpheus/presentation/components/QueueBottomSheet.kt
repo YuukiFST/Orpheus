@@ -45,7 +45,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.Icons
@@ -152,7 +152,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.SettingsViewModel
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.performAppCompatHapticFeedback
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
@@ -249,7 +249,7 @@ fun QueueBottomSheet(
     onQueueRelease: (Float, Float) -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = 10.dp,
-    shape: RoundedCornerShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    shape: RoundedCornerShape = TerminalCornerShape,
 ) {
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
@@ -581,18 +581,9 @@ fun QueueBottomSheet(
     }
     val queueListShape = remember(useLightweightQueueListShape) {
         if (useLightweightQueueListShape) {
-            RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
+            TerminalCornerShape
         } else {
-            AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 26.dp,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusTL = 26.dp,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusBR = 0.dp,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBL = 0.dp,
-                smoothnessAsPercentBL = 60
-            )
+            TerminalCornerShape
         }
     }
 
@@ -942,16 +933,7 @@ fun QueueBottomSheet(
                             .fillMaxHeight()
                             .aspectRatio(1f),
                         onClick = { isFabExpanded = !isFabExpanded },
-                        shape = AbsoluteSmoothCornerShape(
-                            cornerRadiusTR = 50.dp,
-                            smoothnessAsPercentTR = 60,
-                            cornerRadiusTL = 8.dp,
-                            smoothnessAsPercentTL = 60,
-                            cornerRadiusBR = 50.dp,
-                            smoothnessAsPercentBR = 60,
-                            cornerRadiusBL = 8.dp,
-                            smoothnessAsPercentBL = 60
-                        ),
+                        shape = TerminalCornerShape,
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         elevation = FloatingActionButtonDefaults.elevation(0.dp)
@@ -1095,7 +1077,7 @@ fun QueueBottomSheet(
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
             ) {
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     color = colors.inverseSurface,
                     tonalElevation = 6.dp,
                     shadowElevation = 6.dp
@@ -1199,7 +1181,7 @@ private fun QueueToolbarMenuButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             },
-        shape = RoundedCornerShape(18.dp),
+        shape = TerminalCornerShape,
         color = containerColor,
         tonalElevation = 8.dp,
         shadowElevation = 8.dp
@@ -1250,7 +1232,7 @@ private fun QueueHeaderSection(
                 .padding(top = 2.dp, bottom = 14.dp)
                 .width(42.dp)
                 .height(4.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
                 .background(colors.onSurface.copy(alpha = 0.14f))
         )
 
@@ -1336,7 +1318,7 @@ private fun QueueSourceBadge(
     val colors = MaterialTheme.colorScheme
     Surface(
         modifier = modifier.widthIn(max = 190.dp),
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         color = colors.surfaceContainerHighest.copy(alpha = 0.88f),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
@@ -1384,16 +1366,7 @@ private fun QueueControlsToolbar(
 
     Surface(
         modifier = modifier.fillMaxHeight(),
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTR = 8.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTL = 50.dp,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusBR = 8.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBL = 50.dp,
-            smoothnessAsPercentBL = 60
-        ),
+        shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shadowElevation = 0.dp
     ) {
@@ -1453,16 +1426,7 @@ fun SaveQueueAsPlaylistSheet(
     val focusRequester = remember { FocusRequester() }
     val animatedAlbumCornerRadius = 60.dp
     val albumShape = remember(animatedAlbumCornerRadius) {
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = animatedAlbumCornerRadius,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = animatedAlbumCornerRadius,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBL = animatedAlbumCornerRadius,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBR = animatedAlbumCornerRadius,
-            smoothnessAsPercentTL = 60
-        )
+        TerminalCornerShape
     }
 
     var playlistName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -1563,7 +1527,7 @@ fun SaveQueueAsPlaylistSheet(
                                                 }
                                             }
                                         },
-                                    shape = RoundedCornerShape(animatedCornerPercent),
+                                    shape = TerminalCornerShape,
                                     color = animatedContainerColor,
                                     contentColor = animatedContentColor
                                 ) {
@@ -1608,7 +1572,7 @@ fun SaveQueueAsPlaylistSheet(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = TerminalCornerShape,
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -1640,7 +1604,7 @@ fun SaveQueueAsPlaylistSheet(
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = CircleShape,
+                                shape = TerminalCornerShape,
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -1668,7 +1632,7 @@ fun SaveQueueAsPlaylistSheet(
                             modifier = Modifier.fillMaxWidth(),
                             tonalElevation = 6.dp,
                             shadowElevation = 4.dp,
-                            shape = CircleShape,
+                            shape = TerminalCornerShape,
                             color = MaterialTheme.colorScheme.secondaryContainer
                         ) {
                             Row(
@@ -1724,7 +1688,7 @@ fun SaveQueueAsPlaylistSheet(
                                     },
                                     enabled = hasSelection,
                                     modifier = Modifier.height(48.dp),
-                                    shape = CircleShape,
+                                    shape = TerminalCornerShape,
                                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -1786,14 +1750,14 @@ fun SaveQueueAsPlaylistSheet(
                             Row(
                                 Modifier
                                     .fillMaxWidth()
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .clickable {
                                         val currentSelection = selectedSongIds[song.id] ?: false
                                         selectedSongIds[song.id] = !currentSelection
                                     }
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = CircleShape
+                                        shape = TerminalCornerShape
                                     )
                                     .padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1809,7 +1773,7 @@ fun SaveQueueAsPlaylistSheet(
                                         .size(36.dp)
                                         .background(
                                             MaterialTheme.colorScheme.surfaceVariant,
-                                            CircleShape
+                                            TerminalCornerShape
                                         )
                                 ) {
                                     SmartImage(
@@ -1864,14 +1828,14 @@ fun QueuePlaylistSongItem(
         label = "cornerRadiusAnimation"
     )
 
-    val itemShape = RoundedCornerShape(cornerRadius)
+    val itemShape = TerminalCornerShape
 
     val albumCornerRadius by animateDpAsState(
         targetValue = if (isCurrentSong) 60.dp else 8.dp,
         label = "cornerRadiusAnimation"
     )
 
-    val albumShape = RoundedCornerShape(albumCornerRadius)
+    val albumShape = TerminalCornerShape
 
     val elevation by animateDpAsState(
         targetValue = if (isDragging) 4.dp else 1.dp,
@@ -1946,7 +1910,7 @@ fun QueuePlaylistSongItem(
                     .padding(end = 12.dp)
                     .height(surfaceHeightDp)
                     .width(revealWidthDp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(dismissBackgroundColor),
                 contentAlignment = Alignment.CenterEnd
             ) {

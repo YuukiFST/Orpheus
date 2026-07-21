@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,7 @@ fun LyricsSyncControls(
             .height(52.dp)
             .background(
                 color = backgroundColor,
-                shape = CircleShape
+                shape = TerminalCornerShape
             )
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -110,7 +111,7 @@ private fun androidx.compose.foundation.layout.RowScope.SyncButton(
             .weight(weight)
             .fillMaxHeight(),
         enabled = enabled,
-        shape = CircleShape,
+        shape = TerminalCornerShape,
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = containerColor,
             contentColor = contentColor,

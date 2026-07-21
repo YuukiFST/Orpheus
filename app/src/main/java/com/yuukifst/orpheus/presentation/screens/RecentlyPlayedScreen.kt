@@ -24,7 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -91,7 +91,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -358,7 +358,7 @@ fun RecentlyPlayedScreen(
             modifier = Modifier
                 .statusBarsPadding()
                 .padding(start = 10.dp, top = 8.dp)
-                .clip(CircleShape)
+                .clip(TerminalCornerShape)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
@@ -479,12 +479,7 @@ private fun RecentlyPlayedActions(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize(),
-            shape = RoundedCornerShape(
-                topStart = 52.dp,
-                topEnd = 14.dp,
-                bottomStart = 52.dp,
-                bottomEnd = 14.dp
-            )
+            shape = TerminalCornerShape
         ) {
             Icon(
                 imageVector = Icons.Rounded.PlayArrow,
@@ -500,12 +495,7 @@ private fun RecentlyPlayedActions(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize(),
-            shape = RoundedCornerShape(
-                topStart = 14.dp,
-                topEnd = 52.dp,
-                bottomStart = 14.dp,
-                bottomEnd = 52.dp
-            )
+            shape = TerminalCornerShape
         ) {
             Icon(
                 imageVector = Icons.Rounded.Shuffle,
@@ -544,7 +534,7 @@ private fun RecentlyPlayedTimestampDivider(
             modifier = Modifier
                 .weight(1f)
                 .height(8.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(TerminalCornerShape)
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
@@ -556,16 +546,7 @@ private fun RecentlyPlayedTimestampDivider(
         )
         Surface(
             color = chipContainer,
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTL = 22.dp,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusTR = 22.dp,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusBL = 22.dp,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusBR = 22.dp,
-                smoothnessAsPercentTL = 60
-            )
+            shape = TerminalCornerShape
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -575,7 +556,7 @@ private fun RecentlyPlayedTimestampDivider(
                 Box(
                     modifier = Modifier
                         .size(6.dp)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(railColor)
                 )
                 Text(
@@ -590,7 +571,7 @@ private fun RecentlyPlayedTimestampDivider(
             modifier = Modifier
                 .weight(1f)
                 .height(8.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(TerminalCornerShape)
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
@@ -610,16 +591,7 @@ private fun RecentlyPlayedEmptyState(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 26.dp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = 26.dp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBL = 26.dp,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusBR = 26.dp,
-            smoothnessAsPercentTL = 60
-        ),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )

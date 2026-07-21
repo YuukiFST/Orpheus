@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -65,7 +65,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.subcomps.SineWaveLine
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -115,16 +115,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
             item(key = "welcome") {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = fabCornerRadius,
-                        cornerRadiusTL = fabCornerRadius,
-                        cornerRadiusBL = fabCornerRadius,
-                        cornerRadiusBR = fabCornerRadius,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    ),
+                    shape = TerminalCornerShape,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Row(
@@ -368,16 +359,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
         }
         ExtendedFloatingActionButton(
             onClick = { launchUrl(context, reportUrl) },
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTR = fabCornerRadius,
-                cornerRadiusTL = fabCornerRadius,
-                cornerRadiusBL = fabCornerRadius,
-                cornerRadiusBR = fabCornerRadius,
-                smoothnessAsPercentTR = 60,
-                smoothnessAsPercentTL = 60,
-                smoothnessAsPercentBL = 60,
-                smoothnessAsPercentBR = 60
-            ),
+            shape = TerminalCornerShape,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             icon = {
@@ -431,7 +413,7 @@ private fun GitHubReportCard(
                 Box(
                     modifier = Modifier
                         .size(42.dp)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape),
+                        .background(MaterialTheme.colorScheme.surface, TerminalCornerShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -461,16 +443,7 @@ private fun GitHubReportCard(
                 FilledTonalButton(
                     onClick = onOpenIssues,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = 14.dp,
-                        cornerRadiusTL = 14.dp,
-                        cornerRadiusBL = 14.dp,
-                        cornerRadiusBR = 14.dp,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    ),
+                    shape = TerminalCornerShape,
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
@@ -480,16 +453,7 @@ private fun GitHubReportCard(
                 Button(
                     onClick = onReportIssue,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = 14.dp,
-                        cornerRadiusTL = 14.dp,
-                        cornerRadiusBL = 14.dp,
-                        cornerRadiusBR = 14.dp,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    )
+                    shape = TerminalCornerShape
                 ) {
                     Text(text = stringResource(R.string.presentation_batch_g_beta_sheet_report_bug))
                 }
@@ -527,7 +491,7 @@ private fun BetaFaqSection(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(iconTint.copy(alpha = 0.16f), CircleShape),
+                        .background(iconTint.copy(alpha = 0.16f), TerminalCornerShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -578,16 +542,7 @@ private fun BetaCardSurface(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val shape = AbsoluteSmoothCornerShape(
-        cornerRadiusTR = 18.dp,
-        cornerRadiusTL = 18.dp,
-        cornerRadiusBL = 18.dp,
-        cornerRadiusBR = 18.dp,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentBR = 60
-    )
+    val shape = TerminalCornerShape
 
     if (onClick == null) {
         Surface(
@@ -668,7 +623,7 @@ private fun BetaBulletText(text: String) {
             modifier = Modifier
                 .padding(top = 8.dp)
                 .size(5.dp)
-                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .background(MaterialTheme.colorScheme.primary, TerminalCornerShape)
         )
         Text(
             text = text,

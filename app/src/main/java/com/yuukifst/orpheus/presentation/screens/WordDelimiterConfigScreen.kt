@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.widget.Toast
 import androidx.compose.ui.res.stringResource
@@ -26,7 +27,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -168,7 +169,7 @@ fun WordDelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -238,7 +239,7 @@ fun WordDelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -286,7 +287,7 @@ fun WordDelimiterConfigScreen(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                                     unfocusedBorderColor = MaterialTheme.colorScheme.outline
                                 ),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -325,7 +326,7 @@ fun WordDelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -371,7 +372,7 @@ fun WordDelimiterConfigScreen(
                         modifier = Modifier
                             .width(52.dp)
                             .height(36.dp),
-                        shape = CircleShape
+                        shape = TerminalCornerShape
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.RestartAlt,
@@ -430,7 +431,7 @@ fun WordDelimiterConfigScreen(
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(24.dp)
+                shape = TerminalCornerShape
             )
         }
     }

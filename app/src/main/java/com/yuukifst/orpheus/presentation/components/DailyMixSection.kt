@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -56,11 +56,10 @@ import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
-import com.yuukifst.orpheus.utils.shapes.RoundedStarShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.ui.res.stringResource
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.persistentListOf
 
 
@@ -191,16 +190,7 @@ private fun DailyMixCard(
     val visibleSongs = remember(songs) { songs.take(4).toImmutableList() }
     val cornerRadius = 30.dp
     Card(
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusBR = cornerRadius,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusTR = cornerRadius,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusBL = cornerRadius,
-            smoothnessAsPercentBL = 60,
-            cornerRadiusTL = cornerRadius,
-            smoothnessAsPercentBR = 60
-        ),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.elevatedCardElevation(0.dp),
         modifier = Modifier.fillMaxWidth()
@@ -307,22 +297,10 @@ fun DailyMixHeader(thumbnails: ImmutableList<Song>) {
 @Composable
 fun threeShapeSwitch(index: Int, thirdShapeCornerRadius: Dp = 16.dp): Shape { // Ensure the function returns a Shape
     return when (index) { // Return the result of the when expression
-        0 -> RoundedStarShape(
-            sides = 6,
-            rotation = 10f
-        )
-        1 -> CircleShape
-        2 -> AbsoluteSmoothCornerShape(
-            cornerRadiusBL = thirdShapeCornerRadius,
-            cornerRadiusTR = thirdShapeCornerRadius,
-            smoothnessAsPercentBL = 60,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTL = thirdShapeCornerRadius,
-            cornerRadiusBR = thirdShapeCornerRadius,
-            smoothnessAsPercentTL = 60,
-            smoothnessAsPercentBR = 60
-        )
-        else -> CircleShape // It's good practice to have a default case
+        0 -> TerminalCornerShape
+        1 -> TerminalCornerShape
+        2 -> TerminalCornerShape
+        else -> TerminalCornerShape // It's good practice to have a default case
     }
 }
 
@@ -342,7 +320,7 @@ private fun DailyMixSongList(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp, start = 8.dp, end = 8.dp)
-            .clip(RoundedCornerShape(24.dp)),
+            .clip(TerminalCornerShape),
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         songs.forEach { song ->
@@ -352,7 +330,7 @@ private fun DailyMixSongList(
                 isPlaying = stablePlayerState.isPlaying && stablePlayerState.currentSong?.id == song.id,
                 containerColorOverride = itemContainerColor,
                 onMoreOptionsClick = onMoreOptionsClick,
-                customShape = RoundedCornerShape(10.dp),
+                customShape = TerminalCornerShape,
                 showAlbumArt = false,
                 onClick = {
                     playerViewModel.showAndPlaySong(
@@ -382,17 +360,7 @@ private fun ViewAllDailyMixButton(
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = Color.Transparent
         ),
-        shape = AbsoluteSmoothCornerShape(
-            cornerRadiusTL = 10.dp,
-            cornerRadiusTR = 10.dp,
-            smoothnessAsPercentTL = 70,
-            smoothnessAsPercentTR = 70,
-            cornerRadiusBL = 60.dp,
-            cornerRadiusBR = 60.dp,
-            smoothnessAsPercentBL = 70,
-            smoothnessAsPercentBR = 70
-
-        )
+        shape = TerminalCornerShape
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

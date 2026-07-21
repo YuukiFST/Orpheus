@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
@@ -26,7 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
@@ -273,12 +274,7 @@ fun PlaylistItems(
                 .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
                 .fillMaxSize()
                 .clip(
-                    RoundedCornerShape(
-                        topStart = 12.dp,
-                        topEnd = 12.dp,
-                        bottomStart = PlayerSheetCollapsedCornerRadius,
-                        bottomEnd = PlayerSheetCollapsedCornerRadius
-                    )
+                    TerminalCornerShape
                 ),
             state = listState,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -399,7 +395,7 @@ fun PlaylistItem(
                     Modifier.border(
                         width = selectionBorderWidth,
                         color = selectionBorderColor,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = TerminalCornerShape
                     )
                 } else {
                     Modifier
@@ -468,7 +464,7 @@ fun PlaylistItem(
                         .size(26.dp)
                         .background(
                             color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
+                            shape = TerminalCornerShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -513,7 +509,7 @@ fun CreatePlaylistDialogRedesigned(
         onDismissRequest = onDismiss,
     ) {
         Surface(
-            shape = RoundedCornerShape(32.dp),
+            shape = TerminalCornerShape,
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp,
             modifier = Modifier.padding(16.dp)
@@ -536,7 +532,7 @@ fun CreatePlaylistDialogRedesigned(
                     onValueChange = { playlistName = it },
                     label = { Text(stringResource(R.string.create_playlist_name_label)) },
                     placeholder = { Text(stringResource(R.string.create_playlist_name_placeholder)) },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
@@ -563,7 +559,7 @@ fun CreatePlaylistDialogRedesigned(
                         onClick = { onCreate(playlistName) },
                         modifier = Modifier.weight(1f),
                         enabled = playlistName.isNotEmpty(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = TerminalCornerShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary

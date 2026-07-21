@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateFloatAsState
@@ -145,7 +146,7 @@ fun ScreenWrapper(
                     CompositingStrategy.Auto
                 }
                 if (shouldRunDepthEffects && cornerRadius > 0.5f) {
-                    this.shape = RoundedCornerShape(cornerRadius.dp)
+                    this.shape = TerminalCornerShape
                     this.clip = true
                 } else {
                     this.clip = false

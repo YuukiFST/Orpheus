@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
@@ -47,7 +48,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
@@ -217,7 +218,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -253,7 +253,7 @@ import kotlin.math.abs
 import com.yuukifst.orpheus.presentation.components.rememberModalSheetState
 
 val ListExtraBottomGap = 30.dp
-val PlayerSheetCollapsedCornerRadius = 32.dp
+val PlayerSheetCollapsedCornerRadius = 0.dp
 private const val MAX_ALBUM_MULTI_SELECTION = 6
 private const val ENABLE_FOLDERS_SOURCE_TOGGLE = true
 private const val ENABLE_FOLDERS_STORAGE_FILTER = false
@@ -798,17 +798,7 @@ fun LibraryScreen(
                         .fillMaxSize()
                         .padding(horizontal = 0.dp, vertical = 0.dp),
                     color = MaterialTheme.colorScheme.surface,
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTL = 34.dp,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusBL = 0.dp,
-                        smoothnessAsPercentBR = 60,
-                        cornerRadiusBR = 0.dp,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusTR = 34.dp,
-                        smoothnessAsPercentTL = 60
-                    )
-                    // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
+                    shape = RoundedCornerShape(0.dp)
                 ) {
                     Column(Modifier.fillMaxSize()) {
                         // OPTIMIZATION: The sorting logic is now more efficient.
@@ -1065,7 +1055,7 @@ fun LibraryScreen(
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
                                                 inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                activeCornerRadius = 32.dp,
+                                                activeCornerRadius = 0.dp,
                                                 onClick = { playerViewModel.setAlbumsListView(false) },
                                                 text = stringResource(R.string.presentation_batch_d_view_grid),
                                                 imageVector = Icons.Rounded.ViewModule
@@ -1079,7 +1069,7 @@ fun LibraryScreen(
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
                                                 inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                activeCornerRadius = 32.dp,
+                                                activeCornerRadius = 0.dp,
                                                 onClick = { playerViewModel.setAlbumsListView(true) },
                                                 text = stringResource(R.string.presentation_batch_d_view_list),
                                                 imageVector = Icons.AutoMirrored.Rounded.ViewList
@@ -1101,7 +1091,7 @@ fun LibraryScreen(
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
                                                 inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                activeCornerRadius = 32.dp,
+                                                activeCornerRadius = 0.dp,
                                                 onClick = { playerViewModel.setFoldersSource(FolderSource.INTERNAL) },
                                                 text = stringResource(R.string.presentation_batch_d_storage_internal)
                                             )
@@ -1114,7 +1104,7 @@ fun LibraryScreen(
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
                                                 inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                activeCornerRadius = 32.dp,
+                                                activeCornerRadius = 0.dp,
                                                 onClick = {
                                                     if (isSdAvailable) {
                                                         playerViewModel.setFoldersSource(FolderSource.SD_CARD)
@@ -1150,7 +1140,7 @@ fun LibraryScreen(
                                                 MaterialTheme.colorScheme.tertiary
                                             else
                                                 MaterialTheme.colorScheme.surfaceContainerLow,
-                                            boxCornerRadius = if (playerUiState.hideLocalMedia) 18.dp else 50.dp,
+                                            boxCornerRadius = 0.dp,
                                             onCheckedChange = { playerViewModel.setHideLocalMedia(it) }
                                         )
                                     }
@@ -1804,7 +1794,7 @@ private fun CompactLibraryPagerIndicator(
                     .padding(horizontal = 3.dp)
                     .height(4.dp)
                     .width(width)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
             )
         }
@@ -1939,7 +1929,7 @@ fun LibraryNavigationPill(
 ) {
     data class PillState(val pageIndex: Int, val iconRes: Int, val title: String)
 
-    val pillRadius = 50.dp//26.dp
+    val pillRadius = 0.dp
     val innerRadius = 4.dp
     val titleHorizontalPadding = 14.dp
     val titleVerticalPadding = 10.dp
@@ -2000,24 +1990,14 @@ fun LibraryNavigationPill(
             horizontalArrangement = Arrangement.spacedBy(pillGap)
         ) {
             Surface(
-                shape = RoundedCornerShape(
-                    topStart = pillRadius,
-                    bottomStart = pillRadius,
-                    topEnd = innerRadius,
-                    bottomEnd = innerRadius
-                ),
+                shape = TerminalCornerShape,
                 tonalElevation = 8.dp,
                 color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
                     .width(targetTitleWidth)
                     .height(pillHeight)
                     .clip(
-                        RoundedCornerShape(
-                            topStart = pillRadius,
-                            bottomStart = pillRadius,
-                            topEnd = innerRadius,
-                            bottomEnd = innerRadius
-                        )
+                        TerminalCornerShape
                     )
                     .clickable(onClick = onClick)
             ) {
@@ -2066,23 +2046,13 @@ fun LibraryNavigationPill(
             }
 
             Surface(
-                shape = RoundedCornerShape(
-                    topStart = arrowCorner,
-                    bottomStart = arrowCorner,
-                    topEnd = pillRadius,
-                    bottomEnd = pillRadius
-                ),
+                shape = TerminalCornerShape,
                 tonalElevation = 8.dp,
                 color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
                     .height(pillHeight)
                     .clip(
-                        RoundedCornerShape(
-                            topStart = arrowCorner,
-                            bottomStart = arrowCorner,
-                            topEnd = pillRadius,
-                            bottomEnd = pillRadius
-                        )
+                        TerminalCornerShape
                     )
                     .clickable(
                         indication = ripple(),
@@ -2184,7 +2154,7 @@ private fun LibraryTabSwitcherSheet(
                     ) {
                         FilledTonalButton(
                             onClick = onEditClick,
-                            shape = CircleShape,
+                            shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -2213,7 +2183,7 @@ private fun LibraryTabGridItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(0.dp)
     val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
     val iconContainer = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
     val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
@@ -2237,7 +2207,7 @@ private fun LibraryTabGridItem(
             Box(
                 modifier = Modifier
                     .size(52.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(iconContainer.copy(alpha = 0.92f)),
                 contentAlignment = Alignment.Center
             ) {
@@ -2550,12 +2520,7 @@ fun LibraryFoldersTab(
                                     .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp)
                                     .fillMaxSize()
                                     .clip(
-                                        RoundedCornerShape(
-                                            topStart = 26.dp,
-                                            topEnd = 26.dp,
-                                            bottomStart = PlayerSheetCollapsedCornerRadius,
-                                            bottomEnd = PlayerSheetCollapsedCornerRadius
-                                        )
+                                        TerminalCornerShape
                                     ),
                                 state = listState,
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -2780,8 +2745,8 @@ fun AlbumGridItemRedesigned(
 
     val gradientBaseColor = itemDesignColorScheme.primaryContainer
     val onGradientColor = itemDesignColorScheme.onPrimaryContainer
-    val cardCornerRadius = 20.dp
-    val cardShape = RoundedCornerShape(cardCornerRadius)
+    val cardCornerRadius = 0.dp
+    val cardShape = TerminalCornerShape
     val selectionScale by animateFloatAsState(
         targetValue = if (isSelected) 0.985f else 1f,
         animationSpec = tween(durationMillis = 220),
@@ -2821,21 +2786,21 @@ fun AlbumGridItemRedesigned(
                         modifier = Modifier
                             .fillMaxWidth(0.8f)
                             .height(20.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.4f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                 }
             }
@@ -2942,7 +2907,7 @@ fun AlbumGridItemRedesigned(
                             .size(28.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -2975,7 +2940,7 @@ fun ArtistListItem(artist: Artist, onClick: () -> Unit, isLoading: Boolean = fal
                 ShimmerBox(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
@@ -2983,14 +2948,14 @@ fun ArtistListItem(artist: Artist, onClick: () -> Unit, isLoading: Boolean = fal
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
                             .height(20.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.3f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                 }
             } else {
@@ -3055,8 +3020,8 @@ fun AlbumListItem(
 
     val gradientBaseColor = itemDesignColorScheme.primaryContainer
     val onGradientColor = itemDesignColorScheme.onPrimaryContainer
-    val cardCornerRadius = 16.dp
-    val cardShape = RoundedCornerShape(cardCornerRadius)
+    val cardCornerRadius = 0.dp
+    val cardShape = TerminalCornerShape
     val selectionScale by animateFloatAsState(
         targetValue = if (isSelected) 0.99f else 1f,
         animationSpec = tween(durationMillis = 200),
@@ -3092,14 +3057,14 @@ fun AlbumListItem(
                         modifier = Modifier
                             .fillMaxWidth(0.6f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.4f)
                             .height(14.dp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .clip(TerminalCornerShape)
                     )
                 }
             }
@@ -3229,7 +3194,7 @@ fun AlbumListItem(
                             .size(24.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {

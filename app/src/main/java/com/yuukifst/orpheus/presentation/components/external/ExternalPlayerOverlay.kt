@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
@@ -59,7 +59,7 @@ import com.yuukifst.orpheus.presentation.components.player.AnimatedPlaybackContr
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.utils.formatDuration
 import kotlin.math.roundToLong
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -80,16 +80,7 @@ fun ExternalPlayerOverlay(
 
     val sheetShape = remember(navBarCornerRadius) {
         val radiusDp = navBarCornerRadius.dp
-        AbsoluteSmoothCornerShape(
-            cornerRadiusTL = radiusDp,
-            smoothnessAsPercentTR = 60,
-            cornerRadiusTR = radiusDp,
-            smoothnessAsPercentTL = 60,
-            cornerRadiusBL = radiusDp,
-            smoothnessAsPercentBR = 60,
-            cornerRadiusBR = radiusDp,
-            smoothnessAsPercentBL = 60
-        )
+        TerminalCornerShape
     }
 
     val controlAnimationSpec = remember {
@@ -195,7 +186,7 @@ fun ExternalPlayerOverlay(
                                     .align(Alignment.Center)
                                     .width(40.dp)
                                     .height(5.dp)
-                                    .clip(CircleShape)
+                                    .clip(TerminalCornerShape)
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
                             )
                         }
@@ -207,7 +198,7 @@ fun ExternalPlayerOverlay(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                shape = RoundedCornerShape(18.dp),
+                                shape = TerminalCornerShape,
                                 tonalElevation = 4.dp
                             ) {
                                 OptimizedAlbumArt(
@@ -215,7 +206,7 @@ fun ExternalPlayerOverlay(
                                     title = currentSong.title,
                                     modifier = Modifier
                                         .size(96.dp)
-                                        .clip(RoundedCornerShape(18.dp)),
+                                        .clip(TerminalCornerShape),
                                     targetSize = Size(192, 192)
                                 )
                             }
@@ -320,16 +311,7 @@ fun ExternalPlayerOverlay(
                         FilledTonalButton(
                             onClick = onOpenFullPlayer,
                             modifier = Modifier.fillMaxWidth(),
-                            shape = AbsoluteSmoothCornerShape(
-                                cornerRadiusTR = 16.dp,
-                                smoothnessAsPercentTR = 60,
-                                cornerRadiusBL = 16.dp,
-                                smoothnessAsPercentTL = 60,
-                                cornerRadiusTL = 16.dp,
-                                smoothnessAsPercentBL = 60,
-                                cornerRadiusBR = 16.dp,
-                                smoothnessAsPercentBR = 60
-                            ),
+                            shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = colorScheme.primaryContainer,
                                 contentColor = colorScheme.onPrimaryContainer

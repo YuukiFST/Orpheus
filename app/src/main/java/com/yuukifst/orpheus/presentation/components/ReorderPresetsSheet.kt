@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
@@ -73,7 +73,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.equalizer.EqualizerPreset
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.ui.res.stringResource
@@ -235,7 +235,7 @@ fun ReorderPresetsSheet(
                             },
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            shape = CircleShape,
+                            shape = TerminalCornerShape,
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Check,
@@ -278,16 +278,7 @@ fun ReorderPresetsSheet(
                                 items(localItems, key = { it.preset.name }) { item ->
                                     ReorderableItem(reorderableState, key = item.preset.name) { isDragging ->
                                         val elevation = if (isDragging) 8.dp else 0.dp
-                                        val itemShape = AbsoluteSmoothCornerShape(
-                                            cornerRadiusTR = 20.dp,
-                                            smoothnessAsPercentTL = 60,
-                                            cornerRadiusTL = 20.dp,
-                                            smoothnessAsPercentTR = 60,
-                                            cornerRadiusBR = 20.dp,
-                                            smoothnessAsPercentBL = 60,
-                                            cornerRadiusBL = 20.dp,
-                                            smoothnessAsPercentBR = 60
-                                        )
+                                        val itemShape = TerminalCornerShape
 
                                         val bgColor by animateColorAsState(
                                             targetValue = when {
@@ -324,7 +315,7 @@ fun ReorderPresetsSheet(
                                                 Box(
                                                     modifier = Modifier
                                                         .size(32.dp)
-                                                        .clip(CircleShape)
+                                                        .clip(TerminalCornerShape)
                                                         .background(
                                                             if (item.isPinned)
                                                                 MaterialTheme.colorScheme.surfaceContainerHighest

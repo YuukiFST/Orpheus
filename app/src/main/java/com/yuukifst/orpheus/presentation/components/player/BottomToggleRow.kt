@@ -13,7 +13,7 @@ import androidx.media3.common.Player
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.LocalMaterialTheme
 import com.yuukifst.orpheus.presentation.components.ToggleSegmentButton
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @Composable
 fun BottomToggleRow(
@@ -40,16 +40,7 @@ fun BottomToggleRow(
     Box(
         modifier = modifier.background(
             color = containerColor,
-            shape = AbsoluteSmoothCornerShape(
-                cornerRadiusBL = rowCorners,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusBR = rowCorners,
-                smoothnessAsPercentBL = 60,
-                cornerRadiusTL = rowCorners,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusTR = rowCorners,
-                smoothnessAsPercentTL = 60
-            )
+            shape = TerminalCornerShape
         )
     ) {
         Row(
@@ -57,16 +48,7 @@ fun BottomToggleRow(
                 .fillMaxWidth()
                 .padding(8.dp)
                 .clip(
-                    AbsoluteSmoothCornerShape(
-                        cornerRadiusBL = rowCorners,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusBR = rowCorners,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusTL = rowCorners,
-                        smoothnessAsPercentBR = 60,
-                        cornerRadiusTR = rowCorners,
-                        smoothnessAsPercentTL = 60
-                    )
+                    TerminalCornerShape
                 )
                 .background(Color.Transparent),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.scoped
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
@@ -97,8 +98,8 @@ fun RowScope.CustomNavigationBarItem(
     val iconWidth = 48.dp
     val iconHeight = 24.dp
     val indicatorPadding = 4.dp
-    val indicatorShape = RoundedCornerShape(16.dp)
-    val iconShape = RoundedCornerShape(12.dp)
+    val indicatorShape = TerminalCornerShape
+    val iconShape = TerminalCornerShape
 
     // Main layout
     Column(

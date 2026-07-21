@@ -52,7 +52,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.ui.theme.LocalOrpheusDarkTheme
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(UnstableApi::class)
@@ -88,16 +88,7 @@ fun GenreCategoriesGrid(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 18.dp)
-            .clip(AbsoluteSmoothCornerShape(
-                cornerRadiusTR = 24.dp,
-                smoothnessAsPercentTR = 70,
-                cornerRadiusTL = 24.dp,
-                smoothnessAsPercentTL = 70,
-                cornerRadiusBR = 0.dp,
-                smoothnessAsPercentBR = 70,
-                cornerRadiusBL = 0.dp,
-                smoothnessAsPercentBL = 70
-            )),
+            .clip(TerminalCornerShape),
         contentPadding = PaddingValues(
             top = 8.dp,
             bottom = 28.dp + resolveNavBarOccupiedHeight(systemNavBarHeight, navBarCompactMode) + MiniPlayerHeight
@@ -132,7 +123,7 @@ fun GenreCategoriesGrid(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ),
-                    shape = RoundedCornerShape(shape.value.dp)
+                    shape = TerminalCornerShape
                 ) {
                 androidx.compose.material3.Icon(
                         imageVector = if (isGridView) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView,
@@ -170,7 +161,7 @@ private fun GenreCard(
     val backgroundColor = themeColor.container
     val onBackgroundColor = themeColor.onContainer
 
-    val shape = RoundedCornerShape(20.dp)
+    val shape = TerminalCornerShape
 
     // Layout Modifier Logic
     val cardModifier = if (isGridView) {
@@ -190,7 +181,7 @@ private fun GenreCard(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(20.dp))
+                .clip(TerminalCornerShape)
                 .background(backgroundColor)
         ) {
             val textMeasurer = rememberTextMeasurer()

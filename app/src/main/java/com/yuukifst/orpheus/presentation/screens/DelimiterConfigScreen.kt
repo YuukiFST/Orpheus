@@ -82,6 +82,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.ArtistSettingsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.ui.text.style.TextOverflow
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -174,7 +175,7 @@ fun DelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -227,7 +228,7 @@ fun DelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -283,7 +284,7 @@ fun DelimiterConfigScreen(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                                     unfocusedBorderColor = MaterialTheme.colorScheme.outline
                                 ),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = TerminalCornerShape,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -330,7 +331,7 @@ fun DelimiterConfigScreen(
             item {
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -376,7 +377,7 @@ fun DelimiterConfigScreen(
                         modifier = Modifier
                             .width(52.dp)
                             .height(36.dp),
-                        shape = androidx.compose.foundation.shape.CircleShape
+                        shape = TerminalCornerShape
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.RestartAlt,
@@ -435,7 +436,7 @@ fun DelimiterConfigScreen(
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(24.dp)
+                shape = TerminalCornerShape
             )
         }
     }

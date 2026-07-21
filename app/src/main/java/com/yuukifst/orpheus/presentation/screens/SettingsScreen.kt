@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
@@ -33,7 +34,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
@@ -219,10 +220,10 @@ fun SettingsScreen(
                     val totalItems = mainCategories.size + 3 // Device + Accounts + About
                     fun shapeFor(index: Int) =
                         when {
-                            totalItems == 1 -> RoundedCornerShape(24.dp)
-                            index == 0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
-                            index == totalItems - 1 -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-                            else -> RoundedCornerShape(4.dp)
+                            totalItems == 1 -> TerminalCornerShape
+                            index == 0 -> TerminalCornerShape
+                            index == totalItems - 1 -> TerminalCornerShape
+                            else -> TerminalCornerShape
                         }
 
                     var itemIndex = 0
@@ -320,7 +321,7 @@ fun ExpressiveNavigationItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     colors: Pair<Color, Color>,
     onClick: () -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(24.dp)
+    shape: androidx.compose.ui.graphics.Shape = TerminalCornerShape
 ) {
     Surface(
         onClick = onClick,
@@ -336,7 +337,7 @@ fun ExpressiveNavigationItem(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(colors.first)
             ) {
                 Icon(
@@ -374,7 +375,7 @@ fun ExpressiveNavigationItem(
 fun ExpressiveCategoryItem(
     category: SettingsCategory,
     onClick: () -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(24.dp),
+    shape: androidx.compose.ui.graphics.Shape = TerminalCornerShape,
     customColors: Pair<Color, Color>? = null
 ) {
     Surface(
@@ -392,7 +393,7 @@ fun ExpressiveCategoryItem(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(customColors?.first ?: MaterialTheme.colorScheme.primaryContainer)
             ) {
                 if (category.icon != null) {
@@ -451,7 +452,7 @@ fun ExpressiveSettingsGroup(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(TerminalCornerShape)
             .background(Color.Transparent)
     ) {
         content()

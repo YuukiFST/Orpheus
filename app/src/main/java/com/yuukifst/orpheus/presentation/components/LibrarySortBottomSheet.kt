@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDownward
@@ -56,7 +56,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.SortDirection
 import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,12 +158,7 @@ fun LibrarySortBottomSheet(
             Column(
                 modifier = Modifier
                     .clip(
-                        shape = RoundedCornerShape(
-                            topStart = 20.dp,
-                            topEnd = 20.dp,
-                            bottomStart = 20.dp,
-                            bottomEnd = 20.dp
-                        )
+                        shape = TerminalCornerShape
                     ),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -180,12 +175,7 @@ fun LibrarySortBottomSheet(
                             .fillMaxWidth()
                             .padding(vertical = 0.dp)
                             .clip(
-                                shape = RoundedCornerShape(
-                                    topStart = 8.dp,
-                                    topEnd = 8.dp,
-                                    bottomStart = 8.dp,
-                                    bottomEnd = 8.dp
-                                )
+                                shape = TerminalCornerShape
                             )
                             .selectable(
                                 selected = isSelected,
@@ -335,7 +325,7 @@ private fun LibrarySheetSortDirectionCard(
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.72f)
-            .clip(AbsoluteSmoothCornerShape(18.dp, 60))
+            .clip(TerminalCornerShape)
             .background(containerColor)
             .clickable(enabled = enabled, onClick = onClick)
     ) {
@@ -349,7 +339,7 @@ private fun LibrarySheetSortDirectionCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(CircleShape)
+                    .clip(TerminalCornerShape)
                     .background(iconContainerColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -394,16 +384,7 @@ internal fun LibrarySheetToggleCard(
             .fillMaxWidth()
             .padding(horizontal = 0.dp)
             .clip(
-                AbsoluteSmoothCornerShape(
-                    cornerRadiusBL = boxCornerRadius,
-                    smoothnessAsPercentBR = 60,
-                    cornerRadiusTR = boxCornerRadius,
-                    smoothnessAsPercentTL = 60,
-                    cornerRadiusTL = boxCornerRadius,
-                    smoothnessAsPercentBL = 60,
-                    cornerRadiusBR = boxCornerRadius,
-                    smoothnessAsPercentTR = 60
-                )
+                TerminalCornerShape
             )
             .background(color = boxBackgroundColor)
             .clickable(onClick = { onCheckedChange(!checked) })

@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.widget.Toast
 import com.yuukifst.orpheus.data.model.Song
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.layout.ContentScale
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.presentation.components.AutoScrollingText
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -130,7 +130,6 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.text.style.TextGeometricTransform
@@ -617,7 +616,7 @@ fun LyricsSheet(
                 scaleY = scale
                 translationY = lerp(0f, size.height * 0.08f, p)
             }
-            .clip(RoundedCornerShape(32.dp))
+            .clip(TerminalCornerShape)
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
@@ -722,7 +721,7 @@ fun LyricsSheet(
                             )
                             .background(
                                 color = backgroundColor,
-                                shape = CircleShape
+                                shape = TerminalCornerShape
                             )
                             .wrapContentWidth()
                             .animateContentSize(), // Animate width changes
@@ -933,7 +932,7 @@ fun LyricsSheet(
                     Box(
                         modifier = Modifier
                             .size(78.dp)
-                            .clip(RoundedCornerShape(playPauseCornerRadius))
+                            .clip(TerminalCornerShape)
                             .background(playPauseColor)
                             .clickable {
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -1133,12 +1132,7 @@ fun LyricsSheet(
                    }
                    .background(
                         color = accentColor, // No alpha modulation
-                        shape = RoundedCornerShape(
-                            topStart = if(isNext) 360.dp else 8.dp,
-                            bottomStart = if(isNext) 360.dp else 8.dp,
-                            topEnd = if(isNext) 8.dp else 360.dp,
-                            bottomEnd = if(isNext) 8.dp else 360.dp
-                        )
+                        shape = TerminalCornerShape
                    ),
                contentAlignment = Alignment.Center
            ) {
@@ -1526,7 +1520,7 @@ fun LyricLineRow(
         Column(
             modifier = animatedModifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(TerminalCornerShape)
                 .clickable { onClick() }
                 .padding(vertical = verticalPadding, horizontal = 2.dp),
             horizontalAlignment = horizontalAlignment
@@ -1584,7 +1578,7 @@ fun LyricLineRow(
         Column(
             modifier = animatedModifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(TerminalCornerShape)
                 .clickable { onClick() }
                 .padding(vertical = verticalPadding, horizontal = 2.dp),
             horizontalAlignment = horizontalAlignment
@@ -1974,7 +1968,7 @@ private fun LyricsTrackInfo(
 ) {
     if (song == null) return
 
-    val albumShape = CircleShape
+    val albumShape = TerminalCornerShape
 
     // Helper state to stop rotation when paused, but we want it to pause in place?
     // Using infiniteTransition.animateFloat will reset on recomposition if spec changes or stops.

@@ -44,7 +44,7 @@ import com.yuukifst.orpheus.presentation.components.CollapsibleCommonTopBar
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 @Composable
 fun AccountsScreen(
@@ -149,7 +149,7 @@ private fun EmptyAccountsCard() {
     val noLinkedTitle = stringResource(R.string.presentation_batch_b_accounts_no_linked_title)
     val noLinkedBody = stringResource(R.string.presentation_batch_b_accounts_no_linked_body)
     Card(
-        shape = AbsoluteSmoothCornerShape(28.dp, 60),
+        shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

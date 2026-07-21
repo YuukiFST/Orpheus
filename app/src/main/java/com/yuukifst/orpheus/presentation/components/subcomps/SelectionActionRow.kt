@@ -44,7 +44,7 @@ import androidx.compose.ui.zIndex
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 private val buttonHeight = 44.dp
 private val segmentedOuterCornerRadius = 26.dp
@@ -65,38 +65,11 @@ fun SelectionActionRow(
     onOptionsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val leftSegmentShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = segmentedOuterCornerRadius,
-        cornerRadiusBL = segmentedOuterCornerRadius,
-        cornerRadiusTR = segmentedInnerCornerRadius,
-        cornerRadiusBR = segmentedInnerCornerRadius,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentBR = 60
-    )
+    val leftSegmentShape = TerminalCornerShape
     
-    val rightSegmentShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = segmentedInnerCornerRadius,
-        cornerRadiusBL = segmentedInnerCornerRadius,
-        cornerRadiusTR = segmentedOuterCornerRadius,
-        cornerRadiusBR = segmentedOuterCornerRadius,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentBR = 60
-    )
+    val rightSegmentShape = TerminalCornerShape
     
-    val optionsShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = segmentedOuterCornerRadius,
-        cornerRadiusBL = segmentedOuterCornerRadius,
-        cornerRadiusTR = segmentedOuterCornerRadius,
-        cornerRadiusBR = segmentedOuterCornerRadius,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentBR = 60
-    )
+    val optionsShape = TerminalCornerShape
     
     Row(
         modifier = modifier
@@ -191,16 +164,7 @@ fun SelectionCountPill(
     selectedCount: Int,
     modifier: Modifier = Modifier
 ) {
-    val pillShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 20.dp,
-        cornerRadiusBL = 20.dp,
-        cornerRadiusTR = 20.dp,
-        cornerRadiusBR = 20.dp,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentBR = 60
-    )
+    val pillShape = TerminalCornerShape
     
     AnimatedVisibility(
         visible = selectedCount > 0,

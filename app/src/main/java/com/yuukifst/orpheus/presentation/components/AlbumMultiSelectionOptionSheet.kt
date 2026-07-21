@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -19,7 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -207,7 +208,7 @@ private fun AlbumSelectionActionButton(
         modifier = modifier.heightIn(min = 66.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         colors = colors,
-        shape = CircleShape
+        shape = TerminalCornerShape
     ) {
         icon()
         Spacer(modifier = Modifier.width(10.dp))
@@ -242,19 +243,19 @@ private fun StackedAlbumCovers(
                     .offset { IntOffset(offsetX.dp.roundToPx(), 0) }
                     .zIndex((numAlbums - index).toFloat())
                     .size(imageSize)
-                    .background(borderColor, CircleShape)
+                    .background(borderColor, TerminalCornerShape)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(borderWidth)
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     SmartImage(
                         model = album.albumArtUriString,
                         contentDescription = album.title,
-                        shape = CircleShape,
+                        shape = TerminalCornerShape,
                         targetSize = Size(160, 160),
                         modifier = Modifier.fillMaxSize()
                     )

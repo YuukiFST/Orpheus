@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
@@ -204,7 +205,7 @@ fun ArtistSettingsScreen(
                     }
                 ) {
                     Column(
-                        modifier = Modifier.clip(shape = RoundedCornerShape(24.dp)),
+                        modifier = Modifier.clip(shape = TerminalCornerShape),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         // Configure Character Delimiters
@@ -295,7 +296,7 @@ fun ArtistSettingsScreen(
                         )
                     }
                 ) {
-                    Column(modifier = Modifier.clip(shape = RoundedCornerShape(24.dp))) {
+                    Column(modifier = Modifier.clip(shape = TerminalCornerShape)) {
                         SwitchSettingItem(
                             title = stringResource(R.string.presentation_batch_g_artist_group_by_album_artist),
                             subtitle = stringResource(R.string.presentation_batch_g_artist_group_by_album_artist_sub),
@@ -354,7 +355,7 @@ private fun RescanRequiredBanner(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.tertiaryContainer,
-        shape = RoundedCornerShape(16.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -430,7 +431,7 @@ private fun InfoCard(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(16.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -471,7 +472,7 @@ private fun ExamplesCard(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(16.dp),
+        shape = TerminalCornerShape,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)

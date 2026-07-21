@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -27,7 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -78,7 +79,7 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import java.io.File
 import androidx.compose.ui.res.stringResource
 
-val defaultShape = RoundedCornerShape(26.dp) // Fallback shape
+val defaultShape = TerminalCornerShape // Fallback shape
 val genHeight = 42.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,10 +159,7 @@ fun LibraryActionRow(
                     
                     FilledTonalButton(
                         onClick = onMainActionClick,
-                        shape = RoundedCornerShape(
-                            topStart = 26.dp, bottomStart = 26.dp,
-                            topEnd =  newButtonEndCorner, bottomEnd = newButtonEndCorner
-                        ),
+                        shape = TerminalCornerShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = buttonContainerColor,
                             contentColor = buttonContentColor
@@ -225,12 +223,7 @@ fun LibraryActionRow(
 
                             FilledTonalButton(
                                 onClick = onImportM3uClick,
-                                shape = RoundedCornerShape(
-                                    topStart = importButtonStartCorner,
-                                    bottomStart = importButtonStartCorner,
-                                    topEnd = 26.dp,
-                                    bottomEnd = 26.dp
-                                ),
+                                shape = TerminalCornerShape,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -317,12 +310,7 @@ fun LibraryActionRow(
                 ) {
                     FilledTonalIconButton(
                         onClick = onLocateClick,
-                        shape = RoundedCornerShape(
-                            topStart = outerCorner,
-                            bottomStart = outerCorner,
-                            topEnd = locateEndCorner,
-                            bottomEnd = locateEndCorner
-                        ),
+                        shape = TerminalCornerShape,
                         modifier = Modifier.size(genHeight)
                     ) {
                         Icon(
@@ -363,12 +351,7 @@ fun LibraryActionRow(
                     ) {
                         FilledTonalIconButton(
                             onClick = onStorageFilterClick,
-                            shape = RoundedCornerShape(
-                                topStart = filterStartCorner,
-                                bottomStart = filterStartCorner,
-                                topEnd = filterEndCorner,
-                                bottomEnd = filterEndCorner
-                            ),
+                            shape = TerminalCornerShape,
                             modifier = Modifier.size(genHeight)
                         ) {
                              Icon(
@@ -384,12 +367,7 @@ fun LibraryActionRow(
                 // Sort Button
                 FilledTonalIconButton(
                     onClick = onSortClick,
-                    shape = RoundedCornerShape(
-                        topStart = sortStartCorner,
-                        bottomStart = sortStartCorner,
-                        topEnd = outerCorner,
-                        bottomEnd = outerCorner
-                    ),
+                    shape = TerminalCornerShape,
                     modifier = Modifier.size(genHeight)
                 ) {
                     Icon(
@@ -507,7 +485,7 @@ fun Breadcrumbs(
                     fontFamily = RoundedSans,
                     color = if (isLast) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(TerminalCornerShape)
                         .clickable(enabled = !isLast) { onFolderClick(path) }
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
