@@ -239,7 +239,7 @@ fun WavyMusicSlider(
                                     start = Offset(currentProgressPxEndVisual, localCenterY),
                                     end = Offset(localTrackEnd, localCenterY),
                                     strokeWidth = trackHeightPx,
-                                    cap = StrokeCap.Round
+                                    cap = StrokeCap.Square
                                 )
                             }
                         } else {
@@ -248,7 +248,7 @@ fun WavyMusicSlider(
                                 start = Offset(localTrackStart, localCenterY),
                                 end = Offset(localTrackEnd, localCenterY),
                                 strokeWidth = trackHeightPx,
-                                cap = StrokeCap.Round
+                                cap = StrokeCap.Square
                             )
                         }
 
@@ -300,7 +300,7 @@ fun WavyMusicSlider(
                                         color = activeTrackColor,
                                         style = Stroke(
                                             width = trackHeightPx,
-                                            cap = StrokeCap.Round,
+                                            cap = StrokeCap.Square,
                                             join = StrokeJoin.Round, // <- important for smoothing joins
                                             miter = 1f
                                         )
@@ -313,7 +313,7 @@ fun WavyMusicSlider(
                                         start = Offset(localTrackStart, localCenterY),
                                         end = Offset(activeTrackVisualEnd, localCenterY),
                                         strokeWidth = trackHeightPx,
-                                        cap = StrokeCap.Round
+                                        cap = StrokeCap.Square
                                     )
                                 }
                             }
@@ -331,14 +331,13 @@ fun WavyMusicSlider(
                             thumbInteractionFraction
                         )
 
-                        drawRoundRect(
+                        drawRect(
                             color = thumbColor,
                             topLeft = Offset(
                                 currentThumbCenterX - thumbCurrentWidthPx / 2f,
                                 localCenterY - thumbCurrentHeightPx / 2f
                             ),
-                            size = Size(thumbCurrentWidthPx, thumbCurrentHeightPx),
-                            cornerRadius = CornerRadius(thumbCurrentWidthPx / 2f)
+                            size = Size(thumbCurrentWidthPx, thumbCurrentHeightPx)
                         )
                     }
                 }

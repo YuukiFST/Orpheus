@@ -2498,7 +2498,7 @@ private fun TrackDistributionDonut(
                 size = arcSize,
                 style = androidx.compose.ui.graphics.drawscope.Stroke(
                     width = strokePx,
-                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    cap = androidx.compose.ui.graphics.StrokeCap.Square
                 )
             )
 
@@ -2515,7 +2515,7 @@ private fun TrackDistributionDonut(
                         size = arcSize,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
                             width = strokePx,
-                            cap = androidx.compose.ui.graphics.StrokeCap.Round
+                            cap = androidx.compose.ui.graphics.StrokeCap.Square
                         )
                     )
                 }

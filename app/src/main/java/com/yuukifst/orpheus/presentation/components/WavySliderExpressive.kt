@@ -88,7 +88,7 @@ fun WavySliderExpressive(
     val thumbLineHeightPx = with(density) { thumbLineHeightWhenInteracting.toPx() }
 
     val stroke = remember(strokeWidthPx) {
-        Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+        Stroke(width = strokeWidthPx, cap = StrokeCap.Square)
     }
 
     val normalizedValueState = remember(valueRange) {
@@ -274,14 +274,13 @@ fun WavySliderExpressive(
             val maxThumbCenter = (size.width - currentWidth / 2f).coerceAtLeast(minThumbCenter)
             val thumbX = rawThumbX.coerceIn(minThumbCenter, maxThumbCenter)
             
-            drawRoundRect(
+            drawRect(
                 color = thumbColor,
                 topLeft = Offset(
                     thumbX - currentWidth / 2f,
                     thumbY - currentHeight / 2f
                 ),
-                size = Size(currentWidth, currentHeight),
-                cornerRadius = CornerRadius(currentWidth / 2f)
+                size = Size(currentWidth, currentHeight)
             )
         }
 

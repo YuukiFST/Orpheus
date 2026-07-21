@@ -2083,7 +2083,6 @@ private fun PlayerSongInfo(
 @Composable
 private fun PlaceholderBox(
     modifier: Modifier,
-    cornerRadius: Dp = 12.dp,
     color: Color
 ) {
     Surface(
@@ -2149,14 +2148,12 @@ private fun MetadataPlaceholder(
                 modifier = Modifier
                     .fillMaxWidth(0.72f)
                     .height(27.dp), //30.dp
-                cornerRadius = 8.dp,
                 color = color
             )
             PlaceholderBox(
                 modifier = Modifier
                     .fillMaxWidth(0.46f)
                     .height(17.dp), //20.dp
-                cornerRadius = 8.dp,
                 color = onColor
             )
         }
@@ -2182,7 +2179,6 @@ private fun MetadataPlaceholder(
         } else {
             PlaceholderBox(
                 modifier = Modifier.size(width = 48.dp, height = 48.dp),
-                cornerRadius = 24.dp,
                 color = onColor
             )
         }
@@ -2211,7 +2207,6 @@ private fun ProgressPlaceholder(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp),
-                cornerRadius = 3.dp,
                 color = onColor.copy(alpha = 0.15f)
             )
             // Keep active segment in the layout tree but invisible to avoid visual noise.
@@ -2220,7 +2215,6 @@ private fun ProgressPlaceholder(
                     .fillMaxWidth(0.34f)
                     .height(6.dp)
                     .graphicsLayer { alpha = 0f },
-                cornerRadius = 3.dp,
                 color = color
             )
             // Keep thumb slot aligned but fully transparent.
@@ -2229,7 +2223,6 @@ private fun ProgressPlaceholder(
                     .padding(start = 92.dp)
                     .size(14.dp)
                     .graphicsLayer { alpha = 0f },
-                cornerRadius = 7.dp,
                 color = onColor
             )
         }
@@ -2250,14 +2243,12 @@ private fun ProgressPlaceholder(
                     modifier = Modifier
                         .width(34.dp)
                         .height(12.dp),
-                    cornerRadius = 2.dp,
                     color = onColor
                 )
                 PlaceholderBox(
                     modifier = Modifier
                         .width(34.dp)
                         .height(12.dp),
-                    cornerRadius = 2.dp,
                     color = onColor
                 )
             }
@@ -2268,7 +2259,6 @@ private fun ProgressPlaceholder(
                         .align(Alignment.Center)
                         .widthIn(min = 96.dp, max = 180.dp)
                         .height(18.dp),
-                    cornerRadius = 999.dp,
                     color = onColor.copy(alpha = 0.15f)
                 )
             }
@@ -2278,7 +2268,6 @@ private fun ProgressPlaceholder(
 
 @Composable
 private fun ControlsPlaceholder(color: Color, onColor: Color) {
-    val rowCorners = 60.dp
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -2299,7 +2288,6 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
-                    cornerRadius = 60.dp,
                     color = onColor
                 )
                 Surface(
@@ -2314,7 +2302,6 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
-                    cornerRadius = 60.dp,
                     color = onColor
                 )
             }
@@ -2346,7 +2333,6 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
-                        cornerRadius = rowCorners,
                         color = onColor.copy(alpha = 0.1f)
                     )
                 }
@@ -2386,7 +2372,6 @@ private fun BottomToggleRow(
     onFavoriteToggle: () -> Unit
 ) {
     val isFavorite = isFavoriteProvider()
-    val rowCorners = 60.dp
     val inactiveBg = LocalMaterialTheme.current.onSurface.copy(alpha = 0.07f)
     val inactiveContentColor = LocalMaterialTheme.current.onSurface
 
@@ -2415,7 +2400,7 @@ private fun BottomToggleRow(
                 active = isShuffleEnabled,
                 enabled = !isShuffleTransitionInProgress,
                 activeColor = LocalMaterialTheme.current.primaryFixed,
-                activeCornerRadius = rowCorners,
+                activeCornerRadius = 0.dp,
                 activeContentColor = LocalMaterialTheme.current.onPrimaryFixed,
                 inactiveColor = inactiveBg,
                 inactiveContentColor = inactiveContentColor,
@@ -2433,7 +2418,7 @@ private fun BottomToggleRow(
                 modifier = commonModifier,
                 active = repeatActive,
                 activeColor = LocalMaterialTheme.current.secondaryFixed,
-                activeCornerRadius = rowCorners,
+                activeCornerRadius = 0.dp,
                 activeContentColor = LocalMaterialTheme.current.onSecondaryFixed,
                 inactiveColor = inactiveBg,
                 inactiveContentColor = inactiveContentColor,
@@ -2445,7 +2430,7 @@ private fun BottomToggleRow(
                 modifier = commonModifier,
                 active = isFavorite,
                 activeColor = LocalMaterialTheme.current.tertiaryFixed,
-                activeCornerRadius = rowCorners,
+                activeCornerRadius = 0.dp,
                 activeContentColor = LocalMaterialTheme.current.onTertiaryFixed,
                 inactiveColor = inactiveBg,
                 inactiveContentColor = inactiveContentColor,

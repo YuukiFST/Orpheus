@@ -188,7 +188,6 @@ private fun DailyMixCard(
     // O(n) copies — keyed on songs so they don't re-allocate on every recomposition.
     val headerSongs = remember(songs) { songs.take(3).toImmutableList() }
     val visibleSongs = remember(songs) { songs.take(4).toImmutableList() }
-    val cornerRadius = 30.dp
     Card(
         shape = TerminalCornerShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),

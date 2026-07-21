@@ -51,15 +51,7 @@ fun PlaylistCover(
                 val s = (playlist.coverShapeDetail2 ?: 60f).toInt()
                 TerminalCornerShape
             }
-            PlaylistShapeType.RotatedPill.name -> {
-                androidx.compose.foundation.shape.GenericShape { size, _ ->
-                    val w = size.width
-                    val h = size.height
-                    val pillW = w * 0.75f
-                    val offset = (w - pillW) / 2
-                    addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
-                }
-            }
+            PlaylistShapeType.RotatedPill.name -> TerminalCornerShape
             PlaylistShapeType.Star.name -> TerminalCornerShape
             else -> TerminalCornerShape
         }

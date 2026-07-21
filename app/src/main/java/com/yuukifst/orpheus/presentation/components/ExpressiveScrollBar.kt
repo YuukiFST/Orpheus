@@ -31,12 +31,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -219,7 +215,7 @@ fun ExpressiveScrollBar(
     thickness: Dp = 8.dp,
     indicatorExpandedWidth: Dp = 24.dp,
     indicatorExpandedWidthBoost: Dp = 4.dp,
-    indicatorRightCornerRadius: Dp = 6.dp,
+    indicatorRightCornerRadius: Dp = 0.dp,
     paddingEnd: Dp = 4.dp,
     trackGap: Dp = 8.dp,
     dragLabelProvider: ((Int) -> String?)? = null,
@@ -240,7 +236,6 @@ fun ExpressiveScrollBar(
     val surfaceVariantColor = MaterialTheme.colorScheme.secondaryContainer
     val innerIcon = Icons.Rounded.UnfoldMore
     val expandedIndicatorWidth = (indicatorExpandedWidth + indicatorExpandedWidthBoost).coerceAtLeast(thickness)
-    val indicatorRightCornerRadiusPx = with(LocalDensity.current) { indicatorRightCornerRadius.toPx() }
 
     val isInteracting = isPressed || isDragging
     
@@ -526,8 +521,6 @@ fun ExpressiveScrollBar(
             label = "DragLabelSlide"
         )
 
-        val indicatorPath = remember { Path() }
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -603,10 +596,6 @@ fun ExpressiveScrollBar(
                 val trackStrokeWidth = thickness.toPx()
                 val indicatorWidthPx = animatedWidth.toPx()
                 val gapPx = trackGap.toPx()
-                val indicatorLeftCornerRadius = indicatorWidthPx / 2f
-                val maxAllowedRightCornerRadius = minOf(indicatorWidthPx / 2f, handleHeightPx / 2f)
-                val resolvedRightCornerRadius = indicatorRightCornerRadiusPx
-                    .coerceIn(0f, maxAllowedRightCornerRadius)
 
                 val currentIndicatorX = rightAnchorX - indicatorWidthPx
 
@@ -616,7 +605,7 @@ fun ExpressiveScrollBar(
                         start = Offset(trackX, 0f),
                         end = Offset(trackX, handleY - gapPx),
                         strokeWidth = trackStrokeWidth,
-                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                        cap = androidx.compose.ui.graphics.StrokeCap.Square
                     )
                 }
 
@@ -626,26 +615,14 @@ fun ExpressiveScrollBar(
                         start = Offset(trackX, handleY + handleHeightPx + gapPx),
                         end = Offset(trackX, size.height),
                         strokeWidth = trackStrokeWidth,
-                        cap = androidx.compose.ui.graphics.StrokeCap.Round
+                        cap = androidx.compose.ui.graphics.StrokeCap.Square
                     )
                 }
 
-                indicatorPath.reset()
-                indicatorPath.addRoundRect(
-                    RoundRect(
-                        rect = Rect(
-                            offset = Offset(currentIndicatorX, handleY),
-                            size = Size(indicatorWidthPx, handleHeightPx)
-                        ),
-                        topLeft = CornerRadius(indicatorLeftCornerRadius, indicatorLeftCornerRadius),
-                        topRight = CornerRadius(resolvedRightCornerRadius, resolvedRightCornerRadius),
-                        bottomRight = CornerRadius(resolvedRightCornerRadius, resolvedRightCornerRadius),
-                        bottomLeft = CornerRadius(indicatorLeftCornerRadius, indicatorLeftCornerRadius)
-                    )
-                )
-                drawPath(
-                    path = indicatorPath,
-                    color = primaryColor
+                drawRect(
+                    color = primaryColor,
+                    topLeft = Offset(currentIndicatorX, handleY),
+                    size = Size(indicatorWidthPx, handleHeightPx)
                 )
             }
             

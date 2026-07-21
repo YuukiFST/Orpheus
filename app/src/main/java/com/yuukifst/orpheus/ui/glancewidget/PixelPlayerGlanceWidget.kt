@@ -121,13 +121,13 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     size.height <= ONE_BY_ONE_LAYOUT_SIZE.height -> OneByOneWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 60.dp,
+                        bgCornerRadius = 0.dp,
                         isPlaying = isPlaying
                     )
                     size.height <= GABE_TWO_HEIGHT_LAYOUT_SIZE.height -> GabeTwoHeightWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 60.dp,
+                        bgCornerRadius = 0.dp,
                         albumArtBitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         isPlaying = isPlaying,
@@ -136,7 +136,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     else -> GabeWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 360.dp,
+                        bgCornerRadius = 0.dp,
                         albumArtBitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         isPlaying = isPlaying,
@@ -148,7 +148,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     size.width < VERY_THIN_LAYOUT_SIZE.width -> SmallHorizontalWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 60.dp,
+                        bgCornerRadius = 0.dp,
                         albumArtBitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         isPlaying = isPlaying,
@@ -164,12 +164,12 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         textColor = onBackgroundColor,
                         context = context,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 60.dp
+                        bgCornerRadius = 0.dp
                     )
                     else -> ThinWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 60.dp,
+                        bgCornerRadius = 0.dp,
                         title = title,
                         artist = artist,
                         albumArtBitmapData = albumArtBitmapData,
@@ -184,7 +184,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     size.width < MEDIUM_LAYOUT_SIZE.width || size.height < MEDIUM_LAYOUT_SIZE.height -> SmallWidgetLayout(
                         modifier = baseModifier,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 28.dp,
+                        bgCornerRadius = 0.dp,
                         albumArtBitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         isPlaying = isPlaying,
@@ -200,7 +200,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         textColor = onBackgroundColor,
                         context = context,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 28.dp
+                        bgCornerRadius = 0.dp
                     )
                     size.width < EXTRA_LARGE_LAYOUT_SIZE.width || size.height < EXTRA_LARGE_LAYOUT_SIZE.height -> LargeWidgetLayout(
                         modifier = baseModifier,
@@ -209,7 +209,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         albumArtBitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 28.dp,
+                        bgCornerRadius = 0.dp,
                         isPlaying = isPlaying,
                         isFavorite = isFavorite,
                         textColor = onBackgroundColor,
@@ -223,7 +223,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         albumArtUri = albumArtUri,
                         isPlaying = isPlaying,
                         backgroundColor = actualBackgroundColor,
-                        bgCornerRadius = 28.dp,
+                        bgCornerRadius = 0.dp,
                         textColor = onBackgroundColor,
                         context = context,
                         queue = playerInfo.queue
@@ -292,7 +292,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     iconColor = onPrimaryContainerColor,
                     isPlaying = isPlaying,
                     iconSize = 26.dp,
-                    cornerRadius = 10.dp
+                    cornerRadius = 0.dp
                 )
                 Spacer(GlanceModifier.width(10.dp))
                 NextButtonGlance(
@@ -303,7 +303,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     iconColor = onSecondaryColor,
                     iconSize = 26.dp,
                     backgroundColor = secondaryColor,
-                    cornerRadius = 10.dp
+                    cornerRadius = 0.dp
                 )
             }
         }
@@ -370,7 +370,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     iconColor = onPrimaryContainerColor,
                     isPlaying = isPlaying,
                     iconSize = 26.dp,
-                    cornerRadius = 10.dp
+                    cornerRadius = 0.dp
                 )
                 Spacer(GlanceModifier.width(10.dp))
                 NextButtonGlance(
@@ -381,7 +381,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     iconColor = onSecondaryColor,
                     iconSize = 26.dp,
                     backgroundColor = secondaryColor,
-                    cornerRadius = 10.dp
+                    cornerRadius = 0.dp
                 )
             }
         }
@@ -422,7 +422,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     bitmapData = albumArtBitmapData,
                     albumArtUri = albumArtUri,
                     context = context,
-                    cornerRadius = 64.dp
+                    cornerRadius = 0.dp
                 )
                 Spacer(GlanceModifier.height(14.dp))
                 Column(
@@ -438,7 +438,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         iconColor = onPrimaryContainerColor,
                         isPlaying = isPlaying,
                         iconSize = 26.dp,
-                        cornerRadius = 10.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.height(10.dp))
                     NextButtonGlance(
@@ -448,7 +448,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         iconColor = onSecondaryColor,
                         iconSize = 26.dp,
                         backgroundColor = secondaryColor,
-                        cornerRadius = 10.dp
+                        cornerRadius = 0.dp
                     )
                 }
             }
@@ -489,7 +489,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     bitmapData = albumArtBitmapData,
                     albumArtUri = albumArtUri,
                     context = context,
-                    cornerRadius = 64.dp
+                    cornerRadius = 0.dp
                 )
                 Spacer(GlanceModifier.height(14.dp))
                 Column(
@@ -504,7 +504,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         iconColor = onSecondaryColor,
                         iconSize = 26.dp,
                         backgroundColor = secondaryColor,
-                        cornerRadius = 10.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.height(10.dp))
                     PlayPauseButtonGlance(
@@ -515,7 +515,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         iconColor = onPrimaryContainerColor,
                         isPlaying = isPlaying,
                         iconSize = 26.dp,
-                        cornerRadius = 10.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.height(10.dp))
                     NextButtonGlance(
@@ -525,7 +525,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         iconColor = onSecondaryColor,
                         iconSize = 26.dp,
                         backgroundColor = secondaryColor,
-                        cornerRadius = 10.dp
+                        cornerRadius = 0.dp
                     )
                 }
             }
@@ -555,7 +555,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                 iconColor = onPrimaryContainerColor,
                 isPlaying = isPlaying,
                 iconSize = 36.dp,
-                cornerRadius = 30.dp
+                cornerRadius = 0.dp
             )
         }
     }
@@ -592,7 +592,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     albumArtUri = albumArtUri,
                     size = 58.dp,
                     context = context,
-                    cornerRadius = 64.dp
+                    cornerRadius = 0.dp
                 )
                 Spacer(GlanceModifier.width(14.dp))
                 PlayPauseButtonGlance(
@@ -603,7 +603,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     iconColor = onPrimaryContainerColor,
                     isPlaying = isPlaying,
                     iconSize = 26.dp,
-                    cornerRadius = 10.dp
+                    cornerRadius = 0.dp
                 )
             }
         }
@@ -623,8 +623,8 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         val onSecondaryColor = GlanceTheme.colors.onSecondaryContainer
         val primaryContainerColor = GlanceTheme.colors.primaryContainer
         val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
-        val buttonCornerRadius = 16.dp
-        val playButtonCornerRadius = if (isPlaying) 12.dp else 60.dp
+        val buttonCornerRadius = 0.dp
+        val playButtonCornerRadius = 0.dp
 
         Box(
             modifier = modifier
@@ -649,7 +649,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         bitmapData = albumArtBitmapData,
                         albumArtUri = albumArtUri,
                         context = context,
-                        cornerRadius = 64.dp
+                        cornerRadius = 0.dp
                     )
                 }
                 Spacer(GlanceModifier.height(8.dp))
@@ -713,8 +713,8 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         val onSecondaryColor = GlanceTheme.colors.onSecondaryContainer
         val primaryContainerColor = GlanceTheme.colors.primaryContainer
         val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
-        val buttonCornerRadius = 60.dp
-        val playButtonCornerRadius = if (isPlaying) 14.dp else 60.dp
+        val buttonCornerRadius = 0.dp
+        val playButtonCornerRadius = 0.dp
 
         // *** FIX: Apply padding to the outer Box for consistency ***
         Box(
@@ -738,7 +738,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         albumArtUri = albumArtUri,
                         size = 80.dp,
                         context = context,
-                        cornerRadius = 16.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.width(12.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
@@ -831,7 +831,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         albumArtUri = albumArtUri,
                         size = 64.dp,
                         context = context,
-                        cornerRadius = 18.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.width(12.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
@@ -865,8 +865,8 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     val onSecondaryColor = GlanceTheme.colors.onSecondaryContainer
                     val primaryContainerColor = GlanceTheme.colors.primaryContainer
                     val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
-                    val buttonCornerRadius = 60.dp
-                    val playButtonCornerRadius = if (isPlaying) 14.dp else 60.dp
+                    val buttonCornerRadius = 0.dp
+                    val playButtonCornerRadius = 0.dp
 
                     PreviousButtonGlance(
                         modifier = GlanceModifier
@@ -909,7 +909,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         context: Context,
         queue: List<QueueItem>
     ) {
-        val playButtonCornerRadius = if (isPlaying) 16.dp else 60.dp
+        val playButtonCornerRadius = 0.dp
 
         // *** FIX: Apply padding to the outer Box for consistency ***
         Box(
@@ -930,7 +930,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         albumArtUri = albumArtUri,
                         size = 68.dp,
                         context = context,
-                        cornerRadius = 16.dp
+                        cornerRadius = 0.dp
                     )
                     Spacer(GlanceModifier.width(16.dp))
                     Column(modifier = GlanceModifier.defaultWeight()) {
@@ -962,7 +962,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                     val onSecondaryColor = GlanceTheme.colors.onSecondaryContainer
                     val primaryContainerColor = GlanceTheme.colors.primaryContainer
                     val onPrimaryContainerColor = GlanceTheme.colors.onPrimaryContainer
-                    val buttonCornerRadius = 60.dp
+                    val buttonCornerRadius = 0.dp
 
                     PreviousButtonGlance(
                         modifier = GlanceModifier
@@ -1004,7 +1004,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                         .padding(horizontal = 30.dp)
                         .background(textColor.getColor(context).copy(alpha = 0.15f))
                         .height(2.dp)
-                        .cornerRadius(60.dp)
+                        .cornerRadius(0.dp)
                 ) {
 
                 }
@@ -1019,7 +1019,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
                 ) {
                     val items = queue.take(4)
                     val itemSize = 58.dp
-                    val cornerRadius = 14.dp
+                    val cornerRadius = 0.dp
 
                     for (i in 0 until 4) {
                         Box(
@@ -1067,7 +1067,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         size: Dp? = null,
         context: Context,
         modifier: GlanceModifier = GlanceModifier,
-        cornerRadius: Dp = 16.dp
+        cornerRadius: Dp = 0.dp
     ) {
         val TAG_AAIG = "AlbumArtImageGlance"
         Timber.tag(TAG_AAIG)
@@ -1313,7 +1313,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         iconColor: ColorProvider = GlanceTheme.colors.onSurfaceVariant,
         backgroundColor: ColorProvider = GlanceTheme.colors.surfaceVariant,
         iconSize: Dp = 24.dp,
-        cornerRadius: Dp = 8.dp
+        cornerRadius: Dp = 0.dp
     ) {
         val context = LocalContext.current
         val params = actionParametersOf(PlayerActions.key to PlayerActions.NEXT)
@@ -1339,7 +1339,7 @@ class OrpheusGlanceWidget : GlanceAppWidget() {
         iconColor: ColorProvider = GlanceTheme.colors.onSurfaceVariant,
         backgroundColor: ColorProvider = GlanceTheme.colors.surfaceVariant,
         iconSize: Dp = 24.dp,
-        cornerRadius: Dp = 8.dp
+        cornerRadius: Dp = 0.dp
     ) {
         val context = LocalContext.current
         val params = actionParametersOf(PlayerActions.key to PlayerActions.PREVIOUS)

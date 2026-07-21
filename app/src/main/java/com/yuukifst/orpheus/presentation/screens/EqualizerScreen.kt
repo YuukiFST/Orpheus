@@ -75,6 +75,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale // Added
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -405,10 +406,6 @@ fun EqualizerScreen(
 
                 // Power toggle
                 val isEnabled = uiState.isEnabled
-                val powerButtonCorner by animateIntAsState(
-                    targetValue = if (isEnabled) 50 else 12,
-                    label = "PowerButtonShape"
-                )
 
                 FilledIconToggleButton(
                     checked = isEnabled,
@@ -861,7 +858,7 @@ private fun GraphBandSliders(
                     drawPath(
                         path = path,
                         color = primaryColor,
-                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                        style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Square)
                     )
                     
                     // Draw Fill
@@ -1098,42 +1095,21 @@ private fun CustomVerticalSlider(
             }
             
             // 1. Draw Inactive Track
-            drawRoundRect(
+            drawRect(
                 color = actualInactiveTrackColor,
-                topLeft = androidx.compose.ui.geometry.Offset(trackLeft, 0f), 
-                size = androidx.compose.ui.geometry.Size(trackWidth, size.height), // Use height not size.width
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(trackWidth / 2)
+                topLeft = androidx.compose.ui.geometry.Offset(trackLeft, 0f),
+                size = androidx.compose.ui.geometry.Size(trackWidth, size.height)
             )
-            
+
             // 2. Draw Active Track
-            // Cap at thumb center
-            drawCircle(
-                color = actualActiveTrackColor,
-                radius = trackWidth / 2, // Use trackWidth
-                center = androidx.compose.ui.geometry.Offset(centerX, thumbCenterY)
-            )
-            
             val activeRectTop = thumbCenterY
             val activeRectHeight = size.height - activeRectTop
-            
+
             if (activeRectHeight > 0f) {
-                val activeTrackPath = androidx.compose.ui.graphics.Path().apply {
-                    addRoundRect(
-                        androidx.compose.ui.geometry.RoundRect(
-                            rect = androidx.compose.ui.geometry.Rect(
-                                offset = androidx.compose.ui.geometry.Offset(trackLeft, activeRectTop),
-                                size = androidx.compose.ui.geometry.Size(trackWidth, activeRectHeight)
-                            ),
-                            topLeft = androidx.compose.ui.geometry.CornerRadius.Zero,
-                            topRight = androidx.compose.ui.geometry.CornerRadius.Zero,
-                            bottomLeft = androidx.compose.ui.geometry.CornerRadius(trackWidth / 2),
-                            bottomRight = androidx.compose.ui.geometry.CornerRadius(trackWidth / 2)
-                        )
-                    )
-                }
-                drawPath(
-                    path = activeTrackPath,
-                    color = actualActiveTrackColor
+                drawRect(
+                    color = actualActiveTrackColor,
+                    topLeft = androidx.compose.ui.geometry.Offset(trackLeft, activeRectTop),
+                    size = androidx.compose.ui.geometry.Size(trackWidth, activeRectHeight)
                 )
             }
 
@@ -1815,7 +1791,7 @@ private fun HybridFrequencyResponseGraph(
                 start = Offset(0f, y),
                 end = Offset(size.width, y),
                 strokeWidth = 1.dp.toPx(),
-                cap = StrokeCap.Round,
+                cap = StrokeCap.Square,
                 pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
             )
         }
@@ -1849,15 +1825,16 @@ private fun HybridFrequencyResponseGraph(
             drawPath(
                 path = path,
                 color = if (isEnabled) primaryColor else primaryColor.copy(alpha=0.5f),
-                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Square)
             )
             
             // Draw Dots
             points.forEach { point ->
-                drawCircle(
+                val dot = 3.dp.toPx()
+                drawRect(
                     color = Color.White,
-                    radius = 3.dp.toPx(),
-                    center = point
+                    topLeft = Offset(point.x - dot, point.y - dot),
+                    size = Size(dot * 2f, dot * 2f)
                 )
             }
         }

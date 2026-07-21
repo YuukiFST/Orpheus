@@ -2,6 +2,16 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.6] - 2026-07-21
+
+### Changed
+- CRT/terminal UI redesign: flat corners everywhere, black monochrome palette, green accent, JetBrains Mono Nerd typography.
+- Sliders, scrollbars, widgets, equalizer, and canvas draws use square shapes instead of rounded pills/circles.
+- Default player theme is now static DEFAULT instead of album-art-driven colors for new installs.
+
+### Removed
+- RoundedStarShape and remaining smooth-corner shape helpers superseded by TerminalCornerShape.
+
 ## [0.1.0] - 2026-06-09
 
 ### Initial release

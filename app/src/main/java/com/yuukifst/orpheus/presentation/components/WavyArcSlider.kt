@@ -158,7 +158,7 @@ fun WavyArcSlider(
                     startAngle = startAngle + activeSweep,
                     sweepAngle = sweepAngle - activeSweep,
                     useCenter = false,
-                    style = Stroke(width = trackThicknessPx, cap = StrokeCap.Round),
+                    style = Stroke(width = trackThicknessPx, cap = StrokeCap.Square),
                     topLeft = Offset(arcCenter.x - arcRadius, arcCenter.y - arcRadius),
                     size = Size(arcDiameter, arcDiameter)
                 )
@@ -210,7 +210,7 @@ fun WavyArcSlider(
                 drawPath(
                     path = wavePath,
                     color = activeTrackColor,
-                    style = Stroke(width = trackThicknessPx, cap = StrokeCap.Round)
+                    style = Stroke(width = trackThicknessPx, cap = StrokeCap.Square)
                 )
             }
             
@@ -220,10 +220,11 @@ fun WavyArcSlider(
             val thumbX = arcCenter.x + arcRadius * cos(thumbAngleRad)
             val thumbY = arcCenter.y + arcRadius * sin(thumbAngleRad)
             
-            drawCircle(
+            val thumbSize = thumbRadius * thumbScale * 2f
+            drawRect(
                 color = thumbColor,
-                radius = thumbRadius * thumbScale,
-                center = Offset(thumbX.toFloat(), thumbY.toFloat())
+                topLeft = Offset(thumbX.toFloat() - thumbSize / 2f, thumbY.toFloat() - thumbSize / 2f),
+                size = Size(thumbSize, thumbSize)
             )
         }
     }

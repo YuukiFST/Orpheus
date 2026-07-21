@@ -663,26 +663,27 @@ fun BrickBreakerOverlay(
                     
                     // Draw Particles
                     particles.forEach { p ->
-                        drawCircle(
+                        val r = p.radius * p.life
+                        drawRect(
                             color = p.color.copy(alpha = p.alpha * p.life),
-                            radius = p.radius * p.life,
-                            center = p.position
+                            topLeft = Offset(p.position.x - r, p.position.y - r),
+                            size = Size(r * 2f, r * 2f)
                         )
                     }
 
-                    // Draw Paddle (Flat, Pill Shape)
-                    drawRoundRect(
+                    // Draw Paddle (Flat)
+                    drawRect(
                         color = colorScheme.primary,
                         topLeft = paddleRect.topLeft,
-                        size = paddleRect.size,
-                        cornerRadius = CornerRadius(paddleRect.height / 2, paddleRect.height / 2)
+                        size = paddleRect.size
                     )
 
                     // Draw Ball
-                    drawCircle(
+                    val ballSize = ballRadius * 2f
+                    drawRect(
                         color = colorScheme.onSurface,
-                        radius = ballRadius,
-                        center = ballPosition
+                        topLeft = Offset(ballPosition.x - ballRadius, ballPosition.y - ballRadius),
+                        size = Size(ballSize, ballSize)
                     )
                 }
 
@@ -926,22 +927,18 @@ private fun PreLaunchMenu(
 }
 
 private fun DrawScope.drawBrick(brick: BrickState) {
-    val cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-
-    // Solid Flat Color
-    drawRoundRect(
+    drawRect(
         color = brick.color,
         topLeft = brick.rect.topLeft,
-        size = brick.rect.size,
-        cornerRadius = cornerRadius
+        size = brick.rect.size
     )
 
     if (brick.type == BrickType.Solid) {
-        // Simple subtle logic for solid bricks to distinguish them
-         drawCircle(
+        val marker = 4.dp.toPx()
+        drawRect(
             color = Color.Black.copy(alpha = 0.2f),
-            radius = 4.dp.toPx(),
-            center = brick.rect.center
+            topLeft = Offset(brick.rect.center.x - marker, brick.rect.center.y - marker),
+            size = Size(marker * 2f, marker * 2f)
         )
     }
 }

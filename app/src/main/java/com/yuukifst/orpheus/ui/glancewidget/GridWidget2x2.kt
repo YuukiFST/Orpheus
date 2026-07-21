@@ -56,8 +56,8 @@ class GridWidget2x2 : GlanceAppWidget() {
 
         val colors = playerInfo.getWidgetColors()
 
-        val widgetCornerRadius = 28.dp
-        val itemCornerRadius = 16.dp
+        val widgetCornerRadius = 0.dp
+        val itemCornerRadius = 0.dp
 
         val size = LocalSize.current
         val minSide = min(size.width, size.height)

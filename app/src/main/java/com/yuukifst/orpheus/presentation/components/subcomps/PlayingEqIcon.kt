@@ -11,7 +11,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -83,7 +82,6 @@ fun PlayingEqIcon(
         val tentativeBarW = w / (bars + (bars - 1) * (1f + gapFraction))
         val gap = tentativeBarW * gapFraction
         val barW = tentativeBarW
-        val corner = CornerRadius(barW / 2f, barW / 2f)
 
         repeat(bars) { i ->
             // Slow 「breathing」 so the pattern lasts longer
@@ -109,11 +107,10 @@ fun PlayingEqIcon(
             val top = (h - blendedH) / 2f
             val left = i * (barW + gap)
 
-            drawRoundRect(
+            drawRect(
                 color = color,
                 topLeft = Offset(left, top),
-                size = Size(barW, blendedH),
-                cornerRadius = corner
+                size = Size(barW, blendedH)
             )
         }
     }

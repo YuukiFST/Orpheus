@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 
 package com.yuukifst.orpheus.presentation.screens
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.net.Uri
 import java.util.Locale
@@ -1178,15 +1177,7 @@ private fun PlaylistFormContent(
                              val currentShape: Shape = when(currentShapeType) {
                                  PlaylistShapeType.Circle -> TerminalCornerShape
                                  PlaylistShapeType.SmoothRect -> TerminalCornerShape
-                                 PlaylistShapeType.RotatedPill -> {
-                                     androidx.compose.foundation.shape.GenericShape { size, _ ->
-                                         val w = size.width
-                                         val h = size.height
-                                         val pillW = w * 0.75f
-                                         val offset = (w - pillW) / 2
-                                         addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
-                                     }
-                                 }
+                                 PlaylistShapeType.RotatedPill -> TerminalCornerShape
                                  PlaylistShapeType.Star -> TerminalCornerShape
                              }
                              
@@ -1361,7 +1352,6 @@ private fun PlaylistFormContent(
                      ) {
                          colors.forEach { color ->
                              val isSelected = selectedColor == color
-                             val cornerRadius by animateDpAsState(targetValue = if (isSelected) 12.dp else 24.dp, label = "CornerRadius")
                              
                              Box(
                                  modifier = Modifier
@@ -1409,7 +1399,6 @@ private fun PlaylistFormContent(
                      ) {
                          icons.forEach { iconName ->
                              val isSelected = selectedIconName == iconName
-                             val cornerRadius by animateDpAsState(targetValue = if (isSelected) 12.dp else 24.dp, label = "CornerRadius")
 
                              Box(
                                  modifier = Modifier
@@ -1449,18 +1438,11 @@ private fun PlaylistFormContent(
                                  val previewShape = when(shapeType) {
                                      PlaylistShapeType.Circle -> TerminalCornerShape
                                      PlaylistShapeType.SmoothRect -> TerminalCornerShape
-                                     PlaylistShapeType.RotatedPill -> androidx.compose.foundation.shape.GenericShape { size, _ ->
-                                         val w = size.width
-                                         val h = size.height
-                                         val pillW = w * 0.75f
-                                         val offset = (w - pillW) / 2
-                                         addRoundRect(RoundRect(offset, 0f, offset + pillW, h, CornerRadius(pillW/2, pillW/2)))
-                                     }
+                                     PlaylistShapeType.RotatedPill -> TerminalCornerShape
                                      PlaylistShapeType.Star -> TerminalCornerShape
                                  }
 
                                  val rotationM = if(shapeType == PlaylistShapeType.RotatedPill) Modifier.graphicsLayer(rotationZ = 45f) else Modifier
-                                 val cornerRadius by animateDpAsState(targetValue = if (isSelected) 12.dp else 24.dp, label = "CornerRadius")
 
                                  Row(modifier = Modifier.padding(2.dp)) {
                                      Spacer(Modifier.width(2.dp))
