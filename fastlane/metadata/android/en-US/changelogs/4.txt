@@ -1,0 +1,1 @@
+Fix YouTube search returning no results and show suggestions while typing.
