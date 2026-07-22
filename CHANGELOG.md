@@ -2,6 +2,15 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.10] - 2026-07-22
+
+### Fixed
+- Liked tab playback: full-queue handoff no longer cancels itself before `playSongs` starts; favorites queue now includes YouTube likes via `getFavoriteSongsForSelection()`.
+
+### Changed
+- CRT overlay, motion tokens, and list stagger polish across library and player UI.
+- Replaced ad-hoc animation durations with `OrpheusMotion` in scroll bar, full player, queue sheet, and setup flows.
+
 ## [1.0.9] - 2026-07-21
 
 ### Fixed
