@@ -2,6 +2,12 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.11] - 2026-07-22
+
+### Changed
+- Mini player updates instantly when selecting a new track from search or library; optimistic UI state applies before async queue prep.
+- Faster mini player color transition (120ms) when switching songs.
+
 ## [1.0.10] - 2026-07-22
 
 ### Fixed
