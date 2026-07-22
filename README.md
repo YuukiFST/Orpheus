@@ -21,7 +21,7 @@
 
 Orpheus is a GPLv3 Android music player based on [PixelPlayerOSS](https://github.com/PixelPlayerHQ/PixelPlayerOSS).
 
-The difference: you can **listen to music from YouTube without ads** — search, play, download, and add tracks to playlists alongside your local library.
+It focuses on local library playback: scan your files, organize playlists and favorites, show lyrics, and control playback from the full player or home-screen widgets. Optional self-hosted library support covers Navidrome/Subsonic and Jellyfin when you connect your own server.
 
 Package: `com.yuukifst.orpheus`
 
@@ -45,7 +45,7 @@ Release APKs use the naming pattern `Orpheus-<version>-<abi>.apk`.
 
 ## Legal Disclaimer
 
-Orpheus is provided for educational and personal-use purposes only. Orpheus is not affiliated with, endorsed by, or sponsored by YouTube or Google. You are solely responsible for how you use the application and for compliance with applicable terms of service and laws in your jurisdiction.
+Orpheus is provided for personal use. You are responsible for how you use the application and for compliance with applicable terms of service and laws in your jurisdiction. Orpheus is not affiliated with, endorsed by, or sponsored by any third-party music or streaming service.
 
 ## Build (Nix)
 
