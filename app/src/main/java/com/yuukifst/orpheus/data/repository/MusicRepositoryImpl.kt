@@ -62,8 +62,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -71,7 +69,6 @@ import java.io.File
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.insertHeaderItem
 import androidx.paging.map
 import androidx.paging.filter
 import kotlinx.coroutines.flow.conflate
@@ -242,41 +239,17 @@ class MusicRepositoryImpl @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
+    override fun getYouTubeFavoriteSongs(sortOption: SortOption): Flow<List<Song>> =
+        youTubeCachedTrackRepository.observeFavoriteSongs(sortOption)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getPaginatedFavoriteSongs(sortOption: SortOption, storageFilter: StorageFilter): Flow<PagingData<Song>> {
-        val localFavorites = songRepository.getPaginatedFavoriteSongs(sortOption, storageFilter)
-        if (storageFilter == StorageFilter.OFFLINE) return localFavorites
-
-        val youtubeFavorites = youTubeCachedTrackRepository.observeFavoriteSongs(sortOption)
         return when (storageFilter) {
-            StorageFilter.ONLINE -> youtubeFavorites.map { songs -> PagingData.from(songs) }
-            StorageFilter.ALL -> channelFlow {
-                var latestYoutube = emptyList<Song>()
-                var latestPaging: PagingData<Song>? = null
-
-                fun emitMerged() {
-                    val paging = latestPaging ?: return
-                    val merged = latestYoutube.asReversed().fold(paging) { acc, song ->
-                        acc.insertHeaderItem(item = song)
-                    }
-                    trySend(merged)
-                }
-
-                val youtubeJob = launch {
-                    youtubeFavorites.collect { songs ->
-                        latestYoutube = songs
-                        emitMerged()
-                    }
-                }
-                try {
-                    localFavorites.collect { pagingData ->
-                        latestPaging = pagingData
-                        emitMerged()
-                    }
-                } finally {
-                    youtubeJob.cancel()
-                }
-            }
+            StorageFilter.OFFLINE, StorageFilter.ALL ->
+                songRepository.getPaginatedFavoriteSongs(sortOption, storageFilter)
+            StorageFilter.ONLINE ->
+                youTubeCachedTrackRepository.observeFavoriteSongs(sortOption)
+                    .map { songs -> PagingData.from(songs) }
         }.flowOn(Dispatchers.IO)
     }
 

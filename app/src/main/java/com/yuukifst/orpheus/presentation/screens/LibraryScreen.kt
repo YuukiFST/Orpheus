@@ -1155,7 +1155,7 @@ fun LibraryScreen(
                                     .fillMaxSize()
                                     .padding(top = 8.dp),
                                 pageSpacing = 0.dp,
-                                beyondViewportPageCount = 1, // Pre-load adjacent tabs to reduce lag when switching
+                                beyondViewportPageCount = 0,
                                 key = { it }
                             ) { page ->
                                 val tabIndex = resolveTabIndex(
@@ -1266,8 +1266,11 @@ fun LibraryScreen(
                                     LibraryTabId.LIKED -> {
                                         val favoritePagingItems =
                                             libraryViewModel.favoritesPagingFlow.collectAsLazyPagingItems()
+                                        val youtubeFavoriteSongs by libraryViewModel.youtubeFavoriteSongsFlow
+                                            .collectAsStateWithLifecycle(initialValue = persistentListOf())
                                         LibraryFavoritesTab(
                                             favoriteSongs = favoritePagingItems,
+                                            youtubeFavoriteSongs = youtubeFavoriteSongs,
                                             playerViewModel = playerViewModel,
                                             bottomBarHeight = bottomBarHeightDp,
                                             onMoreOptionsClick = stableOnMoreOptionsClick,

@@ -52,6 +52,9 @@ interface MusicRepository {
         storageFilter: com.yuukifst.orpheus.data.model.StorageFilter = com.yuukifst.orpheus.data.model.StorageFilter.ALL
     ): Flow<PagingData<Song>>
 
+    /** YouTube favorites for the LIKED tab when storage filter is ALL (shown above local paging). */
+    fun getYouTubeFavoriteSongs(sortOption: com.yuukifst.orpheus.data.model.SortOption): Flow<List<Song>>
+
     /**
      * Returns all favorite songs as a list (for playback queue on shuffle).
      */

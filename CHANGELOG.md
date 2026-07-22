@@ -2,6 +2,11 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.9] - 2026-07-21
+
+### Fixed
+- Library crash on v1.0.8 (`pageEventFlow` double collection) when opening Liked with YouTube favorites: stop merging YouTube into the local pager flow; show YouTube likes above the paged local list and collect paging only on the visible tab.
+
 ## [1.0.8] - 2026-07-21
 
 ### Fixed

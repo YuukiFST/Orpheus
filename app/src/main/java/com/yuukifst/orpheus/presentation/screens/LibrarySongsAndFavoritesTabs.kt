@@ -67,6 +67,8 @@ import com.yuukifst.orpheus.presentation.components.songFastScrollLabel
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -76,6 +78,7 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun LibraryFavoritesTab(
     favoriteSongs: LazyPagingItems<Song>,
+    youtubeFavoriteSongs: ImmutableList<Song> = persistentListOf(),
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
     onMoreOptionsClick: (Song) -> Unit,
@@ -113,11 +116,17 @@ fun LibraryFavoritesTab(
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = null)
 
-    val currentSongListIndex = remember(favoriteSongs.itemCount, currentSongId) {
+    val currentSongListIndex = remember(favoriteSongs.itemCount, currentSongId, youtubeFavoriteSongs) {
         if (currentSongId == null) -1
         else {
-            val items = favoriteSongs.itemSnapshotList
-            items.indexOfFirst { it?.id == currentSongId }
+            val youtubeIndex = youtubeFavoriteSongs.indexOfFirst { it.id == currentSongId }
+            if (youtubeIndex >= 0) {
+                youtubeIndex
+            } else {
+                val items = favoriteSongs.itemSnapshotList
+                val pagingIndex = items.indexOfFirst { it?.id == currentSongId }
+                if (pagingIndex >= 0) youtubeFavoriteSongs.size + pagingIndex else -1
+            }
         }
     }
     // New action just triggers the ViewModel request
@@ -203,7 +212,11 @@ fun LibraryFavoritesTab(
         }
     }
 
-    if (favoriteSongs.itemCount == 0 && favoriteSongs.loadState.refresh !is LoadState.Loading) {
+    if (
+        favoriteSongs.itemCount == 0 &&
+            youtubeFavoriteSongs.isEmpty() &&
+            favoriteSongs.loadState.refresh !is LoadState.Loading
+    ) {
         LibraryExpressiveEmptyState(
             tabId = LibraryTabId.LIKED,
             storageFilter = storageFilter,
@@ -240,6 +253,28 @@ fun LibraryFavoritesTab(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
                     ) {
+                        items(
+                            items = youtubeFavoriteSongs,
+                            key = { song -> song.id },
+                            contentType = { "youtube_favorite" }
+                        ) { song ->
+                            LibraryPlaybackAwareSongItem(
+                                song = song,
+                                playerViewModel = playerViewModel,
+                                onMoreOptionsClick = { onMoreOptionsClick(song) },
+                                isSelected = selectedSongIds.contains(song.id),
+                                selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
+                                isSelectionMode = isSelectionMode,
+                                onLongPress = { onSongLongPress(song) },
+                                onClick = {
+                                    if (isSelectionMode) {
+                                        onSongSelectionToggle(song)
+                                    } else {
+                                        playerViewModel.showAndPlaySongFromFavorites(song)
+                                    }
+                                }
+                            )
+                        }
                         items(
                             count = favoriteSongs.itemCount,
                             key = { index -> favoriteSongs.peek(index)?.id ?: index },

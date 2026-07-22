@@ -17,6 +17,8 @@ class LibraryViewModel @Inject constructor(
 
     val favoritesPagingFlow = libraryStateHolder.favoritesPagingFlow
 
+    val youtubeFavoriteSongsFlow = libraryStateHolder.youtubeFavoriteSongsFlow
+
     val favoriteSongCountFlow = libraryStateHolder.favoriteSongCountFlow
 
     val isLoadingLibrary = libraryStateHolder.isLoadingLibrary

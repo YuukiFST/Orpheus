@@ -13,6 +13,7 @@ import com.yuukifst.orpheus.data.model.LibraryTabId
 import com.yuukifst.orpheus.data.model.MusicFolder
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.model.SortOption
+import com.yuukifst.orpheus.data.model.StorageFilter
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.repository.MusicRepository
 import kotlinx.collections.immutable.ImmutableList
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -162,6 +164,19 @@ class LibraryStateHolder @Inject constructor(
         }
         .flowOn(Dispatchers.IO)
         .cachedIn(pagingScope)
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val youtubeFavoriteSongsFlow: kotlinx.coroutines.flow.Flow<ImmutableList<Song>> =
+        kotlinx.coroutines.flow.combine(_currentFavoriteSortOption, effectiveStorageFilter) { sort, filter ->
+            sort to filter
+        }.flatMapLatest { (sortOption, filter) ->
+            if (filter == StorageFilter.ALL) {
+                musicRepository.getYouTubeFavoriteSongs(sortOption).map { songs -> songs.toImmutableList() }
+            } else {
+                flowOf(persistentListOf())
+            }
+        }
+        .flowOn(Dispatchers.IO)
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val favoriteSongCountFlow: kotlinx.coroutines.flow.Flow<Int> = effectiveStorageFilter
