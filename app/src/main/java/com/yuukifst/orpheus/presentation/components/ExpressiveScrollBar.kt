@@ -1,10 +1,8 @@
 package com.yuukifst.orpheus.presentation.components
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -22,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridLayoutInfo
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.UnfoldMore
@@ -241,13 +240,13 @@ fun ExpressiveScrollBar(
     
     val animatedWidth by animateDpAsState(
         targetValue = if (isInteracting) expandedIndicatorWidth else thickness,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "WidthAnimation"
     )
     
     val iconAlpha by animateFloatAsState(
         targetValue = if (isInteracting) 1f else 0f,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "IconAlpha"
     )
 
@@ -467,8 +466,8 @@ fun ExpressiveScrollBar(
                             displayedProgress.animateTo(
                                 targetValue = targetProgress,
                                 animationSpec = tween(
-                                    durationMillis = 70,
-                                    easing = FastOutSlowInEasing
+                                    durationMillis = OrpheusMotion.DurationMicro,
+                                    easing = OrpheusMotion.EaseSmoothOut
                                 )
                             )
                         } else {
@@ -507,17 +506,17 @@ fun ExpressiveScrollBar(
 
         val dragLabelAlpha by animateFloatAsState(
             targetValue = if (showDragLabel) 1f else 0f,
-            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
             label = "DragLabelAlpha"
         )
         val dragLabelScale by animateFloatAsState(
             targetValue = if (showDragLabel) 1f else 0.82f,
-            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
             label = "DragLabelScale"
         )
         val dragLabelSlide by animateDpAsState(
             targetValue = if (showDragLabel) 0.dp else 8.dp,
-            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
             label = "DragLabelSlide"
         )
 

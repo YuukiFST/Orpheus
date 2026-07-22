@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -98,6 +97,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceAtLeast
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.Cloud
@@ -133,7 +133,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import timber.log.Timber
 import java.util.Locale
 import kotlin.math.roundToLong
@@ -667,15 +666,15 @@ fun FullPlayerContent(
             // MD3: TopAppBar slides in for portrait; slides up and fades out for landscape
             AnimatedVisibility(
                 visible = !isLandscape,
-                enter = fadeIn(animationSpec = tween(350, easing = FastOutSlowInEasing)) +
+                enter = fadeIn(animationSpec = tween(OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut)) +
                         slideInVertically(
                             initialOffsetY = { -it / 2 },
-                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            animationSpec = tween(OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut)
                         ),
-                exit = fadeOut(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                exit = fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)) +
                        slideOutVertically(
                            targetOffsetY = { -it / 2 },
-                           animationSpec = tween(220, easing = FastOutSlowInEasing)
+                           animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
                        )
             ) {
                 TopAppBar(
@@ -777,7 +776,7 @@ fun FullPlayerContent(
         LaunchedEffect(isLandscape) { contentVisible = true }
         val contentAlpha by animateFloatAsState(
             targetValue = if (contentVisible) 1f else 0f,
-            animationSpec = tween(durationMillis = 380, easing = FastOutSlowInEasing),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut),
             label = "orientationAlpha"
         )
         Box(
@@ -808,12 +807,12 @@ fun FullPlayerContent(
         visible = showLyricsSheet,
         enter = slideInVertically(
             initialOffsetY = { it / 5 },
-            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-        ) + fadeIn(animationSpec = tween(durationMillis = 160)),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+        ) + fadeIn(animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)),
         exit = slideOutVertically(
             targetOffsetY = { it / 6 },
-            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)
-        ) + fadeOut(animationSpec = tween(durationMillis = 120))
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+        ) + fadeOut(animationSpec = tween(OrpheusMotion.DurationMicro))
     ) {
         LyricsSheet(
             stablePlayerStateFlow = playerViewModel.stablePlayerState,
@@ -899,7 +898,7 @@ private fun FullPlayerAlbumCoverSection(
     // art's "pause squish" visible but removing the long tail of frame work.
     val albumArtScale by animateFloatAsState(
         targetValue = if (shouldApplyPausedScale) 0.95f else 1f,
-        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut),
         label = "AlbumArtScale"
     )
 
@@ -999,7 +998,7 @@ private fun FullPlayerControlsSection(
     onFavoriteToggle: () -> Unit
 ) {
     val stableControlAnimationSpec = remember {
-        tween<Float>(durationMillis = 240, easing = FastOutSlowInEasing)
+        tween<Float>(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
     }
     val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayControls
 
@@ -1373,25 +1372,26 @@ private fun SongMetadataDisplaySection(
             enter = scaleIn(
                 initialScale = 0.85f,
                 animationSpec = tween(
-                    durationMillis = 400,
-                    delayMillis = 80,
-                    easing = FastOutSlowInEasing
+                    durationMillis = OrpheusMotion.DurationSlow,
+                    delayMillis = OrpheusMotion.DurationMicro,
+                    easing = OrpheusMotion.EaseSmoothOut
                 )
             ) + fadeIn(
                 animationSpec = tween(
-                    durationMillis = 300,
-                    delayMillis = 80
+                    durationMillis = OrpheusMotion.DurationFast,
+                    delayMillis = OrpheusMotion.DurationMicro,
+                    easing = OrpheusMotion.EaseSmoothOut
                 )
             ),
             exit = scaleOut(
                 targetScale = 0.85f,
                 animationSpec = tween(
-                    durationMillis = 300,
-                    easing = FastOutSlowInEasing
+                    durationMillis = OrpheusMotion.DurationFast,
+                    easing = OrpheusMotion.EaseSmoothOut
                 )
             ) + fadeOut(
                 animationSpec = tween(
-                    durationMillis = 200
+                    durationMillis = OrpheusMotion.DurationQuick
                 )
             )
         ) {
@@ -1928,18 +1928,18 @@ private fun DelayedContent(
     val contentBlendAlpha by animateFloatAsState(
         targetValue = if (isDelayGateOpen) 1f else 0f,
         animationSpec = if (isDelayGateOpen) {
-            tween(durationMillis = 260, easing = FastOutSlowInEasing)
+            tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
         } else {
-            tween(durationMillis = 140, easing = FastOutSlowInEasing)
+            tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
         },
         label = "DelayedContentBlendAlpha"
     )
     val placeholderBlendAlpha by animateFloatAsState(
         targetValue = if (isDelayGateOpen) 0f else 1f,
         animationSpec = if (isDelayGateOpen) {
-            tween(durationMillis = 360, easing = FastOutSlowInEasing)
+            tween(durationMillis = OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut)
         } else {
-            tween(durationMillis = 140, easing = FastOutSlowInEasing)
+            tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
         },
         label = "DelayedPlaceholderBlendAlpha"
     )

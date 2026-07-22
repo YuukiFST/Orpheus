@@ -45,6 +45,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -152,7 +153,6 @@ import com.yuukifst.orpheus.presentation.viewmodel.SettingsViewModel
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.performAppCompatHapticFeedback
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
@@ -805,9 +805,9 @@ fun QueueBottomSheet(
                                             )
                                         )
                                         else -> Modifier.animateItem(
-                                            fadeInSpec = tween(durationMillis = 140),
-                                            fadeOutSpec = tween(durationMillis = 120),
-                                            placementSpec = tween(durationMillis = 180)
+                                            fadeInSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
+                                            fadeOutSpec = tween(durationMillis = OrpheusMotion.DurationMicro),
+                                            placementSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
                                         )
                                     }
                                 ) { isDragging ->
@@ -1877,17 +1877,17 @@ fun QueuePlaylistSongItem(
 
     val dismissBackgroundColor by animateColorAsState(
         targetValue = if (isSwipeTargeted) colors.errorContainer else colors.errorContainer.copy(alpha = 0.82f),
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "dismissBackgroundColor"
     )
     val dismissIconAlpha by animateFloatAsState(
         targetValue = revealProgress * if (isSwipeTargeted) 1f else 0.88f,
-        animationSpec = tween(durationMillis = 120),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationMicro),
         label = "dismissIconAlpha"
     )
     val dismissIconScale by animateFloatAsState(
         targetValue = if (isSwipeTargeted) 1.08f else 0.95f,
-        animationSpec = tween(durationMillis = 120),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationMicro),
         label = "dismissIconScale"
     )
 

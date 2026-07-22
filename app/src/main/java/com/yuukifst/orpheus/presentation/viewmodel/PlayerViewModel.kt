@@ -633,7 +633,8 @@ class PlayerViewModel @Inject constructor(
         ) {
             val sortOption = playerUiState.value.currentSongSortOption
             val storageFilter = playerUiState.value.currentStorageFilter
-            musicRepository.getSongIdsSorted(sortOption, storageFilter)
+            val sortedIds = musicRepository.getSongIdsSorted(sortOption, storageFilter)
+            resolvePlaybackQueueFromSortedIds(sortedIds)
         }
     }
 
@@ -648,9 +649,7 @@ class PlayerViewModel @Inject constructor(
             isVoluntaryPlay = isVoluntaryPlay,
             failureMessage = "Failed to build favorites queue for songId=%s"
         ) {
-            val sortOption = playerUiState.value.currentFavoriteSortOption
-            val storageFilter = playerUiState.value.currentStorageFilter
-            musicRepository.getFavoriteSongIdsSorted(sortOption, storageFilter)
+            getFavoriteSongsForSelection()
         }
     }
 
@@ -677,7 +676,7 @@ class PlayerViewModel @Inject constructor(
         queueName: String,
         isVoluntaryPlay: Boolean,
         failureMessage: String,
-        sortedIdsProvider: suspend () -> List<Long>
+        queueProvider: suspend () -> List<Song>
     ) {
         cancelPendingFullQueuePlayback()
         cancelPendingDirectPlayback()
@@ -685,18 +684,13 @@ class PlayerViewModel @Inject constructor(
 
         fullQueuePlaybackJob = viewModelScope.launch {
             try {
-                val sortedIds = sortedIdsProvider()
+                val fullQueue = queueProvider()
                 throwIfFullQueuePlaybackRequestIsStale(requestToken)
-
-                val fullQueue = resolvePlaybackQueueFromSortedIds(sortedIds)
-                throwIfFullQueuePlaybackRequestIsStale(requestToken)
-
-                showAndPlaySong(
+                handOffFullQueuePlayback(
                     song = song,
-                    contextSongs = fullQueue.ifEmpty { listOf(song) },
+                    fullQueue = fullQueue,
                     queueName = queueName,
-                    isVoluntaryPlay = isVoluntaryPlay,
-                    cancelPendingQueueBuild = false
+                    isVoluntaryPlay = isVoluntaryPlay
                 )
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -709,15 +703,32 @@ class PlayerViewModel @Inject constructor(
                 val fallbackQueue = libraryStateHolder.allSongs.value.takeIf { songs ->
                     songs.isNotEmpty() && songs.any { it.id == song.id }
                 } ?: listOf(song)
-                showAndPlaySong(
+                handOffFullQueuePlayback(
                     song = song,
-                    contextSongs = fallbackQueue,
+                    fullQueue = fallbackQueue,
                     queueName = queueName,
-                    isVoluntaryPlay = isVoluntaryPlay,
-                    cancelPendingQueueBuild = false
+                    isVoluntaryPlay = isVoluntaryPlay
                 )
             }
         }
+    }
+
+    private fun handOffFullQueuePlayback(
+        song: Song,
+        fullQueue: List<Song>,
+        queueName: String,
+        isVoluntaryPlay: Boolean
+    ) {
+        // Clear the job ref before playSongs() cancels pending full-queue work;
+        // otherwise this coroutine cancels itself and playback never starts.
+        fullQueuePlaybackJob = null
+        showAndPlaySong(
+            song = song,
+            contextSongs = fullQueue.ifEmpty { listOf(song) },
+            queueName = queueName,
+            isVoluntaryPlay = isVoluntaryPlay,
+            cancelPendingQueueBuild = false
+        )
     }
 
     private fun cancelPendingFullQueuePlayback() {

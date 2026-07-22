@@ -19,7 +19,6 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -63,6 +62,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -154,7 +154,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -1477,8 +1476,8 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
             AnimatedContent(
                 targetState = isCompact,
                 transitionSpec = {
-                    (fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 0.95f))
-                        .togetherWith(fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.95f))
+                    (fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow, easing = OrpheusMotion.EaseSmoothOut)) + scaleIn(initialScale = 0.95f))
+                        .togetherWith(fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)) + scaleOut(targetScale = 0.95f))
                 },
                 label = "HeaderPreviewAnim"
             ) { compact ->
@@ -2130,9 +2129,8 @@ fun SetupBottomBar(
     isFinishButtonEnabled: Boolean
 ) {
     // --- Animations for morphing and rotation ---
-    val morphAnimationSpec = tween<Float>(durationMillis = 600, easing = FastOutSlowInEasing)
-    // Slower, subtler animation for the rotation
-    val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = FastOutSlowInEasing)
+    val morphAnimationSpec = tween<Float>(durationMillis = OrpheusMotion.DurationVerySlow, easing = OrpheusMotion.EaseSmoothOut)
+    val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = OrpheusMotion.EaseSmoothOut)
 
     // 1. Determine the corner percentages for the target shape
     val targetShapeValues = when (pagerState.currentPage % 3) {
@@ -2239,8 +2237,8 @@ fun SetupBottomBar(
                         targetState = pagerState.currentPage < pagerState.pageCount - 1,
                         transitionSpec = {
                             ContentTransform(
-                                targetContentEnter = fadeIn(animationSpec = tween(220, delayMillis = 90)) + scaleIn(initialScale = 0.9f, animationSpec = tween(220, delayMillis = 90)),
-                                initialContentExit = fadeOut(animationSpec = tween(90)) + scaleOut(targetScale = 0.9f, animationSpec = tween(90))
+                                targetContentEnter = fadeIn(animationSpec = tween(OrpheusMotion.DurationQuick, delayMillis = OrpheusMotion.DurationMicro, easing = OrpheusMotion.EaseSmoothOut)) + scaleIn(initialScale = 0.9f, animationSpec = tween(OrpheusMotion.DurationQuick, delayMillis = OrpheusMotion.DurationMicro, easing = OrpheusMotion.EaseSmoothOut)),
+                                initialContentExit = fadeOut(animationSpec = tween(OrpheusMotion.DurationMicro)) + scaleOut(targetScale = 0.9f, animationSpec = tween(OrpheusMotion.DurationMicro))
                             ).using(SizeTransform(clip = false))
                         },
                         label = "AnimatedFabIcon"
@@ -2438,8 +2436,8 @@ fun NavBarPreview(isDefault: Boolean) {
                 AnimatedContent(
                     targetState = isDefault,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(400)) + slideInVertically { it })
-                            .togetherWith(fadeOut(animationSpec = tween(200)) + slideOutVertically { it })
+                        (fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow, easing = OrpheusMotion.EaseSmoothOut)) + slideInVertically { it })
+                            .togetherWith(fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)) + slideOutVertically { it })
                     },
                     label = "NavbarPreviewAnim"
                 ) { default ->

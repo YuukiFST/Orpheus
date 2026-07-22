@@ -536,6 +536,24 @@ class PlayerViewModelTest {
         }
 
         @Test
+        fun `showAndPlaySongFromFavorites starts playback`() = runTest {
+            val favoriteSongs = listOf(song1, song3)
+            coEvery { mockMusicRepository.getFavoriteSongsOnce(StorageFilter.ALL) } returns favoriteSongs
+            stubShuffledPlayback(favoriteSongs, startSong = song1)
+
+            val mockPlayer = mockk<Player>(relaxed = true)
+            every { mockDualPlayerEngine.masterPlayer } returns mockPlayer
+            every { mockDualPlayerEngine.cancelNext() } just runs
+
+            playerViewModel.showAndPlaySongFromFavorites(song1)
+            advanceUntilIdle()
+
+            coVerify { mockMusicRepository.getFavoriteSongsOnce(StorageFilter.ALL) }
+            verify { mockPlayer.prepare() }
+            verify { mockPlayer.play() }
+        }
+
+        @Test
         fun `shuffleRandomAlbum calls prepareShuffledQueue with startAtZero`() = runTest {
             val album = Album(
                 id = 77L,
