@@ -88,6 +88,7 @@ class PlayerViewModelTest {
     private val mockThemeStateHolder: ThemeStateHolder = mockk(relaxed = true)
     private val mockMultiSelectionStateHolder: MultiSelectionStateHolder = mockk(relaxed = true)
     private val mockPlaylistSelectionStateHolder: PlaylistSelectionStateHolder = mockk(relaxed = true)
+    private val mockYouTubePlaybackController: YouTubePlaybackController = mockk(relaxed = true)
     private lateinit var mockMediaControllerFactory: com.yuukifst.orpheus.data.media.MediaControllerFactory
 
     private val testDispatcher = StandardTestDispatcher()
@@ -161,6 +162,10 @@ class PlayerViewModelTest {
         _favoriteIdsFlow.value = emptySet()
         stablePlayerStateFlow = MutableStateFlow(StablePlayerState(currentSong = null))
         every { mockPlaybackStateHolder.stablePlayerState } returns stablePlayerStateFlow
+        every { mockPlaybackStateHolder.updateStablePlayerState(any()) } answers {
+            val update = firstArg<(StablePlayerState) -> StablePlayerState>()
+            stablePlayerStateFlow.update(update)
+        }
         every { mockPlaybackStateHolder.setMediaController(any()) } just runs // Added missing mock
 
         every { mockSleepTimerStateHolder.initialize(any(), any(), any(), any(), any()) } just runs // Added missing mock
@@ -189,7 +194,10 @@ class PlayerViewModelTest {
         coEvery { mockMusicRepository.getRandomSongs(any()) } returns emptyList()
         coEvery { mockMusicRepository.getSongIdsSorted(any(), any()) } returns emptyList()
         coEvery { mockMusicRepository.getFavoriteSongIdsSorted(any(), any()) } returns emptyList()
-        every { mockLyricsStateHolder.songUpdates } returns MutableSharedFlow()
+        every { mockQueueStateHolder.setOriginalQueueOrder(any()) } just runs
+        coEvery { mockYouTubePlaybackController.playMixedPlaylist(any(), any(), any(), any()) } just Runs
+        every { mockYouTubePlaybackController.queueUpdates } returns MutableSharedFlow()
+        every { mockYouTubePlaybackController.playbackErrors } returns MutableSharedFlow()
 
         // Initialize PlayerViewModel
         val sessionToken = mockk<SessionToken>(relaxed = true)
@@ -242,7 +250,8 @@ class PlayerViewModelTest {
             mockMultiSelectionStateHolder,
             mockPlaylistSelectionStateHolder,
             sessionToken,
-            mockMediaControllerFactory
+            mockMediaControllerFactory,
+            mockYouTubePlaybackController,
         )
     }
 
@@ -449,6 +458,50 @@ class PlayerViewModelTest {
         }
     }
 
+    @Test
+    fun `showAndPlaySong updates mini player song before async queue prep`() = runTest {
+        val currentlyPlaying = Song(
+            id = "1",
+            title = "Current",
+            artist = "Artist A",
+            genre = "Rock",
+            albumArtUriString = "cover1.png",
+            artistId = 1L,
+            albumId = 1L,
+            contentUriString = "content://dummy/1",
+            duration = 180000L,
+            bitrate = null,
+            sampleRate = null,
+            album = "Album",
+            path = "path",
+            mimeType = "audio/mpeg",
+        )
+        val nextSong = currentlyPlaying.copy(id = "2", title = "Next")
+        stablePlayerStateFlow.value = StablePlayerState(currentSong = currentlyPlaying, isPlaying = true)
+
+        mockkObject(MediaItemBuilder)
+        every { MediaItemBuilder.build(any()) } returns MediaItem.Builder()
+            .setMediaId("2")
+            .setUri("file:///tmp/next.mp3")
+            .build()
+        val mockedPlaybackUri = mockk<android.net.Uri>(relaxed = true)
+        every { mockedPlaybackUri.scheme } returns "file"
+        every { MediaItemBuilder.playbackUri(any<Song>()) } returns mockedPlaybackUri
+
+        mockkStatic(android.net.Uri::class)
+        every { android.net.Uri.parse(any()) } returns mockk(relaxed = true)
+
+        val mockPlayer = mockk<Player>(relaxed = true)
+        every { mockDualPlayerEngine.masterPlayer } returns mockPlayer
+        every { mockDualPlayerEngine.cancelNext() } just runs
+
+        playerViewModel.showAndPlaySong(nextSong, listOf(currentlyPlaying, nextSong), "Search")
+
+        assertEquals(nextSong.id, stablePlayerStateFlow.value.currentSong?.id)
+        assertEquals("Search", playerViewModel.playerUiState.value.currentQueueSourceName)
+        assertEquals(2, playerViewModel.playerUiState.value.currentPlaybackQueue.size)
+    }
+
     @Nested
     @DisplayName("Shuffle Functionality")
     inner class ShuffleFunctionalityTests {
@@ -551,6 +604,44 @@ class PlayerViewModelTest {
             coVerify { mockMusicRepository.getFavoriteSongsOnce(StorageFilter.ALL) }
             verify { mockPlayer.prepare() }
             verify { mockPlayer.play() }
+        }
+
+        @Test
+        fun `showAndPlaySongFromFavorites routes YouTube likes through mixed playback`() = runTest {
+            val youtubeFavorite = Song(
+                id = "youtube_abc123",
+                title = "YouTube Song",
+                artist = "Channel",
+                artistId = -1L,
+                album = "YouTube",
+                albumId = -1L,
+                path = "",
+                contentUriString = "",
+                albumArtUriString = "https://example.com/thumb.jpg",
+                duration = 180000L,
+                mimeType = null,
+                bitrate = null,
+                sampleRate = null,
+            )
+            coEvery { mockMusicRepository.getFavoriteSongsOnce(StorageFilter.ALL) } returns listOf(youtubeFavorite)
+
+            mockkStatic(android.net.Uri::class)
+            every { android.net.Uri.parse(any()) } returns mockk(relaxed = true)
+
+            playerViewModel.showAndPlaySongFromFavorites(youtubeFavorite)
+            advanceUntilIdle()
+
+            coVerify {
+                mockYouTubePlaybackController.playMixedPlaylist(
+                    tracks = match { tracks ->
+                        tracks.size == 1 &&
+                            tracks.first() is com.yuukifst.orpheus.data.model.PlaylistMixedTrack.YouTube
+                    },
+                    startIndex = 0,
+                    repeatMode = any(),
+                    stopOnEnd = false,
+                )
+            }
         }
 
         @Test

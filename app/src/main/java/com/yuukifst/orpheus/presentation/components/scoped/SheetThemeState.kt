@@ -1,6 +1,7 @@
 package com.yuukifst.orpheus.presentation.components.scoped
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -133,7 +134,10 @@ internal fun rememberSheetThemeState(
     // previous and the new target ColorScheme manually. This reduces per-frame State reads
     // from 68 → 0 (the lerp runs during the Animatable tick, not during recomposition).
     val albumColorScheme = rememberBatchAnimatedColorScheme(rawAlbumColorScheme)
-    val miniPlayerScheme = rememberBatchAnimatedColorScheme(rawMiniPlayerScheme)
+    val miniPlayerScheme = rememberBatchAnimatedColorScheme(
+        target = rawMiniPlayerScheme,
+        animationSpec = tween(durationMillis = 120, easing = FastOutSlowInEasing),
+    )
 
     val miniAppearProgress = remember { Animatable(0f) }
     LaunchedEffect(currentSong?.id) {
@@ -179,7 +183,10 @@ internal fun rememberSheetThemeState(
  * the 34 concurrent [State] reads that were triggering recomposition on every animation frame.
  */
 @Composable
-private fun rememberBatchAnimatedColorScheme(target: ColorScheme): ColorScheme {
+private fun rememberBatchAnimatedColorScheme(
+    target: ColorScheme,
+    animationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow),
+): ColorScheme {
     val progress = remember { Animatable(1f) }
     var fromScheme by remember { mutableStateOf(target) }
     var toScheme by remember { mutableStateOf(target) }
@@ -192,7 +199,7 @@ private fun rememberBatchAnimatedColorScheme(target: ColorScheme): ColorScheme {
         progress.snapTo(0f)
         progress.animateTo(
             targetValue = 1f,
-            animationSpec = spring(stiffness = Spring.StiffnessLow)
+            animationSpec = animationSpec,
         )
     }
 

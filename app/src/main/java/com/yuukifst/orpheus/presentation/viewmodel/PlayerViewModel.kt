@@ -75,6 +75,7 @@ import com.yuukifst.orpheus.utils.StorageType
 import com.yuukifst.orpheus.utils.StorageUtils
 import com.yuukifst.orpheus.utils.traceSection
 import com.yuukifst.orpheus.utils.isYouTubeMediaId
+import com.yuukifst.orpheus.utils.toPlaylistMixedTracks
 import com.yuukifst.orpheus.utils.ZipShareHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -1957,6 +1958,14 @@ class PlayerViewModel @Inject constructor(
         }
         val playbackContext =
             if (contextSongs.any { it.id == song.id }) contextSongs else listOf(song)
+        val resolvedIndex = indexInQueue
+            ?: playbackContext.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+        applyImmediatePlaybackUi(
+            song = song,
+            queueSongs = playbackContext,
+            queueName = queueName,
+            mediaItemIndex = resolvedIndex,
+        )
         val controller = mediaController
         val currentQueue = _playerUiState.value.currentPlaybackQueue
         val songIndexInQueue = indexInQueue ?: currentQueue.indexOfFirst { it.id == song.id }
@@ -2865,6 +2874,12 @@ class PlayerViewModel @Inject constructor(
     // rebuildPlayerQueue functionality moved to PlaybackStateHolder (simplified)
     fun playSongs(songsToPlay: List<Song>, startSong: Song, queueName: String = "None", playlistId: String? = null) {
         cancelPendingFullQueuePlayback()
+        applyImmediatePlaybackUi(
+            song = startSong,
+            queueSongs = songsToPlay,
+            queueName = queueName,
+            mediaItemIndex = songsToPlay.indexOfFirst { it.id == startSong.id }.coerceAtLeast(0),
+        )
         val requestToken = beginDirectPlaybackRequest()
         directPlaybackJob = viewModelScope.launch {
             transitionSchedulerJob?.cancel()
@@ -3006,6 +3021,32 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    private fun applyImmediatePlaybackUi(
+        song: Song,
+        queueSongs: List<Song>,
+        queueName: String,
+        mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
+    ) {
+        beginPreparingSong(song)
+        _playerUiState.update {
+            it.copy(
+                currentPlaybackQueue = queueSongs.toPlaybackQueue(),
+                currentQueueSourceName = queueName,
+                isLoadingInitialSongs = false,
+            )
+        }
+        playbackStateHolder.updateStablePlayerState {
+            it.copy(
+                currentSong = song,
+                currentMediaItemIndex = mediaItemIndex,
+                isPlaying = true,
+                playWhenReady = true,
+                totalDuration = song.duration.coerceAtLeast(0L),
+            )
+        }
+        _isSheetVisible.value = true
+    }
+
     private fun beginPreparingSong(song: Song) {
         // Skip the "Preparing playback…" pill for local files: they reach STATE_READY
         // in milliseconds, and transient STATE_BUFFERING from audio HAL/offload init
@@ -3119,27 +3160,21 @@ class PlayerViewModel @Inject constructor(
         }
         val effectiveStartSong = songsToPlay.firstOrNull { it.id == startSong.id } ?: songsToPlay.first()
 
+        if (songsToPlay.any { it.id.isYouTubeMediaId() }) {
+            internalPlayMixedSongs(songsToPlay, effectiveStartSong, queueName, playlistId)
+            return
+        }
+
         if (playlistId != null && queueName != "None") {
             appShortcutManager.updateLastPlaylistShortcut(playlistId, queueName)
         }
 
-        beginPreparingSong(effectiveStartSong)
-        _playerUiState.update {
-            it.copy(
-                currentPlaybackQueue = songsToPlay.toPlaybackQueue(),
-                currentQueueSourceName = queueName
-            )
-        }
-        playbackStateHolder.updateStablePlayerState {
-            it.copy(
-                currentSong = effectiveStartSong,
-                currentMediaItemIndex = 0,
-                isPlaying = true,
-                playWhenReady = true,
-                totalDuration = effectiveStartSong.duration.coerceAtLeast(0L)
-            )
-        }
-        _isSheetVisible.value = true
+        applyImmediatePlaybackUi(
+            song = effectiveStartSong,
+            queueSongs = songsToPlay,
+            queueName = queueName,
+            mediaItemIndex = songsToPlay.indexOfFirst { it.id == effectiveStartSong.id }.coerceAtLeast(0),
+        )
 
         val startMediaItem = buildResolvedPlaybackMediaItem(effectiveStartSong)
 
@@ -3183,18 +3218,46 @@ class PlayerViewModel @Inject constructor(
         return MediaItemBuilder.build(song)
     }
 
+    private suspend fun internalPlayMixedSongs(
+        songsToPlay: List<Song>,
+        startSong: Song,
+        queueName: String,
+        playlistId: String?,
+    ) {
+        if (playlistId != null && queueName != "None") {
+            appShortcutManager.updateLastPlaylistShortcut(playlistId, queueName)
+        }
+
+        val startIndex = songsToPlay.indexOfFirst { it.id == startSong.id }.coerceAtLeast(0)
+        applyImmediatePlaybackUi(
+            song = startSong,
+            queueSongs = songsToPlay,
+            queueName = queueName,
+            mediaItemIndex = startIndex,
+        )
+        val playerState = playbackStateHolder.stablePlayerState.value
+        queueStateHolder.setOriginalQueueOrder(songsToPlay)
+        youTubePlaybackController.playMixedPlaylist(
+            tracks = songsToPlay.toPlaylistMixedTracks(),
+            startIndex = startIndex,
+            repeatMode = playerState.repeatMode,
+            stopOnEnd = false,
+        )
+        _playerUiState.update { it.copy(isLoadingInitialSongs = false) }
+        _isSheetVisible.value = true
+    }
 
     private fun loadAndPlaySong(song: Song) {
         cancelPendingFullQueuePlayback()
-        beginPreparingSong(song)
-        playbackStateHolder.updateStablePlayerState {
-            it.copy(
-                currentSong = song,
-                isPlaying = true,
-                playWhenReady = true
-            )
-        }
-        _isSheetVisible.value = true
+        val queueSongs = _playerUiState.value.currentPlaybackQueue
+            .takeIf { it.isNotEmpty() }
+            ?: listOf(song)
+        applyImmediatePlaybackUi(
+            song = song,
+            queueSongs = queueSongs,
+            queueName = _playerUiState.value.currentQueueSourceName,
+            mediaItemIndex = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
+        )
 
         val controller = mediaController
         if (controller == null) {
