@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -336,14 +337,15 @@ fun AlbumDetailScreen(
                                     )
                                 }
                             }
-                            items(
+                            itemsIndexed(
                                 items = discSongs,
-                                key = { song -> "album_song_${song.id}" },
-                                contentType = { "album_song" }
-                            ) { song ->
+                                key = { _, song -> "album_song_${song.id}" },
+                                contentType = { _, _ -> "album_song" }
+                            ) { index, song ->
                                 // Per-item playback observation (see LibraryPlaybackAwareSongItem):
                                 // keeps a track change from recomposing every visible row.
                                 LibraryPlaybackAwareSongItem(
+                                    enterIndex = index,
                                     song = song,
                                     playerViewModel = playerViewModel,
                                     showAlbumArt = false,

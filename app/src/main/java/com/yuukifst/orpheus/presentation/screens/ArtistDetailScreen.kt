@@ -703,6 +703,7 @@ private fun ArtistAlbumSectionSongItem(
             }
 
             EnhancedSongListItem(
+                enterIndex = songIndex,
                 modifier = Modifier.fillMaxWidth(),
                 song = song,
                 isCurrentSong = isCurrentSong,

@@ -27,7 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.worker.SyncProgress
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalLinePosition
+import com.yuukifst.orpheus.ui.theme.terminalAccentLine
 import kotlin.math.roundToInt
 
 /**
@@ -44,7 +48,7 @@ fun SyncProgressBar(
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = syncProgress.progress.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "progressAnimation"
     )
 
@@ -53,9 +57,11 @@ fun SyncProgressBar(
     val percentage = (animatedProgress * 100).roundToInt()
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .terminalAccentLine(TerminalLinePosition.Top),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.medium
+        shape = TerminalCornerShape
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -172,7 +178,7 @@ fun CompactSyncProgressIndicator(
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = syncProgress.progress.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "compactProgressAnimation"
     )
 

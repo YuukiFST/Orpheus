@@ -2,9 +2,9 @@ package com.yuukifst.orpheus.presentation.components.scoped
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -72,21 +72,21 @@ fun RowScope.CustomNavigationBarItem(
     // Animated colors - only recompose when 'selected' changes
     val iconColor by animateColorAsState(
         targetValue = if (selected) selectedIconColor else unselectedIconColor,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "iconColor"
     )
 
     val textColor by animateColorAsState(
         targetValue = if (selected) selectedTextColor else unselectedTextColor,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "textColor"
     )
 
     val iconScale by animateFloatAsState(
         targetValue = if (selected) 1.1f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
+        animationSpec = tween(
+            durationMillis = if (selected) OrpheusMotion.DurationFast else OrpheusMotion.DurationQuick,
+            easing = if (selected) OrpheusMotion.EaseBounce else OrpheusMotion.EaseBounceStrong
         ),
         label = "iconScale"
     )
@@ -130,26 +130,23 @@ fun RowScope.CustomNavigationBarItem(
             // Background indicator (pill shape for Material 3 Expressive)
             androidx.compose.animation.AnimatedVisibility(
                 visible = selected,
-                enter = fadeIn(animationSpec = tween(100)) + // A faster fade in
+                enter = fadeIn(animationSpec = tween(OrpheusMotion.DurationMicro)) +
                         scaleIn(
-                            animationSpec = spring( // We use spring for the scaleIn
-                                dampingRatio = Spring.DampingRatioMediumBouncy, // Provides a moderate bounce
-                                stiffness = Spring.StiffnessLow // You can tune the stiffness
-                                // initialScale so it starts a bit smaller if you want more impact
-                                // initialScale = 0.8f // (Optional)
-                            ),
-                            // You can also tune initialScale inside scaleIn if needed
-                            // initialScale = 0.8f // This is the default value of scaleIn if not specified inside spring
+                            animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseBounce),
                         ),
-                exit = fadeOut(animationSpec = tween(100)) +
-                        scaleOut(animationSpec = tween(100, easing = EaseInQuart)) // Keep the exit as it was or tune it as needed
+                exit = fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick)) +
+                        scaleOut(animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut))
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = indicatorPadding)
+                        .terminalBorder(
+                            color = indicatorColor.copy(alpha = 0.85f),
+                            width = 1.dp
+                        )
                         .background(
-                            color = indicatorColor,
+                            color = indicatorColor.copy(alpha = 0.35f),
                             shape = indicatorShape
                         )
                 )
@@ -185,8 +182,8 @@ fun RowScope.CustomNavigationBarItem(
         // Label with animation
         androidx.compose.animation.AnimatedVisibility(
             visible = showLabel,
-            enter = fadeIn(animationSpec = tween(200, delayMillis = 50)),
-            exit = fadeOut(animationSpec = tween(100))
+            enter = fadeIn(animationSpec = tween(OrpheusMotion.DurationFast, delayMillis = OrpheusMotion.DurationMicro)),
+            exit = fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
         ) {
             Spacer(modifier = Modifier.height(4.dp))
             Box(
@@ -206,6 +203,3 @@ fun RowScope.CustomNavigationBarItem(
     }
 }
 
-// Easing curves for smoother animations (Material 3 Expressive)
-private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)
-private val EaseInQuart = CubicBezierEasing(0.5f, 0f, 0.75f, 0f)

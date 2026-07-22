@@ -31,6 +31,7 @@ internal fun LibraryPlaybackAwareSongItem(
     isSelected: Boolean = false,
     selectionIndex: Int? = null,
     isSelectionMode: Boolean = false,
+    enterIndex: Int? = null,
     onLongPress: () -> Unit = {},
     onMoreOptionsClick: (Song) -> Unit,
     onClick: () -> Unit
@@ -48,6 +49,7 @@ internal fun LibraryPlaybackAwareSongItem(
     }.collectAsStateWithLifecycle(initialValue = LibrarySongPlaybackUiState())
 
     EnhancedSongListItem(
+        enterIndex = enterIndex,
         song = song,
         isPlaying = playbackUiState.isPlaying,
         isCurrentSong = playbackUiState.isCurrentSong,

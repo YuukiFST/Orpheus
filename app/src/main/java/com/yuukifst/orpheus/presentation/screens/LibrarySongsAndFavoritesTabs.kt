@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -253,12 +254,13 @@ fun LibraryFavoritesTab(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
                     ) {
-                        items(
+                        itemsIndexed(
                             items = youtubeFavoriteSongs,
-                            key = { song -> song.id },
-                            contentType = { "youtube_favorite" }
-                        ) { song ->
+                            key = { _, song -> song.id },
+                            contentType = { _, _ -> "youtube_favorite" }
+                        ) { index, song ->
                             LibraryPlaybackAwareSongItem(
+                                enterIndex = index,
                                 song = song,
                                 playerViewModel = playerViewModel,
                                 onMoreOptionsClick = { onMoreOptionsClick(song) },
@@ -283,6 +285,7 @@ fun LibraryFavoritesTab(
                             val song = favoriteSongs[index]
                             if (song != null) {
                                 LibraryPlaybackAwareSongItem(
+                                    enterIndex = youtubeFavoriteSongs.size + index,
                                     song = song,
                                     playerViewModel = playerViewModel,
                                     onMoreOptionsClick = { onMoreOptionsClick(song) },
@@ -356,8 +359,9 @@ fun LibrarySongsTabPaginated(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
             ) {
-                items(12, key = { "skeleton_song_$it" }) {
+                items(12, key = { "skeleton_song_$it" }) { index ->
                     EnhancedSongListItem(
+                        enterIndex = index,
                         song = Song.emptySong(),
                         isPlaying = false,
                         isLoading = true,
@@ -469,6 +473,7 @@ fun LibrarySongsTabPaginated(
                                     }
 
                                     EnhancedSongListItem(
+                                        enterIndex = index,
                                         song = song,
                                         isPlaying = isPlayingThisSong,
                                         isCurrentSong = stablePlayerState.currentSong?.id == song.id,
@@ -478,6 +483,7 @@ fun LibrarySongsTabPaginated(
                                     )
                                 } else {
                                     EnhancedSongListItem(
+                                        enterIndex = index,
                                         song = Song.emptySong(),
                                         isPlaying = false,
                                         isLoading = true,

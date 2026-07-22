@@ -146,7 +146,7 @@ fun OrpheusTheme(
     CompositionLocalProvider(LocalOrpheusDarkTheme provides darkTheme) {
         MaterialTheme(
             colorScheme = finalColorScheme,
-            motionScheme = MotionScheme.standard(),
+            motionScheme = MotionScheme.expressive(),
             typography = Typography,
             shapes = Shapes,
             content = content

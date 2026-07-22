@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -106,6 +108,7 @@ fun SettingsItem(
             modifier =
                     Modifier.fillMaxWidth()
                             .clip(TerminalCornerShape)
+                            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
                             .clickable(onClick = onClick)
     ) {
         Row(

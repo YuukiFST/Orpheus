@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -288,8 +288,9 @@ fun DailyMixScreen(
                     }
                 }
 
-                items(dailyMixSongs, key = { it.id }) { song ->
+                itemsIndexed(dailyMixSongs, key = { _, song -> song.id }) { index, song ->
                     EnhancedSongListItem(
+                        enterIndex = index,
                         modifier = Modifier
                             .padding(horizontal = 16.dp),
                         song = song,

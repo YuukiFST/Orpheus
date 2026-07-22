@@ -322,8 +322,9 @@ private fun DailyMixSongList(
             .clip(TerminalCornerShape),
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
-        songs.forEach { song ->
+        songs.forEachIndexed { index, song ->
             EnhancedSongListItem(
+                enterIndex = index,
                 song = song,
                 isCurrentSong = stablePlayerState.currentSong?.id == song.id,
                 isPlaying = stablePlayerState.isPlaying && stablePlayerState.currentSong?.id == song.id,

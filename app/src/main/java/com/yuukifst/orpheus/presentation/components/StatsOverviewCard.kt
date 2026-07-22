@@ -41,7 +41,8 @@ import com.yuukifst.orpheus.data.stats.StatsTimeRange
 import com.yuukifst.orpheus.presentation.stats.displayNameRes
 import com.yuukifst.orpheus.utils.formatListeningDurationCompact
 import com.yuukifst.orpheus.utils.formatListeningDurationLong
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.phosphorGlow
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.runtime.remember
@@ -59,7 +60,9 @@ fun StatsOverviewCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .phosphorGlow(color = MaterialTheme.colorScheme.primary, alpha = 0.1f, layers = 1)
+            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
         shape = shape,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),

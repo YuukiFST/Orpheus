@@ -7,6 +7,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -121,12 +123,20 @@ fun LibraryActionRow(
             targetState = isFoldersTab,
             label = "ActionRowContent",
             transitionSpec = {
-                if (targetState) { // Transition to Folders (Breadcrumbs)
-                    slideInVertically { height -> height } + fadeIn() togetherWith
-                            slideOutVertically { height -> -height } + fadeOut()
-                } else { // Transition to other tabs (Buttons)
-                    slideInVertically { height -> -height } + fadeIn() togetherWith
-                            slideOutVertically { height -> height } + fadeOut()
+                if (targetState) {
+                    slideInVertically(
+                        animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+                    ) { height -> height } + fadeIn(tween(OrpheusMotion.DurationFast)) togetherWith
+                            slideOutVertically(
+                                animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+                            ) { height -> -height } + fadeOut(tween(OrpheusMotion.DurationQuick))
+                } else {
+                    slideInVertically(
+                        animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+                    ) { height -> -height } + fadeIn(tween(OrpheusMotion.DurationFast)) togetherWith
+                            slideOutVertically(
+                                animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+                            ) { height -> height } + fadeOut(tween(OrpheusMotion.DurationQuick))
                 }
             },
             modifier = Modifier.weight(1f)

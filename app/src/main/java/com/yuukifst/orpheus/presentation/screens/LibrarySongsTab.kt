@@ -264,8 +264,9 @@ fun LibrarySongsTab(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
             ) {
-                items(12, key = { "skeleton_song_$it" }) { // Show 12 skeleton items
+                items(12, key = { "skeleton_song_$it" }) { index -> // Show 12 skeleton items
                     EnhancedSongListItem(
+                        enterIndex = index,
                         song = Song.emptySong(),
                         isPlaying = false,
                         isLoading = true,
@@ -339,6 +340,7 @@ fun LibrarySongsTab(
                                     }
 
                                     LibraryPlaybackAwareSongItem(
+                                        enterIndex = index,
                                         song = song,
                                         playerViewModel = playerViewModel,
                                         isSelected = isSelected,
@@ -351,6 +353,7 @@ fun LibrarySongsTab(
                                 } else {
                                      // Placeholder
                                      EnhancedSongListItem(
+                                        enterIndex = index,
                                         song = Song.emptySong(),
                                         isPlaying = false,
                                         isLoading = true,

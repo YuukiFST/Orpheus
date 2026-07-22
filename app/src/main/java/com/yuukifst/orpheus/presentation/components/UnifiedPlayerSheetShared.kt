@@ -51,6 +51,7 @@ import coil.size.Size
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.terminalAccentLine
 
 internal val LocalMaterialTheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
@@ -88,6 +89,7 @@ internal fun MiniPlayerContentInternal(
         modifier = modifier
             .fillMaxWidth()
             .height(MiniPlayerHeight)
+            .terminalAccentLine()
             .padding(start = 10.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

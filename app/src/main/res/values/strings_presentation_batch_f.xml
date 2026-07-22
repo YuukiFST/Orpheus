@@ -137,6 +137,8 @@
     <string name="presentation_batch_f_album_art_quality_medium_line">Medium (512px) - Balanced</string>
     <string name="presentation_batch_f_album_art_quality_high_line">High (800px) - Best quality</string>
     <string name="presentation_batch_f_album_art_quality_original_line">Original - Maximum quality</string>
+    <string name="presentation_batch_f_exp_crt_overlay_title">CRT screen overlay</string>
+    <string name="presentation_batch_f_exp_crt_overlay_subtitle">Scanlines, vignette, and phosphor tint across the app. Turn off for a cleaner flat look.</string>
 
     <!-- Settings category screen (composables) -->
     <string name="presentation_batch_f_percent">%1$d%%</string>

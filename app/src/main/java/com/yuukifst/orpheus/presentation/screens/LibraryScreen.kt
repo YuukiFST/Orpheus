@@ -45,6 +45,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -233,6 +234,7 @@ import com.yuukifst.orpheus.presentation.screens.CreatePlaylistDialog
 import com.yuukifst.orpheus.presentation.components.PlaylistBottomSheet
 import com.yuukifst.orpheus.presentation.components.PlaylistContainer
 import com.yuukifst.orpheus.presentation.components.subcomps.PlayingEqIcon
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import java.util.Locale
 import androidx.compose.ui.platform.LocalContext
@@ -875,8 +877,12 @@ fun LibraryScreen(
                             targetState = isSelectionMode || isPlaylistSelectionMode || isAlbumSelectionMode,
                             label = "ActionRowModeSwitch",
                             transitionSpec = {
-                                (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                        (slideOutHorizontally { it } + fadeOut())
+                                (slideInHorizontally(
+                                    animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+                                ) { -it } + fadeIn(tween(OrpheusMotion.DurationFast))) togetherWith
+                                        (slideOutHorizontally(
+                                            animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+                                        ) { it } + fadeOut(tween(OrpheusMotion.DurationQuick)))
                             },
                             modifier = Modifier
                                 .padding(
@@ -1792,10 +1798,18 @@ private fun CompactLibraryPagerIndicator(
             val selected = index == safeIndex
             val width by animateDpAsState(
                 targetValue = if (selected) 22.dp else 10.dp,
+                animationSpec = tween(
+                    durationMillis = com.yuukifst.orpheus.ui.theme.OrpheusMotion.DurationFast,
+                    easing = com.yuukifst.orpheus.ui.theme.OrpheusMotion.EaseSmoothOut
+                ),
                 label = "LibraryCompactPagerIndicatorWidth"
             )
             val alpha by animateFloatAsState(
                 targetValue = if (selected) 1f else 0.35f,
+                animationSpec = tween(
+                    durationMillis = com.yuukifst.orpheus.ui.theme.OrpheusMotion.DurationQuick,
+                    easing = com.yuukifst.orpheus.ui.theme.OrpheusMotion.EaseSmoothOut
+                ),
                 label = "LibraryCompactPagerIndicatorAlpha"
             )
 
@@ -2554,8 +2568,9 @@ fun LibraryFoldersTab(
                                     }
                                 }
 
-                                items(songsToShow, key = { it.id }, contentType = { "song" }) { song ->
+                                itemsIndexed(songsToShow, key = { _, song -> song.id }, contentType = { _, _ -> "song" }) { index, song ->
                                     EnhancedSongListItem(
+                                        enterIndex = index,
                                         song = song,
                                         isPlaying = stablePlayerState.currentSong?.id == song.id && stablePlayerState.isPlaying,
                                         isCurrentSong = stablePlayerState.currentSong?.id == song.id,
@@ -2759,12 +2774,18 @@ fun AlbumGridItemRedesigned(
     val cardShape = TerminalCornerShape
     val selectionScale by animateFloatAsState(
         targetValue = if (isSelected) 0.985f else 1f,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = tween(
+            durationMillis = com.yuukifst.orpheus.ui.theme.OrpheusMotion.DurationFast,
+            easing = com.yuukifst.orpheus.ui.theme.OrpheusMotion.EaseSmoothOut
+        ),
         label = "albumGridSelectionScale"
     )
     val selectionBorderWidth by animateDpAsState(
         targetValue = if (isSelected) 2.dp else 0.dp,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = tween(
+            durationMillis = com.yuukifst.orpheus.ui.theme.OrpheusMotion.DurationQuick,
+            easing = com.yuukifst.orpheus.ui.theme.OrpheusMotion.EaseSmoothOut
+        ),
         label = "albumGridSelectionBorder"
     )
 

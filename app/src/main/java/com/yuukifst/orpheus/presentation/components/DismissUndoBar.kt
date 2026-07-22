@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -31,8 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
-import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.phosphorGlow
+import com.yuukifst.orpheus.ui.theme.terminalAccentLine
+import com.yuukifst.orpheus.ui.theme.TerminalLinePosition
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
@@ -56,7 +58,9 @@ fun DismissUndoBar(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = modifier
+            .phosphorGlow(color = MaterialTheme.colorScheme.primary, alpha = 0.12f, layers = 1)
+            .terminalAccentLine(TerminalLinePosition.Top),
         shape = TerminalCornerShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         shadowElevation = 4.dp

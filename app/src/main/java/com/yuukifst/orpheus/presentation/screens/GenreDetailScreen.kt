@@ -301,11 +301,11 @@ fun GenreDetailScreen(
                     uiState.flattenedItems.take(20)
                 }
 
-                items(
+                itemsIndexed(
                     items = displayItems,
-                    key = { it.key },
-                    contentType = { it::class } // CRITICAL: Content type for optimized recycling
-                ) { item ->
+                    key = { _, item -> item.key },
+                    contentType = { _, item -> item::class } // CRITICAL: Content type for optimized recycling
+                ) { index, item ->
                     when (item) {
                         is GenreDetailListItem.ArtistHeader -> {
                             GenreArtistHeader(item.artistName, item.artistImageUrl)
@@ -321,6 +321,7 @@ fun GenreDetailScreen(
                         }
                         is GenreDetailListItem.SongItem -> {
                             GenreSongItemWrapper(
+                                enterIndex = index,
                                 item = item,
                                 stablePlayerState = stablePlayerState,
                                 onSongClick = { song ->
@@ -845,6 +846,7 @@ fun GenreAlbumHeader(
 fun GenreSongItemWrapper(
     item: com.yuukifst.orpheus.presentation.viewmodel.GenreDetailListItem.SongItem,
     stablePlayerState: StablePlayerState,
+    enterIndex: Int? = null,
     onSongClick: (Song) -> Unit,
     onMoreOptionsClick: (Song) -> Unit
 ) {
@@ -887,6 +889,7 @@ fun GenreSongItemWrapper(
             val isPlaying = stablePlayerState.isPlaying
 
             EnhancedSongListItem(
+                 enterIndex = enterIndex,
                  song = song,
                  isPlaying = isPlaying,
                  isCurrentSong = isCurrent,

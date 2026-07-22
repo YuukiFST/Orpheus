@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -11,16 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.VantaAccent
 
 @Composable
 fun ShimmerBox(modifier: Modifier = Modifier) {
-    // Use MaterialTheme colors for proper dark/light mode support
     val baseColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val phosphor = VantaAccent.copy(alpha = 0.12f)
     val highlightColor = MaterialTheme.colorScheme.surfaceContainerHighest
-    
+
     val shimmerColors = listOf(
         baseColor,
+        phosphor,
         highlightColor,
+        phosphor,
         baseColor,
     )
 
@@ -29,7 +34,10 @@ fun ShimmerBox(modifier: Modifier = Modifier) {
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1000, delayMillis = 200),
+            animation = tween(
+                durationMillis = OrpheusMotion.DurationSlow,
+                easing = LinearEasing
+            ),
         ),
         label = "shimmerTranslate"
     )
@@ -40,7 +48,5 @@ fun ShimmerBox(modifier: Modifier = Modifier) {
         end = Offset(x = translateAnim.value, y = translateAnim.value)
     )
 
-    Box(
-        modifier = modifier.background(brush = brush)
-    )
+    Box(modifier = modifier.background(brush = brush))
 }

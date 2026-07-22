@@ -82,6 +82,7 @@ data class SettingsUiState(
     val albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM,
     val albumArtCacheLimitMb: Int = 200,
     val tapBackgroundClosesPlayer: Boolean = false,
+    val crtScreenOverlayEnabled: Boolean = true,
     val hapticsEnabled: Boolean = true,
     val immersiveLyricsEnabled: Boolean = false,
     val immersiveLyricsTimeout: Long = 4000L,
@@ -411,6 +412,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.tapBackgroundClosesPlayerFlow.collect { enabled ->
                 _uiState.update { it.copy(tapBackgroundClosesPlayer = enabled) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.crtScreenOverlayEnabledFlow.collect { enabled ->
+                _uiState.update { it.copy(crtScreenOverlayEnabled = enabled) }
             }
         }
 
@@ -871,6 +878,12 @@ class SettingsViewModel @Inject constructor(
     fun setTapBackgroundClosesPlayer(enabled: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.setTapBackgroundClosesPlayer(enabled)
+        }
+    }
+
+    fun setCrtScreenOverlayEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setCrtScreenOverlayEnabled(enabled)
         }
     }
 

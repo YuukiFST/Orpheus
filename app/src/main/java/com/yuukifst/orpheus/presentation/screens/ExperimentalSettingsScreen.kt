@@ -792,6 +792,33 @@ fun ExperimentalSettingsScreen(
                 }
             }
 
+            item(key = "crt_overlay_section") {
+                SettingsSection(
+                    title = stringResource(R.string.presentation_batch_f_exp_crt_overlay_title),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Visibility,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                ) {
+                    SwitchSettingItem(
+                        title = stringResource(R.string.presentation_batch_f_exp_crt_overlay_title),
+                        subtitle = stringResource(R.string.presentation_batch_f_exp_crt_overlay_subtitle),
+                        checked = uiState.crtScreenOverlayEnabled,
+                        onCheckedChange = settingsViewModel::setCrtScreenOverlayEnabled,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Visibility,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    )
+                }
+            }
+
             item(key = "experimental_bottom_spacer") {
                 Spacer(modifier = Modifier.height(MiniPlayerHeight + 36.dp))
             }

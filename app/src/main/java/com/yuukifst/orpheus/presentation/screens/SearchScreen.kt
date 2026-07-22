@@ -125,6 +125,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import timber.log.Timber
+import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import androidx.compose.ui.res.stringResource
 
@@ -786,7 +787,7 @@ fun SearchResultsList(
                     }
                 ) { index ->
                     val item = itemsForSection[index]
-                    Box(modifier = Modifier.padding(bottom = 12.dp)) {
+                    Box(modifier = Modifier.padding(bottom = 12.dp).terminalStaggerEnter(index)) {
                         when (item) {
                             is SearchResultItem.SongItem -> {
                                 EnhancedSongListItem(

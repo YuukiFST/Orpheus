@@ -209,6 +209,7 @@ constructor(
         val ALBUM_ART_QUALITY = stringPreferencesKey("album_art_quality")
         val ALBUM_ART_CACHE_LIMIT_MB = intPreferencesKey("album_art_cache_limit_mb")
         val TAP_BACKGROUND_CLOSES_PLAYER = booleanPreferencesKey("tap_background_closes_player")
+        val CRT_SCREEN_OVERLAY_ENABLED = booleanPreferencesKey("crt_screen_overlay_enabled")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
         val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
         val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
@@ -1608,6 +1609,17 @@ constructor(
     suspend fun setTapBackgroundClosesPlayer(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TAP_BACKGROUND_CLOSES_PLAYER] = enabled
+        }
+    }
+
+    val crtScreenOverlayEnabledFlow: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.CRT_SCREEN_OVERLAY_ENABLED] ?: true
+        }
+
+    suspend fun setCrtScreenOverlayEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CRT_SCREEN_OVERLAY_ENABLED] = enabled
         }
     }
 

@@ -2,10 +2,9 @@ package com.yuukifst.orpheus.presentation.components
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -192,13 +191,13 @@ private fun ToggleSegmentButtonContainer(
     val targetBgColor = if (active) activeColor else inactiveColor
     val bgColor by animateColorAsState(
         targetValue = if (enabled) targetBgColor else targetBgColor.copy(alpha = 0.5f),
-        animationSpec = tween(durationMillis = 250),
-        label = ""
+        animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
+        label = "segmentBg"
     )
     val cornerRadius by animateDpAsState(
-        targetValue = if (active) activeCornerRadius else 8.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = ""
+        targetValue = if (active) activeCornerRadius else 0.dp,
+        animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
+        label = "segmentCorner"
     )
 
     val stateOn = stringResource(R.string.a11y_toggle_on)

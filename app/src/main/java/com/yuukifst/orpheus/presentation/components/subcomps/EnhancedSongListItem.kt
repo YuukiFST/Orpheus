@@ -58,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
 
 @Immutable
 private data class EnhancedSongAnimationTarget(
@@ -101,10 +102,16 @@ fun EnhancedSongListItem(
     selectionIndex: Int? = null,
     isSelectionMode: Boolean = false,
     showMoreOptionsButton: Boolean = true,
+    enterIndex: Int? = null,
     onLongPress: () -> Unit = {},
     onMoreOptionsClick: (Song) -> Unit,
     onClick: () -> Unit
 ) {
+    val itemModifier = if (enterIndex != null) {
+        modifier.terminalStaggerEnter(enterIndex)
+    } else {
+        modifier
+    }
     val albumArtTargetSizePx = with(LocalDensity.current) { albumArtSize.roundToPx() }
     val isHighlighted = isCurrentSong && !isLoading
     val transition = updateTransition(
@@ -118,19 +125,19 @@ fun EnhancedSongListItem(
     // Share one transition across the item and derive the visual properties from a
     // couple of progress values instead of animating each color/radius independently.
     val highlightProgress by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationFast) },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut) },
         label = "highlightProgress"
     ) { state ->
         if (state.isHighlighted) 1f else 0f
     }
     val selectionVisualProgress by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick) },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut) },
         label = "selectionVisualProgress"
     ) { state ->
         if (state.isSelected) 1f else 0f
     }
     val selectionScaleProgress by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick) },
+        transitionSpec = { tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseBounceStrong) },
         label = "selectionScaleProgress"
     ) { state ->
         if (state.isSelected) 1f else 0f
@@ -169,7 +176,7 @@ fun EnhancedSongListItem(
     if (isLoading) {
         // Shimmer Placeholder Layout
         Surface(
-            modifier = modifier
+            modifier = itemModifier
                 .fillMaxWidth()
                 .clip(surfaceShape),
             shape = surfaceShape,
@@ -227,7 +234,7 @@ fun EnhancedSongListItem(
     } else {
         // Actual Song Item Layout
         Surface(
-            modifier = modifier
+            modifier = itemModifier
                 .fillMaxWidth()
                 .scale(selectionScale)
                 .clip(surfaceShape)

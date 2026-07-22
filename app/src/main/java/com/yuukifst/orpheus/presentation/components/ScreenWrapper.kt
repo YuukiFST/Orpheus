@@ -3,8 +3,8 @@ import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -117,7 +117,7 @@ fun ScreenWrapper(
     val targetRadius = if (shouldRunDepthEffects && !isResumed) 32f else 0f
     val cornerRadius by animateFloatAsState(
         targetValue = targetRadius,
-        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationSlow, easing = OrpheusMotion.EaseSmoothOut),
         label = "cornerRadius"
     )
 
@@ -125,7 +125,7 @@ fun ScreenWrapper(
     val targetDim = if (shouldRunDepthEffects && shouldDim) 0.4f else 0f
     val dimAlpha by animateFloatAsState(
         targetValue = targetDim,
-        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut),
         label = "dimAlpha"
     )
 

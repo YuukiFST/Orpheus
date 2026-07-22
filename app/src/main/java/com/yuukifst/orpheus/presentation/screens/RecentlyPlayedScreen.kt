@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -246,8 +247,9 @@ fun RecentlyPlayedScreen(
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
-                        items(group.songs, key = { songUi -> songUi.song.id }, contentType = { "recently_played_song" }) { item ->
+                        itemsIndexed(group.songs, key = { _, songUi -> songUi.song.id }, contentType = { _, _ -> "recently_played_song" }) { songIndex, item ->
                             EnhancedSongListItem(
+                                enterIndex = songIndex,
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 song = item.song,
                                 isCurrentSong = currentSongId == item.song.id,

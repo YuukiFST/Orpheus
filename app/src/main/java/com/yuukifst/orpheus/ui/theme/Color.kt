@@ -12,6 +12,9 @@ val VantaGray2 = Color(0xFF666666)
 val VantaGray3 = Color(0xFF888888)
 val VantaGray4 = Color(0xFFB8B8B8)
 val VantaHazard = Color(0xFFFF2A2A)
+val VantaPhosphorGlow = Color(0x664AF626)
+val VantaPhosphorDim = Color(0x334AF626)
+val VantaPhosphorBright = Color(0xFF6AFF40)
 
 // Legacy aliases kept for any downstream references
 val OrpheusPurpleDark = VantaBlack

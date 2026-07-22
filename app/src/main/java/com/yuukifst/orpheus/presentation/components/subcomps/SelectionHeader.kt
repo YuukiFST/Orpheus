@@ -53,7 +53,10 @@ import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.runtime.remember
@@ -80,6 +83,7 @@ fun SelectionHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

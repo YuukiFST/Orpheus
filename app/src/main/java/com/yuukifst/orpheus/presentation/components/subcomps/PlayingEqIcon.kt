@@ -1,7 +1,7 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -64,7 +64,7 @@ fun PlayingEqIcon(
     // Activity factor: 1 = bars, 0 = dots (smooth morph)
     val activity by animateFloatAsState(
         targetValue = if (isPlaying) 1f else 0f,
-        animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "activity"
     )
 

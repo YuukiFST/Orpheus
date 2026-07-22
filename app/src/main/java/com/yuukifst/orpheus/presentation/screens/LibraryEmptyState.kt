@@ -1,22 +1,28 @@
 package com.yuukifst.orpheus.presentation.screens
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +33,12 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.LibraryTabId
 import com.yuukifst.orpheus.data.model.StorageFilter
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.TerminalCursorBlink
+import com.yuukifst.orpheus.ui.theme.phosphorGlow
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 
 private data class LibraryEmptySpec(
     val iconRes: Int,
@@ -134,6 +145,11 @@ internal fun LibraryExpressiveEmptyState(
     modifier: Modifier = Modifier
 ) {
     val spec = remember(tabId, storageFilter) { libraryEmptySpec(tabId, storageFilter) }
+    val iconPulse by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(OrpheusMotion.DurationVerySlow, easing = OrpheusMotion.EaseSmoothOut),
+        label = "emptyIconPulse"
+    )
 
     Box(
         modifier = modifier
@@ -146,14 +162,20 @@ internal fun LibraryExpressiveEmptyState(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                .padding(horizontal = 20.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Surface(
                 shape = TerminalCornerShape,
                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f),
-                tonalElevation = 2.dp
+                tonalElevation = 2.dp,
+                modifier = Modifier
+                    .alpha(0.85f + iconPulse * 0.15f)
+                    .phosphorGlow(color = MaterialTheme.colorScheme.primary)
             ) {
                 Box(
                     modifier = Modifier.size(56.dp),
@@ -163,7 +185,7 @@ internal fun LibraryExpressiveEmptyState(
                         painter = painterResource(id = spec.iconRes),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -173,10 +195,11 @@ internal fun LibraryExpressiveEmptyState(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = stringResource(spec.titleRes),
+                    text = "> ${stringResource(spec.titleRes)}",
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = RoundedSans,
                     fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
                 )
                 Text(
@@ -185,6 +208,23 @@ internal fun LibraryExpressiveEmptyState(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "await_input",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        fontFamily = RoundedSans
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TerminalCursorBlink(
+                        modifier = Modifier.size(width = 8.dp, height = 14.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

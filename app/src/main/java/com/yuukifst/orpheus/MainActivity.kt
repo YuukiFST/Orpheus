@@ -121,8 +121,12 @@ import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.screens.SetupScreen
 import com.yuukifst.orpheus.presentation.viewmodel.MainViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
+import com.yuukifst.orpheus.ui.theme.CrtScreenOverlay
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.OrpheusTheme
+import com.yuukifst.orpheus.ui.theme.TerminalPanel
+import com.yuukifst.orpheus.ui.theme.TerminalPromptLabel
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import com.yuukifst.orpheus.utils.CrashHandler
 import com.yuukifst.orpheus.utils.LogUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -226,7 +230,9 @@ class MainActivity : ComponentActivity() {
                 else -> systemDarkTheme
             }
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
-            
+            val crtScreenOverlayEnabled by userPreferencesRepository.crtScreenOverlayEnabledFlow
+                .collectAsStateWithLifecycle(initialValue = true)
+
             // Crash report dialog state
             var showCrashReportDialog by remember { mutableStateOf(false) }
             var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
@@ -275,43 +281,43 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }, 
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (showSetupScreen == null) {
-                        SetupGateLoadingScreen()
-                    } else {
-                        AnimatedContent(
-                            targetState = showSetupScreen,
-                            transitionSpec = {
-                                if (targetState) {
-                                    // Transition to Setup
-                                    fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
+                    Box(Modifier.fillMaxSize()) {
+                        if (showSetupScreen == null) {
+                            SetupGateLoadingScreen()
+                        } else {
+                            AnimatedContent(
+                                targetState = showSetupScreen,
+                                transitionSpec = {
+                                    if (targetState) {
+                                        fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
+                                    } else {
+                                        scaleIn(initialScale = 0.95f, animationSpec = tween(OrpheusMotion.DurationSlow)) + fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith
+                                                slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(OrpheusMotion.DurationQuick)) + fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
+                                    }
+                                },
+                                label = "SetupTransition"
+                            ) { shouldShowSetup ->
+                                if (shouldShowSetup) {
+                                    SetupScreen(onSetupComplete = {
+                                    })
                                 } else {
-                                    // Transition from Setup to Main App
-                                    scaleIn(initialScale = 0.95f, animationSpec = tween(OrpheusMotion.DurationSlow)) + fadeIn(animationSpec = tween(OrpheusMotion.DurationSlow)) togetherWith
-                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(OrpheusMotion.DurationQuick)) + fadeOut(animationSpec = tween(OrpheusMotion.DurationQuick))
+                                    MainAppContent(playerViewModel, mainViewModel)
                                 }
-                            },
-                            label = "SetupTransition"
-                        ) { shouldShowSetup ->
-                            if (shouldShowSetup) {
-                                SetupScreen(onSetupComplete = {
-                                    // Repository-backed setup completion updates the gate automatically.
-                                })
-                            } else {
-                                MainAppContent(playerViewModel, mainViewModel)
                             }
                         }
-                    }
 
-                    // Show crash report dialog if needed
-                    if (showCrashReportDialog && crashLogData != null) {
-                        CrashReportDialog(
-                            crashLog = crashLogData!!,
-                            onDismiss = {
-                                CrashHandler.clearCrashLog()
-                                crashLogData = null
-                                showCrashReportDialog = false
-                            }
-                        )
+                        if (showCrashReportDialog && crashLogData != null) {
+                            CrashReportDialog(
+                                crashLog = crashLogData!!,
+                                onDismiss = {
+                                    CrashHandler.clearCrashLog()
+                                    crashLogData = null
+                                    showCrashReportDialog = false
+                                }
+                            )
+                        }
+
+                        CrtScreenOverlay(enabled = crtScreenOverlayEnabled)
                     }
                 }
             }
@@ -430,16 +436,19 @@ class MainActivity : ComponentActivity() {
                 .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularWavyProgressIndicator()
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = "Preparing setup…",
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center
-                )
+            TerminalPanel {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularWavyProgressIndicator()
+                    Spacer(modifier = Modifier.height(20.dp))
+                    TerminalPromptLabel(text = "preparing_setup")
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Preparing setup…",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -654,8 +663,8 @@ class MainActivity : ComponentActivity() {
         val navBarVisibilityProgressState = animateFloatAsState(
             targetValue = if (shouldHideNavigationBar) 0f else 1f,
             animationSpec = tween(
-                durationMillis = 220,
-                easing = LinearOutSlowInEasing
+                durationMillis = OrpheusMotion.DurationFast,
+                easing = OrpheusMotion.EaseSmoothOut
             ),
             label = "NavBarVisibilityProgress"
         )
@@ -964,21 +973,25 @@ class MainActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f))
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.92f))
                 .clickable(enabled = false, onClick = {}),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(horizontal = 32.dp)
+            TerminalPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp)
             ) {
-                CircularWavyProgressIndicator()
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.sync_preparing_library),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularWavyProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TerminalPromptLabel(text = "sync_library")
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.sync_preparing_library),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 
                 if (syncProgress.hasProgress) {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -996,6 +1009,7 @@ class MainActivity : ComponentActivity() {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
                 }
             }
         }
