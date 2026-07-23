@@ -1959,6 +1959,7 @@ class PlayerViewModel @Inject constructor(
     ) {
         if (cancelPendingQueueBuild) {
             cancelPendingFullQueuePlayback()
+            cancelPendingDirectPlayback()
         }
         val playbackContext =
             if (contextSongs.any { it.id == song.id }) contextSongs else listOf(song)
@@ -2009,9 +2010,18 @@ class PlayerViewModel @Inject constructor(
                 if (needsPlaySongsPrep(playbackContext)) {
                     playSongs(playbackContext, song, queueName, playlistId)
                 } else {
-                    cancelPendingFullQueuePlayback()
-                    beginDirectPlaybackRequest()
-                    internalPlaySongs(playbackContext, song, queueName, playlistId)
+                    val requestToken = beginDirectPlaybackRequest()
+                    directPlaybackJob = coroutineContext.job
+                    try {
+                        throwIfDirectPlaybackRequestIsStale(requestToken)
+                        internalPlaySongs(playbackContext, song, queueName, playlistId)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } finally {
+                        if (requestToken == directPlaybackToken) {
+                            directPlaybackJob = null
+                        }
+                    }
                 }
             }
         }

@@ -2,6 +2,12 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.15] - 2026-07-22
+
+### Fixed
+- About screen now credits YuukiFST and links to the Orpheus repository instead of upstream PixelPlayer maintainers.
+- Search playback switches tracks correctly when selecting another song while one is already playing.
+
 ## [1.0.14] - 2026-07-22
 
 ### Changed

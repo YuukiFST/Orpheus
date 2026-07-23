@@ -123,35 +123,20 @@ private data class Contributor(
 )
 
 private val CoreMaintainer = Contributor(
-    id = "lostf1sh",
-    displayName = "@lostf1sh",
-    role = "FOSS Maintainer",
-    detail = "Maintains Orpheus. GitHub and Telegram: @lostf1sh.",
-    avatarUrl = "https://github.com/lostf1sh.png",
+    id = "yuukifst",
+    displayName = "@YuukiFST",
+    role = "Author & Maintainer",
+    detail = "Author and maintainer of Orpheus.",
+    avatarUrl = "https://github.com/YuukiFST.png",
     iconRes = R.drawable.round_developer_board_24,
-    githubUrl = "https://github.com/lostf1sh",
-    telegramUrl = "https://t.me/lostf1sh",
+    githubUrl = "https://github.com/YuukiFST",
 )
 
-private val NonFossMaintainer = Contributor(
-    id = "theovilardo",
-    displayName = "@theovilardo",
-    role = "Author / Non-FOSS Maintainer",
-    detail = "Author and maintainer of the original Google Play / non-FOSS Orpheus release.",
-    badge = "Original app",
-    avatarUrl = "https://github.com/theovilardo.png",
-    iconRes = R.drawable.round_developer_board_24,
-    githubUrl = "https://github.com/theovilardo",
-)
+private val AboutMaintainers = listOf(CoreMaintainer)
 
-private val AboutMaintainers = listOf(
-    CoreMaintainer,
-    NonFossMaintainer,
-)
-
-private const val SourceRepoUrl = "https://github.com/lostf1sh/Orpheus"
+private const val SourceRepoUrl = "https://github.com/YuukiFST/Orpheus"
 private const val FDroidUrl = "https://f-droid.org/packages/com.yuukifst.orpheus/"
-private const val SponsorUrl = "https://github.com/sponsors/lostf1sh"
+private const val SponsorUrl = "https://github.com/sponsors/YuukiFST"
 
 private data class ProjectLink(
     val id: String,

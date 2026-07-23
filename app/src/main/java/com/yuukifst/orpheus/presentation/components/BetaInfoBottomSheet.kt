@@ -70,8 +70,8 @@ import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val issuesUrl = "https://github.com/lostf1sh/Orpheus/issues"
-    val reportUrl = "https://github.com/lostf1sh/Orpheus/issues/new/choose"
+    val issuesUrl = "https://github.com/YuukiFST/Orpheus/issues"
+    val reportUrl = "https://github.com/YuukiFST/Orpheus/issues/new/choose"
 
     val fabCornerRadius = 18.dp
 

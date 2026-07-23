@@ -506,6 +506,60 @@ class PlayerViewModelTest {
         assertEquals(2, playerViewModel.playerUiState.value.currentPlaybackQueue.size)
     }
 
+    @Test
+    fun `showAndPlaySong cancels stale search playback when switching tracks quickly`() = runTest {
+        val song1 = Song(
+            id = "1",
+            title = "First",
+            artist = "Artist A",
+            genre = "Rock",
+            albumArtUriString = "cover1.png",
+            artistId = 1L,
+            albumId = 1L,
+            contentUriString = "content://dummy/1",
+            duration = 180000L,
+            bitrate = null,
+            sampleRate = null,
+            album = "Album",
+            path = "path",
+            mimeType = "audio/mpeg",
+        )
+        val song2 = song1.copy(id = "2", title = "Second", contentUriString = "content://dummy/2")
+        val searchQueue = listOf(song1, song2)
+
+        mockkObject(MediaItemBuilder)
+        every { MediaItemBuilder.build(match { it.id == "1" }) } returns MediaItem.Builder()
+            .setMediaId("1")
+            .setUri("file:///tmp/first.mp3")
+            .build()
+        every { MediaItemBuilder.build(match { it.id == "2" }) } returns MediaItem.Builder()
+            .setMediaId("2")
+            .setUri("file:///tmp/second.mp3")
+            .build()
+        val mockedPlaybackUri = mockk<android.net.Uri>(relaxed = true)
+        every { mockedPlaybackUri.scheme } returns "file"
+        every { MediaItemBuilder.playbackUri(any<Song>()) } returns mockedPlaybackUri
+
+        mockkStatic(android.net.Uri::class)
+        every { android.net.Uri.parse(any()) } returns mockk(relaxed = true)
+
+        val mockPlayer = mockk<Player>(relaxed = true)
+        every { mockDualPlayerEngine.masterPlayer } returns mockPlayer
+        every { mockDualPlayerEngine.cancelNext() } just runs
+
+        playerViewModel.showAndPlaySong(song1, searchQueue, "Search")
+        playerViewModel.showAndPlaySong(song2, searchQueue, "Search")
+        advanceUntilIdle()
+
+        verify {
+            mockPlayer.setMediaItem(
+                match { it.mediaId == "2" },
+                0L,
+            )
+        }
+        assertEquals(song2.id, stablePlayerStateFlow.value.currentSong?.id)
+    }
+
     @Nested
     @DisplayName("Shuffle Functionality")
     inner class ShuffleFunctionalityTests {
