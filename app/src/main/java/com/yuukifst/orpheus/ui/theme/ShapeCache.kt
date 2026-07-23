@@ -1,27 +1,38 @@
 package com.yuukifst.orpheus.ui.theme
 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 
 /**
  * Cached shape instances for list items and surfaces.
- * Terminal aesthetic: sharp corners, no smooth/iOS-style curves.
  */
 object ShapeCache {
-    val smooth8 = RoundedCornerShape(0.dp)
-    val smooth10 = RoundedCornerShape(0.dp)
-    val smooth12 = RoundedCornerShape(0.dp)
-    val smooth14 = RoundedCornerShape(0.dp)
-    val smooth16 = RoundedCornerShape(0.dp)
-    val smooth20 = RoundedCornerShape(0.dp)
-    val smooth24 = RoundedCornerShape(0.dp)
-    val smooth28 = RoundedCornerShape(0.dp)
-    val smooth32 = RoundedCornerShape(0.dp)
-    val smoothPill = RoundedCornerShape(0.dp)
+    val smooth8: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth8
+    val smooth10: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth10
+    val smooth12: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth12
+    val smooth14: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth14
+    val smooth16: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth16
+    val smooth20: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth20
+    val smooth24: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth24
+    val smooth28: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth28
+    val smooth32: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smooth32
+    val smoothPill: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.smoothPill
 
-    val expressiveAvatar: Shape = RectangleShape
-    val expressiveClover: Shape = RectangleShape
-    val expressiveHero: Shape = RectangleShape
+    val expressiveAvatar: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.expressiveAvatar
+    val expressiveClover: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.expressiveClover
+    val expressiveHero: Shape
+        @Composable @ReadOnlyComposable get() = LocalOrpheusShapes.current.expressiveHero
 }

@@ -249,8 +249,9 @@ fun QueueBottomSheet(
     onQueueRelease: (Float, Float) -> Unit,
     modifier: Modifier = Modifier,
     tonalElevation: Dp = 10.dp,
-    shape: RoundedCornerShape = TerminalCornerShape,
+    shape: RoundedCornerShape? = null,
 ) {
+    val sheetShape = shape ?: (TerminalCornerShape as RoundedCornerShape)
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
     var showTimerOptions by rememberSaveable { mutableStateOf(false) }
@@ -700,7 +701,7 @@ fun QueueBottomSheet(
 
     Surface(
         modifier = modifier,
-        shape = shape,
+        shape = sheetShape,
         tonalElevation = tonalElevation,
         color = colors.surfaceContainer,
     ) {

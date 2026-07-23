@@ -224,6 +224,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
+            val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
+                .collectAsStateWithLifecycle(initialValue = false)
             val useDarkTheme = when (appThemeMode) {
                 AppThemeMode.DARK -> true
                 AppThemeMode.LIGHT -> false
@@ -272,7 +274,8 @@ class MainActivity : ComponentActivity() {
             }
 
             OrpheusTheme(
-                darkTheme = useDarkTheme
+                darkTheme = useDarkTheme,
+                useSmoothCorners = useSmoothCorners,
             ) {
                 var contentVisible by remember { mutableStateOf(true) }
                 val contentAlpha = if (contentVisible) 1f else 0f

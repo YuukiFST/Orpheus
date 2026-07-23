@@ -62,6 +62,7 @@ internal fun rememberSheetThemeState(
     currentSong: Song?,
     themedAlbumArtUri: String?,
     preparingSongId: String?,
+    suppressPreparingIndicator: Boolean = false,
     systemColorScheme: ColorScheme
 ): SheetThemeState {
     val isAlbumArtTheme = playerThemePreference == ThemePreference.ALBUM_ART
@@ -104,8 +105,10 @@ internal fun rememberSheetThemeState(
         }
     }
 
-    val isPreparingPlayback = remember(preparingSongId, currentSong?.id) {
-        preparingSongId != null && preparingSongId == currentSong?.id
+    val isPreparingPlayback = remember(preparingSongId, currentSong?.id, suppressPreparingIndicator) {
+        !suppressPreparingIndicator &&
+            preparingSongId != null &&
+            preparingSongId == currentSong?.id
     }
 
     // Capture nullable var for smart null handling

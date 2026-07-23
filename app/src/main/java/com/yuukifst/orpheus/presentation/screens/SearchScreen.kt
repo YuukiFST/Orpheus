@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.yuukifst.orpheus.ui.theme.OrpheusSearchBarShape
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.ShapeCache
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -126,7 +127,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
-import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
 import androidx.compose.ui.res.stringResource
 
 private data class SearchUiSlice(
@@ -163,7 +163,6 @@ fun SearchScreen(
     }.collectAsStateWithLifecycle(initialValue = SearchUiSlice())
     val currentFilter = searchUiState.selectedSearchFilter
     val genres by playerViewModel.genres.collectAsStateWithLifecycle()
-    val stablePlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
     val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsStateWithLifecycle()
     val selectedSongForInfo by playerViewModel.selectedSongForInfo.collectAsStateWithLifecycle()
     var showSongInfoBottomSheet by remember { mutableStateOf(false) }
@@ -192,7 +191,7 @@ fun SearchScreen(
         showSongInfoBottomSheet = true
     }
 
-    val searchbarCornerRadius = 28.dp
+    val searchBarShape = OrpheusSearchBarShape
 
     val dm = LocalOrpheusDarkTheme.current
 
@@ -317,7 +316,8 @@ fun SearchScreen(
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
-                            .clip(TerminalCornerShape),
+                            .clip(searchBarShape),
+                        shape = searchBarShape,
                         colors = SearchBarDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                             dividerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
@@ -410,8 +410,6 @@ fun SearchScreen(
                                             playerViewModel.onSearchQuerySubmitted(searchQuery)
                                         }
                                     },
-                                    currentPlayingSongId = stablePlayerState.currentSong?.id,
-                                    isPlaying = stablePlayerState.isPlaying,
                                     onSongMoreOptionsClick = handleSongMoreOptionsClick,
                                     navController = navController
                                 )
@@ -672,13 +670,15 @@ fun SearchResultsList(
     searchQuery: String,
     playerViewModel: PlayerViewModel,
     onItemSelected: () -> Unit,
-    currentPlayingSongId: String?,
-    isPlaying: Boolean,
     onSongMoreOptionsClick: (Song) -> Unit,
     navController: NavHostController
 ) {
     val localDensity = LocalDensity.current
-    val playerStableState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
+    val isShuffleEnabled by remember(playerViewModel) {
+        playerViewModel.stablePlayerState
+            .map { it.isShuffleEnabled }
+            .distinctUntilChanged()
+    }.collectAsStateWithLifecycle(initialValue = false)
 
     if (results.isEmpty()) {
         Box(
@@ -790,10 +790,8 @@ fun SearchResultsList(
                     Box(modifier = Modifier.padding(bottom = 12.dp).terminalStaggerEnter(index)) {
                         when (item) {
                             is SearchResultItem.SongItem -> {
-                                EnhancedSongListItem(
+                                LibraryPlaybackAwareSongItem(
                                     song = item.song,
-                                    isPlaying = isPlaying,
-                                    isCurrentSong = currentPlayingSongId == item.song.id,
                                     onMoreOptionsClick = onSongMoreOptionsClick,
                                     onClick = { onSongResultClick(item.song) }
                                 )
@@ -870,7 +868,7 @@ fun SearchResultsList(
                                                 songs.first(),
                                                 item.playlist.name
                                             )
-                                            if (playerStableState.isShuffleEnabled) playerViewModel.toggleShuffle()
+                                            if (isShuffleEnabled) playerViewModel.toggleShuffle()
                                         } else {
                                             playerViewModel.sendToast("Empty playlist")
                                         }

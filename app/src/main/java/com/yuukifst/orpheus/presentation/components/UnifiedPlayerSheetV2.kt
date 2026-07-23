@@ -83,6 +83,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
 import com.yuukifst.orpheus.ui.theme.LocalOrpheusDarkTheme
+import com.yuukifst.orpheus.utils.MediaItemBuilder
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -490,6 +491,12 @@ fun UnifiedPlayerSheetV2(
     val themedAlbumArtUri by playerViewModel.currentThemedAlbumArtUri.collectAsStateWithLifecycle()
     val isDarkTheme = LocalOrpheusDarkTheme.current
     val currentSong = infrequentPlayerState.currentSong
+    val suppressPreparingIndicator = remember(currentSong?.id) {
+        currentSong?.let { song ->
+            val scheme = MediaItemBuilder.playbackUri(song).scheme?.lowercase()
+            scheme == null || scheme in setOf("content", "file", "android.resource")
+        } ?: false
+    }
     val sheetThemeState = rememberSheetThemeState(
         activePlayerSchemePair = activePlayerSchemePair,
         isDarkTheme = isDarkTheme,
@@ -497,6 +504,7 @@ fun UnifiedPlayerSheetV2(
         currentSong = currentSong,
         themedAlbumArtUri = themedAlbumArtUri,
         preparingSongId = preparingSongId,
+        suppressPreparingIndicator = suppressPreparingIndicator,
         systemColorScheme = MaterialTheme.colorScheme
     )
     val albumColorScheme = sheetThemeState.albumColorScheme

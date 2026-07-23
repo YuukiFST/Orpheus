@@ -84,23 +84,19 @@ fun OrpheusButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusButtonShape,
+    shape: Shape? = null,
     colors: ButtonColors = OrpheusButtonDefaults.filledColors(),
     elevation: ButtonElevation? = OrpheusButtonDefaults.elevation(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit,
 ) {
-    val glowModifier = if (LocalOrpheusDarkTheme.current && enabled) {
-        modifier.phosphorGlow(color = MaterialTheme.colorScheme.primary, alpha = 0.14f, layers = 1)
-    } else {
-        modifier
-    }
+    val buttonShape = shape ?: OrpheusButtonShape
     Button(
         onClick = onClick,
-        modifier = glowModifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
+        modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         elevation = elevation,
         contentPadding = contentPadding,
@@ -114,18 +110,19 @@ fun OrpheusFilledTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusButtonShape,
+    shape: Shape? = null,
     colors: ButtonColors = OrpheusButtonDefaults.filledTonalColors(),
     elevation: ButtonElevation? = OrpheusButtonDefaults.tonalElevation(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit,
 ) {
+    val buttonShape = shape ?: OrpheusButtonShape
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         elevation = elevation,
         contentPadding = contentPadding,
@@ -139,7 +136,7 @@ fun OrpheusOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusButtonShape,
+    shape: Shape? = null,
     colors: ButtonColors = OrpheusButtonDefaults.outlinedColors(),
     border: BorderStroke? = BorderStroke(
         1.dp,
@@ -149,11 +146,12 @@ fun OrpheusOutlinedButton(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit,
 ) {
+    val buttonShape = shape ?: OrpheusButtonShape
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         border = border,
         contentPadding = contentPadding,
@@ -167,17 +165,18 @@ fun OrpheusTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusButtonShape,
+    shape: Shape? = null,
     colors: ButtonColors = OrpheusButtonDefaults.textColors(),
     contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit,
 ) {
+    val buttonShape = shape ?: OrpheusButtonShape
     TextButton(
         onClick = onClick,
         modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         contentPadding = contentPadding,
         interactionSource = interactionSource,
@@ -190,16 +189,17 @@ fun OrpheusFilledIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusIconButtonShape,
+    shape: Shape? = null,
     colors: IconButtonColors = OrpheusButtonDefaults.filledIconColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit,
 ) {
+    val buttonShape = shape ?: OrpheusIconButtonShape
     FilledIconButton(
         onClick = onClick,
         modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         interactionSource = interactionSource,
         content = content,
@@ -211,16 +211,17 @@ fun OrpheusFilledTonalIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = OrpheusIconButtonShape,
+    shape: Shape? = null,
     colors: IconButtonColors = OrpheusButtonDefaults.filledTonalIconColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable () -> Unit,
 ) {
+    val buttonShape = shape ?: OrpheusIconButtonShape
     FilledTonalIconButton(
         onClick = onClick,
         modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
         enabled = enabled,
-        shape = shape,
+        shape = buttonShape,
         colors = colors,
         interactionSource = interactionSource,
         content = content,

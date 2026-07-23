@@ -547,11 +547,17 @@ fun SettingsCategoryScreen(
                                     onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
                                     leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
-                                SwitchSettingItem(
-                                    title = stringResource(R.string.setcat_smooth_corners_title),
-                                    subtitle = stringResource(R.string.setcat_smooth_corners_subtitle),
-                                    checked = useSmoothCorners,
-                                    onCheckedChange = settingsViewModel::setUseSmoothCorners,
+                                ThemeSelectorItem(
+                                    label = stringResource(R.string.setcat_visual_style_label),
+                                    description = stringResource(R.string.setcat_visual_style_desc),
+                                    options = mapOf(
+                                        "square" to stringResource(R.string.setcat_visual_style_square),
+                                        "rounded" to stringResource(R.string.setcat_visual_style_rounded),
+                                    ),
+                                    selectedKey = if (useSmoothCorners) "rounded" else "square",
+                                    onSelectionChanged = { key ->
+                                        settingsViewModel.setUseSmoothCorners(key == "rounded")
+                                    },
                                     leadingIcon = { Icon(painterResource(R.drawable.rounded_rounded_corner_24), null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
                             }

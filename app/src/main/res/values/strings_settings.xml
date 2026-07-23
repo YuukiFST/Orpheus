@@ -72,8 +72,10 @@
     <string name="setcat_theme_light">Light Theme</string>
     <string name="setcat_theme_dark">Dark Theme</string>
     <string name="setcat_theme_follow_system">Follow System</string>
-    <string name="setcat_smooth_corners_title">Use Smooth Corners</string>
-    <string name="setcat_smooth_corners_subtitle">Use complex shaped corners effectively improving aesthetics but may affect performance on low-end devices</string>
+    <string name="setcat_visual_style_label">Visual Style</string>
+    <string name="setcat_visual_style_desc">Choose square corners or rounded corners for buttons and surfaces.</string>
+    <string name="setcat_visual_style_square">Square</string>
+    <string name="setcat_visual_style_rounded">Rounded</string>
     <string name="setcat_now_playing">Now Playing</string>
     <string name="setcat_player_theme_label">Player Theme</string>
     <string name="setcat_player_theme_desc">Choose the appearance for the floating player.</string>

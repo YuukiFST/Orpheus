@@ -2584,6 +2584,16 @@ class PlayerViewModel @Inject constructor(
         }
         if (currentSongId == mediaItem.mediaId && currentIndex == expectedIndex) return
 
+        val preparingSongId = _playerUiState.value.preparingSongId
+        if (
+            currentSongId != null &&
+            currentSongId != mediaItem.mediaId &&
+            preparingSongId != null &&
+            preparingSongId != mediaItem.mediaId
+        ) {
+            return
+        }
+
         playbackStateHolder.onPlaybackOccurrenceTransition(mediaItem.mediaId)
         preparePlaybackAudioMetadataForMedia(mediaItem.mediaId)
         transitionSchedulerJob?.cancel()
@@ -3081,13 +3091,10 @@ class PlayerViewModel @Inject constructor(
         // Skip the "Preparing playback…" pill for local files: they reach STATE_READY
         // in milliseconds, and transient STATE_BUFFERING from audio HAL/offload init
         // (or a re-tap of an already-loaded song) can otherwise leave the pill stuck.
-        // Always write the new value (null for local, song.id for remote) so a stale
-        // preparingSongId from a previous remote song cannot outlive a local track switch.
-        if (!isLocalPlaybackSong(song)) {
-            setPreparingSong(song.id)
-        } else {
-            setPreparingSong(null)
-        }
+        // Always track the requested song so syncDisplayedMediaItemIfChanged does not
+        // revert optimistic mini-player updates while the controller is still on the
+        // previous media item. Local tracks skip the preparing spinner in the UI.
+        setPreparingSong(song.id)
         viewModelScope.launch(Dispatchers.IO) {
             val albumArtUri = song.albumArtUriString
             if (albumArtUri.isNullOrBlank()) {

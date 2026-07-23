@@ -27,6 +27,10 @@ val OrpheusWhite = VantaWhite
 val OrpheusBlack = VantaBlack
 val OrpheusSurface = VantaGray0
 
+// Monochrome palette — light: white + black, dark: black + white
+val MonoWhite = Color(0xFFFFFFFF)
+val MonoBlack = Color(0xFF000000)
+
 // Light mode — oklch(0.96 0.008 138) background, deep forest primary
 val LightBackground = Color(0xFFF2F5F0)
 val LightSurface = Color(0xFFF8FAF6)

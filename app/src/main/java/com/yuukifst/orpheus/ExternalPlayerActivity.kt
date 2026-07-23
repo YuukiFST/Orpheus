@@ -20,6 +20,7 @@ import android.content.Intent.EXTRA_STREAM
 import androidx.media3.common.util.UnstableApi
 import com.yuukifst.orpheus.data.preferences.AppThemeMode
 import com.yuukifst.orpheus.data.preferences.ThemePreferencesRepository
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import javax.inject.Inject
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -29,6 +30,8 @@ class ExternalPlayerActivity : ComponentActivity() {
     private val playerViewModel: PlayerViewModel by viewModels()
     @Inject
     lateinit var themePreferencesRepository: ThemePreferencesRepository
+    @Inject
+    lateinit var userPreferencesRepository: UserPreferencesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
@@ -46,12 +49,17 @@ class ExternalPlayerActivity : ComponentActivity() {
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
+            val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
+                .collectAsStateWithLifecycle(initialValue = false)
             val useDarkTheme = when (appThemeMode) {
                 AppThemeMode.DARK -> true
                 AppThemeMode.LIGHT -> false
                 else -> systemDarkTheme
             }
-            OrpheusTheme(darkTheme = useDarkTheme) {
+            OrpheusTheme(
+                darkTheme = useDarkTheme,
+                useSmoothCorners = useSmoothCorners,
+            ) {
                 ExternalPlayerOverlay(
                     playerViewModel = playerViewModel,
                     onDismiss = { finish() },

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 fun Modifier.terminalBorder(
     width: Dp = 1.dp,
     color: Color = MaterialTheme.colorScheme.outline
-): Modifier = border(width = width, color = color, shape = RectangleShape)
+): Modifier = border(width = width, color = color, shape = TerminalCornerShape)
 
 @Composable
 fun Modifier.terminalDivider(): Modifier = terminalBorder(width = 1.dp)

@@ -14,6 +14,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -66,95 +67,96 @@ fun OrpheusStatusBarStyle(
 }
 
 val DarkColorScheme = darkColorScheme(
-    primary = VantaAccent,
-    onPrimary = Color(0xFF0A1209),
-    primaryContainer = VantaPhosphorDim,
-    onPrimaryContainer = VantaPhosphorBright,
-    secondary = VantaGray3,
-    onSecondary = VantaBlack,
-    secondaryContainer = VantaGray1,
-    onSecondaryContainer = VantaGray4,
-    tertiary = VantaGray2,
-    onTertiary = VantaWhite,
-    tertiaryContainer = Color(0xFF1C2019),
-    onTertiaryContainer = VantaGray4,
-    background = VantaBlack,
-    onBackground = VantaWhite,
-    surface = VantaGray0,
-    onSurface = VantaWhite,
-    surfaceVariant = VantaGray1,
-    onSurfaceVariant = VantaGray3,
-    outline = VantaAccent.copy(alpha = 0.28f),
-    outlineVariant = VantaGray1,
-    surfaceTint = VantaAccent.copy(alpha = 0.06f),
+    primary = MonoWhite,
+    onPrimary = MonoBlack,
+    primaryContainer = MonoBlack,
+    onPrimaryContainer = MonoWhite,
+    secondary = MonoWhite,
+    onSecondary = MonoBlack,
+    secondaryContainer = MonoBlack,
+    onSecondaryContainer = MonoWhite,
+    tertiary = MonoWhite,
+    onTertiary = MonoBlack,
+    tertiaryContainer = MonoBlack,
+    onTertiaryContainer = MonoWhite,
+    background = MonoBlack,
+    onBackground = MonoWhite,
+    surface = MonoBlack,
+    onSurface = MonoWhite,
+    surfaceVariant = MonoBlack,
+    onSurfaceVariant = MonoWhite,
+    outline = MonoWhite,
+    outlineVariant = MonoWhite.copy(alpha = 0.5f),
+    surfaceTint = Color.Transparent,
     error = VantaHazard,
-    onError = VantaBlack,
-    surfaceContainerLowest = VantaBlack,
-    surfaceContainerLow = Color(0xFF111411),
-    surfaceContainer = VantaGray0,
-    surfaceContainerHigh = VantaGray1,
-    surfaceContainerHighest = Color(0xFF2E332B),
-    primaryFixed = VantaPhosphorBright,
-    onPrimaryFixed = Color(0xFF0A1209),
-    primaryFixedDim = VantaPhosphorDim,
-    onPrimaryFixedVariant = VantaGray4,
-    secondaryFixed = VantaGray3,
-    onSecondaryFixed = VantaBlack,
-    secondaryFixedDim = VantaGray2,
-    onSecondaryFixedVariant = VantaGray4,
-    tertiaryFixed = VantaGray4,
-    onTertiaryFixed = VantaBlack,
-    tertiaryFixedDim = VantaGray2,
-    onTertiaryFixedVariant = VantaGray3,
+    onError = MonoBlack,
+    surfaceContainerLowest = MonoBlack,
+    surfaceContainerLow = MonoBlack,
+    surfaceContainer = MonoBlack,
+    surfaceContainerHigh = MonoBlack,
+    surfaceContainerHighest = MonoBlack,
+    primaryFixed = MonoWhite,
+    onPrimaryFixed = MonoBlack,
+    primaryFixedDim = MonoWhite.copy(alpha = 0.7f),
+    onPrimaryFixedVariant = MonoWhite,
+    secondaryFixed = MonoWhite,
+    onSecondaryFixed = MonoBlack,
+    secondaryFixedDim = MonoWhite.copy(alpha = 0.7f),
+    onSecondaryFixedVariant = MonoWhite,
+    tertiaryFixed = MonoWhite,
+    onTertiaryFixed = MonoBlack,
+    tertiaryFixedDim = MonoWhite.copy(alpha = 0.7f),
+    onTertiaryFixedVariant = MonoWhite,
 )
 
 val LightColorScheme = lightColorScheme(
-    primary = LightPrimary,
-    onPrimary = Color(0xFFF8FAF6),
-    primaryContainer = LightPrimaryContainer,
-    onPrimaryContainer = LightOnPrimaryContainer,
-    secondary = Color(0xFF3D6B36),
-    onSecondary = Color(0xFFF8FAF6),
-    secondaryContainer = Color(0xFFE0EDE0),
-    onSecondaryContainer = Color(0xFF1A3316),
-    tertiary = VantaGray2,
-    onTertiary = Color(0xFFF8FAF6),
-    tertiaryContainer = LightSurfaceVariant,
-    onTertiaryContainer = LightOnSurfaceVariant,
-    background = LightBackground,
-    onBackground = LightOnSurface,
-    surface = LightSurface,
-    onSurface = LightOnSurface,
-    surfaceVariant = LightSurfaceVariant,
-    onSurfaceVariant = LightOnSurfaceVariant,
-    outline = LightOutline,
-    outlineVariant = Color(0xFFD0D8CC),
-    surfaceTint = LightPrimary.copy(alpha = 0.08f),
+    primary = MonoBlack,
+    onPrimary = MonoWhite,
+    primaryContainer = MonoWhite,
+    onPrimaryContainer = MonoBlack,
+    secondary = MonoBlack,
+    onSecondary = MonoWhite,
+    secondaryContainer = MonoWhite,
+    onSecondaryContainer = MonoBlack,
+    tertiary = MonoBlack,
+    onTertiary = MonoWhite,
+    tertiaryContainer = MonoWhite,
+    onTertiaryContainer = MonoBlack,
+    background = MonoWhite,
+    onBackground = MonoBlack,
+    surface = MonoWhite,
+    onSurface = MonoBlack,
+    surfaceVariant = MonoWhite,
+    onSurfaceVariant = MonoBlack,
+    outline = MonoBlack,
+    outlineVariant = MonoBlack.copy(alpha = 0.5f),
+    surfaceTint = Color.Transparent,
     error = Color(0xFFBA1A1A),
-    onError = Color(0xFFFFFFFF),
-    surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF5F8F3),
-    surfaceContainer = Color(0xFFECEFE9),
-    surfaceContainerHigh = Color(0xFFE2E8DF),
-    surfaceContainerHighest = Color(0xFFD4DCD0),
-    primaryFixed = VantaAccent,
-    onPrimaryFixed = Color(0xFF0A1F08),
-    primaryFixedDim = Color(0xFF3D8A34),
-    onPrimaryFixedVariant = Color(0xFF1A3316),
-    secondaryFixed = Color(0xFF5BE048),
-    onSecondaryFixed = Color(0xFF0A1F08),
-    secondaryFixedDim = Color(0xFF3D6B36),
-    onSecondaryFixedVariant = Color(0xFF1A3316),
-    tertiaryFixed = VantaGray3,
-    onTertiaryFixed = LightOnSurface,
-    tertiaryFixedDim = VantaGray2,
-    onTertiaryFixedVariant = LightOnSurfaceVariant,
+    onError = MonoWhite,
+    surfaceContainerLowest = MonoWhite,
+    surfaceContainerLow = MonoWhite,
+    surfaceContainer = MonoWhite,
+    surfaceContainerHigh = MonoWhite,
+    surfaceContainerHighest = MonoWhite,
+    primaryFixed = MonoBlack,
+    onPrimaryFixed = MonoWhite,
+    primaryFixedDim = MonoBlack.copy(alpha = 0.7f),
+    onPrimaryFixedVariant = MonoBlack,
+    secondaryFixed = MonoBlack,
+    onSecondaryFixed = MonoWhite,
+    secondaryFixedDim = MonoBlack.copy(alpha = 0.7f),
+    onSecondaryFixedVariant = MonoBlack,
+    tertiaryFixed = MonoBlack,
+    onTertiaryFixed = MonoWhite,
+    tertiaryFixedDim = MonoBlack.copy(alpha = 0.7f),
+    onTertiaryFixedVariant = MonoBlack,
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OrpheusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    useSmoothCorners: Boolean = false,
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
@@ -166,17 +168,25 @@ fun OrpheusTheme(
         else -> LightColorScheme
     }
 
+    val shapeSet = remember(useSmoothCorners) {
+        if (useSmoothCorners) OrpheusShapeSets.Rounded else OrpheusShapeSets.Square
+    }
+    val materialShapes = remember(shapeSet) { orpheusMaterialShapes(shapeSet) }
+
     OrpheusStatusBarStyle(
         color = finalColorScheme.background,
         navigationColor = finalColorScheme.background
     )
 
-    CompositionLocalProvider(LocalOrpheusDarkTheme provides darkTheme) {
+    CompositionLocalProvider(
+        LocalOrpheusDarkTheme provides darkTheme,
+        LocalOrpheusShapes provides shapeSet,
+    ) {
         MaterialTheme(
             colorScheme = finalColorScheme,
             motionScheme = MotionScheme.expressive(),
             typography = Typography,
-            shapes = Shapes,
+            shapes = materialShapes,
             content = content
         )
     }

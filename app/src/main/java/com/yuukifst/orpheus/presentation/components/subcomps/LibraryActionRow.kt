@@ -81,7 +81,6 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import java.io.File
 import androidx.compose.ui.res.stringResource
 
-val defaultShape = TerminalCornerShape // Fallback shape
 val genHeight = 42.dp
 
 @OptIn(ExperimentalMaterial3Api::class)

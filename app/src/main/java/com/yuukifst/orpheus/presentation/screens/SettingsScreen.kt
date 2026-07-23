@@ -321,11 +321,12 @@ fun ExpressiveNavigationItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     colors: Pair<Color, Color>,
     onClick: () -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = TerminalCornerShape
+    shape: androidx.compose.ui.graphics.Shape? = null
 ) {
+    val itemShape = shape ?: TerminalCornerShape
     Surface(
         onClick = onClick,
-        shape = shape,
+        shape = itemShape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth().height(88.dp)
     ) {
@@ -375,12 +376,13 @@ fun ExpressiveNavigationItem(
 fun ExpressiveCategoryItem(
     category: SettingsCategory,
     onClick: () -> Unit,
-    shape: androidx.compose.ui.graphics.Shape = TerminalCornerShape,
+    shape: androidx.compose.ui.graphics.Shape? = null,
     customColors: Pair<Color, Color>? = null
 ) {
+    val itemShape = shape ?: TerminalCornerShape
     Surface(
         onClick = onClick,
-        shape = shape,
+        shape = itemShape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth().height(88.dp) 
     ) {
