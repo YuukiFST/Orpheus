@@ -996,7 +996,7 @@ class PlayerViewModel @Inject constructor(
         playbackStateHolder.updateStablePlayerState { state ->
             state.copy(currentMediaItemIndex = update.currentIndex)
         }
-        _isSheetVisible.value = true
+        setSheetVisibleUnlessDismissUndoPending()
         if (_sheetState.value == PlayerSheetState.EXPANDED) {
             _sheetState.value = PlayerSheetState.COLLAPSED
         }
@@ -1161,6 +1161,7 @@ class PlayerViewModel @Inject constructor(
     private val mediaControllerFuture: ListenableFuture<MediaController> =
         mediaControllerFactory.create(context, sessionToken, mediaControllerListener)
     private var pendingRepeatMode: Int? = null
+    private var pendingRepeatModeSuppressPersistence = false
     private var suppressRepeatModePersistence = false
 
     private var pendingPlaybackAction: (() -> Unit)? = null
@@ -1971,6 +1972,7 @@ class PlayerViewModel @Inject constructor(
         }
         val playbackContext =
             if (contextSongs.any { it.id == song.id }) contextSongs else listOf(song)
+        val previousQueueName = _playerUiState.value.currentQueueSourceName
         val resolvedIndex = indexInQueue
             ?: playbackContext.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
         applyImmediatePlaybackUi(
@@ -2022,7 +2024,7 @@ class PlayerViewModel @Inject constructor(
                     directPlaybackJob = coroutineContext.job
                     try {
                         throwIfDirectPlaybackRequestIsStale(requestToken)
-                        internalPlaySongs(playbackContext, song, queueName, playlistId)
+                        internalPlaySongs(playbackContext, song, queueName, playlistId, previousQueueName)
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } finally {
@@ -2442,12 +2444,13 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    private fun applyPreferredRepeatMode(@Player.RepeatMode mode: Int) {
+    private fun applyPreferredRepeatMode(@Player.RepeatMode mode: Int, persist: Boolean = true) {
         playbackStateHolder.updateStablePlayerState { it.copy(repeatMode = mode) }
 
         val controller = mediaController
         if (controller == null) {
             pendingRepeatMode = mode
+            pendingRepeatModeSuppressPersistence = !persist
             return
         }
 
@@ -2455,12 +2458,13 @@ class PlayerViewModel @Inject constructor(
             controller.repeatMode = mode
         }
         pendingRepeatMode = null
+        pendingRepeatModeSuppressPersistence = false
     }
 
     private fun applyControllerRepeatModeWithoutPersist(@Player.RepeatMode mode: Int) {
         suppressRepeatModePersistence = true
         try {
-            applyPreferredRepeatMode(mode)
+            applyPreferredRepeatMode(mode, persist = false)
         } finally {
             suppressRepeatModePersistence = false
         }
@@ -2474,8 +2478,26 @@ class PlayerViewModel @Inject constructor(
         applyControllerRepeatModeWithoutPersist(Player.REPEAT_MODE_ALL)
     }
 
+    private suspend fun reconcileRepeatModeForQueueChange(newQueueName: String, previousQueueName: String) {
+        when {
+            isLikedQueueName(newQueueName) -> ensureLikedQueueRepeatWrap(newQueueName)
+            isLikedQueueName(previousQueueName) -> {
+                val savedRepeatMode = userPreferencesRepository.repeatModeFlow.first()
+                applyControllerRepeatModeWithoutPersist(savedRepeatMode)
+            }
+        }
+    }
+
     private fun flushPendingRepeatMode() {
-        pendingRepeatMode?.let { applyPreferredRepeatMode(it) }
+        val mode = pendingRepeatMode ?: return
+        val suppressPersistence = pendingRepeatModeSuppressPersistence
+        pendingRepeatMode = null
+        pendingRepeatModeSuppressPersistence = false
+        if (suppressPersistence) {
+            applyControllerRepeatModeWithoutPersist(mode)
+        } else {
+            applyPreferredRepeatMode(mode)
+        }
     }
 
     private fun resetPlaybackAudioMetadata() {
@@ -2950,6 +2972,7 @@ class PlayerViewModel @Inject constructor(
 
     // rebuildPlayerQueue functionality moved to PlaybackStateHolder (simplified)
     fun playSongs(songsToPlay: List<Song>, startSong: Song, queueName: String = "None", playlistId: String? = null) {
+        val previousQueueName = _playerUiState.value.currentQueueSourceName
         cancelPendingFullQueuePlayback()
         applyImmediatePlaybackUi(
             song = startSong,
@@ -3003,7 +3026,7 @@ class PlayerViewModel @Inject constructor(
             throwIfDirectPlaybackRequestIsStale(requestToken)
 
             // Send the final list (shuffled or not) to the player engine
-            internalPlaySongs(finalSongsToPlay, validStartSong, queueName, playlistId)
+            internalPlaySongs(finalSongsToPlay, validStartSong, queueName, playlistId, previousQueueName)
             if (requestToken == directPlaybackToken) {
                 directPlaybackJob = null
             }
@@ -3043,6 +3066,7 @@ class PlayerViewModel @Inject constructor(
 
     fun playExternalUri(uri: Uri) {
         viewModelScope.launch {
+            val previousQueueName = _playerUiState.value.currentQueueSourceName
             val externalResult = externalMediaStateHolder.buildExternalSongFromUri(uri)
             if (externalResult == null) {
                 sendToast(context.getString(R.string.external_playback_error))
@@ -3081,7 +3105,13 @@ class PlayerViewModel @Inject constructor(
             _sheetState.value = PlayerSheetState.COLLAPSED
             _isSheetVisible.value = true
 
-            internalPlaySongs(queueSongs, externalResult.song, context.getString(R.string.external_queue_label), null)
+            internalPlaySongs(
+                queueSongs,
+                externalResult.song,
+                context.getString(R.string.external_queue_label),
+                null,
+                previousQueueName,
+            )
             showPlayer()
         }
     }
@@ -3121,7 +3151,7 @@ class PlayerViewModel @Inject constructor(
                 totalDuration = song.duration.coerceAtLeast(0L),
             )
         }
-        _isSheetVisible.value = true
+        setSheetVisibleUnlessDismissUndoPending()
     }
 
     private fun beginPreparingSong(song: Song) {
@@ -3227,7 +3257,13 @@ class PlayerViewModel @Inject constructor(
 
 
 
-    private suspend fun internalPlaySongs(songsToPlay: List<Song>, startSong: Song, queueName: String = "None", playlistId: String? = null) {
+    private suspend fun internalPlaySongs(
+        songsToPlay: List<Song>,
+        startSong: Song,
+        queueName: String = "None",
+        playlistId: String? = null,
+        previousQueueName: String = _playerUiState.value.currentQueueSourceName,
+    ) {
         if (songsToPlay.isEmpty()) {
             clearPreparingSongIfMatching()
             return
@@ -3235,7 +3271,13 @@ class PlayerViewModel @Inject constructor(
         val effectiveStartSong = songsToPlay.firstOrNull { it.id == startSong.id } ?: songsToPlay.first()
 
         if (songsToPlay.any { it.id.isYouTubeMediaId() }) {
-            internalPlayMixedSongs(songsToPlay, effectiveStartSong, queueName, playlistId)
+            internalPlayMixedSongs(
+                songsToPlay,
+                effectiveStartSong,
+                queueName,
+                playlistId,
+                previousQueueName,
+            )
             return
         }
 
@@ -3243,7 +3285,7 @@ class PlayerViewModel @Inject constructor(
             appShortcutManager.updateLastPlaylistShortcut(playlistId, queueName)
         }
 
-        ensureLikedQueueRepeatWrap(queueName)
+        reconcileRepeatModeForQueueChange(queueName, previousQueueName)
 
         applyImmediatePlaybackUi(
             song = effectiveStartSong,
@@ -3299,10 +3341,13 @@ class PlayerViewModel @Inject constructor(
         startSong: Song,
         queueName: String,
         playlistId: String?,
+        previousQueueName: String = _playerUiState.value.currentQueueSourceName,
     ) {
         if (playlistId != null && queueName != "None") {
             appShortcutManager.updateLastPlaylistShortcut(playlistId, queueName)
         }
+
+        reconcileRepeatModeForQueueChange(queueName, previousQueueName)
 
         val startIndex = songsToPlay.indexOfFirst { it.id == startSong.id }.coerceAtLeast(0)
         applyImmediatePlaybackUi(
@@ -3320,7 +3365,7 @@ class PlayerViewModel @Inject constructor(
             stopOnEnd = false,
         )
         _playerUiState.update { it.copy(isLoadingInitialSongs = false) }
-        _isSheetVisible.value = true
+        setSheetVisibleUnlessDismissUndoPending()
     }
 
     private fun loadAndPlaySong(song: Song) {

@@ -49,14 +49,7 @@ class LocalOnlyMediaNotificationProvider(
             actionFactory,
             callback
         )
-        val localOnlyNotification = runCatching {
-            Notification.Builder.recoverBuilder(context, notification.notification)
-                .setLocalOnly(true)
-                .setDeleteIntent(stopPendingIntent)
-                .build()
-        }.getOrElse {
-            notification.notification
-        }
+        val localOnlyNotification = attachLocalOnlyAndDeleteIntent(notification.notification)
         return MediaNotification(notification.notificationId, localOnlyNotification)
     }
 
@@ -68,6 +61,45 @@ class LocalOnlyMediaNotificationProvider(
 
     override fun getNotificationChannelInfo(): MediaNotification.Provider.NotificationChannelInfo =
         delegate.getNotificationChannelInfo()
+
+    private fun attachLocalOnlyAndDeleteIntent(base: Notification): Notification {
+        return runCatching {
+            Notification.Builder.recoverBuilder(context, base)
+                .setLocalOnly(true)
+                .setDeleteIntent(stopPendingIntent)
+                .build()
+        }.getOrElse {
+            rebuildNotificationWithDeleteIntent(base)
+        }
+    }
+
+    private fun rebuildNotificationWithDeleteIntent(base: Notification): Notification {
+        val channelId = base.channelId ?: getNotificationChannelInfo().id
+        val builder = Notification.Builder(context, channelId)
+            .setSmallIcon(base.smallIcon)
+            .setContentTitle(base.extras.getCharSequence(Notification.EXTRA_TITLE))
+            .setContentText(base.extras.getCharSequence(Notification.EXTRA_TEXT))
+            .setSubText(base.extras.getCharSequence(Notification.EXTRA_SUB_TEXT))
+            .setLargeIcon(base.getLargeIcon())
+            .setContentIntent(base.contentIntent)
+            .setDeleteIntent(stopPendingIntent)
+            .setLocalOnly(true)
+            .setShowWhen(base.extras.getBoolean(Notification.EXTRA_SHOW_WHEN, false))
+            .setOnlyAlertOnce(true)
+            .setVisibility(base.visibility)
+            .setOngoing(base.flags and Notification.FLAG_ONGOING_EVENT != 0)
+
+        base.actions?.forEach { action ->
+            builder.addAction(
+                Notification.Action.Builder(
+                    action.icon,
+                    action.title,
+                    action.actionIntent,
+                ).build()
+            )
+        }
+        return builder.build()
+    }
 
     private companion object {
         private const val REQUEST_CODE_STOP_AND_UNLOAD = 1001

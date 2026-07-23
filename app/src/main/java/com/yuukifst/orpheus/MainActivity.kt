@@ -138,6 +138,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import com.yuukifst.orpheus.presentation.utils.AppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.NoOpHapticFeedback
@@ -1088,7 +1089,7 @@ private class NavBarShapeCache {
 }
 
 /**
- * Fixed-radius corner shape. Swaps Shape for a plain
+ * Fixed-radius corner shape. Swaps AbsoluteSmoothCornerShape for a plain
  * RoundedCornerShape when smooth corners are disabled in settings. The radius
  * values are identical in both branches, so the animated radius behavior is
  * unchanged regardless of which delegate is active. The resulting Outline is
@@ -1114,12 +1115,25 @@ private class DynamicSmoothCornerShape(
             if (cachedSize == size && cachedLayoutDirection == layoutDirection) return it
         }
 
-        val delegate: androidx.compose.ui.graphics.Shape = RoundedCornerShape(
-            topStart = topRadius,
-            topEnd = topRadius,
-            bottomEnd = bottomRadius,
-            bottomStart = bottomRadius
-        )
+        val delegate: androidx.compose.ui.graphics.Shape = if (useSmoothCorners) {
+            AbsoluteSmoothCornerShape(
+                cornerRadiusTL = topRadius,
+                smoothnessAsPercentTL = 60,
+                cornerRadiusTR = topRadius,
+                smoothnessAsPercentTR = 60,
+                cornerRadiusBL = bottomRadius,
+                smoothnessAsPercentBL = 60,
+                cornerRadiusBR = bottomRadius,
+                smoothnessAsPercentBR = 60
+            )
+        } else {
+            RoundedCornerShape(
+                topStart = topRadius,
+                topEnd = topRadius,
+                bottomEnd = bottomRadius,
+                bottomStart = bottomRadius
+            )
+        }
 
         return delegate.createOutline(size, layoutDirection, density).also {
             cachedSize = size

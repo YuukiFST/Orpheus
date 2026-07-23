@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import kotlinx.coroutines.CoroutineScope
+import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 internal data class SheetInteractionState(
     val playerShadowShape: Shape,
@@ -54,13 +55,21 @@ internal fun rememberSheetInteractionState(
     onDraggingChange: (Boolean) -> Unit,
     onDraggingPlayerAreaChange: (Boolean) -> Unit
 ): SheetInteractionState {
+    val useSmoothCornersState = rememberUpdatedState(useSmoothCorners)
+    val isDraggingState = rememberUpdatedState(isDragging)
     val playerShadowShape = remember(
         overallSheetTopCornerRadiusProvider,
         playerContentActualBottomRadiusProvider,
+        playerContentExpansionFraction
     ) {
         PlayerSheetDynamicShape(
             topRadiusProvider = overallSheetTopCornerRadiusProvider,
             bottomRadiusProvider = playerContentActualBottomRadiusProvider,
+            useSmoothShapeProvider = {
+                useSmoothCornersState.value &&
+                    !isDraggingState.value &&
+                    !playerContentExpansionFraction.isRunning
+            }
         )
     }
 
@@ -115,6 +124,7 @@ internal fun rememberSheetInteractionState(
 private class PlayerSheetDynamicShape(
     private val topRadiusProvider: () -> Dp,
     private val bottomRadiusProvider: () -> Dp,
+    private val useSmoothShapeProvider: () -> Boolean
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -123,17 +133,31 @@ private class PlayerSheetDynamicShape(
     ): Outline {
         val topRadius = topRadiusProvider().nonNegative()
         val bottomRadius = bottomRadiusProvider().nonNegative()
-        val topRadiusPx = with(density) { topRadius.toPx() }
-        val bottomRadiusPx = with(density) { bottomRadius.toPx() }
-        return Outline.Rounded(
-            RoundRect(
-                rect = Rect(0f, 0f, size.width, size.height),
-                topLeft = CornerRadius(topRadiusPx, topRadiusPx),
-                topRight = CornerRadius(topRadiusPx, topRadiusPx),
-                bottomRight = CornerRadius(bottomRadiusPx, bottomRadiusPx),
-                bottomLeft = CornerRadius(bottomRadiusPx, bottomRadiusPx)
+        if (topRadius <= 1.dp || bottomRadius <= 1.dp || !useSmoothShapeProvider()) {
+            val topRadiusPx = with(density) { topRadius.toPx() }
+            val bottomRadiusPx = with(density) { bottomRadius.toPx() }
+            return Outline.Rounded(
+                RoundRect(
+                    rect = Rect(0f, 0f, size.width, size.height),
+                    topLeft = CornerRadius(topRadiusPx, topRadiusPx),
+                    topRight = CornerRadius(topRadiusPx, topRadiusPx),
+                    bottomRight = CornerRadius(bottomRadiusPx, bottomRadiusPx),
+                    bottomLeft = CornerRadius(bottomRadiusPx, bottomRadiusPx)
+                )
             )
+        }
+
+        val shape = AbsoluteSmoothCornerShape(
+            cornerRadiusTL = topRadius,
+            smoothnessAsPercentTL = 60,
+            cornerRadiusTR = topRadius,
+            smoothnessAsPercentTR = 60,
+            cornerRadiusBL = bottomRadius,
+            smoothnessAsPercentBL = 60,
+            cornerRadiusBR = bottomRadius,
+            smoothnessAsPercentBR = 60
         )
+        return shape.createOutline(size, layoutDirection, density)
     }
 }
 
