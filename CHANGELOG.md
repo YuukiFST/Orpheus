@@ -2,6 +2,20 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.13] - 2026-07-22
+
+### Added
+- Visual style setting: square or rounded corners for buttons, cards, and search bar.
+- `OrpheusSwitch` respects the visual style preference (square track/thumb in square mode).
+
+### Changed
+- App theme uses monochrome black/white palette: light mode white background with black text and outlines; dark mode inverted.
+- Settings screens no longer block input during navigation transitions and scroll the collapsible top bar without per-frame coroutine churn.
+
+### Fixed
+- Search playback keeps optimistic mini player updates while ExoPlayer still reports the previous track.
+- Switches no longer stay rounded when square visual style is selected.
+
 ## [1.0.12] - 2026-07-22
 
 ### Changed

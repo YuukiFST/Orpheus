@@ -49,7 +49,8 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitchThumbIcon
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -538,16 +539,12 @@ private fun BackupSectionSelectableCardShared(
                     }
                 }
 
-                Switch(
+                OrpheusSwitch(
                     checked = selected,
                     onCheckedChange = { onToggle() },
                     enabled = enabled,
                     thumbContent = {
-                        AnimatedContent(
-                            targetState = selected,
-                            transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) },
-                            label = "switch_thumb_icon"
-                        ) { isSelected ->
+                        OrpheusSwitchThumbIcon(checked = selected) { isSelected ->
                             Icon(
                                 imageVector = if (isSelected) Icons.Rounded.Check else Icons.Rounded.Close,
                                 contentDescription = null,

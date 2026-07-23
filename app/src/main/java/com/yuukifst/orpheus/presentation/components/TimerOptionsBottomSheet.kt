@@ -29,7 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
@@ -298,7 +298,7 @@ fun TimerOptionsBottomSheet(
                             .padding(end = 8.dp),
                         color = if (isSwitchEnabled) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface // Adjust text color for contrast
                     )
-                    Switch(
+                    OrpheusSwitch(
                         checked = isSwitchEnabled,
                         enabled = isTimerMode || counterSliderPosition == 1f,
                         onCheckedChange = {

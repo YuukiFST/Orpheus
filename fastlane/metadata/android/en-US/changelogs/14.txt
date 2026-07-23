@@ -1,0 +1,1 @@
+Square or rounded visual style, monochrome black/white theme, square-aware switches, and smoother Settings scrolling.

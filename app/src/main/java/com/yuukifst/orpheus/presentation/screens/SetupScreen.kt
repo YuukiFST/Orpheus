@@ -95,7 +95,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -1341,7 +1341,7 @@ private fun ExternalServiceToggleCard(
                 )
             }
 
-            Switch(
+            OrpheusSwitch(
                 checked = checked,
                 onCheckedChange = onCheckedChange
             )
@@ -1427,7 +1427,7 @@ fun LibraryLayoutPage(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Switch(
+                    OrpheusSwitch(
                         checked = isCompact,
                         onCheckedChange = { checked ->
                             onModeSelected(if (checked) "compact_pill" else "tab_row")
@@ -2341,7 +2341,7 @@ fun NavBarLayoutPage(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        OrpheusSwitch(
                             checked = isDefault,
                             onCheckedChange = { checked ->
                                 onModeSelected(if (checked) "default" else "full_width")

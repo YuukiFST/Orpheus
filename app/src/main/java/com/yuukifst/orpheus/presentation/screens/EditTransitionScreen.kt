@@ -54,7 +54,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -315,7 +315,7 @@ private fun TransitionSummaryCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        OrpheusSwitch(
                             checked = !followingGlobal,
                             onCheckedChange = { isEnabled -> if (isEnabled) onEnableOverride() else onResetToGlobal() },
                             enabled = enabled,

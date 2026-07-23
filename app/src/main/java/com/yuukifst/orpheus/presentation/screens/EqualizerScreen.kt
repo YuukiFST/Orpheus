@@ -110,7 +110,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.GraphicEq
@@ -1279,7 +1279,7 @@ private fun EffectCard(
                 }
             }
             
-            Switch(
+            OrpheusSwitch(
                 checked = isEnabled,
                 onCheckedChange = onEnabledChange,
                 modifier = Modifier.scale(0.8f) 
@@ -1433,7 +1433,7 @@ private fun IndividualEffectRow(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            Switch(
+            OrpheusSwitch(
                 checked = isEnabled,
                 onCheckedChange = onEnabledChange,
                 thumbContent = if (isEnabled) {

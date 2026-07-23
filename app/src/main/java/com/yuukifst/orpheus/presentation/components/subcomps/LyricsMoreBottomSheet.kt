@@ -40,7 +40,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -376,7 +376,7 @@ fun LyricsMoreBottomSheet(
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                OrpheusSwitch(
                                     checked = showRomanization,
                                     onCheckedChange = onShowRomanizationChange,
                                     colors = SwitchDefaults.colors(
@@ -412,7 +412,7 @@ fun LyricsMoreBottomSheet(
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                OrpheusSwitch(
                                     checked = showTranslation,
                                     onCheckedChange = onShowTranslationChange,
                                     colors = SwitchDefaults.colors(
@@ -449,7 +449,7 @@ fun LyricsMoreBottomSheet(
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                OrpheusSwitch(
                                     modifier = Modifier,
                                     checked = isImmersiveTemporarilyDisabled,
                                     onCheckedChange = {
@@ -488,7 +488,7 @@ fun LyricsMoreBottomSheet(
                                 )
                             },
                             trailingContent = {
-                                Switch(
+                                OrpheusSwitch(
                                     checked = keepScreenOn,
                                     onCheckedChange = onKeepScreenOnChange,
                                     colors = SwitchDefaults.colors(

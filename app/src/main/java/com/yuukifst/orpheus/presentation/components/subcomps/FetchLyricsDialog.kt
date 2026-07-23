@@ -33,7 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -225,7 +225,7 @@ private fun IdleContent(
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.75f)
                 )
             }
-            Switch(
+            OrpheusSwitch(
                 checked = forcePickResults,
                 onCheckedChange = onToggleForcePickResults,
                 colors = SwitchDefaults.colors(

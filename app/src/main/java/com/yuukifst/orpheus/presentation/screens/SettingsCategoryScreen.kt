@@ -3,6 +3,8 @@ import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitchThumbIcon
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.components.BackupModuleSelectionDialog
@@ -28,6 +30,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -99,7 +102,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -111,6 +113,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -307,15 +311,14 @@ fun SettingsCategoryScreen(
     
     val titleMaxLines = if (isLongTitle) 2 else 1
 
-    val topBarHeight = remember(maxTopBarHeightPx) { Animatable(maxTopBarHeightPx) }
-    var collapseFraction by remember { mutableStateOf(0f) }
+    var topBarHeightPx by remember(maxTopBarHeightPx) { mutableFloatStateOf(maxTopBarHeightPx) }
 
-    LaunchedEffect(topBarHeight.value, maxTopBarHeightPx) {
-        collapseFraction =
-                1f -
-                        ((topBarHeight.value - minTopBarHeightPx) /
-                                        (maxTopBarHeightPx - minTopBarHeightPx))
-                                .coerceIn(0f, 1f)
+    val collapseFraction by remember(minTopBarHeightPx, maxTopBarHeightPx) {
+        derivedStateOf {
+            1f -
+                ((topBarHeightPx - minTopBarHeightPx) / (maxTopBarHeightPx - minTopBarHeightPx))
+                    .coerceIn(0f, 1f)
+        }
     }
 
     val nestedScrollConnection = remember {
@@ -331,13 +334,13 @@ fun SettingsCategoryScreen(
                     return Offset.Zero
                 }
 
-                val previousHeight = topBarHeight.value
+                val previousHeight = topBarHeightPx
                 val newHeight =
                         (previousHeight + delta).coerceIn(minTopBarHeightPx, maxTopBarHeightPx)
                 val consumed = newHeight - previousHeight
 
                 if (consumed.roundToInt() != 0) {
-                    coroutineScope.launch { topBarHeight.snapTo(newHeight) }
+                    topBarHeightPx = newHeight
                 }
 
                 val canConsumeScroll = !(isScrollingDown && newHeight == minTopBarHeightPx)
@@ -348,7 +351,7 @@ fun SettingsCategoryScreen(
 
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (!lazyListState.isScrollInProgress) {
-            val shouldExpand = topBarHeight.value > (minTopBarHeightPx + maxTopBarHeightPx) / 2
+            val shouldExpand = topBarHeightPx > (minTopBarHeightPx + maxTopBarHeightPx) / 2
             val canExpand =
                     lazyListState.firstVisibleItemIndex == 0 &&
                             lazyListState.firstVisibleItemScrollOffset == 0
@@ -356,9 +359,15 @@ fun SettingsCategoryScreen(
             val targetValue =
                     if (shouldExpand && canExpand) maxTopBarHeightPx else minTopBarHeightPx
 
-            if (topBarHeight.value != targetValue) {
+            if (topBarHeightPx != targetValue) {
                 coroutineScope.launch {
-                    topBarHeight.animateTo(targetValue, spring(stiffness = Spring.StiffnessMedium))
+                    animate(
+                        initialValue = topBarHeightPx,
+                        targetValue = targetValue,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                    ) { value, _ ->
+                        topBarHeightPx = value
+                    }
                 }
             }
         }
@@ -368,7 +377,7 @@ fun SettingsCategoryScreen(
         modifier =
             Modifier.nestedScroll(nestedScrollConnection).fillMaxSize()
     ) {
-        val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
+        val currentTopBarHeightDp = with(density) { topBarHeightPx.toDp() }
         
         LazyColumn(
             state = lazyListState,
@@ -1002,25 +1011,6 @@ fun SettingsCategoryScreen(
             maxLines = titleMaxLines
         )
 
-        // Block interaction during transition
-        var isTransitioning by remember { mutableStateOf(true) }
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(com.yuukifst.orpheus.presentation.navigation.TRANSITION_DURATION.toLong())
-            isTransitioning = false
-        }
-        
-        if (isTransitioning) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                   awaitPointerEventScope {
-                        while (true) {
-                            awaitPointerEvent()
-                        }
-                    }
-                }
-            )
-        }
     }
 
     BackupTransferProgressDialogHost(progress = dataTransferProgress)
@@ -1793,16 +1783,12 @@ private fun BackupSectionSelectableCard(
                     }
                 }
 
-                Switch(
+                OrpheusSwitch(
                     checked = selected,
                     onCheckedChange = { onToggle() },
                     enabled = enabled,
                     thumbContent = {
-                        AnimatedContent(
-                            targetState = selected,
-                            transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) },
-                            label = "switch_thumb_icon"
-                        ) { isSelected ->
+                        OrpheusSwitchThumbIcon(checked = selected) { isSelected ->
                             Icon(
                                 imageVector = if (isSelected) Icons.Rounded.Check else Icons.Rounded.Close,
                                 contentDescription = null,

@@ -45,8 +45,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
+import com.yuukifst.orpheus.ui.theme.OrpheusSwitchThumbIcon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -190,7 +191,7 @@ fun SwitchSettingItem(
                 )
             }
 
-            Switch(
+            OrpheusSwitch(
                 checked = checked,
                 onCheckedChange = { newValue ->
                     if (enabled) {
@@ -204,11 +205,7 @@ fun SwitchSettingItem(
                 },
                 enabled = enabled,
                 thumbContent = {
-                    AnimatedContent(
-                        targetState = checked,
-                        transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) },
-                        label = "switch_thumb_icon"
-                    ) { isChecked ->
+                    OrpheusSwitchThumbIcon(checked = checked) { isChecked ->
                         Icon(
                             imageVector = if (isChecked) Icons.Rounded.Check else Icons.Rounded.Close,
                             contentDescription = null,

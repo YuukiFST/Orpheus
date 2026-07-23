@@ -1,19 +1,14 @@
 package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
-import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.rememberTransition
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -60,11 +55,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -98,24 +91,6 @@ fun SettingsScreen(
         settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
 
-    // Animation effects
-    val transitionState = remember { MutableTransitionState(false) }
-    LaunchedEffect(true) { transitionState.targetState = true }
-
-    val transition = rememberTransition(transitionState, label = "SettingsAppearTransition")
-
-    val contentAlpha by
-            transition.animateFloat(
-                    label = "ContentAlpha",
-                    transitionSpec = { OrpheusMotion.screenEnterAlphaTween() }
-            ) { if (it) 1f else 0f }
-
-    val contentOffset by
-            transition.animateDp(
-                    label = "ContentOffset",
-                    transitionSpec = { OrpheusMotion.screenEnterOffsetTween() }
-            ) { if (it) 0.dp else 12.dp }
-
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -133,15 +108,14 @@ fun SettingsScreen(
 
     var showCornerRadiusOverlay by remember { mutableStateOf(false) }
 
-    val topBarHeight = remember { Animatable(maxTopBarHeightPx) }
-    var collapseFraction by remember { mutableStateOf(0f) }
+    var topBarHeightPx by remember(maxTopBarHeightPx) { mutableFloatStateOf(maxTopBarHeightPx) }
 
-    LaunchedEffect(topBarHeight.value) {
-        collapseFraction =
-                1f -
-                        ((topBarHeight.value - minTopBarHeightPx) /
-                                        (maxTopBarHeightPx - minTopBarHeightPx))
-                                .coerceIn(0f, 1f)
+    val collapseFraction by remember(minTopBarHeightPx, maxTopBarHeightPx) {
+        derivedStateOf {
+            1f -
+                ((topBarHeightPx - minTopBarHeightPx) / (maxTopBarHeightPx - minTopBarHeightPx))
+                    .coerceIn(0f, 1f)
+        }
     }
 
     val nestedScrollConnection = remember {
@@ -157,13 +131,13 @@ fun SettingsScreen(
                     return Offset.Zero
                 }
 
-                val previousHeight = topBarHeight.value
+                val previousHeight = topBarHeightPx
                 val newHeight =
                         (previousHeight + delta).coerceIn(minTopBarHeightPx, maxTopBarHeightPx)
                 val consumed = newHeight - previousHeight
 
                 if (consumed.roundToInt() != 0) {
-                    coroutineScope.launch { topBarHeight.snapTo(newHeight) }
+                    topBarHeightPx = newHeight
                 }
 
                 val canConsumeScroll = !(isScrollingDown && newHeight == minTopBarHeightPx)
@@ -174,7 +148,7 @@ fun SettingsScreen(
 
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (!lazyListState.isScrollInProgress) {
-            val shouldExpand = topBarHeight.value > (minTopBarHeightPx + maxTopBarHeightPx) / 2
+            val shouldExpand = topBarHeightPx > (minTopBarHeightPx + maxTopBarHeightPx) / 2
             val canExpand =
                     lazyListState.firstVisibleItemIndex == 0 &&
                             lazyListState.firstVisibleItemScrollOffset == 0
@@ -182,22 +156,24 @@ fun SettingsScreen(
             val targetValue =
                     if (shouldExpand && canExpand) maxTopBarHeightPx else minTopBarHeightPx
 
-            if (topBarHeight.value != targetValue) {
+            if (topBarHeightPx != targetValue) {
                 coroutineScope.launch {
-                    topBarHeight.animateTo(targetValue, spring(stiffness = Spring.StiffnessMedium))
+                    animate(
+                        initialValue = topBarHeightPx,
+                        targetValue = targetValue,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                    ) { value, _ ->
+                        topBarHeightPx = value
+                    }
                 }
             }
         }
     }
 
     Box(
-            modifier =
-                    Modifier.nestedScroll(nestedScrollConnection).fillMaxSize().graphicsLayer {
-                        alpha = contentAlpha
-                        translationY = contentOffset.toPx()
-                    }
+            modifier = Modifier.nestedScroll(nestedScrollConnection).fillMaxSize()
     ) {
-        val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
+        val currentTopBarHeightDp = with(density) { topBarHeightPx.toDp() }
         LazyColumn(
                 state = lazyListState,
                 contentPadding = PaddingValues(
@@ -292,25 +268,6 @@ fun SettingsScreen(
                 onBackClick = onNavigationIconClick
         )
 
-        // Block interaction during transition
-        var isTransitioning by remember { mutableStateOf(true) }
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(com.yuukifst.orpheus.presentation.navigation.TRANSITION_DURATION.toLong())
-            isTransitioning = false
-        }
-
-        if (isTransitioning) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                     awaitPointerEventScope {
-                        while (true) {
-                            awaitPointerEvent()
-                        }
-                    }
-                }
-            )
-        }
     }
 }
 
