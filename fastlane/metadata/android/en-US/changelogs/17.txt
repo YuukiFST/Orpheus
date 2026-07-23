@@ -1,0 +1,1 @@
+Pixel theme with pastel palette. Mono Settings tiles except Pixel. Search bar shows > prompt. Liked queue wraps at end. Dismiss stops playback. Faster Settings motion. Corner radius on preview, Liked rows, and mini player. About screen cleanup.

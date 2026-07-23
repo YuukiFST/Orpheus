@@ -2,6 +2,22 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.16] - 2026-07-23
+
+### Added
+- Pixel theme mode with Google-style pastel palette, selectable in Settings and setup.
+
+### Changed
+- Settings category tiles use monochrome styling in Light, Dark, and Follow System; pastel fills remain for Pixel theme only.
+- Search bars show a terminal-style `>` prompt instead of a search icon.
+- Settings navigation transitions use OrpheusMotion fast duration (250ms) instead of 450ms.
+
+### Fixed
+- Liked queue wraps to the first track at the end of the list when repeat is off.
+- Dismissing the mini player or swiping away the notification stops playback; sheet no longer revives after a single dismiss swipe.
+- Corner radius preview, Liked song rows, and mini player sheet honor the nav bar radius preference.
+- About screen no longer shows GitHub Sponsors or F-Droid links.
+
 ## [1.0.15] - 2026-07-22
 
 ### Fixed
