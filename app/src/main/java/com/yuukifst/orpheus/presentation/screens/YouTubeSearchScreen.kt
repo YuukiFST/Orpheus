@@ -140,7 +140,14 @@ fun YouTubeSearchScreen(
                             expanded = false,
                             onExpandedChange = {},
                             placeholder = { Text("Search YouTube") },
-                            leadingIcon = {},
+                            leadingIcon = {
+                                Text(
+                                    text = ">",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            },
                             trailingIcon = {},
                             colors = SearchBarDefaults.inputFieldColors(
                                 focusedContainerColor = Color.Transparent,
