@@ -208,6 +208,7 @@ class MusicService : MediaLibraryService() {
         private const val TAG = "MusicService_Orpheus"
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.yuukifst.orpheus.ACTION_SLEEP_TIMER_EXPIRED"
+        const val ACTION_STOP_AND_UNLOAD = "com.yuukifst.orpheus.ACTION_STOP_AND_UNLOAD"
         const val EXTRA_FORCE_FOREGROUND_ON_START =
             "com.yuukifst.orpheus.extra.FORCE_FOREGROUND_ON_START"
         // Queue/index/flags snapshot is only used for restore on process death. A full-queue
@@ -938,6 +939,12 @@ class MusicService : MediaLibraryService() {
                 ACTION_SLEEP_TIMER_EXPIRED -> {
                     Timber.tag(TAG).d("Sleep timer expired action received. Pausing player.")
                     playbackTimerController.onDurationSleepTimerExpired()
+                }
+                ACTION_STOP_AND_UNLOAD -> {
+                    stopPlaybackAndUnload(
+                        reason = "notification_dismissed",
+                        preservePlaybackSnapshot = false,
+                    )
                 }
             }
         }

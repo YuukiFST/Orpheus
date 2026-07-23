@@ -1,7 +1,9 @@
 package com.yuukifst.orpheus.data.service
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
@@ -19,6 +21,17 @@ class LocalOnlyMediaNotificationProvider(
     private val delegate: DefaultMediaNotificationProvider =
         DefaultMediaNotificationProvider.Builder(context).build(),
 ) : MediaNotification.Provider {
+
+    private val stopPendingIntent: PendingIntent by lazy {
+        PendingIntent.getService(
+            context,
+            REQUEST_CODE_STOP_AND_UNLOAD,
+            Intent(context, MusicService::class.java).apply {
+                action = MusicService.ACTION_STOP_AND_UNLOAD
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
 
     fun setSmallIcon(iconResId: Int) {
         delegate.setSmallIcon(iconResId)
@@ -39,6 +52,7 @@ class LocalOnlyMediaNotificationProvider(
         val localOnlyNotification = runCatching {
             Notification.Builder.recoverBuilder(context, notification.notification)
                 .setLocalOnly(true)
+                .setDeleteIntent(stopPendingIntent)
                 .build()
         }.getOrElse {
             notification.notification
@@ -54,4 +68,8 @@ class LocalOnlyMediaNotificationProvider(
 
     override fun getNotificationChannelInfo(): MediaNotification.Provider.NotificationChannelInfo =
         delegate.getNotificationChannelInfo()
+
+    private companion object {
+        private const val REQUEST_CODE_STOP_AND_UNLOAD = 1001
+    }
 }

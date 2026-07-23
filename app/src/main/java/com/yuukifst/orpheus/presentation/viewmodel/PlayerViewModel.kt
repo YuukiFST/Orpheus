@@ -397,6 +397,12 @@ class PlayerViewModel @Inject constructor(
         _isMiniPlayerDismissing.value = dismissing
     }
 
+    private fun setSheetVisibleUnlessDismissUndoPending() {
+        if (!_playerUiState.value.showDismissUndoBar) {
+            _isSheetVisible.value = true
+        }
+    }
+
     private val _selectedSongForInfo = MutableStateFlow<Song?>(null)
     val selectedSongForInfo: StateFlow<Song?> = _selectedSongForInfo.asStateFlow()
 
@@ -2431,7 +2437,7 @@ class PlayerViewModel @Inject constructor(
             lastQueueSignature = signature
             _playerUiState.update { it.copy(currentPlaybackQueue = queue.toPlaybackQueue()) }
             if (queue.isNotEmpty()) {
-                _isSheetVisible.value = true
+                setSheetVisibleUnlessDismissUndoPending()
             }
         }
     }
@@ -2704,7 +2710,7 @@ class PlayerViewModel @Inject constructor(
                 }
                 loadLyricsForCurrentSong()
                 if (playerCtrl.isPlaying) {
-                    _isSheetVisible.value = true
+                    setSheetVisibleUnlessDismissUndoPending()
                     startProgressUpdates()
                 }
             } else {
@@ -2741,7 +2747,7 @@ class PlayerViewModel @Inject constructor(
                     playerCtrl.playbackState != Player.STATE_IDLE &&
                     playerCtrl.playbackState != Player.STATE_ENDED
                 if (isPlaying || shouldKeepSampling) {
-                    _isSheetVisible.value = true
+                    setSheetVisibleUnlessDismissUndoPending()
                     if (isPlaying) {
                         clearPreparingSongIfMatching(playerCtrl.currentMediaItem?.mediaId)
                     }
@@ -4302,6 +4308,8 @@ class PlayerViewModel @Inject constructor(
             updateUiState = { mutation -> _playerUiState.update(mutation) },
             disconnectRemoteIfNeeded = {},
             clearPlayback = {
+                mediaController?.playWhenReady = false
+                mediaController?.pause()
                 mediaController?.stop()
                 mediaController?.clearMediaItems()
             },
