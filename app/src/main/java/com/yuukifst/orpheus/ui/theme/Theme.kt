@@ -152,11 +152,55 @@ val LightColorScheme = lightColorScheme(
     onTertiaryFixedVariant = MonoBlack,
 )
 
+val PixelColorScheme = darkColorScheme(
+    primary = PixelPrimary,
+    onPrimary = PixelOnPrimary,
+    primaryContainer = PixelPrimaryContainer,
+    onPrimaryContainer = PixelOnPrimaryContainer,
+    secondary = PixelSecondary,
+    onSecondary = PixelOnSecondary,
+    secondaryContainer = PixelSecondaryContainer,
+    onSecondaryContainer = PixelOnSecondaryContainer,
+    tertiary = PixelTertiary,
+    onTertiary = PixelOnTertiary,
+    tertiaryContainer = PixelTertiaryContainer,
+    onTertiaryContainer = PixelOnTertiaryContainer,
+    background = PixelBackground,
+    onBackground = PixelOnBackground,
+    surface = PixelSurface,
+    onSurface = PixelOnSurface,
+    surfaceVariant = PixelSurfaceVariant,
+    onSurfaceVariant = PixelOnSurfaceVariant,
+    outline = PixelOutline,
+    outlineVariant = PixelOutlineVariant,
+    surfaceTint = Color.Transparent,
+    error = VantaHazard,
+    onError = MonoBlack,
+    surfaceContainerLowest = PixelBackground,
+    surfaceContainerLow = Color(0xFF242628),
+    surfaceContainer = Color(0xFF2E3033),
+    surfaceContainerHigh = Color(0xFF393B3E),
+    surfaceContainerHighest = Color(0xFF44474F),
+    primaryFixed = PixelPrimary,
+    onPrimaryFixed = PixelOnPrimary,
+    primaryFixedDim = PixelPrimary.copy(alpha = 0.7f),
+    onPrimaryFixedVariant = PixelOnPrimaryContainer,
+    secondaryFixed = PixelSecondary,
+    onSecondaryFixed = PixelOnSecondary,
+    secondaryFixedDim = PixelSecondary.copy(alpha = 0.7f),
+    onSecondaryFixedVariant = PixelOnSecondaryContainer,
+    tertiaryFixed = PixelTertiary,
+    onTertiaryFixed = PixelOnTertiary,
+    tertiaryFixedDim = PixelTertiary.copy(alpha = 0.7f),
+    onTertiaryFixedVariant = PixelOnTertiaryContainer,
+)
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OrpheusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     useSmoothCorners: Boolean = false,
+    scheme: AppThemeScheme = AppThemeScheme.LIGHT,
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
@@ -164,6 +208,7 @@ fun OrpheusTheme(
         colorSchemePairOverride != null -> {
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
+        scheme == AppThemeScheme.PIXEL -> PixelColorScheme
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

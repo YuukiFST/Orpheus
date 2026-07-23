@@ -124,6 +124,8 @@
     <string name="setup_theme_dark_description">The default Material 3 dark look for Orpheus.</string>
     <string name="setup_theme_light_title">Light</string>
     <string name="setup_theme_light_description">A brighter Material 3 look across the app.</string>
+    <string name="setup_theme_pixel_title">Pixel</string>
+    <string name="setup_theme_pixel_description">Colorful Material look inspired by PixelPlayer.</string>
     <string name="setup_theme_follow_title">Follow system</string>
     <string name="setup_theme_follow_description">Match your phone\'s current appearance setting.</string>
     <string name="setup_compact_mode_pill_hint">Using minimal pill navigation</string>

@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.components.external.ExternalPlayerOverlay
 import com.yuukifst.orpheus.ui.theme.OrpheusTheme
+import com.yuukifst.orpheus.ui.theme.resolveAppTheme
 import android.content.Intent.EXTRA_STREAM
 import androidx.media3.common.util.UnstableApi
 import com.yuukifst.orpheus.data.preferences.AppThemeMode
@@ -51,13 +52,10 @@ class ExternalPlayerActivity : ComponentActivity() {
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
                 .collectAsStateWithLifecycle(initialValue = false)
-            val useDarkTheme = when (appThemeMode) {
-                AppThemeMode.DARK -> true
-                AppThemeMode.LIGHT -> false
-                else -> systemDarkTheme
-            }
+            val resolvedTheme = resolveAppTheme(appThemeMode, systemDarkTheme)
             OrpheusTheme(
-                darkTheme = useDarkTheme,
+                darkTheme = resolvedTheme.darkTheme,
+                scheme = resolvedTheme.scheme,
                 useSmoothCorners = useSmoothCorners,
             ) {
                 ExternalPlayerOverlay(

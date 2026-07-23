@@ -71,6 +71,7 @@
     <string name="setcat_app_theme_desc">Switch between light, dark, or follow system appearance.</string>
     <string name="setcat_theme_light">Light Theme</string>
     <string name="setcat_theme_dark">Dark Theme</string>
+    <string name="setcat_theme_pixel">Pixel</string>
     <string name="setcat_theme_follow_system">Follow System</string>
     <string name="setcat_visual_style_label">Visual Style</string>
     <string name="setcat_visual_style_desc">Choose square corners or rounded corners for buttons and surfaces.</string>

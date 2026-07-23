@@ -124,6 +124,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.ui.theme.CrtScreenOverlay
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.OrpheusTheme
+import com.yuukifst.orpheus.ui.theme.resolveAppTheme
 import com.yuukifst.orpheus.ui.theme.TerminalPanel
 import com.yuukifst.orpheus.ui.theme.TerminalPromptLabel
 import com.yuukifst.orpheus.ui.theme.terminalBorder
@@ -226,11 +227,7 @@ class MainActivity : ComponentActivity() {
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
                 .collectAsStateWithLifecycle(initialValue = false)
-            val useDarkTheme = when (appThemeMode) {
-                AppThemeMode.DARK -> true
-                AppThemeMode.LIGHT -> false
-                else -> systemDarkTheme
-            }
+            val resolvedTheme = resolveAppTheme(appThemeMode, systemDarkTheme)
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
             val crtScreenOverlayEnabled by userPreferencesRepository.crtScreenOverlayEnabledFlow
                 .collectAsStateWithLifecycle(initialValue = true)
@@ -274,7 +271,8 @@ class MainActivity : ComponentActivity() {
             }
 
             OrpheusTheme(
-                darkTheme = useDarkTheme,
+                darkTheme = resolvedTheme.darkTheme,
+                scheme = resolvedTheme.scheme,
                 useSmoothCorners = useSmoothCorners,
             ) {
                 var contentVisible by remember { mutableStateOf(true) }

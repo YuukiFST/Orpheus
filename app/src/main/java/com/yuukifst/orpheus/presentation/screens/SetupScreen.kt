@@ -77,6 +77,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Restore
@@ -1042,6 +1043,12 @@ fun ThemeSelectionPage(
             title = stringResource(R.string.setup_theme_light_title),
             description = stringResource(R.string.setup_theme_light_description),
             icon = Icons.Outlined.LightMode
+        ),
+        ThemeOptionItem(
+            mode = AppThemeMode.PIXEL,
+            title = stringResource(R.string.setup_theme_pixel_title),
+            description = stringResource(R.string.setup_theme_pixel_description),
+            icon = Icons.Rounded.Palette
         ),
         ThemeOptionItem(
             mode = AppThemeMode.FOLLOW_SYSTEM,
