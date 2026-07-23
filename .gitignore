@@ -53,3 +53,5 @@ TMPDIR*
 
 PRD.md
 **/superpowers/plans/
+
+.worktrees/
