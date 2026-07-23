@@ -1,0 +1,1 @@
+Light mode is now the default. Fixed missing outlines on search bar and library tabs, and rounded corners on library header tabs.

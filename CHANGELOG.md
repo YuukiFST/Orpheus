@@ -2,6 +2,15 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.14] - 2026-07-22
+
+### Changed
+- Light mode is now the default theme for new installs and unset preferences.
+
+### Fixed
+- Light mode search bar and library tabs now show black outlines.
+- Library header tabs and surfaces honor the rounded visual style setting instead of staying square.
+
 ## [1.0.13] - 2026-07-22
 
 ### Added
