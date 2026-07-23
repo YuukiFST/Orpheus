@@ -11,20 +11,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class OrpheusShapeSet(
-    val terminal: Shape,
-    val button: Shape,
-    val iconButton: Shape,
-    val searchBar: Shape,
-    val smooth8: Shape,
-    val smooth10: Shape,
-    val smooth12: Shape,
-    val smooth14: Shape,
-    val smooth16: Shape,
-    val smooth20: Shape,
-    val smooth24: Shape,
-    val smooth28: Shape,
-    val smooth32: Shape,
-    val smoothPill: Shape,
+    val terminal: RoundedCornerShape,
+    val button: RoundedCornerShape,
+    val iconButton: RoundedCornerShape,
+    val searchBar: RoundedCornerShape,
+    val smooth8: RoundedCornerShape,
+    val smooth10: RoundedCornerShape,
+    val smooth12: RoundedCornerShape,
+    val smooth14: RoundedCornerShape,
+    val smooth16: RoundedCornerShape,
+    val smooth20: RoundedCornerShape,
+    val smooth24: RoundedCornerShape,
+    val smooth28: RoundedCornerShape,
+    val smooth32: RoundedCornerShape,
+    val smoothPill: RoundedCornerShape,
     val expressiveAvatar: Shape,
     val expressiveClover: Shape,
     val expressiveHero: Shape,
@@ -72,33 +72,23 @@ object OrpheusShapeSets {
     )
 }
 
+/** Synced from [OrpheusTheme]; safe to read outside @Composable (defaults, remember keys). */
+object OrpheusActiveShapes {
+    var set: OrpheusShapeSet = OrpheusShapeSets.Square
+        internal set
+}
+
 val LocalOrpheusShapes = staticCompositionLocalOf { OrpheusShapeSets.Square }
 
-/** Sharp terminal corners — use instead of Shape or ad-hoc radii. */
-val TerminalShape: Shape
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalOrpheusShapes.current.terminal
+val TerminalShape: Shape get() = OrpheusActiveShapes.set.terminal
 
-val TerminalCornerShape: Shape
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalOrpheusShapes.current.terminal
+val TerminalCornerShape: RoundedCornerShape get() = OrpheusActiveShapes.set.terminal
 
-val OrpheusButtonShape: Shape
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalOrpheusShapes.current.button
+val OrpheusButtonShape: RoundedCornerShape get() = OrpheusActiveShapes.set.button
 
-val OrpheusIconButtonShape: Shape
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalOrpheusShapes.current.iconButton
+val OrpheusIconButtonShape: RoundedCornerShape get() = OrpheusActiveShapes.set.iconButton
 
-val OrpheusSearchBarShape: Shape
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalOrpheusShapes.current.searchBar
+val OrpheusSearchBarShape: RoundedCornerShape get() = OrpheusActiveShapes.set.searchBar
 
 @Composable
 @ReadOnlyComposable

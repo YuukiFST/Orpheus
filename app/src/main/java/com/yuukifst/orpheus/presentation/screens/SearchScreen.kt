@@ -792,6 +792,7 @@ fun SearchResultsList(
                             is SearchResultItem.SongItem -> {
                                 LibraryPlaybackAwareSongItem(
                                     song = item.song,
+                                    playerViewModel = playerViewModel,
                                     onMoreOptionsClick = onSongMoreOptionsClick,
                                     onClick = { onSongResultClick(item.song) }
                                 )

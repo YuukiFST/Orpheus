@@ -171,6 +171,7 @@ fun OrpheusTheme(
     val shapeSet = remember(useSmoothCorners) {
         if (useSmoothCorners) OrpheusShapeSets.Rounded else OrpheusShapeSets.Square
     }
+    OrpheusActiveShapes.set = shapeSet
     val materialShapes = remember(shapeSet) { orpheusMaterialShapes(shapeSet) }
 
     OrpheusStatusBarStyle(

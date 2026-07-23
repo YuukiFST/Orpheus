@@ -251,7 +251,7 @@ fun QueueBottomSheet(
     tonalElevation: Dp = 10.dp,
     shape: RoundedCornerShape? = null,
 ) {
-    val sheetShape = shape ?: (TerminalCornerShape as RoundedCornerShape)
+    val sheetShape = shape ?: TerminalCornerShape
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
     var showTimerOptions by rememberSaveable { mutableStateOf(false) }
