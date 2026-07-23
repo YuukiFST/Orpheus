@@ -1,8 +1,10 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusSearchBarShape
 import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +58,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -123,6 +127,7 @@ fun YouTubeSearchScreen(
                     .padding(start = 24.dp, top = statusBarTopInset + 12.dp, end = 24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val searchBarShape = OrpheusSearchBarShape
                 DockedSearchBar(
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -145,7 +150,14 @@ fun YouTubeSearchScreen(
                     },
                     expanded = false,
                     onExpandedChange = {},
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                        .clip(searchBarShape),
+                    shape = searchBarShape,
+                    colors = SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    ),
                 ) {}
             }
 

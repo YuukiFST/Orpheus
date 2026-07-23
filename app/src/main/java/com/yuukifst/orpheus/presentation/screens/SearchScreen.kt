@@ -317,8 +317,8 @@ fun SearchScreen(
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
-                            .clip(searchBarShape)
-                            .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape),
+                            .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                            .clip(searchBarShape),
                         shape = searchBarShape,
                         colors = SearchBarDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),

@@ -120,7 +120,9 @@ fun OrpheusFilledTonalButton(
     val buttonShape = shape ?: OrpheusButtonShape
     FilledTonalButton(
         onClick = onClick,
-        modifier = modifier.terminalPressScale(interactionSource, pressedScale = 0.96f),
+        modifier = modifier
+            .terminalPressScale(interactionSource, pressedScale = 0.96f)
+            .terminalBorder(color = MaterialTheme.colorScheme.outline),
         enabled = enabled,
         shape = buttonShape,
         colors = colors,

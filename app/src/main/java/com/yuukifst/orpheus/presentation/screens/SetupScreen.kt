@@ -2,6 +2,7 @@
 package com.yuukifst.orpheus.presentation.screens
 
 import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusOutlinedButton
 import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import android.Manifest
 import android.content.Context
@@ -149,6 +150,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.SetupUiState
 import com.yuukifst.orpheus.presentation.viewmodel.SetupViewModel
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
 import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import com.yuukifst.orpheus.utils.StorageInfo
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -488,7 +490,7 @@ fun DirectorySelectionPage(
             R.drawable.rounded_audio_file_24
         )
     ) {
-        OrpheusTextButton(onClick = onSkip) {
+        OrpheusOutlinedButton(onClick = onSkip) {
             Text(stringResource(R.string.skip_for_now), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -634,7 +636,8 @@ fun WelcomePage() {
             color = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 2.dp,
-            shadowElevation = 0.dp
+            shadowElevation = 0.dp,
+            modifier = Modifier.setupOutline(),
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -859,7 +862,8 @@ private fun PermissionOptionCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
-        modifier = Modifier.fillMaxWidth()
+        shape = TerminalCornerShape,
+        modifier = Modifier.fillMaxWidth().setupOutline()
     ) {
         Column(
             modifier = Modifier
@@ -1002,7 +1006,7 @@ fun BackupRestorePage(
             }
         }
 
-        OrpheusTextButton(
+        OrpheusOutlinedButton(
             onClick = onSkip,
             enabled = !uiState.isRestoringBackup
         ) {
@@ -1115,7 +1119,7 @@ private fun ThemeModeOptionCard(
             }
         ),
         shape = TerminalCornerShape,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().setupOutline()
     ) {
         Row(
             modifier = Modifier
@@ -1296,7 +1300,7 @@ private fun ExternalServiceToggleCard(
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = TerminalCornerShape,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().setupOutline()
     ) {
         Row(
             modifier = Modifier
@@ -1407,6 +1411,7 @@ fun LibraryLayoutPage(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = TerminalCornerShape,
+                modifier = Modifier.fillMaxWidth().setupOutline(),
                 onClick = { onModeSelected(if (isCompact) "tab_row" else "compact_pill") }
             ) {
                 Row(
@@ -1466,6 +1471,7 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
         ),
         modifier = Modifier
             .fillMaxWidth()
+            .setupOutline()
     ) {
         Box(
             modifier = Modifier
@@ -1523,10 +1529,12 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(
-                                    modifier = Modifier.background(
-                                        MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = TerminalCornerShape
-                                    )
+                                    modifier = Modifier
+                                        .setupOutline()
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceContainerLowest,
+                                            shape = TerminalCornerShape
+                                        )
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
@@ -1551,10 +1559,12 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(
-                                    modifier = Modifier.background(
-                                        MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = TerminalCornerShape
-                                    )
+                                    modifier = Modifier
+                                        .setupOutline()
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceContainerLowest,
+                                            shape = TerminalCornerShape
+                                        )
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
@@ -1579,10 +1589,12 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(
-                                    modifier = Modifier.background(
-                                        MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = TerminalCornerShape
-                                    )
+                                    modifier = Modifier
+                                        .setupOutline()
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceContainerLowest,
+                                            shape = TerminalCornerShape
+                                        )
                                 ) {
                                     Text(
                                         modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp),
@@ -2156,7 +2168,8 @@ fun SetupBottomBar(
 
     Surface(
         modifier = modifier
-            .shadow(elevation = 8.dp, shape = shape, clip = true),
+            .shadow(elevation = 8.dp, shape = shape, clip = true)
+            .setupOutline(),
         color = MaterialTheme.colorScheme.surfaceContainer,
         shape = TerminalCornerShape
     ) {
@@ -2229,6 +2242,7 @@ fun SetupBottomBar(
                     contentColor = contentColor,
                     modifier = Modifier
                         .rotate(animatedRotation)
+                        .setupOutline()
                         .padding(end = 0.dp)
                 ) {
                     // 5. Apply a counter-rotation to the button content (the icon)
@@ -2318,6 +2332,7 @@ fun NavBarLayoutPage(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 shape = TerminalCornerShape,
+                modifier = Modifier.fillMaxWidth().setupOutline(),
                 onClick = { onModeSelected(if (isDefault) "full_width" else "default") }
             ) {
                 Column(
@@ -2405,6 +2420,7 @@ fun NavBarPreview(isDefault: Boolean) {
             .fillMaxWidth()
             .height(200.dp) // Taller to show bottom part clearly
             .padding(horizontal = 8.dp)
+            .setupOutline()
     ) {
         Box(
             modifier = Modifier
@@ -2489,3 +2505,7 @@ fun NavBarPreview(isDefault: Boolean) {
         }
     }
 }
+
+@Composable
+private fun Modifier.setupOutline(): Modifier =
+    terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
