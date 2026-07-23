@@ -1,7 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
 
 import androidx.compose.ui.graphics.Shape
-import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalIconButton
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
@@ -135,8 +134,6 @@ private val CoreMaintainer = Contributor(
 private val AboutMaintainers = listOf(CoreMaintainer)
 
 private const val SourceRepoUrl = "https://github.com/YuukiFST/Orpheus"
-private const val FDroidUrl = "https://f-droid.org/packages/com.yuukifst.orpheus/"
-private const val SponsorUrl = "https://github.com/sponsors/YuukiFST"
 
 private data class ProjectLink(
     val id: String,
@@ -169,13 +166,6 @@ fun AboutScreen(
             subtitle = stringResource(R.string.about_link_source_subtitle),
             iconRes = R.drawable.github,
             url = SourceRepoUrl,
-        ),
-        ProjectLink(
-            id = "fdroid",
-            title = stringResource(R.string.about_link_fdroid_title),
-            subtitle = stringResource(R.string.about_link_fdroid_subtitle),
-            iconRes = R.drawable.fdroid,
-            url = FDroidUrl,
         ),
     )
 
@@ -293,16 +283,6 @@ fun AboutScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 8.dp),
-                )
-            }
-
-            item(key = "support_card") {
-                AboutSupportCard(
-                    onSponsorClick = { openUrl(context, SponsorUrl) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 12.dp),
                 )
             }
 
@@ -500,113 +480,6 @@ private fun CommunitySignalsRow() {
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun AboutSupportCard(
-    onSponsorClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val shape = TerminalCornerShape
-
-    Surface(
-        modifier = modifier,
-        shape = shape,
-        color = MaterialTheme.colorScheme.primaryContainer,
-        tonalElevation = 4.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    shape = TerminalCornerShape,
-                    color = MaterialTheme.colorScheme.primary,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.rounded_favorite_24),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(12.dp).size(24.dp),
-                    )
-                }
-
-                Spacer(Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.about_support_eyebrow),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f),
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = stringResource(R.string.about_support_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.about_support_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.86f),
-            )
-
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                listOf(
-                    stringResource(R.string.about_support_chip_foss),
-                    stringResource(R.string.about_support_chip_ci),
-                    stringResource(R.string.about_support_chip_streaming),
-                ).forEach { label ->
-                    Surface(
-                        shape = TerminalCornerShape,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.10f),
-                    ) {
-                        Text(
-                            text = label,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-            }
-
-            OrpheusFilledTonalButton(
-                onClick = onSponsorClick,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.github),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.about_support_cta),
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
         }
     }
