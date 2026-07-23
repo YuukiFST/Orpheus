@@ -1155,6 +1155,7 @@ class PlayerViewModel @Inject constructor(
     private val mediaControllerFuture: ListenableFuture<MediaController> =
         mediaControllerFactory.create(context, sessionToken, mediaControllerListener)
     private var pendingRepeatMode: Int? = null
+    private var suppressRepeatModePersistence = false
 
     private var pendingPlaybackAction: (() -> Unit)? = null
     private var metadataProbeJob: Job? = null
@@ -2450,6 +2451,23 @@ class PlayerViewModel @Inject constructor(
         pendingRepeatMode = null
     }
 
+    private fun applyControllerRepeatModeWithoutPersist(@Player.RepeatMode mode: Int) {
+        suppressRepeatModePersistence = true
+        try {
+            applyPreferredRepeatMode(mode)
+        } finally {
+            suppressRepeatModePersistence = false
+        }
+    }
+
+    private fun isLikedQueueName(queueName: String): Boolean = queueName.contains("Liked Songs")
+
+    private fun ensureLikedQueueRepeatWrap(queueName: String) {
+        if (!isLikedQueueName(queueName)) return
+        if (playbackStateHolder.stablePlayerState.value.repeatMode != Player.REPEAT_MODE_OFF) return
+        applyControllerRepeatModeWithoutPersist(Player.REPEAT_MODE_ALL)
+    }
+
     private fun flushPendingRepeatMode() {
         pendingRepeatMode?.let { applyPreferredRepeatMode(it) }
     }
@@ -2901,7 +2919,9 @@ class PlayerViewModel @Inject constructor(
             }
             override fun onRepeatModeChanged(repeatMode: Int) {
                 playbackStateHolder.updateStablePlayerState { it.copy(repeatMode = repeatMode) }
-                viewModelScope.launch { userPreferencesRepository.setRepeatMode(repeatMode) }
+                if (!suppressRepeatModePersistence) {
+                    viewModelScope.launch { userPreferencesRepository.setRepeatMode(repeatMode) }
+                }
             }
             override fun onTimelineChanged(timeline: Timeline, reason: Int) {
                 syncDisplayedMediaItemIfChanged(playerCtrl)
@@ -3216,6 +3236,8 @@ class PlayerViewModel @Inject constructor(
         if (playlistId != null && queueName != "None") {
             appShortcutManager.updateLastPlaylistShortcut(playlistId, queueName)
         }
+
+        ensureLikedQueueRepeatWrap(queueName)
 
         applyImmediatePlaybackUi(
             song = effectiveStartSong,

@@ -66,6 +66,12 @@ internal fun shouldResumeAfterTransientAudioFocusLoss(
         (transitionRunning && (auxiliaryPlayWhenReady || auxiliaryIsPlaying))
 }
 
+internal fun nextIndex(current: Int, size: Int, repeatMode: Int): Int? = when (repeatMode) {
+    Player.REPEAT_MODE_ONE -> current
+    Player.REPEAT_MODE_ALL -> if (size == 0) null else (current + 1) % size
+    else -> (current + 1).takeIf { it < size }
+}
+
 internal fun shouldDisableAudioOffloadByDefaultForDevice(
     manufacturer: String,
     brand: String,
@@ -888,12 +894,9 @@ class DualPlayerEngine @Inject constructor(
         val currentAbsoluteIndex = resolveCurrentAbsoluteIndex(currentMediaItem, snapshot)
         if (currentAbsoluteIndex == C.INDEX_UNSET) return null
 
-        val targetIndex = when (repeatMode) {
-            Player.REPEAT_MODE_ONE -> currentAbsoluteIndex
-            else -> currentAbsoluteIndex + 1
-        }
+        val targetIndex = nextIndex(currentAbsoluteIndex, snapshot.size, repeatMode) ?: return null
 
-        val targetItem = snapshot.getOrNull(targetIndex) ?: return null
+        val targetItem = snapshot[targetIndex]
         return TransitionTarget(
             mediaItem = targetItem,
             absoluteIndex = targetIndex,
