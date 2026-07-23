@@ -80,6 +80,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import com.yuukifst.orpheus.data.preferences.LaunchTab
+import com.yuukifst.orpheus.data.preferences.AppThemeMode
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -187,6 +188,7 @@ fun SettingsScreen(
         ) {
             item {
                 val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                val mono = MaterialTheme.colorScheme.surfaceContainerLow to MaterialTheme.colorScheme.onSurface
                 ExpressiveSettingsGroup {
                     val mainCategories = SettingsCategory.entries.filter {
                         it != SettingsCategory.ABOUT && 
@@ -205,7 +207,7 @@ fun SettingsScreen(
                     var itemIndex = 0
 
                     mainCategories.forEach { category ->
-                        val colors = getCategoryColors(category, isDark)
+                        val colors = settingsCategoryColorsOrMono(category, isDark, uiState.appThemeMode, mono)
 
                         ExpressiveCategoryItem(
                             category = category,
@@ -227,7 +229,12 @@ fun SettingsScreen(
 
                     ExpressiveCategoryItem(
                         category = SettingsCategory.DEVICE_CAPABILITIES,
-                        customColors = getCategoryColors(SettingsCategory.DEVICE_CAPABILITIES, isDark),
+                        customColors = settingsCategoryColorsOrMono(
+                            SettingsCategory.DEVICE_CAPABILITIES,
+                            isDark,
+                            uiState.appThemeMode,
+                            mono
+                        ),
                         onClick = { navController.navigateSafely(Screen.DeviceCapabilities.route) },
                         shape = shapeFor(itemIndex)
                     )
@@ -240,7 +247,11 @@ fun SettingsScreen(
                         title = stringResource(R.string.settings_accounts_row_title),
                         subtitle = stringResource(R.string.settings_accounts_row_subtitle),
                         icon = Icons.Rounded.AccountCircle,
-                        colors = getAccountsColors(isDark),
+                        colors = if (uiState.appThemeMode == AppThemeMode.PIXEL) {
+                            getAccountsColors(isDark)
+                        } else {
+                            mono
+                        },
                         onClick = { navController.navigateSafely(Screen.Accounts.route) },
                         shape = shapeFor(itemIndex)
                     )
@@ -251,7 +262,12 @@ fun SettingsScreen(
 
                     ExpressiveCategoryItem(
                         category = SettingsCategory.ABOUT,
-                        customColors = getCategoryColors(SettingsCategory.ABOUT, isDark),
+                        customColors = settingsCategoryColorsOrMono(
+                            SettingsCategory.ABOUT,
+                            isDark,
+                            uiState.appThemeMode,
+                            mono
+                        ),
                         onClick = { navController.navigateSafely("about") },
                         shape = shapeFor(itemIndex)
                     )
@@ -417,6 +433,14 @@ fun ExpressiveSettingsGroup(content: @Composable () -> Unit) {
         content()
     }
 }
+
+internal fun settingsCategoryColorsOrMono(
+    category: SettingsCategory,
+    isDark: Boolean,
+    appThemeMode: String,
+    monoPair: Pair<Color, Color>,
+): Pair<Color, Color> =
+    if (appThemeMode == AppThemeMode.PIXEL) getCategoryColors(category, isDark) else monoPair
 
 private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair<Color, Color> {
     return if (isDark) {
