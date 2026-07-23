@@ -327,11 +327,12 @@ fun NavBarCornerRadiusContent(
                         .height(previewHeight)
                         .padding(horizontal = if (isFullWidth) 0.dp else bottomPadding), // Full Width: No horizontal padding
                     color = MaterialTheme.colorScheme.onBackground,
-                    shape = if (isFullWidth) {
-                        TerminalCornerShape
-                    } else {
-                        TerminalCornerShape
-                    }
+                    shape = RoundedCornerShape(
+                        topStart = sliderValue.dp,
+                        topEnd = sliderValue.dp,
+                        bottomStart = if (isFullWidth) 0.dp else sliderValue.dp,
+                        bottomEnd = if (isFullWidth) 0.dp else sliderValue.dp
+                    )
                 ) {
 
                 }

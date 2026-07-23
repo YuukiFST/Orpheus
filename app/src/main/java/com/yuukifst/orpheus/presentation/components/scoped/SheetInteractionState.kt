@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import kotlinx.coroutines.CoroutineScope
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 internal data class SheetInteractionState(
     val playerShadowShape: Shape,
@@ -55,21 +54,13 @@ internal fun rememberSheetInteractionState(
     onDraggingChange: (Boolean) -> Unit,
     onDraggingPlayerAreaChange: (Boolean) -> Unit
 ): SheetInteractionState {
-    val useSmoothCornersState = rememberUpdatedState(useSmoothCorners)
-    val isDraggingState = rememberUpdatedState(isDragging)
     val playerShadowShape = remember(
         overallSheetTopCornerRadiusProvider,
         playerContentActualBottomRadiusProvider,
-        playerContentExpansionFraction
     ) {
         PlayerSheetDynamicShape(
             topRadiusProvider = overallSheetTopCornerRadiusProvider,
             bottomRadiusProvider = playerContentActualBottomRadiusProvider,
-            useSmoothShapeProvider = {
-                useSmoothCornersState.value &&
-                    !isDraggingState.value &&
-                    !playerContentExpansionFraction.isRunning
-            }
         )
     }
 
@@ -124,7 +115,6 @@ internal fun rememberSheetInteractionState(
 private class PlayerSheetDynamicShape(
     private val topRadiusProvider: () -> Dp,
     private val bottomRadiusProvider: () -> Dp,
-    private val useSmoothShapeProvider: () -> Boolean
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -133,23 +123,17 @@ private class PlayerSheetDynamicShape(
     ): Outline {
         val topRadius = topRadiusProvider().nonNegative()
         val bottomRadius = bottomRadiusProvider().nonNegative()
-        if (topRadius <= 1.dp || bottomRadius <= 1.dp || !useSmoothShapeProvider()) {
-            val topRadiusPx = with(density) { topRadius.toPx() }
-            val bottomRadiusPx = with(density) { bottomRadius.toPx() }
-            return Outline.Rounded(
-                RoundRect(
-                    rect = Rect(0f, 0f, size.width, size.height),
-                    topLeft = CornerRadius(topRadiusPx, topRadiusPx),
-                    topRight = CornerRadius(topRadiusPx, topRadiusPx),
-                    bottomRight = CornerRadius(bottomRadiusPx, bottomRadiusPx),
-                    bottomLeft = CornerRadius(bottomRadiusPx, bottomRadiusPx)
-                )
+        val topRadiusPx = with(density) { topRadius.toPx() }
+        val bottomRadiusPx = with(density) { bottomRadius.toPx() }
+        return Outline.Rounded(
+            RoundRect(
+                rect = Rect(0f, 0f, size.width, size.height),
+                topLeft = CornerRadius(topRadiusPx, topRadiusPx),
+                topRight = CornerRadius(topRadiusPx, topRadiusPx),
+                bottomRight = CornerRadius(bottomRadiusPx, bottomRadiusPx),
+                bottomLeft = CornerRadius(bottomRadiusPx, bottomRadiusPx)
             )
-        }
-
-        val shape =
-            TerminalCornerShape
-        return shape.createOutline(size, layoutDirection, density)
+        )
     }
 }
 

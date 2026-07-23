@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +33,7 @@ internal fun LibraryPlaybackAwareSongItem(
     selectionIndex: Int? = null,
     isSelectionMode: Boolean = false,
     enterIndex: Int? = null,
+    customShape: Shape? = null,
     onLongPress: () -> Unit = {},
     onMoreOptionsClick: (Song) -> Unit,
     onClick: () -> Unit
@@ -59,6 +61,7 @@ internal fun LibraryPlaybackAwareSongItem(
         isSelected = isSelected,
         selectionIndex = selectionIndex,
         isSelectionMode = isSelectionMode,
+        customShape = customShape,
         onLongPress = onLongPress,
         onMoreOptionsClick = onMoreOptionsClick,
         onClick = onClick

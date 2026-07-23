@@ -62,6 +62,7 @@ import com.yuukifst.orpheus.data.model.LibraryTabId
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.data.model.StorageFilter
+import com.yuukifst.orpheus.data.preferences.sanitizeNavBarCornerRadius
 import com.yuukifst.orpheus.presentation.components.ExpressiveScrollBar
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
 import com.yuukifst.orpheus.presentation.components.songFastScrollLabel
@@ -116,6 +117,15 @@ fun LibraryFavoritesTab(
             .map { it.currentSong?.id }
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = null)
+    val navBarCornerRadiusRaw by playerViewModel.navBarCornerRadius.collectAsStateWithLifecycle()
+    val navBarCornerRadius = sanitizeNavBarCornerRadius(navBarCornerRadiusRaw)
+    val cardShape = remember(navBarCornerRadius) {
+        if (navBarCornerRadius > 0) {
+            RoundedCornerShape(navBarCornerRadius.dp)
+        } else {
+            TerminalCornerShape
+        }
+    }
 
     val currentSongListIndex = remember(favoriteSongs.itemCount, currentSongId, youtubeFavoriteSongs) {
         if (currentSongId == null) -1
@@ -263,6 +273,7 @@ fun LibraryFavoritesTab(
                                 enterIndex = index,
                                 song = song,
                                 playerViewModel = playerViewModel,
+                                customShape = cardShape,
                                 onMoreOptionsClick = { onMoreOptionsClick(song) },
                                 isSelected = selectedSongIds.contains(song.id),
                                 selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
@@ -288,6 +299,7 @@ fun LibraryFavoritesTab(
                                     enterIndex = youtubeFavoriteSongs.size + index,
                                     song = song,
                                     playerViewModel = playerViewModel,
+                                    customShape = cardShape,
                                     onMoreOptionsClick = { onMoreOptionsClick(song) },
                                     isSelected = selectedSongIds.contains(song.id),
                                     selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
@@ -307,6 +319,7 @@ fun LibraryFavoritesTab(
                                     isPlaying = false,
                                     isLoading = true,
                                     isCurrentSong = false,
+                                    customShape = cardShape,
                                     onMoreOptionsClick = {},
                                     onClick = {}
                                 )
