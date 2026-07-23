@@ -1,11 +1,14 @@
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SizeTransform
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,7 +44,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -84,7 +86,6 @@ import com.yuukifst.orpheus.ui.theme.LocalOrpheusDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.PlaylistPlay
 import androidx.compose.material.icons.rounded.History
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -123,7 +124,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import timber.log.Timber
 import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
@@ -327,7 +327,7 @@ fun SearchScreen(
                     )
                 }
 
-                FilledIconButton(
+                OrpheusFilledIconButton(
                     modifier = Modifier.padding(bottom = 2.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -347,12 +347,12 @@ fun SearchScreen(
                 targetState = showGenreBrowse,
                 transitionSpec = {
                     val switchingToGenre = targetState
-                    val enter = fadeIn(animationSpec = tween(durationMillis = 320, delayMillis = 70)) +
-                        slideInVertically(animationSpec = tween(durationMillis = 320)) { fullHeight ->
+                    val enter = fadeIn(animationSpec = OrpheusMotion.openTween()) +
+                        slideInVertically(animationSpec = OrpheusMotion.openOffsetTween()) { fullHeight ->
                             if (switchingToGenre) -fullHeight / 10 else fullHeight / 10
                         }
-                    val exit = fadeOut(animationSpec = tween(durationMillis = 220)) +
-                        slideOutVertically(animationSpec = tween(durationMillis = 220)) { fullHeight ->
+                    val exit = fadeOut(animationSpec = OrpheusMotion.closeTween()) +
+                        slideOutVertically(animationSpec = OrpheusMotion.closeOffsetTween()) { fullHeight ->
                             if (switchingToGenre) fullHeight / 12 else -fullHeight / 12
                         }
                     (enter togetherWith exit).using(SizeTransform(clip = false))
@@ -562,7 +562,7 @@ fun SearchHistoryList(
                 fontWeight = FontWeight.Bold
             )
             if (historyItems.isNotEmpty()) {
-                TextButton(onClick = onClearAllHistory) {
+                OrpheusTextButton(onClick = onClearAllHistory) {
                     Text(stringResource(R.string.clear_all), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -954,7 +954,7 @@ fun SearchResultAlbumItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
                 shape = TerminalCornerShape,
@@ -1029,7 +1029,7 @@ fun SearchResultArtistItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
                 shape = TerminalCornerShape,
@@ -1090,7 +1090,7 @@ fun SearchResultPlaylistItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = onPlayClick,
                 modifier = Modifier.size(40.dp),
                 shape = TerminalCornerShape,

@@ -1,6 +1,8 @@
 
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -77,16 +79,15 @@ import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Restore
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -96,7 +97,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -488,7 +488,7 @@ fun DirectorySelectionPage(
             R.drawable.rounded_audio_file_24
         )
     ) {
-        TextButton(onClick = onSkip) {
+        OrpheusTextButton(onClick = onSkip) {
             Text(stringResource(R.string.skip_for_now), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -834,7 +834,7 @@ fun PermissionsPage(
 
         if (hasPendingRuntimePermissions) {
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
+            OrpheusButton(
                 onClick = { batchPermissionState.launchMultiplePermissionRequest() },
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 14.dp)
@@ -915,7 +915,7 @@ private fun PermissionOptionCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (!granted) {
-                FilledTonalButton(
+                OrpheusFilledTonalButton(
                     onClick = onGrantClicked,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1002,7 +1002,7 @@ fun BackupRestorePage(
             }
         }
 
-        TextButton(
+        OrpheusTextButton(
             onClick = onSkip,
             enabled = !uiState.isRestoringBackup
         ) {
@@ -1695,7 +1695,7 @@ fun PermissionPageLayout(
         ) {
             content()
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
+            OrpheusButton(
                 onClick = onGrantClicked,
                 enabled = buttonEnabled,
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
@@ -1769,14 +1769,14 @@ private fun SetupRestoreDialog(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TextButton(
+                            OrpheusTextButton(
                                 onClick = onDismiss,
                                 enabled = !inProgress,
                                 modifier = Modifier.height(52.dp)
                             ) {
                                 Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
-                            Button(
+                            OrpheusButton(
                                 onClick = onConfirm,
                                 enabled = plan.selectedModules.isNotEmpty() && !inProgress,
                                 modifier = Modifier
@@ -2356,7 +2356,7 @@ fun NavBarLayoutPage(
                     ) {
                          Column {
                              Spacer(modifier = Modifier.height(16.dp))
-                             FilledTonalButton(
+                             OrpheusFilledTonalButton(
                                  onClick = onCustomizeRadius,
                                  modifier = Modifier.fillMaxWidth(),
                                  colors = ButtonDefaults.filledTonalButtonColors(

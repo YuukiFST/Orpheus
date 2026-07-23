@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,13 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.Cloud
@@ -117,7 +116,7 @@ fun HomeGradientTopBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(start = 12.dp)
             ) {
-                FilledTonalButton(
+                OrpheusFilledTonalButton(
                     modifier = Modifier.padding(start = 4.dp),
                     shape = TerminalCornerShape,
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
@@ -144,7 +143,7 @@ fun HomeGradientTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(end = 14.dp)
             ) {
-                FilledIconButton(
+                OrpheusFilledIconButton(
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.onSurface
@@ -156,7 +155,7 @@ fun HomeGradientTopBar(
                         contentDescription = stringResource(R.string.presentation_batch_g_topbar_cd_changelog)
                     )
                 }
-                FilledIconButton(
+                OrpheusFilledIconButton(
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.onSurface

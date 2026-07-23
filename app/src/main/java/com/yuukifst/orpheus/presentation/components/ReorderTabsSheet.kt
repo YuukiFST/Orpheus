@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.components
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DragIndicator
@@ -25,16 +24,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,23 +46,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
-import android.view.HapticFeedbackConstants
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.library.LibraryTabId
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
 import com.yuukifst.orpheus.presentation.utils.performAppCompatHapticFeedback
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -87,7 +85,7 @@ fun ReorderTabsSheet(
             title = { Text(stringResource(R.string.reorder_tabs_reset_dialog_title)) },
             text = { Text(stringResource(R.string.reorder_tabs_reset_dialog_body)) },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         onReset()
                         localTabs = tabs
@@ -98,7 +96,7 @@ fun ReorderTabsSheet(
                 }
             },
             dismissButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = { showResetDialog = false }
                 ) {
                     Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)

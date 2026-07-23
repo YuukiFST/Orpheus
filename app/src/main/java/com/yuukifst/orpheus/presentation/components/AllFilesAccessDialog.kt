@@ -1,8 +1,8 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
@@ -18,12 +18,12 @@ fun AllFilesAccessDialog(
         title = { Text(text = stringResource(id = R.string.all_files_access_title)) },
         text = { Text(text = stringResource(id = R.string.all_files_access_description)) },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            OrpheusTextButton(onClick = onConfirm) {
                 Text(text = stringResource(id = R.string.grant_permission_button), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            OrpheusTextButton(onClick = onDismiss) {
                 Text(text = stringResource(id = R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }

@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,14 +22,11 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Smartphone
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -67,10 +65,11 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.preferences.MAX_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.data.preferences.MIN_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.presentation.viewmodel.SettingsViewModel
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.presentation.components.resolveNavBarSurfaceHeight
 import androidx.compose.ui.res.stringResource
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 const val DEFAULT_NAV_BAR_CORNER_RADIUS = 28f
 
@@ -125,7 +124,7 @@ fun NavBarCornerRadiusContent(
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier =
                             Modifier
                                 .padding(start = 12.dp, top = 4.dp), 
@@ -139,7 +138,7 @@ fun NavBarCornerRadiusContent(
                     }
                 },
                 actions = {
-                    Button(
+                    OrpheusButton(
                         onClick = {
                             onRadiusChange(sliderValue.toInt().coerceIn(MIN_NAV_BAR_CORNER_RADIUS, MAX_NAV_BAR_CORNER_RADIUS))
                             onDone()
@@ -236,7 +235,7 @@ fun NavBarCornerRadiusContent(
                             )
 
                             if (hasBeenAdjusted) {
-                                FilledTonalButton(
+                                OrpheusFilledTonalButton(
                                     onClick = {
                                         sliderValue = DEFAULT_NAV_BAR_CORNER_RADIUS.safeRadius()
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)

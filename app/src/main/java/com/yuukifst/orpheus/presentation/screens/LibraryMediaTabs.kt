@@ -3,9 +3,9 @@
     ExperimentalMaterial3Api::class,
     kotlinx.coroutines.FlowPreview::class
 )
-
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -237,7 +236,7 @@ fun LibraryAlbumsTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { albums.retry() }) {
+                    OrpheusButton(onClick = { albums.retry() }) {
                         Text(stringResource(R.string.library_retry), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
@@ -535,7 +534,7 @@ fun LibraryArtistsTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { artists.retry() }) {
+                    OrpheusButton(onClick = { artists.retry() }) {
                         Text(stringResource(R.string.library_retry), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }

@@ -1,7 +1,11 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 package com.yuukifst.orpheus.presentation.screens
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
@@ -49,7 +53,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
@@ -61,10 +64,8 @@ import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Deselect
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material.icons.rounded.ViewModule
 import com.yuukifst.orpheus.presentation.components.ToggleSegmentButton
@@ -81,7 +82,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import com.yuukifst.orpheus.ui.theme.ShapeCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -180,7 +180,6 @@ import com.yuukifst.orpheus.presentation.screens.search.components.GenreTypograp
 import com.yuukifst.orpheus.presentation.components.SyncProgressBar
 import com.yuukifst.orpheus.presentation.viewmodel.LibraryViewModel
 import com.yuukifst.orpheus.utils.formatSongCount
-import androidx.paging.compose.collectAsLazyPagingItems
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -208,7 +207,6 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -219,7 +217,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -237,13 +234,11 @@ import com.yuukifst.orpheus.presentation.components.subcomps.PlayingEqIcon
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import java.util.Locale
-import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.focus.focusModifier
 import com.yuukifst.orpheus.data.model.PlaylistShapeType
 import kotlinx.coroutines.flow.first
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.LoadState
 import com.yuukifst.orpheus.presentation.components.ExpressiveScrollBar
@@ -683,7 +678,7 @@ fun LibraryScreen(
                         }
                     },
                     actions = {
-                        FilledIconButton(
+                        OrpheusFilledIconButton(
                             modifier = Modifier.padding(end = 14.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -1016,7 +1011,6 @@ fun LibraryScreen(
                                     option.storageKey == currentTabId.defaultSort.storageKey
                                 }
                                 ?: sanitizedSortOptions.first()
-
 
                             val isAlbumTab = currentTabId == LibraryTabId.ALBUMS
                             val isFoldersTab = currentTabId == LibraryTabId.FOLDERS
@@ -1406,8 +1400,6 @@ fun LibraryScreen(
         }
     }
 
-
-
     PlaylistCreationTypeDialog(
         visible = showPlaylistCreationTypeDialog,
         onDismiss = { showPlaylistCreationTypeDialog = false },
@@ -1440,7 +1432,6 @@ fun LibraryScreen(
             )
         }
     )
-
 
     if (showSongInfoBottomSheet && selectedSongForInfo != null) {
         val currentSong = selectedSongForInfo
@@ -1724,7 +1715,7 @@ fun LibraryScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         if (mergePlaylistName.isNotEmpty()) {
                             playlistViewModel.mergePlaylistsIntoOne(
@@ -1742,7 +1733,7 @@ fun LibraryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
+                OrpheusTextButton(onClick = {
                     showMergePlaylistDialog = false
                     pendingMergePlaylistIds = emptyList()
                     mergePlaylistName = ""
@@ -1844,12 +1835,12 @@ private fun LibraryInlineSyncIndicator(
         visible = visible,
         enter = androidx.compose.animation.expandVertically(
             expandFrom = Alignment.Top,
-            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-        ) + androidx.compose.animation.fadeIn(animationSpec = tween(180)),
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+        ) + androidx.compose.animation.fadeIn(OrpheusMotion.openTween()),
         exit = androidx.compose.animation.shrinkVertically(
             shrinkTowards = Alignment.Top,
-            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-        ) + androidx.compose.animation.fadeOut(animationSpec = tween(160))
+            animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+        ) + androidx.compose.animation.fadeOut(OrpheusMotion.closeTween())
     ) {
         // Collected inside this subtree so progress ticks don't recompose the
         // parent screen — same pattern as LibrarySyncOverlay.
@@ -2176,7 +2167,7 @@ private fun LibraryTabSwitcherSheet(
                             .fillMaxWidth()
                             .heightIn(min = 46.dp, max = 60.dp)
                     ) {
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = onEditClick,
                             shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
@@ -2349,7 +2340,6 @@ fun LibraryFoldersTab(
     onRequestCrossFolderLocate: (String) -> Unit = {}
 ) {
     // List state moved inside AnimatedContent to prevent state sharing issues during transitions
-
 
     AnimatedContent(
         targetState = Pair(isPlaylistView, currentFolder?.path ?: FOLDER_NAVIGATION_ROOT_KEY),
@@ -3055,12 +3045,12 @@ fun AlbumListItem(
     val cardShape = TerminalCornerShape
     val selectionScale by animateFloatAsState(
         targetValue = if (isSelected) 0.99f else 1f,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut),
         label = "albumListSelectionScale"
     )
     val selectionBorderWidth by animateDpAsState(
         targetValue = if (isSelected) 2.dp else 0.dp,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "albumListSelectionBorder"
     )
 

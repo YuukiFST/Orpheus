@@ -1,6 +1,9 @@
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import com.yuukifst.orpheus.utils.traceSection
 import androidx.compose.foundation.background
@@ -31,14 +34,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Shuffle
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -92,7 +92,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -351,7 +350,7 @@ fun RecentlyPlayedScreen(
             }
         }
 
-        FilledIconButton(
+        OrpheusFilledIconButton(
             onClick = { navController.popBackStack() },
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -476,7 +475,7 @@ private fun RecentlyPlayedActions(
             .height(52.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Button(
+        OrpheusButton(
             onClick = onPlay,
             modifier = Modifier
                 .weight(1f)
@@ -492,7 +491,7 @@ private fun RecentlyPlayedActions(
             Text(stringResource(R.string.presentation_batch_b_play_latest))
         }
 
-        FilledTonalButton(
+        OrpheusFilledTonalButton(
             onClick = onShuffle,
             modifier = Modifier
                 .weight(1f)

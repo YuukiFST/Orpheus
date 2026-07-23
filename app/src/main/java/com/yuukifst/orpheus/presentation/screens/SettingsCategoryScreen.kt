@@ -1,5 +1,8 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.components.BackupModuleSelectionDialog
@@ -26,7 +29,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -87,7 +89,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.IconButtonDefaults
@@ -102,7 +103,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -1157,14 +1157,14 @@ fun SettingsCategoryScreen(
             },
             confirmButton = {
                 if (isPaletteBulkRegenerateRunning) {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = {},
                         enabled = false
                     ) {
                         Text(stringResource(R.string.working_ellipsis), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 } else {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = {
                             isPaletteBulkRegenerateRunning = true
                             paletteBulkCompletedCount = 0
@@ -1201,7 +1201,7 @@ fun SettingsCategoryScreen(
             },
             dismissButton = {
                 if (!isPaletteBulkRegenerateRunning) {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = { showRegenerateAllPalettesDialog = false }
                     ) {
                         Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1218,8 +1218,8 @@ fun SettingsCategoryScreen(
             title = { Text(stringResource(R.string.dialog_reset_lyrics_title)) },
             text = { Text(stringResource(R.string.dialog_cannot_undo)) },
             onDismissRequest = { showClearLyricsDialog = false },
-            confirmButton = { TextButton(onClick = { showClearLyricsDialog = false; playerViewModel.resetAllLyrics() }) { Text(stringResource(R.string.confirm), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
-            dismissButton = { TextButton(onClick = { showClearLyricsDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+            confirmButton = { OrpheusTextButton(onClick = { showClearLyricsDialog = false; playerViewModel.resetAllLyrics() }) { Text(stringResource(R.string.confirm), maxLines = 1, overflow = TextOverflow.Ellipsis) } },
+            dismissButton = { OrpheusTextButton(onClick = { showClearLyricsDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
         )
     }
 
@@ -1231,7 +1231,7 @@ fun SettingsCategoryScreen(
             text = { Text(stringResource(R.string.dialog_rebuild_database_message)) },
             onDismissRequest = { showRebuildDatabaseWarning = false },
             confirmButton = { 
-                TextButton(
+                OrpheusTextButton(
                     onClick = { 
                         showRebuildDatabaseWarning = false
                         refreshRequested = true
@@ -1245,7 +1245,7 @@ fun SettingsCategoryScreen(
                     Text(stringResource(R.string.rebuild)) 
                 } 
             },
-            dismissButton = { TextButton(onClick = { showRebuildDatabaseWarning = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+            dismissButton = { OrpheusTextButton(onClick = { showRebuildDatabaseWarning = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
         )
     }
 
@@ -1256,7 +1256,7 @@ fun SettingsCategoryScreen(
             text = { Text(stringResource(R.string.dialog_regenerate_daily_mix_body)) },
             onDismissRequest = { showRegenerateDailyMixDialog = false },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         showRegenerateDailyMixDialog = false
                         playerViewModel.forceUpdateDailyMix()
@@ -1266,7 +1266,7 @@ fun SettingsCategoryScreen(
                     Text(stringResource(R.string.dialog_regenerate), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
-            dismissButton = { TextButton(onClick = { showRegenerateDailyMixDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+            dismissButton = { OrpheusTextButton(onClick = { showRegenerateDailyMixDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
         )
     }
 
@@ -1277,7 +1277,7 @@ fun SettingsCategoryScreen(
             text = { Text(stringResource(R.string.dialog_regenerate_stats_body)) },
             onDismissRequest = { showRegenerateStatsDialog = false },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         showRegenerateStatsDialog = false
                         statsViewModel.forceRegenerateStats()
@@ -1287,7 +1287,7 @@ fun SettingsCategoryScreen(
                     Text(stringResource(R.string.dialog_regenerate), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
-            dismissButton = { TextButton(onClick = { showRegenerateStatsDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+            dismissButton = { OrpheusTextButton(onClick = { showRegenerateStatsDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
         )
     }
 
@@ -1473,8 +1473,8 @@ private fun BackupSectionSelectionDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "backup_section_dialog"
             ) {
                 Surface(
@@ -1499,7 +1499,7 @@ private fun BackupSectionSelectionDialog(
                                     )
                                 },
                                 navigationIcon = {
-                                    FilledIconButton(
+                                    OrpheusFilledIconButton(
                                         modifier = Modifier.padding(start = 6.dp),
                                         onClick = { closeDialog(onDismiss) },
                                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -1534,7 +1534,7 @@ private fun BackupSectionSelectionDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        FilledIconButton(
+                                        OrpheusFilledIconButton(
                                             onClick = { onSelectionChanged(BackupSection.entries.toSet()) },
                                             enabled = !inProgress,
                                             colors = IconButtonDefaults.filledIconButtonColors(
@@ -1547,7 +1547,7 @@ private fun BackupSectionSelectionDialog(
                                                 contentDescription = stringResource(R.string.cd_select_all)
                                             )
                                         }
-                                        FilledIconButton(
+                                        OrpheusFilledIconButton(
                                             onClick = { onSelectionChanged(emptySet()) },
                                             enabled = !inProgress,
                                             colors = IconButtonDefaults.filledIconButtonColors(
@@ -1860,7 +1860,7 @@ private fun BackupTransferProgressDialogHost(progress: BackupTransferProgressUpd
 private fun BackupTransferProgressDialog(progress: BackupTransferProgressUpdate) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress.progress.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(durationMillis = OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut),
         label = "BackupTransferProgress"
     )
     val progressPercent = (animatedProgress * 100f).roundToInt().coerceIn(0, 100)
@@ -2019,8 +2019,8 @@ private fun ImportFileSelectionDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "import_file_selection_dialog"
             ) {
                 Surface(
@@ -2045,7 +2045,7 @@ private fun ImportFileSelectionDialog(
                                     )
                                 },
                                 navigationIcon = {
-                                    FilledIconButton(
+                                    OrpheusFilledIconButton(
                                         modifier = Modifier.padding(start = 6.dp),
                                         onClick = { closeDialog(onDismiss) },
                                         colors = IconButtonDefaults.filledIconButtonColors(

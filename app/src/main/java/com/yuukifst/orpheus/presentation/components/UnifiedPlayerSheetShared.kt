@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.animation.core.animateDpAsState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SkipNext
@@ -101,6 +100,7 @@ internal fun MiniPlayerContentInternal(
                     contentDescription = stringResource(R.string.cd_album_art_for_title, song.title),
                     shape = TerminalCornerShape,
                     targetSize = Size(150, 150),
+                    crossfadeDurationMillis = 0,
                     modifier = Modifier.size(44.dp)
                 )
             }

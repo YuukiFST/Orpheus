@@ -49,7 +49,7 @@ fun Modifier.phosphorGlow(
 
 fun Modifier.terminalPressScale(
     interactionSource: MutableInteractionSource,
-    pressedScale: Float = 0.97f,
+    pressedScale: Float = 0.96f,
 ): Modifier = composed {
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(

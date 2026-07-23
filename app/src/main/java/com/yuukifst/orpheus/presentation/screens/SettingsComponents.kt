@@ -38,13 +38,10 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -70,7 +67,9 @@ import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.worker.SyncProgress
 import com.yuukifst.orpheus.presentation.viewmodel.LyricsRefreshProgress
-import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusOutlinedButton
 import androidx.compose.ui.res.vectorResource
 import androidx.core.view.HapticFeedbackConstantsCompat
 import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
@@ -467,7 +466,7 @@ fun RefreshLibraryItem(
             Spacer(modifier = Modifier.height(12.dp))
             
             // Full Rescan button
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                     onClick = onFullSync,
                     enabled = !isSyncing,
                     modifier = Modifier.fillMaxWidth()
@@ -490,7 +489,7 @@ fun RefreshLibraryItem(
             Spacer(modifier = Modifier.height(8.dp))
             
             // Rebuild Database button - full width, destructive action
-            OutlinedButton(
+            OrpheusOutlinedButton(
                     onClick = onRebuild,
                     enabled = !isSyncing,
                     modifier = Modifier.fillMaxWidth(),
@@ -614,13 +613,13 @@ fun RefreshLyricsItem(
                     )
                 }
 
-                FilledIconButton(
+                OrpheusFilledIconButton(
                         onClick = onRefresh,
                         enabled = !isRefreshing,
-                        colors =
-                                IconButtonDefaults.filledIconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                                )
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
                 ) {
                     Icon(
                             imageVector = Icons.Outlined.Sync,
@@ -698,7 +697,7 @@ fun ActionSettingsItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Primary Action
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onPrimaryAction,
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth()
@@ -709,7 +708,7 @@ fun ActionSettingsItem(
             // Secondary Action (Optional)
             if (secondaryActionLabel != null && onSecondaryAction != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
+                OrpheusOutlinedButton(
                     onClick = onSecondaryAction,
                     enabled = enabled,
                     modifier = Modifier.fillMaxWidth()

@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,14 +35,12 @@ import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -92,9 +91,9 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.ShapeCache
 import kotlinx.coroutines.flow.map
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @OptIn(UnstableApi::class)
 @ExperimentalMaterial3Api
@@ -224,7 +223,7 @@ fun SongPickerContent(
                         }
                     }
 
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = { onConfirm(selectedSongIds.filterValues { it }.keys) },
                         modifier = Modifier.size(56.dp),
                         shape = TerminalCornerShape,
@@ -500,7 +499,7 @@ fun SongPickerPagingList(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Button(onClick = { pagedSongs.retry() }) {
+                    OrpheusButton(onClick = { pagedSongs.retry() }) {
                         Text(stringResource(R.string.library_retry), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
@@ -570,7 +569,7 @@ fun SongPickerPagingList(
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Button(onClick = { pagedSongs.retry() }) {
+                                OrpheusButton(onClick = { pagedSongs.retry() }) {
                                     Text(stringResource(R.string.song_picker_load_more), maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 }
                             }

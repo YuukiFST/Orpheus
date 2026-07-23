@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,12 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +55,7 @@ fun NoInternetDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            OrpheusTextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.ok), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -105,7 +105,7 @@ fun NoInternetScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            Button(
+            OrpheusButton(
                 onClick = onRetry,
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {

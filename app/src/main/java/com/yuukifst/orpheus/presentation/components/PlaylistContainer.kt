@@ -1,4 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
@@ -6,7 +9,7 @@ import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
@@ -27,7 +30,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
@@ -36,7 +38,6 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.Topic
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,13 +45,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -89,7 +88,6 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlaylistUiState
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistSelectionStateHolder
 import com.yuukifst.orpheus.utils.formatSongCount
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import androidx.compose.foundation.combinedClickable
 import kotlinx.coroutines.flow.map
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -366,7 +364,7 @@ fun PlaylistItem(
 
     val selectionBorderWidth by animateDpAsState(
         targetValue = if (isSelected) 2.5.dp else 0.dp,
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = OrpheusMotion.openDpTween(),
         label = "playlistSelectionBorderAnimation"
     )
 
@@ -376,13 +374,13 @@ fun PlaylistItem(
             isSelected -> MaterialTheme.colorScheme.secondaryContainer
             else -> MaterialTheme.colorScheme.surfaceContainerLow
         },
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = OrpheusMotion.openColorTween(),
         label = "playlistContainerColorAnimation"
     )
 
     val selectionBorderColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0f),
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = OrpheusMotion.openColorTween(),
         label = "playlistBorderColorAnimation"
     )
 
@@ -548,14 +546,14 @@ fun CreatePlaylistDialogRedesigned(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(stringResource(R.string.cancel), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
 
-                    Button(
+                    OrpheusButton(
                         onClick = { onCreate(playlistName) },
                         modifier = Modifier.weight(1f),
                         enabled = playlistName.isNotEmpty(),

@@ -1,5 +1,8 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +40,6 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.media.CoverArtUpdate
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.graphics.ImageBitmap
 import android.net.Uri
 import androidx.compose.ui.graphics.Brush
@@ -48,6 +50,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import kotlinx.collections.immutable.ImmutableList
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 /**
  * Data class representing a field that can have mixed values across multiple songs
@@ -102,8 +105,8 @@ fun EditMultipleSongsSheet(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200))
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween())
             ) {
                 EditMultipleSongsContent(
                     songs = songs,
@@ -422,7 +425,7 @@ private fun EditMultipleSongsContent(
                         exitDirection = FloatingToolbarExitDirection.Bottom
                     ),
                     content = {
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = onDismiss,
                             modifier = Modifier.height(48.dp),
                             colors = ButtonDefaults.filledTonalButtonColors(
@@ -433,7 +436,7 @@ private fun EditMultipleSongsContent(
                             Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         Spacer(Modifier.width(8.dp))
-                        Button(
+                        OrpheusButton(
                             onClick = {
                                 onSave(
                                     songs,
@@ -602,7 +605,7 @@ private fun BatchCoverArtEditorCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
             ) {
-                FilledTonalButton(onClick = onPickNewArt) {
+                OrpheusFilledTonalButton(onClick = onPickNewArt) {
                     Icon(Icons.Rounded.Image, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -617,7 +620,7 @@ private fun BatchCoverArtEditorCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
                 ) {
                     if (preview != null || isDeleted) {
-                        TextButton(onClick = onReset) {
+                        OrpheusTextButton(onClick = onReset) {
                             Icon(Icons.Rounded.Restore, contentDescription = null)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
@@ -627,7 +630,7 @@ private fun BatchCoverArtEditorCard(
                             )
                         }
                     } else {
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = onDelete,
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.errorContainer,

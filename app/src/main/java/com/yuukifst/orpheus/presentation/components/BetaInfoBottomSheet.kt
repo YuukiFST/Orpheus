@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -33,11 +34,9 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.Whatshot
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +64,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.subcomps.SineWaveLine
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -440,7 +439,7 @@ private fun GitHubReportCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                FilledTonalButton(
+                OrpheusFilledTonalButton(
                     onClick = onOpenIssues,
                     modifier = Modifier.fillMaxWidth(),
                     shape = TerminalCornerShape,
@@ -450,7 +449,7 @@ private fun GitHubReportCard(
                 ) {
                     Text(text = stringResource(R.string.presentation_batch_g_beta_sheet_open_issues))
                 }
-                Button(
+                OrpheusButton(
                     onClick = onReportIssue,
                     modifier = Modifier.fillMaxWidth(),
                     shape = TerminalCornerShape

@@ -7,6 +7,8 @@ import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
 import com.yuukifst.orpheus.presentation.navigation.navigateToTopLevelSafely
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,7 +16,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -272,7 +274,7 @@ fun ArtistDetailScreen(
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodyLarge
                             )
-                            FilledTonalButton(onClick = { viewModel.retry() }) {
+                            OrpheusFilledTonalButton(onClick = { viewModel.retry() }) {
                                 Text(stringResource(R.string.library_retry))
                             }
                         }
@@ -353,9 +355,9 @@ fun ArtistDetailScreen(
                                     Box(
                                         modifier = Modifier
                                             .animateItem(
-                                                fadeInSpec = tween(durationMillis = 160),
-                                                fadeOutSpec = tween(durationMillis = 120),
-                                                placementSpec = tween(durationMillis = 180)
+                                                fadeInSpec = OrpheusMotion.openTween(),
+                                                fadeOutSpec = OrpheusMotion.closeTween(),
+                                                placementSpec = OrpheusMotion.openOffsetTween()
                                             )
                                             .fillMaxWidth()
                                             .height(10.dp)
@@ -370,9 +372,9 @@ fun ArtistDetailScreen(
                                 ) { songIndex, song ->
                                     ArtistAlbumSectionSongItem(
                                         modifier = Modifier.animateItem(
-                                            fadeInSpec = tween(durationMillis = 180),
-                                            fadeOutSpec = tween(durationMillis = 120),
-                                            placementSpec = tween(durationMillis = 200)
+                                            fadeInSpec = OrpheusMotion.openTween(),
+                                            fadeOutSpec = OrpheusMotion.closeTween(),
+                                            placementSpec = OrpheusMotion.openOffsetTween()
                                         ),
                                         song = song,
                                         songIndex = songIndex,
@@ -580,7 +582,7 @@ private fun CollapsibleAlbumSectionHeader(
 ) {
     val expandIconRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
-        animationSpec = tween(durationMillis = 260),
+        animationSpec = OrpheusMotion.openTween(),
         label = "ArtistAlbumExpandRotation"
     )
     val subtitle = remember(section.year, section.songs.size) {
@@ -838,7 +840,7 @@ private fun SharedArtistTopBarProbe(
                 Box(
                     modifier = Modifier.padding(end = 12.dp, top = 4.dp)
                 ) {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = { showImageMenu = true },
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
@@ -1012,7 +1014,7 @@ private fun CustomCollapsingTopBar(
                     .fillMaxSize()
                     .statusBarsPadding()
             ) {
-                FilledIconButton(
+                OrpheusFilledIconButton(
                     modifier = Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 4.dp),
                     onClick = onBackPressed,
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)

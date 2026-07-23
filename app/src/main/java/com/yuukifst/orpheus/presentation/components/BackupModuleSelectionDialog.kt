@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -41,7 +43,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
@@ -131,8 +132,8 @@ fun BackupModuleSelectionDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "import_module_selection_dialog"
             ) {
                 Surface(
@@ -157,7 +158,7 @@ fun BackupModuleSelectionDialog(
                                     )
                                 },
                                 navigationIcon = {
-                                    FilledIconButton(
+                                    OrpheusFilledIconButton(
                                         modifier = Modifier.padding(start = 6.dp),
                                         onClick = { closeDialog(onBack) },
                                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -192,7 +193,7 @@ fun BackupModuleSelectionDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        FilledIconButton(
+                                        OrpheusFilledIconButton(
                                             onClick = { onSelectionChanged(plan.availableModules) },
                                             enabled = !inProgress,
                                             colors = IconButtonDefaults.filledIconButtonColors(
@@ -205,7 +206,7 @@ fun BackupModuleSelectionDialog(
                                                 contentDescription = stringResource(R.string.presentation_batch_g_backup_cd_select_all)
                                             )
                                         }
-                                        FilledIconButton(
+                                        OrpheusFilledIconButton(
                                             onClick = { onSelectionChanged(emptySet()) },
                                             enabled = !inProgress,
                                             colors = IconButtonDefaults.filledIconButtonColors(

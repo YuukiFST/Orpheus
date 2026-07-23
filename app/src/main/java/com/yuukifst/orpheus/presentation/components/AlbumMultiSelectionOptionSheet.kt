@@ -1,8 +1,9 @@
 package com.yuukifst.orpheus.presentation.components
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -69,7 +68,7 @@ fun AlbumMultiSelectionOptionSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize(animationSpec = tween(durationMillis = 200))
+                .animateContentSize(animationSpec = OrpheusMotion.openSizeTween())
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Row(
@@ -203,7 +202,7 @@ private fun AlbumSelectionActionButton(
     icon: @Composable () -> Unit,
     text: String
 ) {
-    FilledTonalButton(
+    OrpheusFilledTonalButton(
         onClick = onClick,
         modifier = modifier.heightIn(min = 66.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),

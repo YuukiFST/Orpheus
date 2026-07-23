@@ -1,5 +1,8 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,7 +71,6 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import dev.shreyaspatil.capturable.capturable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.rounded.Restore
@@ -89,6 +91,7 @@ import java.io.ByteArrayOutputStream
 import java.util.Locale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 private fun formatReplayGainForInput(gainDb: Float?): String {
     return gainDb?.let { String.format(Locale.US, "%.2f", it) }.orEmpty()
@@ -128,8 +131,8 @@ fun EditSongSheet(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200))
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween())
             ) {
                 EditSongContent(
                     song = song,
@@ -272,7 +275,7 @@ private fun EditSongContent(
             title = { Text(stringResource(R.string.edit_song_info_dialog_title)) },
             text = { Text(stringResource(R.string.edit_song_info_dialog_body)) },
             confirmButton = {
-                TextButton(onClick = { showInfoDialog = false }) {
+                OrpheusTextButton(onClick = { showInfoDialog = false }) {
                     Text(stringResource(R.string.edit_song_got_it), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -644,7 +647,7 @@ private fun EditSongContent(
                     expanded = true,
                     scrollBehavior = scrollBehavior,
                     content = {
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = onDismiss,
                             modifier = Modifier.height(48.dp),
                             colors = ButtonDefaults.filledTonalButtonColors(
@@ -657,7 +660,7 @@ private fun EditSongContent(
                         Spacer(
                             modifier = Modifier.width(8.dp)
                         )
-                        Button(
+                        OrpheusButton(
                             onClick = {
                                 val resolvedTrackNumber = trackNumber.toIntOrNull() ?: song.trackNumber
                                 val resolvedDiscNumber = discNumber.toIntOrNull()
@@ -795,20 +798,20 @@ private fun CoverArtEditorCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
             ) {
-                FilledTonalButton(onClick = onPickNewArt) {
+                OrpheusFilledTonalButton(onClick = onPickNewArt) {
                     Icon(Icons.Rounded.Image, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.edit_song_change_cover_art), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
 
                 if (preview != null || isDeleted) {
-                    TextButton(onClick = onReset) {
+                    OrpheusTextButton(onClick = onReset) {
                         Icon(Icons.Rounded.Restore, contentDescription = null)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(stringResource(R.string.action_reset), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 } else if (albumArtUri != null) {
-                    FilledTonalButton(
+                    OrpheusFilledTonalButton(
                         onClick = onDelete,
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -1010,7 +1013,7 @@ fun CoverArtCropperDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)
                 ) {
-                    TextButton(
+                    OrpheusTextButton(
                         enabled = !isSaving,
                         onClick = onDismiss
                     ) {
@@ -1018,10 +1021,10 @@ fun CoverArtCropperDialog(
                     }
 
                     val canConfirm = !isLoading && loadError == null && loadedBitmap != null
-                    Button(
+                    OrpheusButton(
                         enabled = canConfirm && !isSaving,
                         onClick = {
-                            if (!canConfirm) return@Button
+                            if (!canConfirm) return@OrpheusButton
                             dialogScope.launch {
                                 isSaving = true
                                 val captured = captureController.captureAsync().await()

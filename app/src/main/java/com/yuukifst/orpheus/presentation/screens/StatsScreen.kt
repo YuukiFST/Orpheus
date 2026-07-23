@@ -1,6 +1,8 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package com.yuukifst.orpheus.presentation.screens
+
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.core.Animatable
@@ -50,7 +52,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -63,7 +64,6 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -354,7 +354,7 @@ fun StatsScreen(
                         onBackClick = { navController.popBackStack() },
                         containerColor = Color.Transparent,
                         actions = {
-                            FilledIconButton(
+                            OrpheusFilledIconButton(
                                 modifier = Modifier
                                     .padding(end = 12.dp),
                                 onClick = statsViewModel::requestStatsRefresh,
@@ -508,7 +508,6 @@ private fun StatsEmptyState(
         }
     }
 }
-
 
 @Composable
 private fun SummaryPill(
@@ -2147,7 +2146,7 @@ private fun SongStatsCard(
                 }
 
                 if (songs.size > 8) {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = { showAll = !showAll },
                         shape = TerminalCornerShape,
                         modifier = Modifier

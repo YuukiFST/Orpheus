@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 private const val ScanlineSpacingPx = 3f
-private const val ScanlineAlpha = 0.045f
-private const val VignetteAlpha = 0.42f
-private const val PhosphorTintAlpha = 0.018f
+private const val ScanlineAlpha = 0.032f
+private const val VignetteAlpha = 0.36f
+private const val PhosphorTintAlpha = 0.012f
 
 @Composable
 fun rememberReduceMotion(): Boolean {

@@ -92,7 +92,6 @@ import com.yuukifst.orpheus.presentation.viewmodel.MemorySummary
 import com.yuukifst.orpheus.presentation.viewmodel.PlaybackCompatibilitySummary
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

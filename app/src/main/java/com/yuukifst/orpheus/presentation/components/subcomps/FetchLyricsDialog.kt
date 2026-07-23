@@ -1,4 +1,6 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
@@ -16,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudUpload
@@ -24,7 +25,6 @@ import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SearchOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -36,7 +36,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -244,7 +243,7 @@ private fun IdleContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Button(
+        OrpheusButton(
             onClick = onSearch,
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = TerminalCornerShape
@@ -254,7 +253,7 @@ private fun IdleContent(
             Text(stringResource(R.string.search), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
 
-        Button(
+        OrpheusButton(
             onClick = onImport,
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = TerminalCornerShape,
@@ -269,7 +268,7 @@ private fun IdleContent(
         }
 
         // Cancel button (replaces the X)
-        TextButton(
+        OrpheusTextButton(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = TerminalCornerShape
@@ -335,7 +334,7 @@ private fun PickResultContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     // Cancel button at the end of the list
-    TextButton(
+    OrpheusTextButton(
         onClick = onCancel,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -523,7 +522,7 @@ fun NotFoundContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Button(
+        OrpheusButton(
             onClick = {
                 onManualSearch(
                     title,
@@ -541,7 +540,7 @@ fun NotFoundContent(
             Text(stringResource(R.string.search))
         }
 
-        TextButton(
+        OrpheusTextButton(
             onClick = onCancel,
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = TerminalCornerShape
@@ -590,7 +589,7 @@ private fun ErrorContent(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    Button(
+    OrpheusButton(
         onClick = onDismiss,
         modifier = Modifier.fillMaxWidth().height(50.dp),
         colors = ButtonDefaults.buttonColors(

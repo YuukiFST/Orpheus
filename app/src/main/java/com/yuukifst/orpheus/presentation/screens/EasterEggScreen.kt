@@ -2,8 +2,7 @@ package com.yuukifst.orpheus.presentation.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
@@ -43,14 +42,14 @@ fun EasterEggScreen(
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(durationMillis = 260)) +
+        enter = fadeIn(animationSpec = OrpheusMotion.openTween()) +
             scaleIn(
                 initialScale = 0.97f,
-                animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+                animationSpec = OrpheusMotion.openTween(),
             ) +
             slideInVertically(
                 initialOffsetY = { fullHeight -> fullHeight / 10 },
-                animationSpec = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+                animationSpec = OrpheusMotion.openOffsetTween(),
             ),
     ) {
         BrickBreakerOverlay(

@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
 
@@ -32,7 +33,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeExtendedFloatingActionButton
 import androidx.compose.material3.LoadingIndicator
@@ -110,6 +110,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import com.yuukifst.orpheus.ui.theme.ShapeCache
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.presentation.components.rememberModalSheetState
@@ -601,9 +602,8 @@ private fun YourMixEmptyPlaceholder(
                 )
             }
 
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onRefresh,
-                shape = TerminalCornerShape
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Refresh,
@@ -656,7 +656,7 @@ fun YourMixHeader(
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
-        // Play Button - color changes based on shuffle state
+        // Play OrpheusButton - color changes based on shuffle state
         LargeExtendedFloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)

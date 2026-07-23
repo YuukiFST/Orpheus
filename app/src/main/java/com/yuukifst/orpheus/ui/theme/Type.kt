@@ -55,15 +55,15 @@ val Typography = Typography(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.Bold,
         fontSize = 48.sp,
-        lineHeight = 56.sp,
-        letterSpacing = 0.sp
+        lineHeight = 52.sp,
+        letterSpacing = (-0.5).sp
     ),
     displayMedium = TextStyle(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.Bold,
         fontSize = 36.sp,
-        lineHeight = 44.sp,
-        letterSpacing = 0.sp
+        lineHeight = 40.sp,
+        letterSpacing = (-0.25).sp
     ),
     displaySmall = TextStyle(
         fontFamily = JetBrainsMonoNerd,
@@ -76,22 +76,22 @@ val Typography = Typography(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.SemiBold,
         fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = 0.sp
+        lineHeight = 36.sp,
+        letterSpacing = (-0.25).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.SemiBold,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = 0.sp
+        lineHeight = 32.sp,
+        letterSpacing = (-0.15).sp
     ),
     headlineSmall = TextStyle(
         fontFamily = JetBrainsMonoNerd,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp
+        lineHeight = 28.sp,
+        letterSpacing = (-0.1).sp
     ),
     titleLarge = TextStyle(
         fontFamily = JetBrainsMonoNerd,

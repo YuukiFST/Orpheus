@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -15,9 +16,7 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +35,7 @@ import com.yuukifst.orpheus.ui.theme.phosphorGlow
 import com.yuukifst.orpheus.ui.theme.terminalAccentLine
 import com.yuukifst.orpheus.ui.theme.TerminalLinePosition
 import androidx.compose.ui.text.style.TextOverflow
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @Composable
 fun DismissUndoBar(
@@ -83,7 +83,7 @@ fun DismissUndoBar(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Button(
+                    OrpheusButton(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                             contentColor = MaterialTheme.colorScheme.onSurface
@@ -92,7 +92,7 @@ fun DismissUndoBar(
                     ) {
                         Text(stringResource(R.string.action_undo), color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                             contentColor = MaterialTheme.colorScheme.onSurface

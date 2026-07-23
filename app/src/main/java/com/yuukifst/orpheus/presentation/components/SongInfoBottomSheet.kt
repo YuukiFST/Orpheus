@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -12,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -73,13 +74,14 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.subcomps.AutoSizingTextToFill
 import com.yuukifst.orpheus.utils.formatDuration
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.yuukifst.orpheus.data.media.CoverArtUpdate
 import com.yuukifst.orpheus.presentation.viewmodel.SongInfoBottomSheetViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.SongInfoBottomSheetViewModel.ToneTarget
 import kotlinx.coroutines.launch
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.compose.ui.graphics.TransformOrigin
 import com.yuukifst.orpheus.presentation.screens.TabAnimation
@@ -225,15 +227,15 @@ fun SongInfoBottomSheet(
 
     val favoriteButtonCornerRadius by animateDpAsState(
         targetValue = if (isFavorite) evenCornerRadiusElems else 60.dp,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteCornerAnimation"
+        animationSpec = OrpheusMotion.openDpTween(), label = "FavoriteCornerAnimation"
     )
     val favoriteButtonContainerColor by animateColorAsState(
         targetValue = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteContainerColorAnimation"
+        animationSpec = OrpheusMotion.openColorTween(), label = "FavoriteContainerColorAnimation"
     )
     val favoriteButtonContentColor by animateColorAsState(
         targetValue = if (isFavorite) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteContentColorAnimation"
+        animationSpec = OrpheusMotion.openColorTween(), label = "FavoriteContentColorAnimation"
     )
     val favoriteButtonShape = remember(favoriteButtonCornerRadius) {
         TerminalCornerShape
@@ -351,7 +353,7 @@ fun SongInfoBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateContentSize(
-                                animationSpec = tween(durationMillis = 280),
+                                animationSpec = OrpheusMotion.openSizeTween(),
                                 alignment = Alignment.TopCenter
                             )
                     ) {
@@ -396,7 +398,7 @@ fun SongInfoBottomSheet(
                                                     }
                                                 )
 
-                                                FilledIconButton(
+                                                OrpheusFilledIconButton(
                                                     modifier = Modifier
                                                         .weight(0.25f)
                                                         .fillMaxHeight(),
@@ -459,7 +461,7 @@ fun SongInfoBottomSheet(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                                             ) {
-                                                FilledTonalButton(
+                                                OrpheusFilledTonalButton(
                                                     modifier = Modifier
                                                         .weight(0.6f)
                                                         .heightIn(min = 66.dp),
@@ -478,7 +480,7 @@ fun SongInfoBottomSheet(
                                                     Spacer(Modifier.width(14.dp))
                                                     Text(stringResource(R.string.action_add_to_queue))
                                                 }
-                                                FilledTonalButton(
+                                                OrpheusFilledTonalButton(
                                                     modifier = Modifier
                                                         .weight(0.4f)
                                                         .heightIn(min = 66.dp),
@@ -508,7 +510,7 @@ fun SongInfoBottomSheet(
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                                             ) {
-                                                FilledTonalButton(
+                                                OrpheusFilledTonalButton(
                                                     modifier = Modifier
                                                         .weight(0.5f)
                                                         .heightIn(min = 66.dp),
@@ -527,7 +529,7 @@ fun SongInfoBottomSheet(
                                                     Text(stringResource(R.string.shortcut_playlist_short))
                                                 }
 
-                                                FilledTonalButton(
+                                                OrpheusFilledTonalButton(
                                                     modifier = Modifier
                                                         .weight(0.5f)
                                                         .heightIn(min = 66.dp),
@@ -845,7 +847,7 @@ private fun ToneTargetPickerDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    OrpheusTextButton(onClick = onDismiss) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -931,10 +933,10 @@ private fun ToneConfirmationDialog(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    OrpheusTextButton(onClick = onDismiss) {
                         Text(stringResource(R.string.cancel))
                     }
-                    FilledTonalButton(onClick = onConfirm) {
+                    OrpheusFilledTonalButton(onClick = onConfirm) {
                         Text(stringResource(R.string.song_info_tone_confirm_action))
                     }
                 }
@@ -997,7 +999,7 @@ private fun RingtoneActionButton(
     )
 
     if (showText) {
-        FilledTonalButton(
+        OrpheusFilledTonalButton(
             modifier = modifier,
             colors = colors,
             contentPadding = PaddingValues(horizontal = if (compactText) 12.dp else 18.dp),

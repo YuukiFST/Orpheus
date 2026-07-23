@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalIconButton
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -109,21 +110,8 @@ fun GenreCategoriesGrid(
                     style = MaterialTheme.typography.titleLarge
                 )
                 
-                // Toggle Button with persistence and styling
-                // "Round to Square (12dp) when selected" logic:
-                // Assuming List View is the "Selected" / "Alternative" state.
-                val shape = androidx.compose.animation.core.animateFloatAsState(
-                    targetValue = if (!isGridView) 12f else 50f, // 12dp for List, 50% (Circle) for Grid
-                    label = "shapeAnimation"
-                )
-                
-                androidx.compose.material3.FilledIconButton(
+                OrpheusFilledTonalIconButton(
                     onClick = { playerViewModel.toggleGenreViewMode() },
-                    colors = androidx.compose.material3.IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    ),
-                    shape = TerminalCornerShape
                 ) {
                 androidx.compose.material3.Icon(
                         imageVector = if (isGridView) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView,

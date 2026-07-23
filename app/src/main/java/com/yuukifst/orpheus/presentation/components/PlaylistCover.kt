@@ -30,7 +30,6 @@ import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.model.PlaylistShapeType
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable

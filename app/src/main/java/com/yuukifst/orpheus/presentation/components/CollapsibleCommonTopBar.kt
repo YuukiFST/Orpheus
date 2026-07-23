@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,7 @@ import androidx.compose.ui.zIndex
 import com.yuukifst.orpheus.ui.theme.OrpheusStatusBarStyle
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @Composable
 fun CollapsibleCommonTopBar(
@@ -86,7 +86,7 @@ fun CollapsibleCommonTopBar(
                 .fillMaxSize()
                 .statusBarsPadding()
         ) {
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 12.dp, top = 4.dp)

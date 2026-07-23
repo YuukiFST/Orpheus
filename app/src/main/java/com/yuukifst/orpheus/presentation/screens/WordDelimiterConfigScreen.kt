@@ -1,5 +1,8 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import android.widget.Toast
 import androidx.compose.ui.res.stringResource
@@ -27,7 +30,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,10 +38,8 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.InputChip
@@ -48,7 +48,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -293,7 +292,7 @@ fun WordDelimiterConfigScreen(
 
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            FilledIconButton(
+                            OrpheusFilledIconButton(
                                 onClick = {
                                     if (newDelimiter.isNotBlank()) {
                                         val success = viewModel.addWordDelimiter(newDelimiter)
@@ -363,7 +362,7 @@ fun WordDelimiterConfigScreen(
                         .padding(end = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = { showResetDialog = true },
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -409,7 +408,7 @@ fun WordDelimiterConfigScreen(
                     )
                 },
                 confirmButton = {
-                    Button(
+                    OrpheusButton(
                         onClick = {
                             viewModel.resetWordDelimitersToDefault()
                             Toast.makeText(context, context.getString(R.string.word_delimiter_toast_reset), Toast.LENGTH_SHORT).show()
@@ -424,7 +423,7 @@ fun WordDelimiterConfigScreen(
                     }
                 },
                 dismissButton = {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = { showResetDialog = false }
                     ) {
                         Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)

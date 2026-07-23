@@ -2,7 +2,7 @@ package com.yuukifst.orpheus.presentation.components
 
 import android.app.Activity
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +39,6 @@ import androidx.compose.material.icons.rounded.Speaker
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -58,12 +57,12 @@ import coil.compose.AsyncImage
 import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.runtime.remember
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 /**
  * Bottom sheet for batch operations on multiple selected playlists.
@@ -96,7 +95,7 @@ fun PlaylistMultiSelectionBottomSheet(
     ) {
         Box(
             modifier = Modifier
-                .animateContentSize(animationSpec = tween(durationMillis = 200))
+                .animateContentSize(animationSpec = OrpheusMotion.openSizeTween())
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -166,7 +165,7 @@ fun PlaylistMultiSelectionBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),
@@ -188,7 +187,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                 Text(stringResource(R.string.delete_action))
                             }
 
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),
@@ -221,7 +220,7 @@ fun PlaylistMultiSelectionBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),
@@ -243,7 +242,7 @@ fun PlaylistMultiSelectionBottomSheet(
                                 Text(stringResource(R.string.action_merge))
                             }
 
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),

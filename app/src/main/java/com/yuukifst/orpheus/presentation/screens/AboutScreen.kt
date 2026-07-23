@@ -1,5 +1,9 @@
 package com.yuukifst.orpheus.presentation.screens
+
 import androidx.compose.ui.graphics.Shape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -48,8 +52,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -105,7 +107,6 @@ import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 
 private data class Contributor(
@@ -201,13 +202,13 @@ fun AboutScreen(
 
     val contentAlpha by transition.animateFloat(
         label = "ContentAlpha",
-        transitionSpec = { tween(durationMillis = 500) },
+        transitionSpec = { OrpheusMotion.screenEnterAlphaTween() },
     ) { if (it) 1f else 0f }
 
     val contentOffset by transition.animateDp(
         label = "ContentOffset",
-        transitionSpec = { tween(durationMillis = 400, easing = FastOutSlowInEasing) },
-    ) { if (it) 0.dp else 40.dp }
+        transitionSpec = { OrpheusMotion.screenEnterOffsetTween() },
+    ) { if (it) 0.dp else 12.dp }
 
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
@@ -605,7 +606,7 @@ private fun AboutSupportCard(
                 }
             }
 
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onSponsorClick,
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -941,14 +942,14 @@ private fun SocialIconButton(
 ) {
     if (url.isNullOrBlank()) return
     val context = LocalContext.current
-    IconButton(
+    OrpheusFilledTonalIconButton(
         onClick = { openUrl(context, url) },
         modifier = modifier.size(40.dp),
     ) {
         Icon(
             painter = painterResource(painterRes),
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }

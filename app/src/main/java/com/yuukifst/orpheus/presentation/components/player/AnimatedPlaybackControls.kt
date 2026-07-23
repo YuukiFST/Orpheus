@@ -1,10 +1,10 @@
 package com.yuukifst.orpheus.presentation.components.player
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.LocalMaterialTheme
 import kotlinx.coroutines.delay
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 private enum class PlaybackButtonType { NONE, PREVIOUS, PLAY_PAUSE, NEXT }
 
@@ -167,7 +166,10 @@ fun AnimatedPlaybackControls(
             // the draw phase only, so it doesn't contribute recompositions.
             val playCorner by animateDpAsState(
                 targetValue = if (!playPauseVisualState) playPauseCornerPlaying else playPauseCornerPaused,
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                animationSpec = tween(
+                    durationMillis = OrpheusMotion.DurationFast,
+                    easing = OrpheusMotion.EaseSmoothOut,
+                ),
                 label = "playCorner"
             )
             val playShape = TerminalCornerShape

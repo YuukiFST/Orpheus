@@ -10,6 +10,7 @@ import com.yuukifst.orpheus.data.model.Song // Para verificar el mapeo
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.database.FavoritesDao
+import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,6 +40,7 @@ class MusicRepositoryImplTest {
     private val mockSongRepository: SongRepository = mockk(relaxed = true)
     private val mockFavoritesDao: FavoritesDao = mockk(relaxed = true)
     private val mockArtistImageRepository: ArtistImageRepository = mockk(relaxed = true)
+    private val mockYouTubeCachedTrackRepository: YouTubeCachedTrackRepository = mockk(relaxed = true)
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -100,7 +102,8 @@ class MusicRepositoryImplTest {
 
             favoritesDao = mockFavoritesDao,
             artistImageRepository = mockArtistImageRepository,
-            folderTreeBuilder = mockk(relaxed = true)
+            folderTreeBuilder = mockk(relaxed = true),
+            youTubeCachedTrackRepository = mockYouTubeCachedTrackRepository,
         )
     }
 

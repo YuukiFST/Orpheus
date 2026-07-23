@@ -1,5 +1,9 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.Animatable
@@ -44,7 +48,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -131,7 +134,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import com.yuukifst.orpheus.presentation.components.WavyArcSlider
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.rounded.Edit // Added
 import androidx.compose.material.icons.rounded.ExpandMore // Added
 import androidx.compose.material.icons.rounded.Save // Added
@@ -217,13 +219,13 @@ fun EqualizerScreen(
     
     val contentAlpha by transition.animateFloat(
         label = "ContentAlpha",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { OrpheusMotion.screenEnterAlphaTween() }
     ) { if (it) 1f else 0f }
     
     val contentOffset by transition.animateDp(
         label = "ContentOffset",
-        transitionSpec = { tween(durationMillis = 400, easing = FastOutSlowInEasing) }
-    ) { if (it) 0.dp else 40.dp }
+        transitionSpec = { OrpheusMotion.screenEnterOffsetTween() }
+    ) { if (it) 0.dp else 12.dp }
     
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
@@ -385,7 +387,7 @@ fun EqualizerScreen(
             collapsedTitleStartPadding = 72.dp,
             actions = {
                 // View Mode Toggle
-                FilledIconButton(
+                OrpheusFilledIconButton(
                     onClick = { equalizerViewModel.cycleViewMode() },
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -507,7 +509,7 @@ private fun PresetTabsRow(
             }
         }
         
-        // Edit Button as a specific Tab (unselectable)
+        // Edit OrpheusButton as a specific Tab (unselectable)
         TabAnimation(
             index = -1,
             title = stringResource(R.string.presentation_batch_d_eq_edit_tab_title),

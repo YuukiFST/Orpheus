@@ -48,7 +48,6 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.subcomps.SineWaveLine
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 data class ChangelogSection(
     @StringRes val titleRes: Int,

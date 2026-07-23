@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
@@ -30,8 +32,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -288,7 +288,7 @@ private fun PaletteStyleHeader(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = onBackClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = scheme.surfaceContainerLow,
@@ -310,7 +310,7 @@ private fun PaletteStyleHeader(
                 modifier = Modifier.weight(1f)
             )
 
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onApplyClick,
                 enabled = applyEnabled,
                 shape = TerminalCornerShape,

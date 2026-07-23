@@ -1,4 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
@@ -49,12 +51,10 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -389,7 +389,7 @@ private fun RescanRequiredBanner(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Button(
+            OrpheusButton(
                 onClick = onRescanClick,
                 enabled = !isResyncing,
                 colors = ButtonDefaults.buttonColors(

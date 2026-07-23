@@ -1,5 +1,11 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusOutlinedButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 import android.widget.Toast
 import com.yuukifst.orpheus.data.model.Song
@@ -556,7 +562,7 @@ fun LyricsSheet(
                     Text(stringResource(R.string.save_lyrics_dialog_message))
                     Spacer(modifier = Modifier.height(16.dp))
                     if (hasSynced) {
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = {
                                 showSaveLyricsDialog = false
                                 onSaveLyricsToFile(
@@ -572,7 +578,7 @@ fun LyricsSheet(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     if (hasPlain) {
-                        OutlinedButton(
+                        OrpheusOutlinedButton(
                             onClick = {
                                 showSaveLyricsDialog = false
                                 onSaveLyricsToFile(
@@ -590,7 +596,7 @@ fun LyricsSheet(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showSaveLyricsDialog = false }) {
+                OrpheusTextButton(onClick = { showSaveLyricsDialog = false }) {
                     Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -638,7 +644,7 @@ fun LyricsSheet(
                         }
 
                         coroutineScope.launch {
-                             swipeProgress.animateTo(0f, tween(200))
+                             swipeProgress.animateTo(0f, OrpheusMotion.closeTween())
                              dragOffset = 0f
                         }
                     },
@@ -646,7 +652,7 @@ fun LyricsSheet(
                         isSwipeActive = false
                         dragOffset = 0f
                         coroutineScope.launch {
-                            swipeProgress.animateTo(0f, tween(200))
+                            swipeProgress.animateTo(0f, OrpheusMotion.closeTween())
                         }
                     },
                     onDrag = { change, dragAmount ->
@@ -702,9 +708,9 @@ fun LyricsSheet(
                 AnimatedContent(
                     targetState = currentSong,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(300)) + 
-                         scaleIn(initialScale = 0.9f, animationSpec = tween(300)))
-                        .togetherWith(fadeOut(animationSpec = tween(300)))
+                        (fadeIn(OrpheusMotion.openTween()) +
+                         scaleIn(initialScale = OrpheusMotion.ContentSwapScale, animationSpec = OrpheusMotion.openTween()))
+                        .togetherWith(fadeOut(OrpheusMotion.closeTween()))
                     },
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -922,7 +928,7 @@ fun LyricsSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Play/Pause Button (Smaller)
+                    // Play/Pause OrpheusButton (Smaller)
                     val playPauseCornerRadius by animateDpAsState(
                         targetValue = if (isPlaying) 18.dp else 50.dp,
                         animationSpec = spring(stiffness = Spring.StiffnessLow),
@@ -1084,7 +1090,7 @@ fun LyricsSheet(
             }
         }
 
-       // Show Controls Button (Overlay)
+       // Show Controls OrpheusButton (Overlay)
        AnimatedVisibility(
             visible = immersiveMode,
             enter = fadeIn() + slideInVertically { it / 2 },
@@ -1093,7 +1099,7 @@ fun LyricsSheet(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)
         ) {
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = { resetImmersiveTimer() },
                 modifier = Modifier.size(48.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(
@@ -1405,7 +1411,7 @@ fun LyricLineRow(
         animationSpec = if (useAnimatedLyrics) spring(
             stiffness = Spring.StiffnessVeryLow,
             dampingRatio = Spring.DampingRatioMediumBouncy
-        ) else tween(durationMillis = 250),
+        ) else OrpheusMotion.openColorTween(),
         label = "lineColor"
     )
 
@@ -1425,7 +1431,7 @@ fun LyricLineRow(
         animationSpec = if (useAnimatedLyrics) spring(
             stiffness = Spring.StiffnessVeryLow,
             dampingRatio = Spring.DampingRatioMediumBouncy
-        ) else tween(durationMillis = 200),
+        ) else OrpheusMotion.closeTween(),
         label = "lineScale"
     )
     val verticalPadding by animateDpAsState(
@@ -1433,7 +1439,7 @@ fun LyricLineRow(
         animationSpec = if (useAnimatedLyrics) spring(
             stiffness = Spring.StiffnessVeryLow,
             dampingRatio = Spring.DampingRatioMediumBouncy
-        ) else tween(durationMillis = 200),
+        ) else OrpheusMotion.closeDpTween(),
         label = "linePadding"
     )
     val alpha by animateFloatAsState(
@@ -1441,7 +1447,7 @@ fun LyricLineRow(
         animationSpec = if (useAnimatedLyrics) spring(
             stiffness = Spring.StiffnessLow,
             dampingRatio = Spring.DampingRatioNoBouncy
-        ) else tween(durationMillis = 200),
+        ) else OrpheusMotion.closeTween(),
         label = "lineAlpha"
     )
 
@@ -1452,7 +1458,11 @@ fun LyricLineRow(
 
     val blurRadius by animateDpAsState(
         targetValue = targetBlur,
-        animationSpec = if (useAnimatedLyrics) tween(durationMillis = 400) else tween(durationMillis = 200),
+        animationSpec = if (useAnimatedLyrics) {
+            tween(OrpheusMotion.DurationSlow, easing = OrpheusMotion.EaseSmoothOut)
+        } else {
+            OrpheusMotion.closeDpTween()
+        },
         label = "lineBlur"
     )
 
@@ -1645,14 +1655,14 @@ fun LyricWordSpan(
     val wordAnimSpec = if (useAnimatedLyrics) spring<Float>(
         stiffness = Spring.StiffnessVeryLow,
         dampingRatio = Spring.DampingRatioMediumBouncy
-    ) else tween(durationMillis = 200)
+    ) else OrpheusMotion.closeTween()
 
     val color by animateColorAsState(
         targetValue = if (isHighlighted) highlightedColor else unhighlightedColor,
         animationSpec = if (useAnimatedLyrics) spring(
             stiffness = Spring.StiffnessVeryLow,
             dampingRatio = Spring.DampingRatioMediumBouncy
-        ) else tween(durationMillis = 200),
+        ) else OrpheusMotion.closeColorTween(),
         label = "wordColor"
     )
 

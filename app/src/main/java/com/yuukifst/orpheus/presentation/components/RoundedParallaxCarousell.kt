@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.annotation.FloatRange
@@ -309,7 +310,7 @@ private fun RoundedCarousel(
 
         val animatedAlpha by animateFloatAsState(
             targetValue = if (carouselStyle == CarouselStyle.ONE_PEEK && page > state.pagerState.currentPage + 1) 0f else 1f,
-            animationSpec = tween(durationMillis = 200),
+            animationSpec = OrpheusMotion.closeTween(),
             label = "CarouselItemAlpha"
         )
 

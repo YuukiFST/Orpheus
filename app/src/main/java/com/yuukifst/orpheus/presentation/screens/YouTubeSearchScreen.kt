@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
@@ -43,7 +44,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -313,7 +313,7 @@ private fun YouTubeSearchHistorySection(
                 fontWeight = FontWeight.Bold,
             )
             if (historyItems.isNotEmpty()) {
-                TextButton(onClick = onClearAllHistory) {
+                OrpheusTextButton(onClick = onClearAllHistory) {
                     Text("Clear all")
                 }
             }

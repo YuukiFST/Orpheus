@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -98,13 +99,13 @@ fun ExperimentalSettingsScreen(
     val transition = rememberTransition(transitionState, label = "ExperimentalSettingsAppearTransition")
     val contentAlpha by transition.animateFloat(
         label = "ContentAlpha",
-        transitionSpec = { tween(durationMillis = 500) }
+        transitionSpec = { OrpheusMotion.screenEnterAlphaTween() }
     ) { if (it) 1f else 0f }
 
     val contentOffset by transition.animateDp(
         label = "ContentOffset",
-        transitionSpec = { tween(durationMillis = 400, easing = FastOutSlowInEasing) }
-    ) { if (it) 0.dp else 40.dp }
+        transitionSpec = { OrpheusMotion.screenEnterOffsetTween() }
+    ) { if (it) 0.dp else 12.dp }
 
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()

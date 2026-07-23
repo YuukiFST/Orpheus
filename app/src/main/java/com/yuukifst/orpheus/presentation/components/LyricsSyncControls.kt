@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -105,7 +104,7 @@ private fun androidx.compose.foundation.layout.RowScope.SyncButton(
     enabled: Boolean = true,
     fontSize: androidx.compose.ui.unit.TextUnit = 11.sp
 ) {
-    FilledTonalButton(
+    OrpheusFilledTonalButton(
         onClick = onClick,
         modifier = Modifier
             .weight(weight)

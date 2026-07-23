@@ -1,3 +1,5 @@
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -31,10 +33,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -45,7 +45,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -83,6 +82,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import androidx.compose.ui.text.style.TextOverflow
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -290,7 +290,7 @@ fun DelimiterConfigScreen(
 
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            FilledIconButton(
+                            OrpheusFilledIconButton(
                                 onClick = {
                                     if (newDelimiter.isNotBlank()) {
                                         val success = viewModel.addDelimiter(newDelimiter)
@@ -368,7 +368,7 @@ fun DelimiterConfigScreen(
                         .padding(end = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = { showResetDialog = true },
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -414,7 +414,7 @@ fun DelimiterConfigScreen(
                     )
                 },
                 confirmButton = {
-                    Button(
+                    OrpheusButton(
                         onClick = {
                             viewModel.resetDelimitersToDefault()
                             Toast.makeText(context, context.getString(R.string.delimiter_toast_reset), Toast.LENGTH_SHORT).show()
@@ -429,7 +429,7 @@ fun DelimiterConfigScreen(
                     }
                 },
                 dismissButton = {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = { showResetDialog = false }
                     ) {
                         Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)

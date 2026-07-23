@@ -111,7 +111,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
@@ -681,6 +680,11 @@ class PlayerViewModel @Inject constructor(
     ) {
         cancelPendingFullQueuePlayback()
         cancelPendingDirectPlayback()
+        applyImmediatePlaybackUi(
+            song = song,
+            queueSongs = listOf(song),
+            queueName = queueName,
+        )
         val requestToken = fullQueuePlaybackToken
 
         fullQueuePlaybackJob = viewModelScope.launch {
@@ -1986,7 +1990,11 @@ class PlayerViewModel @Inject constructor(
             null
         }
 
-        if (controller != null && reusableTargetIndex != null) {
+        if (
+            controller != null &&
+            reusableTargetIndex != null &&
+            !playbackContext.any { it.id.isYouTubeMediaId() }
+        ) {
             cancelPendingDirectPlaybackBuild()
             playLoadedControllerItem(controller, reusableTargetIndex)
             if (isVoluntaryPlay) {
@@ -1997,9 +2005,26 @@ class PlayerViewModel @Inject constructor(
             }
         } else {
             if (isVoluntaryPlay) incrementSongScore(song)
-            playSongs(playbackContext, song, queueName, playlistId)
+            viewModelScope.launch {
+                if (needsPlaySongsPrep(playbackContext)) {
+                    playSongs(playbackContext, song, queueName, playlistId)
+                } else {
+                    cancelPendingFullQueuePlayback()
+                    beginDirectPlaybackRequest()
+                    internalPlaySongs(playbackContext, song, queueName, playlistId)
+                }
+            }
         }
         resetPredictiveBackState()
+    }
+
+    private suspend fun needsPlaySongsPrep(playbackContext: List<Song>): Boolean {
+        if (playbackContext.any { it.id.isYouTubeMediaId() || it.requiresHydration() }) {
+            return true
+        }
+        val isPersistent = userPreferencesRepository.persistentShuffleEnabledFlow.first()
+        val isShuffleOn = playbackStateHolder.stablePlayerState.value.isShuffleEnabled
+        return isPersistent && isShuffleOn
     }
 
     fun showAndPlaySong(song: Song) {
@@ -2023,6 +2048,11 @@ class PlayerViewModel @Inject constructor(
             }
         }
 
+        for (index in 0 until mediaItemCount) {
+            val mediaId = runCatching { getMediaItemAt(index).mediaId }.getOrNull()
+            if (mediaId == songId) return index
+        }
+
         if (songIndexInQueue !in 0 until mediaItemCount) return null
 
         val mediaIdAtTarget = runCatching { getMediaItemAt(songIndexInQueue).mediaId }.getOrNull()
@@ -2044,7 +2074,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun Song.requiresHydration(): Boolean {
-        return contentUriString.isBlank()
+        return contentUriString.isBlank() && !id.isYouTubeMediaId()
     }
 
     private suspend fun hydrateSongsIfNeeded(songs: List<Song>): List<Song> {

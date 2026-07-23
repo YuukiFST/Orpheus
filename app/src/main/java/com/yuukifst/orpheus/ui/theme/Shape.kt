@@ -11,6 +11,10 @@ import androidx.compose.ui.unit.dp
 val TerminalShape: Shape = RectangleShape
 val TerminalCornerShape = RoundedCornerShape(0.dp)
 
+/** Subtle radius for interactive controls — concentric with 8dp padding on 14dp outer. */
+val OrpheusButtonShape = RoundedCornerShape(6.dp)
+val OrpheusIconButtonShape = RoundedCornerShape(8.dp)
+
 /** Drop-in replacement for Shape; ignores radius and smoothness. */
 @Suppress("UNUSED_PARAMETER")
 fun terminalCornerShape(
@@ -31,7 +35,7 @@ fun terminalCornerShape(
 ): Shape = TerminalCornerShape
 
 val Shapes = Shapes(
-    small = RoundedCornerShape(0.dp),
-    medium = RoundedCornerShape(0.dp),
-    large = RoundedCornerShape(0.dp)
+    small = OrpheusButtonShape,
+    medium = OrpheusButtonShape,
+    large = OrpheusIconButtonShape,
 )

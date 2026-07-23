@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -19,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -31,7 +32,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlin.math.roundToInt
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -335,7 +334,7 @@ fun TimerOptionsBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
+                OrpheusButton(
                     enabled = counterSliderPosition == 1f,
                     onClick = {
                         showCustomTimePicker = true
@@ -347,7 +346,7 @@ fun TimerOptionsBottomSheet(
                 ) {
                     Text(stringResource(R.string.sleep_timer_ui_custom_time))
                 }
-                Button(
+                OrpheusButton(
                     onClick = {
                         onCancelTimer()
                         onDismiss()
@@ -391,7 +390,7 @@ fun TimerOptionsBottomSheet(
                 TimePicker(state = timePickerState)
             },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         val hour = timePickerState.hour
                         val minute = timePickerState.minute
@@ -408,7 +407,7 @@ fun TimerOptionsBottomSheet(
                 }
             },
             dismissButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         showCustomTimePicker = false // Dismiss the M3 dialog
                     }

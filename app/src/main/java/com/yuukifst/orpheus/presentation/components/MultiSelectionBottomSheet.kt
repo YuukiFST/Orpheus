@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,8 +39,6 @@ import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -67,7 +65,8 @@ import androidx.compose.ui.zIndex
 import coil.size.Size
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 /**
  * Bottom sheet for batch operations on multiple selected songs.
@@ -121,15 +120,15 @@ fun MultiSelectionBottomSheet(
 
     val favoriteButtonCornerRadius by animateDpAsState(
         targetValue = if (allAreLiked) evenCornerRadius else 60.dp,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteCornerAnimation"
+        animationSpec = OrpheusMotion.openDpTween(), label = "FavoriteCornerAnimation"
     )
     val favoriteButtonContainerColor by animateColorAsState(
         targetValue = if (allAreLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteContainerColorAnimation"
+        animationSpec = OrpheusMotion.openColorTween(), label = "FavoriteContainerColorAnimation"
     )
     val favoriteButtonContentColor by animateColorAsState(
         targetValue = if (allAreLiked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(durationMillis = 300), label = "FavoriteContentColorAnimation"
+        animationSpec = OrpheusMotion.openColorTween(), label = "FavoriteContentColorAnimation"
     )
 
     val favoriteButtonShape = remember(favoriteButtonCornerRadius) {
@@ -142,7 +141,7 @@ fun MultiSelectionBottomSheet(
     ) {
         Box(
             modifier = Modifier
-                .animateContentSize(animationSpec = tween(durationMillis = 200))
+                .animateContentSize(animationSpec = OrpheusMotion.openSizeTween())
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -266,7 +265,7 @@ fun MultiSelectionBottomSheet(
                             // Like/Unlike toggle button
                             // If all are liked -> clicking will unlike all
                             // If any is not liked -> clicking will like all
-                            FilledIconButton(
+                            OrpheusFilledIconButton(
                                 modifier = Modifier
                                     .weight(0.25f)
                                     .fillMaxHeight(),
@@ -324,7 +323,7 @@ fun MultiSelectionBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.6f)
                                     .heightIn(min = 66.dp),
@@ -347,7 +346,7 @@ fun MultiSelectionBottomSheet(
                                 Text(stringResource(R.string.action_add_to_queue))
                             }
                             
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.4f)
                                     .heightIn(min = 66.dp),
@@ -381,7 +380,7 @@ fun MultiSelectionBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),
@@ -403,7 +402,7 @@ fun MultiSelectionBottomSheet(
                                 Text(stringResource(R.string.shortcut_playlist_short))
                             }
                             
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .heightIn(min = 66.dp),

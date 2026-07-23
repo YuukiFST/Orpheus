@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
@@ -38,7 +39,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -261,7 +261,7 @@ private fun RenameDownloadDialog(
             )
         },
         confirmButton = {
-            TextButton(
+            OrpheusTextButton(
                 onClick = { onConfirm(title) },
                 enabled = title.isNotBlank(),
             ) {
@@ -269,7 +269,7 @@ private fun RenameDownloadDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            OrpheusTextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         },

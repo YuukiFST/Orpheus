@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.foundation.background
@@ -199,7 +200,7 @@ fun LyricsMoreBottomSheet(
                     title = { Text(stringResource(R.string.lyrics_more_dialog_reset_title)) },
                     text = { Text(stringResource(R.string.lyrics_more_dialog_reset_message)) },
                     confirmButton = {
-                        androidx.compose.material3.TextButton(
+                        OrpheusTextButton(
                             onClick = {
                                 showResetDialog = false
                                 onDismissRequest()
@@ -210,7 +211,7 @@ fun LyricsMoreBottomSheet(
                         }
                     },
                     dismissButton = {
-                        androidx.compose.material3.TextButton(
+                        OrpheusTextButton(
                             onClick = { showResetDialog = false }
                         ) {
                             Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)

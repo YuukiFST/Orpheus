@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -65,7 +67,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarExitDirection
@@ -78,7 +79,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MediumExtendedFloatingActionButton
@@ -174,7 +174,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.MyLocation
-import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MediumTopAppBar
@@ -192,6 +191,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import kotlin.math.abs
 import kotlinx.collections.immutable.ImmutableList
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 private data class QueueUndoBarProjection(
     val isVisible: Boolean = false,
@@ -1100,7 +1100,7 @@ fun QueueBottomSheet(
                             style = MaterialTheme.typography.bodyMedium,
                             color = colors.inverseOnSurface.copy(alpha = 0.7f),
                         )
-                        TextButton(
+                        OrpheusTextButton(
                             onClick = { viewModel.undoRemoveSongFromQueue() }
                         ) {
                             Text(
@@ -1136,7 +1136,7 @@ fun QueueBottomSheet(
                 title = { Text(stringResource(R.string.presentation_batch_e_clear_queue_dialog_title)) },
                 text = { Text(stringResource(R.string.presentation_batch_e_clear_queue_dialog_message)) },
                 confirmButton = {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = {
                             onClearQueue()
                             showClearQueueDialog = false
@@ -1146,7 +1146,7 @@ fun QueueBottomSheet(
                     }
                 },
                 dismissButton = {
-                    TextButton(
+                    OrpheusTextButton(
                         onClick = { showClearQueueDialog = false }
                     ) {
                         Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1674,7 +1674,7 @@ fun SaveQueueAsPlaylistSheet(
                                     )
                                 }
 
-                                Button(
+                                OrpheusButton(
                                     onClick = {
                                         if (hasSelection) {
                                             val finalName =
@@ -2028,7 +2028,7 @@ fun QueuePlaylistSongItem(
                     }
 
                     if (isFromPlaylist) {
-                        FilledIconButton(
+                        OrpheusFilledIconButton(
                             onClick = { onMoreOptionsClick(song) },
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = mvContainerColor,
@@ -2050,7 +2050,7 @@ fun QueuePlaylistSongItem(
                     }
 
                     AnimatedVisibility(visible = isRemoveButtonVisible && !enableSwipeToDismiss) {
-                        FilledIconButton(
+                        OrpheusFilledIconButton(
                             onClick = onRemoveClick,
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = colors.surfaceContainer,

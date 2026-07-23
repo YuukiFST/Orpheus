@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.ColorScheme
@@ -136,7 +137,7 @@ internal fun rememberSheetThemeState(
     val albumColorScheme = rememberBatchAnimatedColorScheme(rawAlbumColorScheme)
     val miniPlayerScheme = rememberBatchAnimatedColorScheme(
         target = rawMiniPlayerScheme,
-        animationSpec = tween(durationMillis = 120, easing = FastOutSlowInEasing),
+        animationSpec = snap(),
     )
 
     val miniAppearProgress = remember { Animatable(0f) }

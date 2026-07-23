@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -23,12 +25,10 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -147,7 +147,7 @@ fun CrashReportDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilledTonalButton(
+                    OrpheusFilledTonalButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText(
@@ -168,7 +168,7 @@ fun CrashReportDialog(
                         Text(stringResource(R.string.action_copy))
                     }
 
-                    FilledTonalButton(
+                    OrpheusFilledTonalButton(
                         onClick = {
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
@@ -194,7 +194,7 @@ fun CrashReportDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            OrpheusTextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.dismiss), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }

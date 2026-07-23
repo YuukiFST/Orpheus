@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.Deselect
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,7 +43,9 @@ import androidx.compose.ui.zIndex
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 private val buttonHeight = 44.dp
 private val segmentedOuterCornerRadius = 26.dp
@@ -84,7 +85,7 @@ fun SelectionActionRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Select All button (left segment)
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onSelectAll,
                 shape = leftSegmentShape,
                 colors = ButtonDefaults.filledTonalButtonColors(
@@ -109,7 +110,7 @@ fun SelectionActionRow(
             }
             
             // Deselect button (right segment) - using secondary colors
-            FilledTonalButton(
+            OrpheusFilledTonalButton(
                 onClick = onDeselect,
                 shape = rightSegmentShape,
                 colors = ButtonDefaults.filledTonalButtonColors(
@@ -137,7 +138,7 @@ fun SelectionActionRow(
         //Spacer(modifier = Modifier.width(optionsGap))
         
         // Options button
-        FilledTonalButton(
+        OrpheusFilledTonalButton(
             onClick = onOptionsClick,
             shape = optionsShape,
             colors = ButtonDefaults.filledTonalButtonColors(
@@ -171,8 +172,14 @@ fun SelectionCountPill(
         enter = slideInVertically(
             initialOffsetY = { -it },
             animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-        ) + fadeIn() + scaleIn(initialScale = 0.8f),
-        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut() + scaleOut(targetScale = 0.8f),
+        ) + fadeIn(OrpheusMotion.openTween()) + scaleIn(
+            initialScale = OrpheusMotion.ContentSwapScale,
+            animationSpec = OrpheusMotion.openTween(),
+        ),
+        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(OrpheusMotion.closeTween()) + scaleOut(
+            targetScale = OrpheusMotion.ContentSwapScale,
+            animationSpec = OrpheusMotion.closeTween(),
+        ),
         modifier = modifier
     ) {
         Surface(

@@ -1,5 +1,4 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
-
 package com.yuukifst.orpheus.presentation.screens
 
 import androidx.activity.compose.BackHandler
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextGeometricTransform
@@ -35,14 +34,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
-import com.yuukifst.orpheus.presentation.components.SongPickerList
 import com.yuukifst.orpheus.presentation.components.SmartImage
+import com.yuukifst.orpheus.presentation.components.SongPickerList
 import com.yuukifst.orpheus.presentation.utils.GenreIconProvider
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
-import androidx.compose.ui.res.stringResource
-import com.yuukifst.orpheus.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -108,7 +110,7 @@ fun QuickFillContent(
                     }
                 },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier.padding(start = 8.dp),
                         onClick = { if (step > 0) step-- else onDismiss() },
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -148,7 +150,7 @@ fun QuickFillContent(
                                label = { Text(stringResource(R.string.presentation_batch_b_search_songs_label)) },
                                leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                                trailingIcon = if (searchQuery.isNotEmpty()) {
-                                   { IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Rounded.Clear, null) } }
+                                   { OrpheusFilledIconButton(onClick = { searchQuery = "" }) { Icon(Icons.Rounded.Clear, contentDescription = null) } }
                                } else null,
                                singleLine = true,
                                shape = TerminalCornerShape,
@@ -215,7 +217,7 @@ fun QuickFillContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Select All (Left Segment)
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = { songs.forEach { selectedSongIds[it.id] = true } },
                             shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
@@ -231,7 +233,7 @@ fun QuickFillContent(
                         Spacer(modifier = Modifier.width(2.dp))
                         
                         // Clear (Right Segment)
-                        FilledTonalButton(
+                        OrpheusFilledTonalButton(
                             onClick = { selectedSongIds.clear() },
                             shape = TerminalCornerShape,
                             colors = ButtonDefaults.filledTonalButtonColors(
@@ -264,8 +266,8 @@ fun QuickFillContent(
                     Spacer(modifier = Modifier.width(16.dp)) // Added separation
                 }
 
-                // Action Button
-                Button(
+                // Action OrpheusButton
+                OrpheusButton(
                     onClick = {
                         if (step == 0) {
                             step = 1
@@ -338,7 +340,7 @@ fun GenreValidatorContent(
         modifier = Modifier.fillMaxSize()
     ) {
         item {
-            // Add Custom Button
+            // Add Custom OrpheusButton
             Card(
                 onClick = { showCustomDialog = true },
                 colors = CardDefaults.cardColors(
@@ -452,7 +454,7 @@ fun GenreValidatorContent(
                 }
             },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         if (newGenreName.isNotBlank()) {
                             onAddCustomGenre(newGenreName, selectedIcon)
@@ -463,7 +465,7 @@ fun GenreValidatorContent(
                 ) { Text(addLabel, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             },
             dismissButton = {
-                TextButton(onClick = { showCustomDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                OrpheusTextButton(onClick = { showCustomDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
         )
     }

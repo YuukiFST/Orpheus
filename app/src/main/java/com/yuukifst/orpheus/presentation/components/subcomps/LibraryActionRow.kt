@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components.subcomps
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -30,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -45,7 +46,6 @@ import androidx.compose.material.icons.rounded.Dataset
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
@@ -167,7 +167,7 @@ fun LibraryActionRow(
                     val buttonContainerColor = MaterialTheme.colorScheme.tertiaryContainer
                     val buttonContentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     
-                    FilledTonalButton(
+                    OrpheusFilledTonalButton(
                         onClick = onMainActionClick,
                         shape = TerminalCornerShape,
                         colors = ButtonDefaults.buttonColors(
@@ -231,7 +231,7 @@ fun LibraryActionRow(
                         Row(modifier = Modifier.height(genHeight), verticalAlignment = Alignment.CenterVertically) {
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            FilledTonalButton(
+                            OrpheusFilledTonalButton(
                                 onClick = onImportM3uClick,
                                 shape = TerminalCornerShape,
                                 colors = ButtonDefaults.buttonColors(
@@ -277,13 +277,13 @@ fun LibraryActionRow(
         if (showSortButton) {
             val outerCorner = 26.dp
             
-            // Logic for Sort Button (Rightmost)
+            // Logic for Sort OrpheusButton (Rightmost)
             val sortStartCorner by animateDpAsState(
                 targetValue = if (showLocateButton || showStorageFilterButton) 8.dp else outerCorner,
                 label = "SortStartCorner"
             )
 
-            // Logic for Filter Button (Middle or Left if Locate hidden)
+            // Logic for Filter OrpheusButton (Middle or Left if Locate hidden)
             // Filter is visible if showStorageFilterButton is true
             val filterEndCorner = 8.dp // Connected to Sort
             val filterStartCorner by animateDpAsState(
@@ -291,7 +291,7 @@ fun LibraryActionRow(
                 label = "FilterStartCorner"
             )
             
-            // Logic for Locate Button (Leftmost)
+            // Logic for Locate OrpheusButton (Leftmost)
             val locateEndCorner = 8.dp // Connected to Filer or Sort
 
             // Gaps
@@ -312,7 +312,7 @@ fun LibraryActionRow(
 
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Locate Button
+                // Locate OrpheusButton
                 AnimatedVisibility(
                     visible = showLocateButton,
                     enter = slideInHorizontally(initialOffsetX = { it / 2 }) + fadeIn(),
@@ -332,7 +332,7 @@ fun LibraryActionRow(
                 
                 Spacer(modifier = Modifier.width(gapBetweenLocateAndNext))
 
-                // Storage Filter Button
+                // Storage Filter OrpheusButton
                 AnimatedVisibility(
                     visible = showStorageFilterButton,
                     enter = slideInHorizontally(initialOffsetX = { it / 2 }) + fadeIn(),
@@ -374,7 +374,7 @@ fun LibraryActionRow(
 
                 Spacer(modifier = Modifier.width(gapBetweenFilterAndSort))
 
-                // Sort Button
+                // Sort OrpheusButton
                 FilledTonalIconButton(
                     onClick = onSortClick,
                     shape = TerminalCornerShape,

@@ -1,4 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.brickbreaker
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import android.content.Context
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -30,7 +30,6 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -745,7 +744,7 @@ fun BrickBreakerOverlay(
 
                             Spacer(modifier = Modifier.height(32.dp))
 
-                            androidx.compose.material3.Button(
+                            OrpheusButton(
                                 onClick = {
                                     if (hasWon) {
                                         nextLevel()
@@ -902,7 +901,7 @@ private fun PreLaunchMenu(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            Button(
+            OrpheusButton(
                 onClick = onPlayClick,
                 shape = TerminalCornerShape,
                 colors = ButtonDefaults.buttonColors(

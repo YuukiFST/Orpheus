@@ -3,7 +3,7 @@ package com.yuukifst.orpheus.presentation.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,7 +41,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -83,11 +82,11 @@ import com.yuukifst.orpheus.data.model.Curve
 import com.yuukifst.orpheus.data.model.TransitionMode
 import com.yuukifst.orpheus.data.model.TransitionSettings
 import com.yuukifst.orpheus.presentation.viewmodel.TransitionViewModel
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import java.util.concurrent.TimeUnit
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -140,7 +139,7 @@ fun EditTransitionScreen(
                     )
                 },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier
                             .padding(start = 10.dp),
                         onClick = { navController.navigateUp() },
@@ -219,8 +218,8 @@ fun EditTransitionScreen(
                 item {
                     AnimatedVisibility(
                         visible = isCrossfadeEnabled,
-                        enter = expandVertically(tween(300)) + fadeIn(tween(300)),
-                        exit = shrinkVertically(tween(300)) + fadeOut(tween(300))
+                        enter = expandVertically(OrpheusMotion.openSizeTween()) + fadeIn(OrpheusMotion.openTween()),
+                        exit = shrinkVertically(OrpheusMotion.closeSizeTween()) + fadeOut(OrpheusMotion.closeTween())
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
                             TransitionDurationSection(
@@ -386,7 +385,7 @@ private fun ExpressiveMorphingToggle(
 
         val indicatorOffset by animateDpAsState(
             targetValue = if (selectedIndex == 1) indicatorWidth else 0.dp,
-            animationSpec = tween(durationMillis = 300),
+            animationSpec = OrpheusMotion.openDpTween(),
             label = "offset"
         )
 
@@ -458,7 +457,7 @@ private fun TransitionDurationSection(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 onClick = { onDurationChange(TransitionSettings().durationMs) },
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,

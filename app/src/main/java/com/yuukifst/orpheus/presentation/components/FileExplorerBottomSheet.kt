@@ -1,6 +1,8 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 package com.yuukifst.orpheus.presentation.components
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 
 import androidx.compose.animation.AnimatedContent
@@ -33,7 +35,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -49,7 +50,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MediumExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -136,8 +136,8 @@ fun FileExplorerDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "file_explorer_dialog"
             ) {
                 Surface(
@@ -247,7 +247,7 @@ fun FileExplorerContent(
                     )
                 },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier.padding(start = 6.dp),
                         onClick = onDismiss,
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -262,7 +262,7 @@ fun FileExplorerContent(
                     }
                 },
                 actions = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier.padding(end = 6.dp),
                         onClick = onRefresh,
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -373,7 +373,7 @@ fun FileExplorerContent(
                     ),
                     label = "directory_content",
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(200))
+                        fadeIn(OrpheusMotion.openTween()) togetherWith fadeOut(OrpheusMotion.closeTween())
                     }
                 ) { (_, children, _) ->
                     when {

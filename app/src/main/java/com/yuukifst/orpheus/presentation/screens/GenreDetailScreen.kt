@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
@@ -420,7 +422,7 @@ fun GenreDetailScreen(
                     },
                     headerContent = if (isUnknownGenre) {
                         {
-                            Button(
+                            OrpheusButton(
                                 onClick = {
                                     showSortSheet = false
                                     showQuickFillDialog = true
@@ -663,7 +665,7 @@ fun GenreCollapsibleTopBar(
         )
 
         Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-             FilledIconButton(
+             OrpheusFilledIconButton(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 12.dp, top = 4.dp)

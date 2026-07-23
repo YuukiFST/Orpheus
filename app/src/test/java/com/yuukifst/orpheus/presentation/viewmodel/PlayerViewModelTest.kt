@@ -156,6 +156,10 @@ class PlayerViewModelTest {
         every { mockSearchStateHolder.updateSearchFilter(any()) } just runs
         every { mockSearchStateHolder.initialize(any()) } just runs // Added missing initialize mock
 
+        every { mockLyricsStateHolder.songUpdates } returns MutableSharedFlow()
+        every { mockLyricsStateHolder.messageEvents } returns MutableSharedFlow()
+        coEvery { mockUserPreferencesRepository.getPlaybackQueueSnapshotOnce() } returns null
+
         // Connectivity mocks removed as properties differ from expectations
         every { mockConnectivityStateHolder.initialize() } just runs
 

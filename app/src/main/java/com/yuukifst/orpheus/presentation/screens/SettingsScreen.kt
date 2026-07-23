@@ -1,4 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
@@ -34,13 +36,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -107,14 +107,14 @@ fun SettingsScreen(
     val contentAlpha by
             transition.animateFloat(
                     label = "ContentAlpha",
-                    transitionSpec = { tween(durationMillis = 500) }
+                    transitionSpec = { OrpheusMotion.screenEnterAlphaTween() }
             ) { if (it) 1f else 0f }
 
     val contentOffset by
             transition.animateDp(
                     label = "ContentOffset",
-                    transitionSpec = { tween(durationMillis = 400, easing = FastOutSlowInEasing) }
-            ) { if (it) 0.dp else 40.dp }
+                    transitionSpec = { OrpheusMotion.screenEnterOffsetTween() }
+            ) { if (it) 0.dp else 12.dp }
 
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()

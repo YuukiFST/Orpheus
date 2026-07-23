@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.LocalMaterialTheme
+import com.yuukifst.orpheus.ui.theme.terminalPressScale
 
 @Composable
 fun ToggleSegmentButton(
@@ -42,7 +45,7 @@ fun ToggleSegmentButton(
     active: Boolean,
     enabled: Boolean = true,
     activeColor: Color,
-    inactiveColor: Color = Color.Gray,
+    inactiveColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     activeContentColor: Color = LocalMaterialTheme.current.onPrimary,
     inactiveContentColor: Color = LocalMaterialTheme.current.onSurfaceVariant,
     activeCornerRadius: Dp = 8.dp,
@@ -74,7 +77,7 @@ fun ToggleSegmentButton(
     active: Boolean,
     enabled: Boolean = true,
     activeColor: Color,
-    inactiveColor: Color = Color.Gray,
+    inactiveColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     activeContentColor: Color = LocalMaterialTheme.current.onPrimary,
     inactiveContentColor: Color = LocalMaterialTheme.current.onSurfaceVariant,
     activeCornerRadius: Dp = 8.dp,
@@ -106,7 +109,7 @@ fun ToggleSegmentButton(
     active: Boolean,
     enabled: Boolean = true,
     activeColor: Color,
-    inactiveColor: Color = Color.Gray,
+    inactiveColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     activeContentColor: Color = LocalMaterialTheme.current.onPrimary,
     inactiveContentColor: Color = LocalMaterialTheme.current.primary,
     activeCornerRadius: Dp = 8.dp,
@@ -137,7 +140,7 @@ fun ToggleSegmentButton(
     active: Boolean,
     enabled: Boolean = true,
     activeColor: Color,
-    inactiveColor: Color = Color.Gray,
+    inactiveColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     activeContentColor: Color = LocalMaterialTheme.current.onPrimary,
     inactiveContentColor: Color = LocalMaterialTheme.current.onSurfaceVariant,
     activeCornerRadius: Dp = 8.dp,
@@ -202,13 +205,20 @@ private fun ToggleSegmentButtonContainer(
 
     val stateOn = stringResource(R.string.a11y_toggle_on)
     val stateOff = stringResource(R.string.a11y_toggle_off)
+    val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier = modifier
             .fillMaxSize()
+            .terminalPressScale(interactionSource)
             .clip(TerminalCornerShape)
             .background(bgColor)
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+                interactionSource = interactionSource,
+                indication = null,
+            )
             .semantics { stateDescription = if (active) stateOn else stateOff },
         contentAlignment = Alignment.Center
     ) {

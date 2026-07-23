@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,8 +58,8 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.ui.res.stringResource
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.persistentListOf
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 
 // 2) DailyMixSection y DailyMixCard quedan igual de ligeras...
@@ -352,7 +351,7 @@ private fun ViewAllDailyMixButton(
     modifier: Modifier = Modifier,
     onClickOpen: () -> Unit
 ) {
-    FilledTonalButton(
+    OrpheusFilledTonalButton(
         modifier = modifier,
         onClick = {
             onClickOpen()

@@ -1,5 +1,7 @@
 package com.yuukifst.orpheus.presentation.components
 
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.MutableTransitionState
@@ -40,7 +42,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -49,7 +50,6 @@ import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -73,12 +73,12 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.equalizer.EqualizerPreset
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import kotlinx.coroutines.launch
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.collections.immutable.ImmutableList
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -98,7 +98,7 @@ fun ReorderPresetsSheet(
             title = { Text(stringResource(R.string.presentation_batch_e_reset_presets_title)) },
             text = { Text(stringResource(R.string.presentation_batch_e_reset_presets_message)) },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         onReset()
                         showResetDialog = false
@@ -109,7 +109,7 @@ fun ReorderPresetsSheet(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                OrpheusTextButton(onClick = { showResetDialog = false }) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
         )
     }
@@ -165,8 +165,8 @@ fun ReorderPresetsSheet(
         ) {
         AnimatedVisibility(
             visibleState = transitionState,
-            enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-            exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+            enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+            exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
             label = "manage_presets_dialog"
         ) {
             Surface(
@@ -191,7 +191,7 @@ fun ReorderPresetsSheet(
                                 )
                             },
                             navigationIcon = {
-                                FilledIconButton(
+                                OrpheusFilledIconButton(
                                     modifier = Modifier.padding(start = 6.dp),
                                     onClick = onDismiss,
                                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -206,7 +206,7 @@ fun ReorderPresetsSheet(
                                 }
                             },
                             actions = {
-                                FilledIconButton(
+                                OrpheusFilledIconButton(
                                     modifier = Modifier.padding(end = 6.dp),
                                     onClick = { showResetDialog = true },
                                     colors = IconButtonDefaults.filledIconButtonColors(

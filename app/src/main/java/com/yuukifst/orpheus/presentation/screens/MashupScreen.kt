@@ -31,7 +31,6 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -59,6 +58,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.MashupViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.presentation.components.rememberModalSheetState
+import com.yuukifst.orpheus.ui.theme.OrpheusOutlinedButton
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -240,11 +240,11 @@ private fun DeckUi(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedButton(onClick = { onNudge(-100) }, enabled = deckState.song != null) { Text("<<", maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    OrpheusOutlinedButton(onClick = { onNudge(-100) }, enabled = deckState.song != null) { Text("<<", maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     IconButton(onClick = onPlayPause, enabled = deckState.song != null, modifier = Modifier.size(56.dp)) {
                         Icon(painter = painterResource(if (deckState.isPlaying) R.drawable.rounded_pause_24 else R.drawable.rounded_play_arrow_24), contentDescription = stringResource(R.string.mashup_cd_play_pause), modifier = Modifier.fillMaxSize())
                     }
-                    OutlinedButton(onClick = { onNudge(100) }, enabled = deckState.song != null) { Text(">>", maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    OrpheusOutlinedButton(onClick = { onNudge(100) }, enabled = deckState.song != null) { Text(">>", maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
 
                 Column(modifier = Modifier.padding(top = 8.dp)) {

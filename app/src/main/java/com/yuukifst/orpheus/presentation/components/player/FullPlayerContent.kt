@@ -1,5 +1,6 @@
 package com.yuukifst.orpheus.presentation.components.player
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
@@ -47,7 +48,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -142,6 +142,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import com.yuukifst.orpheus.presentation.components.rememberModalSheetState
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 private const val PREVIOUS_TRACK_RESTART_THRESHOLD_MS = 10_000L
 private const val SKIP_COMMAND_GUARD_MS = 96L
@@ -747,7 +748,7 @@ fun FullPlayerContent(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Queue Button — full circle, matching the collapse button
+                            // Queue OrpheusButton — full circle, matching the collapse button
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -1370,7 +1371,7 @@ private fun SongMetadataDisplaySection(
         AnimatedVisibility(
             visible = isBuffering,
             enter = scaleIn(
-                initialScale = 0.85f,
+                initialScale = OrpheusMotion.ContentSwapScale,
                 animationSpec = tween(
                     durationMillis = OrpheusMotion.DurationSlow,
                     delayMillis = OrpheusMotion.DurationMicro,
@@ -1384,7 +1385,7 @@ private fun SongMetadataDisplaySection(
                 )
             ),
             exit = scaleOut(
-                targetScale = 0.85f,
+                targetScale = OrpheusMotion.ContentSwapScale,
                 animationSpec = tween(
                     durationMillis = OrpheusMotion.DurationFast,
                     easing = OrpheusMotion.EaseSmoothOut
@@ -1452,7 +1453,7 @@ private fun SongMetadataDisplaySection(
             }
         } else {
             // Portrait Mode: Just the Lyrics button (Queue is in TopBar)
-            FilledIconButton(
+            OrpheusFilledIconButton(
                 modifier = Modifier
                     .size(width = 48.dp, height = 48.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(

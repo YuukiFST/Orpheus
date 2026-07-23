@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +58,7 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
 @Immutable
 private data class EnhancedSongAnimationTarget(
@@ -398,7 +398,7 @@ fun EnhancedSongListItem(
                 }
 
                 if (showTrailingAction) {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = { onMoreOptionsClick(song) },
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = colors.surfaceContainerHigh,

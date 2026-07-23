@@ -1,7 +1,10 @@
 package com.yuukifst.orpheus.presentation.screens
 
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.navigation.navigateSafelyReplacing
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,14 +52,12 @@ import androidx.compose.material.icons.rounded.DragIndicator
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,7 +68,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -122,7 +122,6 @@ import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistSongsOrderMode
 import com.yuukifst.orpheus.utils.formatSongCount
 import com.yuukifst.orpheus.utils.formatTotalDuration
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import com.yuukifst.orpheus.presentation.components.LibrarySortBottomSheet
@@ -364,7 +363,7 @@ fun PlaylistDetailScreen(
                         .padding(bottom = playbackControlBottomPadding),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
+                    OrpheusButton(
                         onClick = {
                             if (songsInPlaylist.isNotEmpty()) {
                                 if (hasYouTubeTracks) {
@@ -393,7 +392,7 @@ fun PlaylistDetailScreen(
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                         Text(playItLabel)
                     }
-                    FilledTonalButton(
+                    OrpheusFilledTonalButton(
                         onClick = {
                             if (localReorderableSongs.isNotEmpty()) {
                                 playerViewModel.playSongsShuffled(
@@ -454,7 +453,7 @@ fun PlaylistDetailScreen(
                             label = "removeIconColor"
                         )
 
-                        Button(
+                        OrpheusButton(
                             onClick = { showAddSongsSheet = true },
                             shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 12.dp),
@@ -479,7 +478,7 @@ fun PlaylistDetailScreen(
                             )
                         }
 
-                        Button(
+                        OrpheusButton(
                             onClick = { isRemoveModeEnabled = !isRemoveModeEnabled },
                             shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 8.dp),
@@ -508,7 +507,7 @@ fun PlaylistDetailScreen(
                             )
                         }
 
-                        Button(
+                        OrpheusButton(
                             onClick = { isReorderModeEnabled = !isReorderModeEnabled },
                             shape = TerminalCornerShape,
                             contentPadding = PaddingValues(horizontal = 8.dp),
@@ -826,7 +825,7 @@ fun PlaylistDetailScreen(
                 Text(deletePlaylistConfirmBody)
             },
             confirmButton = {
-                TextButton(
+                OrpheusTextButton(
                     onClick = {
                         playlistViewModel.deletePlaylist(currentPlaylist.id)
                         onDeletePlayListClick()
@@ -837,7 +836,7 @@ fun PlaylistDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
+                OrpheusTextButton(onClick = { showDeleteConfirmation = false }) {
                     Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -1068,11 +1067,11 @@ fun RenamePlaylistDialog(currentName: String, onDismiss: () -> Unit, onRename: (
             )
         },
         confirmButton = {
-            Button(
+            OrpheusButton(
                 onClick = { if (newName.text.isNotBlank()) onRename(newName.text) },
                 enabled = newName.text.isNotBlank() && newName.text != currentName
             ) { Text(renameAction, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+        dismissButton = { OrpheusTextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), maxLines = 1, overflow = TextOverflow.Ellipsis) } }
     )
 }

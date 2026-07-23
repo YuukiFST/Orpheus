@@ -56,7 +56,6 @@ import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.SortDirection
 import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.ui.theme.RoundedSans
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)

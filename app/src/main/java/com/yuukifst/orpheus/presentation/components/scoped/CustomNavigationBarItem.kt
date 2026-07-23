@@ -3,8 +3,8 @@ import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import androidx.compose.animation.animateColorAsState
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.terminalBorder
+import com.yuukifst.orpheus.ui.theme.terminalPressScale
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -106,6 +106,7 @@ fun RowScope.CustomNavigationBarItem(
         modifier = modifier
             .weight(1f)
             .fillMaxHeight()
+            .terminalPressScale(interactionSource)
             .clickable(
                 onClick = onClick,
                 enabled = enabled,

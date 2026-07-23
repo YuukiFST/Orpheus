@@ -1,12 +1,11 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
-
 package com.yuukifst.orpheus.presentation.screens
 
 import android.net.Uri
-import java.util.Locale
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -22,39 +21,46 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.Crop
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Headphones
@@ -62,37 +68,41 @@ import androidx.compose.material.icons.rounded.MicExternalOn
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Piano
 import androidx.compose.material.icons.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Speaker
-import androidx.compose.material.icons.rounded.Crop
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -103,8 +113,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -113,50 +131,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.media3.common.util.UnstableApi
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.yuukifst.orpheus.data.model.Song
-import com.yuukifst.orpheus.presentation.components.ImageCropView
 import com.yuukifst.orpheus.data.model.PlaylistShapeType
 import com.yuukifst.orpheus.data.model.SmartPlaylistRule
-import com.yuukifst.orpheus.presentation.components.SongPickerSelectionPane
-import com.yuukifst.orpheus.ui.theme.RoundedSans
-import androidx.compose.material3.Slider
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Matrix
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.automirrored.rounded.QueueMusic
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Surface
-import androidx.compose.ui.graphics.TransformOrigin
+import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.model.StorageFilter
+import com.yuukifst.orpheus.presentation.components.ImageCropView
+import com.yuukifst.orpheus.presentation.components.SongPickerSelectionPane
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.media3.common.util.UnstableApi
-import androidx.compose.material3.MediumExtendedFloatingActionButton
-import androidx.compose.material3.SliderDefaults
-
+import com.yuukifst.orpheus.ui.theme.OrpheusButton
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
+import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
+import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.utils.resolvePlaylistCoverContentColor
+import java.util.Locale
 
 import kotlinx.coroutines.launch
 
@@ -219,8 +218,8 @@ fun CreatePlaylistDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "create_playlist_dialog"
             ) {
                 CreatePlaylistContent(
@@ -260,8 +259,8 @@ fun EditPlaylistDialog(
         ) {
             AnimatedVisibility(
                 visibleState = transitionState,
-                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(animationSpec = tween(220)),
-                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(animationSpec = tween(200)),
+                enter = slideInVertically(initialOffsetY = { it / 6 }) + fadeIn(OrpheusMotion.openTween()),
+                exit = slideOutVertically(targetOffsetY = { it / 6 }) + fadeOut(OrpheusMotion.closeTween()),
                 label = "edit_playlist_dialog"
             ) {
                  EditPlaylistContent(
@@ -396,7 +395,7 @@ private fun CreatePlaylistContent(
                     }
                 },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier.padding(start = 6.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -593,7 +592,7 @@ private fun CreatePlaylistContent(
                         }
                     }
 
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         onClick = {
                             val imageUriString = if(selectedTab == 1) selectedImageUri?.toString() else null
                             val color = if(selectedTab == 2) selectedColor else null
@@ -825,7 +824,7 @@ fun EditPlaylistContent(
                     )
                 },
                 navigationIcon = {
-                    FilledIconButton(
+                    OrpheusFilledIconButton(
                         modifier = Modifier.padding(start = 6.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -936,7 +935,6 @@ fun EditPlaylistContent(
     }
 }
 
-
 @kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PlaylistFormContent(
@@ -1029,7 +1027,7 @@ private fun PlaylistFormContent(
                          )
                      }
                      Spacer(Modifier.weight(1f))
-                     Button(
+                     OrpheusButton(
                         onClick = { onShowCropUiChange(false) },
                         modifier = Modifier
                             .align(Alignment.End)
@@ -1057,7 +1055,7 @@ private fun PlaylistFormContent(
         AnimatedContent(
              targetState = selectedTab,
              transitionSpec = {
-                 fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(220))
+                 fadeIn(OrpheusMotion.openTween()) togetherWith fadeOut(OrpheusMotion.closeTween())
              },
              label = "preview_transition",
              modifier = Modifier
@@ -1119,7 +1117,7 @@ private fun PlaylistFormContent(
                                      horizontalArrangement = Arrangement.spacedBy(8.dp),
                                      modifier = Modifier.padding(horizontal = 16.dp)
                                  ) {
-                                     FilledTonalButton(
+                                     OrpheusFilledTonalButton(
                                          onClick = { imagePickerLauncher.launch("image/*") },
                                          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                          modifier = Modifier.height(40.dp).weight(1f)
@@ -1128,7 +1126,7 @@ private fun PlaylistFormContent(
                                          Spacer(Modifier.width(8.dp))
                                          Text(stringResource(R.string.presentation_batch_f_change), style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                      }
-                                     Button(
+                                     OrpheusButton(
                                          onClick = { onImageUriChange(null) },
                                          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                          modifier = Modifier.height(40.dp).weight(1f),
@@ -1169,8 +1167,14 @@ private fun PlaylistFormContent(
                          AnimatedContent(
                              targetState = selectedShapeType,
                              transitionSpec = {
-                                 fadeIn(animationSpec = tween(300)) + scaleIn(initialScale = 0.8f) togetherWith 
-                                 fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f)
+                                 fadeIn(animationSpec = OrpheusMotion.openTween()) + scaleIn(
+                                     initialScale = OrpheusMotion.ContentSwapScale,
+                                     animationSpec = OrpheusMotion.openTween(),
+                                 ) togetherWith
+                                 fadeOut(animationSpec = OrpheusMotion.closeTween()) + scaleOut(
+                                     targetScale = OrpheusMotion.ContentSwapScale,
+                                     animationSpec = OrpheusMotion.closeTween(),
+                                 )
                              },
                              label = "shape_transition"
                          ) { currentShapeType ->
@@ -1500,9 +1504,6 @@ private fun PlaylistFormContent(
     }
 }
 
-
-
-
 fun getIconByName(name: String?): ImageVector? {
     return when (name) {
         "MusicNote" -> Icons.Rounded.MusicNote
@@ -1657,7 +1658,6 @@ fun ThickSlider(
         }
     )
 }
-
 
 fun getThemeContentColor(colorArgb: Int, scheme: androidx.compose.material3.ColorScheme): Color {
     return resolvePlaylistCoverContentColor(colorArgb, scheme)
