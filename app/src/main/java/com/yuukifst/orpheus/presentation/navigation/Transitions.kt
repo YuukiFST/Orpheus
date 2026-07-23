@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.ui.graphics.TransformOrigin
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 // MD3 Expressive – Emphasized easing (matches Material Motion spec)
 // cubic-bezier(0.2, 0, 0, 1.0) — fast start, smooth settle
@@ -21,9 +22,9 @@ private val EmphasizedDecelerateEasing = CubicBezierEasing(0.2f, 0.85f, 0.7f, 1f
 // Accelerate for elements leaving the screen
 private val EmphasizedAccelerateEasing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
 
-// Base duration designed for 1x animation scale — looks good at full speed,
-// still smooth at 0.5x (system halves it to ~225 ms).
-const val TRANSITION_DURATION = 450
+// Base duration aligned with OrpheusMotion.DurationFast — looks good at full speed,
+// still smooth at 0.5x (system halves it to ~125 ms).
+const val TRANSITION_DURATION = OrpheusMotion.DurationFast // 250
 
 // Push: Enter from Right — slides in 50% of screen width + slight scale up (mirrors popExit's weight)
 // Fade uses an accelerate-style curve so alpha stays low while slide does its work,
