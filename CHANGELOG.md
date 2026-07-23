@@ -2,6 +2,16 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.12] - 2026-07-22
+
+### Changed
+- Unified `Orpheus*` button components across sheets, dialogs, settings, and player.
+- Tokenized motion with typed `OrpheusMotion` tween helpers (open 250ms / close 150ms).
+- Terminal press scale and phosphor glow feedback on interactive controls.
+
+### Fixed
+- YouTube-liked tracks no longer reuse local MediaController queue when the playback context includes YouTube media IDs.
+
 ## [1.0.11] - 2026-07-22
 
 ### Changed
