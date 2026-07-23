@@ -48,7 +48,7 @@ class ExternalPlayerActivity : ComponentActivity() {
 
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
-            val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
+            val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
                 .collectAsStateWithLifecycle(initialValue = false)
             val useDarkTheme = when (appThemeMode) {

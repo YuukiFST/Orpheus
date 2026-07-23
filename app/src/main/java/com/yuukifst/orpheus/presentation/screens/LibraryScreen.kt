@@ -795,7 +795,7 @@ fun LibraryScreen(
                         .fillMaxSize()
                         .padding(horizontal = 0.dp, vertical = 0.dp),
                     color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(0.dp)
+                    shape = TerminalCornerShape
                 ) {
                     Column(Modifier.fillMaxSize()) {
                         // OPTIMIZATION: The sorting logic is now more efficient.
@@ -2198,7 +2198,7 @@ private fun LibraryTabGridItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val shape = RoundedCornerShape(0.dp)
+    val shape = TerminalCornerShape
     val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh
     val iconContainer = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
     val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface

@@ -16,6 +16,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -316,7 +317,8 @@ fun SearchScreen(
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
-                            .clip(searchBarShape),
+                            .clip(searchBarShape)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape),
                         shape = searchBarShape,
                         colors = SearchBarDefaults.colors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),

@@ -50,7 +50,7 @@ import kotlinx.collections.immutable.toImmutableList
 
 data class SettingsUiState(
     val isLoadingDirectories: Boolean = false,
-    val appThemeMode: String = AppThemeMode.DARK,
+    val appThemeMode: String = AppThemeMode.LIGHT,
     val playerThemePreference: String = ThemePreference.DEFAULT,
     val albumArtPaletteStyle: AlbumArtPaletteStyle = AlbumArtPaletteStyle.default,
     val albumArtColorAccuracy: Int = AlbumArtColorAccuracy.DEFAULT,

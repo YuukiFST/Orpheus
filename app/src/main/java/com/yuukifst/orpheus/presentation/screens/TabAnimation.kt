@@ -1,7 +1,6 @@
 package com.yuukifst.orpheus.presentation.screens
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -16,13 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.terminalPressScale
 
 @Composable
@@ -56,10 +55,10 @@ fun TabAnimation(
         animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
         label = "tabContentColor"
     )
-    val borderWidth by animateDpAsState(
-        targetValue = if (isSelected) 1.dp else 0.dp,
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) selectedColor else MaterialTheme.colorScheme.outline,
         animationSpec = tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut),
-        label = "tabBorderWidth"
+        label = "tabBorderColor"
     )
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.02f else 1f,
@@ -76,9 +75,9 @@ fun TabAnimation(
                 this.transformOrigin = transformOrigin
             }
             .terminalPressScale(interactionSource)
-            .clip(RectangleShape)
-            .background(color = backgroundColor, shape = RectangleShape)
-            .border(width = borderWidth, color = selectedColor, shape = RectangleShape),
+            .clip(TerminalCornerShape)
+            .background(color = backgroundColor, shape = TerminalCornerShape)
+            .border(width = 1.dp, color = borderColor, shape = TerminalCornerShape),
         selected = isSelected,
         text = content,
         onClick = {

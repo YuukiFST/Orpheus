@@ -22,7 +22,7 @@ class ThemePreferencesRepository @Inject constructor(
     }
 
     val appThemeModeFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[Keys.APP_THEME_MODE] ?: AppThemeMode.DARK
+        preferences[Keys.APP_THEME_MODE] ?: AppThemeMode.LIGHT
     }
 
     val playerThemePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->

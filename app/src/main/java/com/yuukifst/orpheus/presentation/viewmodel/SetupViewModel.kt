@@ -46,7 +46,7 @@ data class SetupUiState(
     val externalLyricsEnabled: Boolean = false,
     val externalArtistImagesEnabled: Boolean = false,
     val alarmsPermissionGranted: Boolean = false,
-    val appThemeMode: String = AppThemeMode.DARK,
+    val appThemeMode: String = AppThemeMode.LIGHT,
     val isInspectingBackup: Boolean = false,
     val isRestoringBackup: Boolean = false,
     val restorePlan: RestorePlan? = null,
@@ -107,7 +107,7 @@ class SetupViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             if (!userPreferencesRepository.initialSetupDoneFlow.first()) {
-                themePreferencesRepository.initializeAppThemeMode(AppThemeMode.DARK)
+                themePreferencesRepository.initializeAppThemeMode(AppThemeMode.LIGHT)
                 themePreferencesRepository.initializePlayerThemePreference(ThemePreference.DEFAULT)
             }
         }
