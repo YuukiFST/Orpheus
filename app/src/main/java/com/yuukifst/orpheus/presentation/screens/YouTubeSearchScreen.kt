@@ -202,6 +202,10 @@ fun YouTubeSearchScreen(
                                 onAddToQueue = { viewModel.addToQueue(track) },
                                 onAddToPlaylist = { showPlaylistPickerForTrack = track },
                                 onDownload = { viewModel.download(track) },
+                                onChannelClick = { channelName ->
+                                    searchQuery = channelName
+                                    viewModel.searchChannel(channelName)
+                                },
                             )
                         }
                     }
@@ -395,6 +399,7 @@ private fun YouTubeSearchResultItem(
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
     onDownload: () -> Unit,
+    onChannelClick: (String) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -430,6 +435,9 @@ private fun YouTubeSearchResultItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable {
+                    onChannelClick(track.channelName)
+                },
             )
             if (track.durationMs > 0L) {
                 Text(
