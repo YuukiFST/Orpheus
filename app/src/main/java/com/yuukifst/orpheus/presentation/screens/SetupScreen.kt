@@ -32,8 +32,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -67,7 +65,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -79,7 +76,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PhoneAndroid
-import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -182,8 +178,7 @@ fun SetupScreen(
     val isExplorerReady by setupViewModel.isExplorerReady.collectAsStateWithLifecycle()
     val isCurrentDirectoryResolved by setupViewModel.isCurrentDirectoryResolved.collectAsStateWithLifecycle()
     var selectedBackupUri by remember { mutableStateOf<Uri?>(null) }
-    
-    var showCornerRadiusOverlay by remember { mutableStateOf(false) }
+
     val backupPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -384,7 +379,6 @@ fun SetupScreen(
                     SetupPage.NavBarLayout -> NavBarLayoutPage(
                         uiState = uiState,
                         onModeSelected = setupViewModel::setNavBarStyle,
-                        onCustomizeRadius = { showCornerRadiusOverlay = true },
                         onSkip = {
                             navigateToPage(pagerState.currentPage + 1)
                         }
@@ -413,24 +407,6 @@ fun SetupScreen(
                 selectedBackupUri = null
                 setupViewModel.restoreFromPlan(uri)
             }
-        )
-    }
-
-    // Overlay for Corner Radius Customization
-    AnimatedVisibility(
-        visible = showCornerRadiusOverlay,
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-    ) {
-        BackHandler {
-            showCornerRadiusOverlay = false
-        }
-        NavBarCornerRadiusContent(
-            initialRadius = uiState.navBarCornerRadius.toFloat(),
-            onRadiusChange = { setupViewModel.setNavBarCornerRadius(it) },
-            onDone = { showCornerRadiusOverlay = false },
-            onBack = { showCornerRadiusOverlay = false },
-            isFullWidth = uiState.navBarStyle == "full_width"
         )
     }
 }
@@ -2285,7 +2261,6 @@ fun SetupBottomBar(
 fun NavBarLayoutPage(
     uiState: SetupUiState,
     onModeSelected: (String) -> Unit,
-    onCustomizeRadius: () -> Unit,
     onSkip: () -> Unit
 ) {
     val isDefault = uiState.navBarStyle != "full_width" // Default or null is default
@@ -2369,28 +2344,6 @@ fun NavBarLayoutPage(
                                 onModeSelected(if (checked) "default" else "full_width")
                             }
                         )
-                    }
-                    
-                    AnimatedVisibility(
-                        visible = true, // Always visible now
-                        enter =   androidx.compose.animation.expandVertically() + fadeIn(),
-                        exit = androidx.compose.animation.shrinkVertically() + fadeOut()
-                    ) {
-                         Column {
-                             Spacer(modifier = Modifier.height(16.dp))
-                             OrpheusFilledTonalButton(
-                                 onClick = onCustomizeRadius,
-                                 modifier = Modifier.fillMaxWidth(),
-                                 colors = ButtonDefaults.filledTonalButtonColors(
-                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                 )
-                             ) {
-                                 Icon(Icons.Rounded.RoundedCorner, contentDescription = null, modifier = Modifier.size(18.dp))
-                                 Spacer(modifier = Modifier.width(8.dp))
-                                 Text(stringResource(R.string.customize_corner_radius))
-                             }
-                         }
                     }
                 }
             }
