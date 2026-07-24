@@ -197,6 +197,12 @@ class YouTubeSearchViewModel @Inject constructor(
         }
     }
 
+    fun addToQueue(track: YouTubeTrack) {
+        viewModelScope.launch {
+            playbackController.addToQueue(track)
+        }
+    }
+
     fun addToPlaylist(track: YouTubeTrack, playlistId: String) {
         viewModelScope.launch {
             val existing = youTubePlaylistDao.observeForPlaylist(playlistId).first()

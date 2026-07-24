@@ -106,6 +106,35 @@ class YouTubePlaybackController @Inject constructor(
         }.isSuccess
     }
 
+    suspend fun addToQueue(track: YouTubeTrack): Boolean {
+        return runCatching {
+            val player = dualPlayerEngine.masterPlayer
+            val mediaItem = withContext(Dispatchers.IO) {
+                playbackResolver.resolveMediaItem(track)
+            }
+            withContext(Dispatchers.Main.immediate) {
+                if (player.mediaItemCount == 0) {
+                    playOnce(track)
+                    return@withContext
+                }
+                if (sessionStopOnEnd) {
+                    sessionStopOnEnd = false
+                    attachPlaybackListener(player, stopOnEnd = false)
+                }
+                val entry = PlaylistMixedTrack.YouTube(
+                    track = track,
+                    sortOrder = currentMixedTracks.size,
+                )
+                currentMixedTracks = currentMixedTracks + entry
+                player.addMediaItem(mediaItem)
+                publishQueueUpdate(player.currentMediaItemIndex)
+            }
+        }.onFailure { error ->
+            if (error is CancellationException) throw error
+            _playbackErrors.emit(userFacingPlaybackError(error))
+        }.isSuccess
+    }
+
     suspend fun playPlaylist(tracks: List<YouTubeTrack>, startIndex: Int = 0) {
         if (tracks.isEmpty()) return
         runCatching {
@@ -396,6 +425,12 @@ class YouTubePlaybackViewModel @Inject constructor(
     fun playOnce(track: YouTubeTrack) {
         viewModelScope.launch {
             playbackController.playOnce(track)
+        }
+    }
+
+    fun addToQueue(track: YouTubeTrack) {
+        viewModelScope.launch {
+            playbackController.addToQueue(track)
         }
     }
 

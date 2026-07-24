@@ -28,10 +28,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -63,9 +63,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.yuukifst.orpheus.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yuukifst.orpheus.data.model.SearchHistoryItem
@@ -196,7 +198,8 @@ fun YouTubeSearchScreen(
                             YouTubeSearchResultItem(
                                 track = track,
                                 isDownloading = track.videoId in uiState.downloadingVideoIds,
-                                onPlayOnce = { viewModel.playOnce(track) },
+                                onPlay = { viewModel.playOnce(track) },
+                                onAddToQueue = { viewModel.addToQueue(track) },
                                 onAddToPlaylist = { showPlaylistPickerForTrack = track },
                                 onDownload = { viewModel.download(track) },
                             )
@@ -388,7 +391,8 @@ private fun YouTubeSearchHistorySection(
 private fun YouTubeSearchResultItem(
     track: YouTubeTrack,
     isDownloading: Boolean,
-    onPlayOnce: () -> Unit,
+    onPlay: () -> Unit,
+    onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
     onDownload: () -> Unit,
 ) {
@@ -398,7 +402,7 @@ private fun YouTubeSearchResultItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(TerminalCornerShape)
-            .clickable(onClick = onPlayOnce)
+            .clickable(onClick = onPlay)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -445,12 +449,14 @@ private fun YouTubeSearchResultItem(
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                 DropdownMenuItem(
-                    text = { Text("Play once") },
+                    text = { Text(stringResource(R.string.action_add_to_queue)) },
                     onClick = {
                         showMenu = false
-                        onPlayOnce()
+                        onAddToQueue()
                     },
-                    leadingIcon = { Icon(Icons.Rounded.PlayArrow, contentDescription = null) },
+                    leadingIcon = {
+                        Icon(Icons.AutoMirrored.Rounded.QueueMusic, contentDescription = null)
+                    },
                 )
                 DropdownMenuItem(
                     text = { Text("Add to playlist") },
