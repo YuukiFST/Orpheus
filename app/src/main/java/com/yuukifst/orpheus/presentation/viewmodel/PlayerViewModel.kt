@@ -1970,8 +1970,11 @@ class PlayerViewModel @Inject constructor(
             cancelPendingFullQueuePlayback()
             cancelPendingDirectPlayback()
         }
-        val playbackContext =
-            if (contextSongs.any { it.id == song.id }) contextSongs else listOf(song)
+        val playbackContext = when {
+            isSearchQueueName(queueName) -> listOf(song)
+            contextSongs.any { it.id == song.id } -> contextSongs
+            else -> listOf(song)
+        }
         val previousQueueName = _playerUiState.value.currentQueueSourceName
         val resolvedIndex = indexInQueue
             ?: playbackContext.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
@@ -2004,7 +2007,8 @@ class PlayerViewModel @Inject constructor(
         if (
             controller != null &&
             reusableTargetIndex != null &&
-            !playbackContext.any { it.id.isYouTubeMediaId() }
+            !playbackContext.any { it.id.isYouTubeMediaId() } &&
+            !isSearchQueueName(queueName)
         ) {
             cancelPendingDirectPlaybackBuild()
             playLoadedControllerItem(controller, reusableTargetIndex)
@@ -2480,6 +2484,8 @@ class PlayerViewModel @Inject constructor(
 
     private suspend fun reconcileRepeatModeForQueueChange(newQueueName: String, previousQueueName: String) {
         when {
+            isSearchQueueName(newQueueName) ->
+                applyControllerRepeatModeWithoutPersist(Player.REPEAT_MODE_OFF)
             isLikedQueueName(newQueueName) -> ensureLikedQueueRepeatWrap(newQueueName)
             isLikedQueueName(previousQueueName) -> {
                 val savedRepeatMode = userPreferencesRepository.repeatModeFlow.first()

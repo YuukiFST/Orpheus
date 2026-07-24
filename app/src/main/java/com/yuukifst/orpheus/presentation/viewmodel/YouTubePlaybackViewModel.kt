@@ -13,7 +13,6 @@ import com.yuukifst.orpheus.data.youtube.YouTubePlaybackResolver
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import com.yuukifst.orpheus.utils.MediaItemBuilder
-import com.yuukifst.orpheus.utils.isYouTubeMediaId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +27,14 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
+
+internal fun shouldReplaceQueueForSearchPlay(
+    currentIsYouTubeSession: Boolean,
+    explicitAddToQueue: Boolean,
+): Boolean = !explicitAddToQueue
+
+internal fun isSearchQueueName(queueName: String): Boolean =
+    queueName.startsWith("Search")
 
 internal fun YouTubeTrack.toPlaybackSong(filePath: String? = null): Song = Song(
     id = mediaId,
@@ -83,34 +90,16 @@ class YouTubePlaybackController @Inject constructor(
         return runCatching {
             cachedTrackRepository.recordPlayed(track)
             listeningStatsTracker.onVoluntarySelection(track.mediaId)
-            val entry = PlaylistMixedTrack.YouTube(track = track, sortOrder = currentMixedTracks.size)
-            val player = dualPlayerEngine.masterPlayer
-
-            if (canAppendToSession(player)) {
-                val newIndex = currentMixedTracks.size
-                currentMixedTracks = currentMixedTracks + entry
-                val mediaItem = withContext(Dispatchers.IO) {
-                    playbackResolver.resolveMediaItem(track)
-                }
-                withContext(Dispatchers.Main.immediate) {
-                    attachPlaybackListener(player, sessionStopOnEnd)
-                    player.addMediaItem(mediaItem)
-                    player.seekTo(newIndex, 0L)
-                    player.prepare()
-                    player.play()
-                    publishPlaybackState(newIndex, Player.REPEAT_MODE_OFF, false)
-                }
-            } else {
-                currentMixedTracks = listOf(entry)
-                sessionStopOnEnd = true
-                startPlayback(
-                    tracks = currentMixedTracks,
-                    startIndex = 0,
-                    repeatMode = Player.REPEAT_MODE_OFF,
-                    stopOnEnd = true,
-                    queueName = "YouTube",
-                )
-            }
+            val entry = PlaylistMixedTrack.YouTube(track = track, sortOrder = 0)
+            currentMixedTracks = listOf(entry)
+            sessionStopOnEnd = true
+            startPlayback(
+                tracks = currentMixedTracks,
+                startIndex = 0,
+                repeatMode = Player.REPEAT_MODE_OFF,
+                stopOnEnd = true,
+                queueName = "YouTube",
+            )
         }.onFailure { error ->
             if (error is CancellationException) throw error
             _playbackErrors.emit(userFacingPlaybackError(error))
@@ -220,13 +209,6 @@ class YouTubePlaybackController @Inject constructor(
         }
     }
 
-    private fun canAppendToSession(player: Player): Boolean {
-        if (currentMixedTracks.isEmpty()) return false
-        if (player.mediaItemCount <= 0) return false
-        val currentId = player.currentMediaItem?.mediaId ?: return false
-        return currentId.isYouTubeMediaId()
-    }
-
     private suspend fun resolveMixedEntry(entry: PlaylistMixedTrack): MediaItem {
         return when (entry) {
             is PlaylistMixedTrack.Local -> MediaItemBuilder.build(entry.song)
@@ -241,11 +223,13 @@ class YouTubePlaybackController @Inject constructor(
                 if (
                     stopOnEnd &&
                     playbackState == Player.STATE_ENDED &&
-                    player.repeatMode == Player.REPEAT_MODE_OFF &&
-                    player.mediaItemCount <= 1
+                    player.repeatMode == Player.REPEAT_MODE_OFF
                 ) {
-                    player.pause()
                     player.playWhenReady = false
+                    player.pause()
+                    player.clearMediaItems()
+                    currentMixedTracks = emptyList()
+                    sessionStopOnEnd = false
                 }
             }
 

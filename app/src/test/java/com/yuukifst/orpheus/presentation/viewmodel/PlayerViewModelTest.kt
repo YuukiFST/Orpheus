@@ -503,7 +503,7 @@ class PlayerViewModelTest {
 
         assertEquals(nextSong.id, stablePlayerStateFlow.value.currentSong?.id)
         assertEquals("Search", playerViewModel.playerUiState.value.currentQueueSourceName)
-        assertEquals(2, playerViewModel.playerUiState.value.currentPlaybackQueue.size)
+        assertEquals(1, playerViewModel.playerUiState.value.currentPlaybackQueue.size)
     }
 
     @Test
