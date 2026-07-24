@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -34,6 +35,12 @@ class PlaylistDismissUndoStateHolderTest {
         album = "Album",
         path = "path",
         mimeType = "audio/mpeg",
+    )
+
+    private val fakeSong2 = fakeSong.copy(
+        id = "2",
+        title = "Song 2",
+        contentUriString = "content://dummy/2",
     )
 
     @Test
@@ -67,5 +74,43 @@ class PlaylistDismissUndoStateHolderTest {
         assertFalse(sheet)
         assertTrue(state.currentPlaybackQueue.isEmpty())
         assertTrue(state.currentQueueSourceName.isEmpty())
+    }
+
+    @Test
+    fun dismissClearsQueueSoNoSecondTrackRemains() = runTest {
+        val holder = PlaylistDismissUndoStateHolder(appContext)
+        val queue = listOf(fakeSong, fakeSong2)
+        var state = PlayerUiState(
+            currentPlaybackQueue = persistentListOf(fakeSong, fakeSong2),
+            currentQueueSourceName = "Q",
+        )
+        var queueSizeWhenClearPlaybackRuns: Int? = null
+        var stableCleared = false
+        var sheet = true
+
+        holder.dismissPlaylistAndShowUndo(
+            scope = this,
+            currentSong = fakeSong2,
+            queue = queue,
+            queueName = "Q",
+            position = 10L,
+            getUiState = { state },
+            updateUiState = { mut -> state = mut(state) },
+            disconnectRemoteIfNeeded = {},
+            clearPlayback = {
+                queueSizeWhenClearPlaybackRuns = state.currentPlaybackQueue.size
+            },
+            clearStablePlaybackState = { stableCleared = true },
+            setCurrentPosition = {},
+            setSheetVisible = { sheet = it },
+        )
+        runCurrent()
+
+        assertEquals(0, queueSizeWhenClearPlaybackRuns)
+        assertTrue(stableCleared)
+        assertTrue(state.showDismissUndoBar)
+        assertTrue(state.currentPlaybackQueue.isEmpty())
+        assertEquals(2, state.dismissedQueue.size)
+        assertFalse(sheet)
     }
 }

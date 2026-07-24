@@ -4342,6 +4342,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun dismissPlaylistAndShowUndo() {
+        if (_playerUiState.value.showDismissUndoBar) return
         setMiniPlayerDismissing(false)
         playlistDismissUndoStateHolder.dismissPlaylistAndShowUndo(
             scope = viewModelScope,
@@ -4357,11 +4358,21 @@ class PlayerViewModel @Inject constructor(
                 mediaController?.pause()
                 mediaController?.stop()
                 mediaController?.clearMediaItems()
+                playbackStateHolder.updateStablePlayerState {
+                    it.copy(
+                        currentSong = null,
+                        currentMediaItemIndex = 0,
+                        isPlaying = false,
+                        playWhenReady = false,
+                    )
+                }
+                _playerUiState.update { it.copy(currentPlaybackQueue = persistentListOf()) }
             },
             clearStablePlaybackState = {
                 playbackStateHolder.updateStablePlayerState {
                     it.copy(
                         currentSong = null,
+                        currentMediaItemIndex = 0,
                         isPlaying = false,
                         playWhenReady = false,
                         totalDuration = 0L

@@ -51,15 +51,14 @@ class PlaylistDismissUndoStateHolder @Inject constructor(
             }
 
             disconnectRemoteIfNeeded()
-            clearPlayback()
-            clearStablePlaybackState()
-
             updateUiState {
                 it.copy(
                     currentPlaybackQueue = persistentListOf(),
                     currentQueueSourceName = ""
                 )
             }
+            clearStablePlaybackState()
+            clearPlayback()
             setCurrentPosition(0L)
             setSheetVisible(false)
 

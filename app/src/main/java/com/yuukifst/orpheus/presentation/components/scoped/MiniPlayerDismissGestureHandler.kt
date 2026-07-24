@@ -41,10 +41,12 @@ internal class MiniPlayerDismissGestureHandler(
     private var dragPhase: MiniDismissDragPhase = MiniDismissDragPhase.IDLE
     private var accumulatedDragX: Float = 0f
     private var offsetJob: Job? = null
+    private var dismissTriggered: Boolean = false
 
     fun onDragStart() {
         dragPhase = MiniDismissDragPhase.TENSION
         accumulatedDragX = 0f
+        dismissTriggered = false
         offsetJob?.cancel()
         offsetJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
             offsetAnimatable.stop()
@@ -106,7 +108,8 @@ internal class MiniPlayerDismissGestureHandler(
         dragPhase = MiniDismissDragPhase.IDLE
         offsetJob?.cancel()
         val dismissThreshold = screenWidthPx * 0.4f
-        if (abs(accumulatedDragX) > dismissThreshold) {
+        if (abs(accumulatedDragX) > dismissThreshold && !dismissTriggered) {
+            dismissTriggered = true
             onDismissStarted()
             val targetDismissOffset = if (accumulatedDragX < 0) -screenWidthPx else screenWidthPx
             offsetJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
