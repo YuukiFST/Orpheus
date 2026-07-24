@@ -805,12 +805,13 @@ class MusicService : MediaLibraryService() {
         )
             .setSmallIcon(R.drawable.monochrome_player)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.service_processing_action))
+            .setContentText("")
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(getOpenAppPendingIntent())
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .build()
         // Pass mediaPlayback explicitly. On API 34+ a missing/mismatched type can throw
         // MissingForegroundServiceTypeException; ServiceCompat picks the right overload
