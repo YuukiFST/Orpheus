@@ -2,6 +2,21 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.17] - 2026-07-24
+
+### Added
+- Search: Add to queue menu action for appending tracks while playback is active.
+
+### Changed
+- Setup: corner radius customization removed from first-run flow.
+- Search: Play Once menu item removed; tap-to-play remains the default action.
+- Search: artist label and click use YouTube uploader when available.
+
+### Fixed
+- Mini player dismiss clears the queue so a second bar does not appear.
+- Processing playback action notification is no longer shown.
+- Search playback is isolated from Liked so switching contexts does not continue the wrong queue.
+
 ## [1.0.16] - 2026-07-23
 
 ### Added
