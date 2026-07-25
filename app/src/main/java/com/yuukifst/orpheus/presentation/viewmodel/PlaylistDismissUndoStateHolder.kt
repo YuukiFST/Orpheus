@@ -35,7 +35,8 @@ class PlaylistDismissUndoStateHolder @Inject constructor(
         clearPlayback: () -> Unit,
         clearStablePlaybackState: () -> Unit,
         setCurrentPosition: (Long) -> Unit,
-        setSheetVisible: (Boolean) -> Unit
+        setSheetVisible: (Boolean) -> Unit,
+        onDismissCommitted: () -> Unit = {},
     ) {
         scope.launch {
             if (currentSong == null && queue.isEmpty()) return@launch
@@ -70,9 +71,17 @@ class PlaylistDismissUndoStateHolder @Inject constructor(
                         it.copy(
                             showDismissUndoBar = false,
                             dismissedSong = null,
-                            dismissedQueue = persistentListOf()
+                            dismissedQueue = persistentListOf(),
+                            dismissedQueueName = "",
+                            dismissedPosition = 0L,
                         )
                     }
+                    // Re-clear + keep sheet hidden: MediaController can rehydrate currentSong
+                    // while the undo bar is visible; without this the mini player snaps back.
+                    clearStablePlaybackState()
+                    clearPlayback()
+                    setSheetVisible(false)
+                    onDismissCommitted()
                 }
             }
         }

@@ -110,6 +110,7 @@ import com.yuukifst.orpheus.presentation.components.DismissUndoBar
 import com.yuukifst.orpheus.presentation.components.DrawerDestination
 import com.yuukifst.orpheus.presentation.components.MiniPlayerBottomSpacer
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
+import com.yuukifst.orpheus.presentation.components.MiniPlayerVisibilityPolicy
 import com.yuukifst.orpheus.presentation.components.PlayerInternalNavigationBar
 import com.yuukifst.orpheus.presentation.components.UnifiedPlayerSheetV2
 import com.yuukifst.orpheus.presentation.components.calculatePlayerSheetCollapsedTargetY
@@ -737,7 +738,13 @@ class MainActivity : ComponentActivity() {
                                 .map { it.showDismissUndoBar }
                                 .distinctUntilChanged()
                         }.collectAsStateWithLifecycle(initialValue = false)
-                        val showPlayerContentArea = currentSongId != null && !showDismissUndoBar
+                        val dismissJustCommitted by playerViewModel.dismissJustCommitted.collectAsStateWithLifecycle()
+                        val showPlayerContentArea =
+                            MiniPlayerVisibilityPolicy.shouldShowPlayerContent(
+                                currentSongId = currentSongId,
+                                showDismissUndoBar = showDismissUndoBar,
+                                dismissJustCommitted = dismissJustCommitted,
+                            )
                         val navBarElevation = 3.dp
 
                         val animatedNavBarCornerRadius = animateDpAsState(

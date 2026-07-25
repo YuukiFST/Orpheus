@@ -25,25 +25,21 @@ class LocalOnlyMediaNotificationProvider(
     private val stopPendingIntent: PendingIntent by lazy {
         val intent = Intent(context, MusicService::class.java).apply {
             action = MusicService.ACTION_STOP_AND_UNLOAD
+            // Also set Media3's dismissed key so either OEM path unloads playback.
+            putExtra(
+                "androidx.media3.session.NOTIFICATION_DISMISSED_EVENT_KEY",
+                true,
+            )
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        // Foreground service is already running during playback; getForegroundService
-        // is required on API 26+ so OEM shade dismiss reliably delivers onStartCommand.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            PendingIntent.getForegroundService(
-                context,
-                REQUEST_CODE_STOP_AND_UNLOAD,
-                intent,
-                flags,
-            )
-        } else {
-            PendingIntent.getService(
-                context,
-                REQUEST_CODE_STOP_AND_UNLOAD,
-                intent,
-                flags,
-            )
-        }
+        // deleteIntent must use getService: getForegroundService fails on some OEMs
+        // when the shade dismisses while the app process is background-cached.
+        PendingIntent.getService(
+            context,
+            REQUEST_CODE_STOP_AND_UNLOAD,
+            intent,
+            flags,
+        )
     }
 
     fun setSmallIcon(iconResId: Int) {

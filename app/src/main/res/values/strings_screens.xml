@@ -90,6 +90,7 @@
     <!-- Content descriptions -->
     <string name="cd_expand_menu">Expand menu</string>
     <string name="cd_next_step">Next</string>
+    <string name="cd_previous_step">Back</string>
     <string name="cd_finish">Finish</string>
     <string name="cd_close">Close</string>
     <string name="cd_remove">Remove</string>

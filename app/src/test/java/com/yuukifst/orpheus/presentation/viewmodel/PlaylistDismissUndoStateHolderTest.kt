@@ -6,6 +6,7 @@ import com.yuukifst.orpheus.data.model.Song
 import io.mockk.mockk
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -112,5 +113,45 @@ class PlaylistDismissUndoStateHolderTest {
         assertTrue(state.currentPlaybackQueue.isEmpty())
         assertEquals(2, state.dismissedQueue.size)
         assertFalse(sheet)
+    }
+
+    @Test
+    fun undoTimeoutCommitsDismissAndKeepsSheetHidden() = runTest {
+        val holder = PlaylistDismissUndoStateHolder(appContext)
+        var state = PlayerUiState(
+            currentPlaybackQueue = persistentListOf(fakeSong),
+            currentQueueSourceName = "Q",
+            undoBarVisibleDuration = 50L,
+        )
+        var sheet = true
+        var dismissCommitted = 0
+
+        holder.dismissPlaylistAndShowUndo(
+            scope = this,
+            currentSong = fakeSong,
+            queue = listOf(fakeSong),
+            queueName = "Q",
+            position = 10L,
+            getUiState = { state },
+            updateUiState = { mut -> state = mut(state) },
+            disconnectRemoteIfNeeded = {},
+            clearPlayback = {},
+            clearStablePlaybackState = {},
+            setCurrentPosition = {},
+            setSheetVisible = { sheet = it },
+            onDismissCommitted = { dismissCommitted++ },
+        )
+        runCurrent()
+        assertTrue(state.showDismissUndoBar)
+        assertFalse(sheet)
+
+        advanceTimeBy(50L)
+        runCurrent()
+
+        assertFalse(state.showDismissUndoBar)
+        assertFalse(sheet)
+        assertEquals(1, dismissCommitted)
+        assertTrue(state.dismissedSong == null)
+        assertTrue(state.dismissedQueue.isEmpty())
     }
 }

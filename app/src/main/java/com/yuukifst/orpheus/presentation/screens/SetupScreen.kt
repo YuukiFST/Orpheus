@@ -67,6 +67,7 @@ import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Check
@@ -82,6 +83,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
@@ -279,6 +281,11 @@ fun SetupScreen(
                 animated = (pagerState.currentPage != 0),
                 isNextButtonEnabled = isNextButtonEnabled,
                 isFinishButtonEnabled = uiState.allPermissionsGranted,
+                onBackClicked = {
+                    if (pagerState.currentPage > 0) {
+                        navigateToPage(pagerState.currentPage - 1)
+                    }
+                },
                 onNextClicked = {
                     val page = pages[pagerState.currentPage]
                     if (isPermissionGateSatisfied(context, page, uiState)) {
@@ -2118,6 +2125,7 @@ fun SetupBottomBar(
     modifier: Modifier = Modifier,
     animated: Boolean = false,
     pagerState: PagerState,
+    onBackClicked: () -> Unit = {},
     onNextClicked: () -> Unit,
     onFinishClicked: () -> Unit,
     isNextButtonEnabled: Boolean,
@@ -2168,12 +2176,21 @@ fun SetupBottomBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (pagerState.currentPage > 0) {
+                    IconButton(onClick = onBackClicked) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_previous_step),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 // --- KEY CHANGE: animated text ---
                 AnimatedContent(
                     targetState = pagerState.currentPage,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp),
+                        .padding(start = if (pagerState.currentPage > 0) 0.dp else 16.dp),
                     transitionSpec = {
                         if (targetState > initialState) {
                             (slideInVertically { height -> height } + fadeIn()).togetherWith(slideOutVertically { height -> -height } + fadeOut())

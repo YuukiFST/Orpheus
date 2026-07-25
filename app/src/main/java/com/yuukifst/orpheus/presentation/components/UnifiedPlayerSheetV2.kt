@@ -67,6 +67,7 @@ import com.yuukifst.orpheus.presentation.components.scoped.QueueSheetRuntimeEffe
 import com.yuukifst.orpheus.presentation.components.scoped.SheetMotionController
 import com.yuukifst.orpheus.presentation.components.scoped.miniPlayerDismissHorizontalGesture
 import com.yuukifst.orpheus.presentation.components.scoped.playerSheetVerticalDragGesture
+import com.yuukifst.orpheus.presentation.components.MiniPlayerVisibilityPolicy
 import com.yuukifst.orpheus.presentation.components.scoped.rememberFullPlayerCompositionPolicy
 import com.yuukifst.orpheus.presentation.components.scoped.rememberFullPlayerVisualState
 import com.yuukifst.orpheus.presentation.components.scoped.rememberMiniPlayerDismissGestureHandler
@@ -221,17 +222,28 @@ fun UnifiedPlayerSheetV2(
     val miniPlayerContentHeightPx = remember { with(density) { MiniPlayerHeight.toPx() } }
 
     val isOutputConnecting = false
+    val dismissJustCommitted by playerViewModel.dismissJustCommitted.collectAsStateWithLifecycle()
     val showPlayerContentArea by remember(
         infrequentPlayerState.currentSong,
         showDismissUndoBar,
+        dismissJustCommitted,
     ) {
         derivedStateOf {
-            infrequentPlayerState.currentSong != null && !showDismissUndoBar
+            MiniPlayerVisibilityPolicy.shouldShowPlayerContent(
+                currentSongId = infrequentPlayerState.currentSong?.id,
+                showDismissUndoBar = showDismissUndoBar,
+                dismissJustCommitted = dismissJustCommitted,
+            )
         }
     }
 
-    LaunchedEffect(showPlayerContentArea) {
-        if (showPlayerContentArea && offsetAnimatable.value != 0f) {
+    LaunchedEffect(showPlayerContentArea, dismissJustCommitted) {
+        val shouldSnap = MiniPlayerVisibilityPolicy.shouldSnapOffsetOnScreen(
+            showPlayerContentArea = showPlayerContentArea,
+            contentBecameVisible = showPlayerContentArea,
+            dismissJustCommitted = dismissJustCommitted,
+        )
+        if (shouldSnap && offsetAnimatable.value != 0f) {
             offsetAnimatable.snapTo(0f)
         }
     }

@@ -209,6 +209,8 @@ class MusicService : MediaLibraryService() {
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.yuukifst.orpheus.ACTION_SLEEP_TIMER_EXPIRED"
         const val ACTION_STOP_AND_UNLOAD = "com.yuukifst.orpheus.ACTION_STOP_AND_UNLOAD"
+        // Soft clear for mini-player swipe dismiss (keeps service alive for Undo).
+        const val ACTION_CLEAR_PLAYBACK = "com.yuukifst.orpheus.ACTION_CLEAR_PLAYBACK"
         // Media3 packs this on notification swipe deleteIntent (KEYCODE_MEDIA_STOP path).
         private const val MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY =
             "androidx.media3.session.NOTIFICATION_DISMISSED_EVENT_KEY"
@@ -844,12 +846,25 @@ class MusicService : MediaLibraryService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val media3Dismissed =
+            intent?.getBooleanExtra(MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY, false) == true
+        val action = intent?.action
         // Media3 default deleteIntent only hides the shade card; treat swipe as full unload.
-        if (intent?.getBooleanExtra(MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY, false) == true) {
+        // Return early: falling through to super.onStartCommand (START_STICKY) can revive playback.
+        if (MusicServiceShould.returnEarlyAfterUnload(action, media3Dismissed)) {
             stopPlaybackAndUnload(
-                reason = "notification_dismissed_media3",
+                reason = if (media3Dismissed) {
+                    "notification_dismissed_media3"
+                } else {
+                    "notification_dismissed"
+                },
                 preservePlaybackSnapshot = false,
             )
+            return START_NOT_STICKY
+        }
+
+        if (action == ACTION_CLEAR_PLAYBACK) {
+            clearPlaybackKeepService(reason = "mini_player_dismiss")
             return START_NOT_STICKY
         }
 
@@ -878,10 +893,10 @@ class MusicService : MediaLibraryService() {
             startTemporaryForegroundForCommand()
         }
 
-        intent?.action?.let { action ->
-            Timber.tag(TAG).d("onStartCommand widget action: %s", action)
+        intent?.action?.let { actionName ->
+            Timber.tag(TAG).d("onStartCommand widget action: %s", actionName)
             val player = mediaSession?.player ?: engine.masterPlayer
-            when (action) {
+            when (actionName) {
                 PlayerActions.PLAY_PAUSE -> {
                     if (player.playbackState == Player.STATE_IDLE) {
                         player.prepare()
@@ -952,12 +967,6 @@ class MusicService : MediaLibraryService() {
                 ACTION_SLEEP_TIMER_EXPIRED -> {
                     Timber.tag(TAG).d("Sleep timer expired action received. Pausing player.")
                     playbackTimerController.onDurationSleepTimerExpired()
-                }
-                ACTION_STOP_AND_UNLOAD -> {
-                    stopPlaybackAndUnload(
-                        reason = "notification_dismissed",
-                        preservePlaybackSnapshot = false,
-                    )
                 }
             }
         }
@@ -2228,6 +2237,25 @@ class MusicService : MediaLibraryService() {
             reason = "notification_close_button",
             preservePlaybackSnapshot = false
         )
+    }
+
+    private fun clearPlaybackKeepService(reason: String) {
+        Timber.tag(TAG).d("Clearing playback, keeping service. reason=%s", reason)
+        followUpMediaSessionUiRefreshJob?.cancel()
+        mediaSessionButtonRefreshJob?.cancel()
+        debouncedWidgetUpdateJob?.cancel()
+        playbackSnapshotPersistJob?.cancel()
+        clearHeadsetReconnectResume()
+        playbackTimerController.release()
+        clearPlaybackSnapshotOnUnload()
+        listeningStatsTracker.finalizeCurrentSession(forceSynchronousPersistence = true)
+        engine.stopAndClearAllPlayers()
+        val player = mediaSession?.player ?: engine.masterPlayer
+        player.playWhenReady = false
+        player.stop()
+        player.clearMediaItems()
+        requestWidgetFullUpdate(force = true)
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     private fun stopPlaybackAndUnload(

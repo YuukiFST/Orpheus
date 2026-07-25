@@ -392,15 +392,48 @@ class PlayerViewModel @Inject constructor(
 
     private val _isMiniPlayerDismissing = MutableStateFlow(false)
     val isMiniPlayerDismissing: StateFlow<Boolean> = _isMiniPlayerDismissing.asStateFlow()
+    private val _dismissJustCommitted = MutableStateFlow(false)
+    val dismissJustCommitted: StateFlow<Boolean> = _dismissJustCommitted.asStateFlow()
 
     fun setMiniPlayerDismissing(dismissing: Boolean) {
         _isMiniPlayerDismissing.value = dismissing
     }
 
     private fun setSheetVisibleUnlessDismissUndoPending() {
-        if (!_playerUiState.value.showDismissUndoBar) {
+        if (!_playerUiState.value.showDismissUndoBar && !_dismissJustCommitted.value) {
             _isSheetVisible.value = true
         }
+    }
+
+    private fun clearDismissCommittedIfPlayingNewSong(songId: String?) {
+        if (songId != null && _dismissJustCommitted.value) {
+            _dismissJustCommitted.value = false
+        }
+    }
+
+    private fun clearPlaybackForDismiss() {
+        mediaController?.playWhenReady = false
+        mediaController?.pause()
+        mediaController?.stop()
+        mediaController?.clearMediaItems()
+        // DualPlayer can keep an auxiliary engine playing after MediaController.clear;
+        // ask the service to stop both engines without unloading (Undo still needs service).
+        runCatching {
+            context.startService(
+                Intent(context, MusicService::class.java).apply {
+                    action = MusicService.ACTION_CLEAR_PLAYBACK
+                }
+            )
+        }
+        playbackStateHolder.updateStablePlayerState {
+            it.copy(
+                currentSong = null,
+                currentMediaItemIndex = 0,
+                isPlaying = false,
+                playWhenReady = false,
+            )
+        }
+        _playerUiState.update { it.copy(currentPlaybackQueue = persistentListOf()) }
     }
 
     private val _selectedSongForInfo = MutableStateFlow<Song?>(null)
@@ -2647,6 +2680,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun syncDisplayedMediaItemIfChanged(player: Player) {
+        if (_playerUiState.value.showDismissUndoBar || _dismissJustCommitted.value) return
 
         val mediaItem = player.currentMediaItem ?: return
         val currentSongId = playbackStateHolder.stablePlayerState.value.currentSong?.id
@@ -2776,6 +2810,12 @@ class PlayerViewModel @Inject constructor(
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (_playerUiState.value.showDismissUndoBar || _dismissJustCommitted.value) {
+                    playbackStateHolder.updateStablePlayerState {
+                        it.copy(isPlaying = false, playWhenReady = false)
+                    }
+                    return
+                }
                 playbackStateHolder.updateStablePlayerState {
                     it.copy(
                         isPlaying = isPlaying,
@@ -2810,6 +2850,19 @@ class PlayerViewModel @Inject constructor(
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                if (_playerUiState.value.showDismissUndoBar || _dismissJustCommitted.value) {
+                    if (mediaItem == null) {
+                        playbackStateHolder.updateStablePlayerState {
+                            it.copy(
+                                currentSong = null,
+                                isPlaying = false,
+                                playWhenReady = false,
+                            )
+                        }
+                    }
+                    return
+                }
+                clearDismissCommittedIfPlayingNewSong(mediaItem?.mediaId)
                 playbackStateHolder.onPlaybackOccurrenceTransition(mediaItem?.mediaId)
                 preparePlaybackAudioMetadataForMedia(mediaItem?.mediaId)
                 transitionSchedulerJob?.cancel()
@@ -3151,6 +3204,7 @@ class PlayerViewModel @Inject constructor(
         queueName: String,
         mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
     ) {
+        _dismissJustCommitted.value = false
         beginPreparingSong(song)
         _playerUiState.update {
             it.copy(
@@ -4375,21 +4429,7 @@ class PlayerViewModel @Inject constructor(
             getUiState = { _playerUiState.value },
             updateUiState = { mutation -> _playerUiState.update(mutation) },
             disconnectRemoteIfNeeded = {},
-            clearPlayback = {
-                mediaController?.playWhenReady = false
-                mediaController?.pause()
-                mediaController?.stop()
-                mediaController?.clearMediaItems()
-                playbackStateHolder.updateStablePlayerState {
-                    it.copy(
-                        currentSong = null,
-                        currentMediaItemIndex = 0,
-                        isPlaying = false,
-                        playWhenReady = false,
-                    )
-                }
-                _playerUiState.update { it.copy(currentPlaybackQueue = persistentListOf()) }
-            },
+            clearPlayback = { clearPlaybackForDismiss() },
             clearStablePlaybackState = {
                 playbackStateHolder.updateStablePlayerState {
                     it.copy(
@@ -4402,7 +4442,11 @@ class PlayerViewModel @Inject constructor(
                 }
             },
             setCurrentPosition = { playbackStateHolder.setCurrentPosition(it) },
-            setSheetVisible = { _isSheetVisible.value = it }
+            setSheetVisible = { _isSheetVisible.value = it },
+            onDismissCommitted = {
+                _dismissJustCommitted.value = true
+                setMiniPlayerDismissing(false)
+            },
         )
     }
 
@@ -4414,6 +4458,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun undoDismissPlaylist() {
+        _dismissJustCommitted.value = false
         setMiniPlayerDismissing(false)
         playlistDismissUndoStateHolder.undoDismissPlaylist(
             scope = viewModelScope,
