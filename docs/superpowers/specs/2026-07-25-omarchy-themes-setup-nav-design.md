@@ -1,43 +1,55 @@
-# Omarchy Themes + Setup Arrow + Navbar Corners — Design
+# Omarchy Themes + Sakura + Setup Arrow + Navbar Corners — Design
 
 Date: 2026-07-25  
 Status: approved for planning  
-Scope: three Omarchy-derived app themes (Settings-only), Setup next-arrow chrome fix, navbar tip square when Rounded — then plan / implement
+Scope: Omarchy-derived themes + Sakura (Settings-only), ThemePersonality (bounded “vivo”), Setup next-arrow chrome fix, navbar tip square when Rounded — then plan / implement
+
+## Constraint (frontend.md HARD EXCEPTION)
+
+Orpheus already has a Design System (`OrpheusMotion`, `OrpheusShapeSet`, `LocalTerminalChrome`, Pixel soft chrome, Terminal typography).
+
+- **Do not** run the greenfield frontend.md skill pipeline.
+- **Do** extend Orpheus tokens/schemes/chrome in place.
+- Colorful themes use soft chrome like Pixel; Light/Dark stay mono terminal (user Visual Style Square/Rounded).
 
 ## Goals
 
-1. Add **Ethereal**, **Rose Pine**, and **Catppuccin Mocha** as app theme modes, mapped from [Omarchy](https://omarchytheme.com/) palettes (as published on those theme pages).
-2. New themes appear only in **Settings → Appearance**; they must **not** appear in Setup theme picker.
-3. Fix Setup bottom-bar **Next** control: remove the square chrome (FAB + outline) so it matches Back (`IconButton` family).
-4. Fix navbar tips staying square when Visual Style is **Rounded** (radius `0` / promo gaps).
+1. Add **Ethereal**, **Rose Pine**, and **Catppuccin Mocha** as app theme modes from [Omarchy](https://omarchytheme.com/) palettes (exact page hex).
+2. Add **Sakura** as a creative pink Settings-only theme (not Omarchy).
+3. New themes appear only in **Settings → Appearance**; they must **not** appear in Setup theme picker.
+4. Add bounded **ThemePersonality** so colorful themes feel distinct (shapes + motion recipes on shared chrome) without redesigning Library/Player layouts.
+5. Fix Setup bottom-bar **Next** control: remove square chrome (FAB + outline) so it matches Back (`IconButton` family).
+6. Fix navbar tips staying square when Visual Style is **Rounded** (radius `0` / promo gaps).
 
 ## Non-goals
 
 - Changing player album-art / dynamic theme prefs (`ThemePreference`).
-- Follow System selecting Omarchy themes (Follow System stays OS mono Light/Dark only, same as Pixel).
-- Adding Omarchy themes to Setup, or a separate “Dawn vs Main” Rose Pine picker (use the Omarchy page palette as-is: Rose Pine = light `#faf4ed`).
+- Follow System selecting colorful themes (Follow System stays OS mono Light/Dark only, same as Pixel).
+- Adding colorful themes to Setup, or a separate “Dawn vs Main” Rose Pine picker (use Omarchy page palette as-is: Rose Pine = light `#faf4ed`).
+- Per-theme full layout redesign of Library / Player / Search (phase later if wanted).
 - Release bump / ship (unless requested after implementation).
 - Emulator / adb UI driving (`CLAUDE.md`).
 
 ---
 
-## 1. Omarchy themes (Settings-only)
+## 1. Themes (Settings-only)
 
 ### Preference model
 
-Extend `AppThemeMode` with three string constants:
+Extend `AppThemeMode` with:
 
 | Mode | Storage key | Appearance |
 |------|-------------|------------|
 | Ethereal | `ethereal` | Dark navy `#060B1E`, fg `#ffcead`, accent `#7d82d9` |
-| Rose Pine | `rose_pine` | Light `#faf4ed`, fg `#575279`, accent `#56949f` (Omarchy page = Dawn-like) |
+| Rose Pine | `rose_pine` | Light `#faf4ed`, fg `#575279`, accent `#56949f` (Omarchy = Dawn-like) |
 | Catppuccin Mocha | `catppuccin_mocha` | Dark `#11111B`, fg `#CDD6F4`, accent `#F5C2E7` |
+| Sakura | `sakura` | Light cream-pink `#FFF5F7`, fg `#5C2A3A`, accent `#E85A8C` |
 
 Existing modes unchanged: `LIGHT`, `DARK`, `PIXEL`, `FOLLOW_SYSTEM`.
 
 ### Resolution
 
-Extend `AppThemeScheme` with `ETHEREAL`, `ROSE_PINE`, `CATPPUCCIN_MOCHA`.
+Extend `AppThemeScheme` with `ETHEREAL`, `ROSE_PINE`, `CATPPUCCIN_MOCHA`, `SAKURA`.
 
 ```
 when (appThemeMode) {
@@ -47,6 +59,7 @@ when (appThemeMode) {
   ETHEREAL -> darkTheme=true, scheme=ETHEREAL
   ROSE_PINE -> darkTheme=false, scheme=ROSE_PINE
   CATPPUCCIN_MOCHA -> darkTheme=true, scheme=CATPPUCCIN_MOCHA
+  SAKURA -> darkTheme=false, scheme=SAKURA
   FOLLOW_SYSTEM -> OS light/dark → mono LIGHT|DARK only
   else / legacy "terminal" -> DARK
 }
@@ -54,31 +67,86 @@ when (appThemeMode) {
 
 ### Color schemes + chrome
 
-- Build Material 3 `ColorScheme`s from Omarchy palette roles (background, foreground, accent, color0–15 as supporting containers / error / secondary / tertiary). Exact hex from the three Omarchy theme pages — no invented variants.
-- Soft chrome like Pixel: `LocalTerminalChrome = false` for Ethereal / Rose Pine / Catppuccin Mocha / Pixel.
-- Shapes: reuse Pixel / Rounded soft set (not Square terminal). Typography: Terminal for mono Light/Dark; Pixel (or shared soft) typography for colorful schemes including the three new ones.
-- Settings hub category pastel fills: apply for Pixel **and** the three new modes (same “colorful theme” path); Light/Dark/Follow stay mono tiles.
+- Build Material 3 `ColorScheme`s from Omarchy palette roles for the three Omarchy themes (background, foreground, accent, color0–15 as supporting containers / error / secondary / tertiary). Exact hex from the Omarchy pages.
+- Sakura (creative):
+
+| Role | Hex |
+|------|-----|
+| background | `#FFF5F7` |
+| surface / surfaceContainer | `#FFE8EE` |
+| surfaceContainerHigh | `#FFD6E0` |
+| onBackground / onSurface | `#5C2A3A` |
+| primary / primaryContainer | `#E85A8C` / `#FFB7C5` |
+| onPrimary | `#FFFFFF` |
+| secondary | `#F2A0B8` |
+| tertiary | `#C45C7A` |
+| error | `#D64545` |
+| outline | `#E8A0B5` |
+
+- Soft chrome: `LocalTerminalChrome = false` for Pixel + Ethereal + Rose Pine + Catppuccin Mocha + Sakura.
+- Shapes: soft sets (Pixel / personality variants), not Square terminal, for colorful schemes. Typography: Terminal for mono Light/Dark; soft/`Typography` (Pixel typography) for colorful schemes.
+- Settings hub category pastel fills: apply for Pixel **and** all four new modes; Light/Dark/Follow stay mono tiles.
 
 ### Surfaces that list themes
 
 | Surface | Themes shown |
 |---------|----------------|
-| Settings Appearance `ThemeSelectorItem` | Light, Dark, Pixel, Ethereal, Rose Pine, Catppuccin Mocha, Follow System |
+| Settings Appearance `ThemeSelectorItem` | Light, Dark, Pixel, Ethereal, Rose Pine, Catppuccin Mocha, Sakura, Follow System |
 | Setup theme page | Light, Dark, Pixel, Follow System only (unchanged) |
 
-Strings: `setcat_theme_ethereal`, `setcat_theme_rose_pine`, `setcat_theme_catppuccin_mocha` (and translations already used by Appearance).
+Strings: `setcat_theme_ethereal`, `setcat_theme_rose_pine`, `setcat_theme_catppuccin_mocha`, `setcat_theme_sakura`.
 
 ### Touch points
 
 - `AppThemeMode`, `AppThemeScheme`, `resolveAppTheme`
-- `Theme.kt` color schemes + `OrpheusTheme` branch (`isSoftChrome` / not only `isPixel`)
+- `Theme.kt` / `Color.kt` color schemes + `OrpheusTheme` branch (`isSoftChrome` / not only `isPixel`)
 - `SettingsCategoryScreen` options map
-- `SettingsScreen` / category color helpers that currently special-case `PIXEL`
-- Unit tests: `AppThemeModeResolutionTest` for three new modes + Follow System still mono
+- `SettingsScreen` / `settingsCategoryColorsOrMono` colorful path
+- Unit tests: `AppThemeModeResolutionTest` for four new modes + Follow System still mono
 
 ---
 
-## 2. Setup Next arrow (no square)
+## 2. ThemePersonality (bounded “vivo”)
+
+### Mechanism
+
+```kotlin
+enum class ThemeMotionRecipe { SLIDE_FADE, SLIDE_SHORT, FADE_LONG, SCALE_FADE }
+
+data class ThemePersonality(
+    val softChrome: Boolean,
+    val shapeSet: OrpheusShapeSet, // or key resolved in OrpheusTheme
+    val motionRecipe: ThemeMotionRecipe,
+    val openDistance: Dp, // OrpheusMotion Distance* tokens only
+)
+
+val LocalThemePersonality = staticCompositionLocalOf { /* terminal default */ }
+```
+
+`OrpheusTheme` sets `LocalThemePersonality` from `scheme`.
+
+| Scheme | Feeling | Shape | Motion recipe |
+|--------|---------|-------|---------------|
+| LIGHT / DARK | terminal | Square or Rounded (user pref) | `SLIDE_FADE`, `DistanceBase` |
+| PIXEL | soft Pixel | `OrpheusShapeSets.Pixel` | `SLIDE_FADE`, `DistanceBase` |
+| ETHEREAL | navy cool | soft + slightly more pill (reuse Pixel or Rounded with larger search/button) | `FADE_LONG` (open `DurationFast`, close `DurationQuick`; prefer fade over travel) |
+| ROSE_PINE | calm cream | soft médio (`OrpheusShapeSets.Rounded`) | `SLIDE_SHORT` (`DistanceSmall`) |
+| CATPPUCCIN_MOCHA | pastel cozy | soft Pixel-like | `SCALE_FADE` (scale from `ContentSwapScale` 0.97f → 1 + fade; open/close asymmetry) |
+| SAKURA | petal | larger radius soft (Pixel with searchBar/smooth28+ bump or dedicated Sakura set copying Pixel + +4.dp on medium radii) | `SLIDE_FADE` with `DistanceBase` |
+
+### Consumers (v1)
+
+- `OrpheusTheme` shape / chrome / typography selection
+- Shared animated chrome that already uses `OrpheusMotion` and can read `LocalThemePersonality` (e.g. Settings enter / Setup nav icon transition) — optional wire where cheap
+- Settings pastel tiles via colorful-mode helper
+
+### Non-consumers (v1)
+
+- Do not fork Library / Player / Search layout trees per theme.
+
+---
+
+## 3. Setup Next arrow (no square)
 
 ### Root cause
 
@@ -96,7 +164,7 @@ Setup bottom bar: Back = plain `IconButton`; Next/Finish = `MediumExtendedFloati
 
 ---
 
-## 3. Navbar tips square when Rounded
+## 4. Navbar tips square when Rounded
 
 ### Root cause
 
@@ -119,16 +187,16 @@ Navbar clip radius comes from `navBarCornerRadius`, independent of Visual Style.
 
 ---
 
-## 4. Testing
+## 5. Testing
 
-- Unit: resolve three new modes; Follow System ignores them; promo Rounded+0→28.
+- Unit: resolve four new modes; Follow System ignores them; pastel path for colorful modes; promo Rounded+0→28.
 - Compile: `compileDebugKotlin` / relevant unit tests.
-- Manual (user device): Settings lists three themes and applies colors; Setup theme page has no Ethereal/Rose Pine/Catppuccin; Setup Next matches Back (no square); Library navbar tips rounded when Visual Style = Rounded.
+- Manual (user device): Settings lists four themes and applies colors; Setup theme page has no Ethereal/Rose Pine/Catppuccin/Sakura; Setup Next matches Back (no square); Library navbar tips rounded when Visual Style = Rounded; soft themes feel distinct (shapes/motion) without layout forks.
 
 ---
 
 ## Approach
 
-**Chosen:** Approach A — new `AppThemeMode` values + schemes, Settings-only listing, soft chrome like Pixel, Setup IconButton Next, radius promo harden.
+**Chosen:** Approach A — new `AppThemeMode` values + schemes + `ThemePersonality`, Settings-only listing, soft chrome like Pixel, Setup IconButton Next, radius promo harden.
 
-Rejected: scheme-override without modes (fragile resolution); terminal chrome on Omarchy palettes (fights color).
+Rejected: scheme-override without modes; terminal chrome on colorful palettes; full per-theme Library/Player redesign in this cycle.
