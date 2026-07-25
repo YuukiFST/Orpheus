@@ -2,6 +2,14 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.26] - 2026-07-25
+
+### Added
+- Orpheus brand logo as launcher icon, README header, and About screen artwork.
+
+### Changed
+- README screenshots updated to current Now Playing and Appearance UI.
+
 ## [1.0.25] - 2026-07-25
 
 ### Fixed
