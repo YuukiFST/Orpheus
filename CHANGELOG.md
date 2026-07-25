@@ -2,6 +2,13 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.21] - 2026-07-25
+
+### Changed
+- Design-system foundation: shared `OrpheusSpacing` scale, motion distance tokens, documented Title/Meta/Label type roles, and `LocalTerminalChrome` gates for terminal borders/press chrome.
+- Player and mini player layout rhythm, typography roles, and spacing tokens; mini player height 72dp for readable title/meta.
+- Library song rows, Search/YouTube insets and row chrome, Settings row borders and hub chevrons, Setup page padding and heading roles — polish in place on the existing Orpheus look (no new palette).
+
 ## [1.0.20] - 2026-07-25
 
 ### Changed
