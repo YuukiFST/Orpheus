@@ -2141,6 +2141,7 @@ fun SetupBottomBar(
 
     Surface(
         modifier = modifier
+            .navigationBarsPadding()
             .shadow(elevation = 8.dp, shape = shape, clip = true)
             .setupOutline(),
         color = MaterialTheme.colorScheme.surfaceContainer,
