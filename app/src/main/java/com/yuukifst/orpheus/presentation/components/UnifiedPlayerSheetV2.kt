@@ -3,7 +3,6 @@ package com.yuukifst.orpheus.presentation.components
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.spring
@@ -84,6 +83,7 @@ import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
 import com.yuukifst.orpheus.ui.theme.LocalOrpheusDarkTheme
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.utils.MediaItemBuilder
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -252,7 +252,10 @@ fun UnifiedPlayerSheetV2(
     val visualOvershootScaleY = remember { Animatable(1f) }
     val initialFullPlayerOffsetY = remember(density) { with(density) { 24.dp.toPx() } }
     val sheetAnimationSpec = remember {
-        tween<Float>(durationMillis = ANIMATION_DURATION_MS, easing = FastOutSlowInEasing)
+        tween<Float>(
+            durationMillis = ANIMATION_DURATION_MS,
+            easing = OrpheusMotion.EaseSmoothOut
+        )
     }
     val sheetAnimationMutex = remember { MutatorMutex() }
     val sheetExpandedTargetY = 0f

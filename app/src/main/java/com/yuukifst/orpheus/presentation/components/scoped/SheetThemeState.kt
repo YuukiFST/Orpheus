@@ -2,7 +2,6 @@ package com.yuukifst.orpheus.presentation.components.scoped
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -21,6 +20,7 @@ import androidx.compose.ui.util.lerp
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.presentation.viewmodel.ColorSchemePair
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 /**
  * Theme state for the player sheet.
@@ -150,7 +150,10 @@ internal fun rememberSheetThemeState(
         } else if (miniAppearProgress.value < 1f) {
             miniAppearProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
+                animationSpec = tween(
+                    durationMillis = OrpheusMotion.DurationFast,
+                    easing = OrpheusMotion.EaseSmoothOut
+                )
             )
         }
     }

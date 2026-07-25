@@ -49,13 +49,14 @@ import androidx.compose.ui.unit.sp
 import coil.size.Size
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.terminalAccentLine
 
 internal val LocalMaterialTheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
 val MiniPlayerHeight = 64.dp
-const val ANIMATION_DURATION_MS = 255
+const val ANIMATION_DURATION_MS = OrpheusMotion.DurationFast
 val MiniPlayerBottomSpacer = 8.dp
 
 @Composable
