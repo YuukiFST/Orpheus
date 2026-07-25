@@ -1,6 +1,5 @@
 package com.yuukifst.orpheus.presentation.components.scoped
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.Density
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.math.max
@@ -69,7 +69,10 @@ internal fun rememberSheetOverlayState(
 
     val queueVisualOpenFraction by animateFloatAsState(
         targetValue = if (showQueueSheet && screenHeightPx > 0f) 1f else 0f,
-        animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+        animationSpec = tween(
+            durationMillis = OrpheusMotion.DurationFast,
+            easing = OrpheusMotion.EaseSmoothOut
+        ),
         label = "queueVisualOpenFraction"
     )
 

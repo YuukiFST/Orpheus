@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -19,9 +18,10 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 import com.yuukifst.orpheus.ui.theme.terminalPressScale
 
 @Composable
@@ -68,7 +68,7 @@ fun TabAnimation(
 
     Tab(
         modifier = modifier
-            .padding(all = 5.dp)
+            .padding(all = OrpheusSpacing.xxs)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -77,7 +77,7 @@ fun TabAnimation(
             .terminalPressScale(interactionSource)
             .clip(TerminalCornerShape)
             .background(color = backgroundColor, shape = TerminalCornerShape)
-            .border(width = 1.dp, color = borderColor, shape = TerminalCornerShape),
+            .terminalBorder(color = borderColor),
         selected = isSelected,
         text = content,
         onClick = {

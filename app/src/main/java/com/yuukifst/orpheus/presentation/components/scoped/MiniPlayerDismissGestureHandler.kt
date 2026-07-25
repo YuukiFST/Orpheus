@@ -2,7 +2,6 @@ package com.yuukifst.orpheus.presentation.components.scoped
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -19,6 +18,7 @@ import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.sign
@@ -116,8 +116,8 @@ internal class MiniPlayerDismissGestureHandler(
                 offsetAnimatable.animateTo(
                     targetValue = targetDismissOffset,
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = OrpheusMotion.DurationQuick,
+                        easing = OrpheusMotion.EaseSmoothOut
                     )
                 )
                 onDismissPlaylistAndShowUndo()

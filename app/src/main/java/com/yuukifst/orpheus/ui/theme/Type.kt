@@ -50,6 +50,16 @@ val ExpTitleTypography = Typography(
     )
 )
 
+/**
+ * Orpheus Dark/Light Material typography (mono).
+ *
+ * Semantic roles for screen polish (Phases 2–5) — map UI copy to these, do not invent ad-hoc sizes:
+ * - **Title** — primary track / screen heading → prefer `titleLarge` / `titleMedium` / `headline*`
+ * - **Meta** — artist, secondary line, timestamps → prefer `bodyMedium` / `bodySmall` (tabular nums on body)
+ * - **Label** — chrome labels, settings rows, section labels → prefer `labelLarge` / `labelMedium` / `labelSmall`
+ *
+ * Pixel mode uses [ExpTitleTypography] / Montserrat — keep Pixel styles; do not force mono there.
+ */
 val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = JetBrainsMonoNerd,

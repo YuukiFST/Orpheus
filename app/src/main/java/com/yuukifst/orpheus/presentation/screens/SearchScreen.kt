@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.OrpheusSearchBarShape
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.ShapeCache
@@ -127,6 +128,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
 import androidx.compose.ui.res.stringResource
 
@@ -193,6 +195,7 @@ fun SearchScreen(
     }
 
     val searchBarShape = OrpheusSearchBarShape
+    val showTerminalChrome = LocalTerminalChrome.current
 
     val dm = LocalOrpheusDarkTheme.current
 
@@ -240,8 +243,12 @@ fun SearchScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, top = statusBarTopInset + 12.dp, end = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(
+                        start = OrpheusSpacing.lg,
+                        top = statusBarTopInset + OrpheusSpacing.sm,
+                        end = OrpheusSpacing.lg,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val searchBarInputFieldColors = SearchBarDefaults.inputFieldColors(
@@ -317,7 +324,13 @@ fun SearchScreen(
                         expanded = false,
                         onExpandedChange = {},
                         modifier = Modifier
-                            .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                            .then(
+                                if (showTerminalChrome) {
+                                    Modifier.border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                                } else {
+                                    Modifier
+                                }
+                            )
                             .clip(searchBarShape),
                         shape = searchBarShape,
                         colors = SearchBarDefaults.colors(
@@ -377,13 +390,13 @@ fun SearchScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp)
+                            .padding(horizontal = OrpheusSpacing.lg)
                     ) {
                         FlowRow(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp, horizontal = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                .padding(vertical = OrpheusSpacing.xs),
+                            horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.xs),
                             verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
                             SearchFilterChip(SearchFilterType.ALL, currentFilter, playerViewModel)

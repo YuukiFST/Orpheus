@@ -97,7 +97,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceAtLeast
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.Cloud
@@ -254,7 +256,7 @@ fun FullPlayerContent(
     val isBluetoothEnabled = fullPlayerSlice.isBluetoothEnabled
     val bluetoothName = fullPlayerSlice.bluetoothName
     val navigationBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val queueGestureBottomExclusion = maxOf(20.dp, navigationBarBottomInset + 8.dp)
+    val queueGestureBottomExclusion = maxOf(20.dp, navigationBarBottomInset + OrpheusSpacing.xs)
     val queueGestureBottomExclusionPx = with(LocalDensity.current) {
         queueGestureBottomExclusion.toPx()
     }
@@ -708,7 +710,7 @@ fun FullPlayerContent(
                                             imageVector = androidx.compose.material.icons.Icons.Rounded.Cloud,
                                             contentDescription = stringResource(R.string.presentation_batch_g_player_cd_cloud_stream),
                                             tint = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.6f),
-                                            modifier = Modifier.padding(start = 8.dp).size(16.dp)
+                                            modifier = Modifier.padding(start = OrpheusSpacing.xs).size(16.dp)
                                         )
                                     }
                                 }
@@ -906,7 +908,7 @@ private fun FullPlayerAlbumCoverSection(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = OrpheusSpacing.xs)
     ) {
         val carouselHeight = when (carouselStyle) {
             CarouselStyle.NO_PEEK -> maxWidth
@@ -1028,7 +1030,7 @@ private fun FullPlayerControlsSection(
         ) {
             AnimatedPlaybackControls(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = OrpheusSpacing.sm, vertical = OrpheusSpacing.xs),
                 isPlayingProvider = isPlayingProvider,
                 onPrevious = onPrevious,
                 onPlayPause = onPlayPause,
@@ -1253,24 +1255,23 @@ private fun FullPlayerPortraitContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(
-                horizontal = 24.dp,
-                vertical = 0.dp
-            ),
+            .padding(horizontal = OrpheusSpacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
+        verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.md)
     ) {
         albumCoverSection(Modifier)
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.xxs)
         ) {
             Box(Modifier.align(Alignment.Start)) {
                 songMetadataSection()
             }
             playerProgressSection()
         }
+
+        Spacer(Modifier.weight(1f, fill = true))
 
         controlsSection()
     }
@@ -1288,10 +1289,7 @@ private fun FullPlayerLandscapeContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(
-                horizontal = 24.dp,
-                vertical = 0.dp
-            ),
+            .padding(horizontal = OrpheusSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
         albumCoverSection(
@@ -1303,16 +1301,13 @@ private fun FullPlayerLandscapeContent(
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .weight(1f)
-                .padding(
-                    horizontal = 0.dp,
-                    vertical = 0.dp
-                ),
+                .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.md)
         ) {
             songMetadataSection()
             playerProgressSection()
+            Spacer(Modifier.weight(1f, fill = true))
             controlsSection()
         }
     }
@@ -1343,7 +1338,7 @@ private fun SongMetadataDisplaySection(
             .fillMaxWidth()
             .heightIn(min = 70.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm)
     ) {
         song?.let { currentSong ->
             PlayerSongInfo(
@@ -1399,10 +1394,10 @@ private fun SongMetadataDisplaySection(
             Surface(
                 shape = TerminalCornerShape,
                 color = chipColor,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = OrpheusSpacing.xs)
             ) {
                 Box(
-                    modifier = Modifier.padding(10.dp), 
+                    modifier = Modifier.padding(10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     LoadingIndicator(
@@ -1744,7 +1739,7 @@ private fun EfficientSlider(
         semanticsLabel = "Playback position",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 0.dp)
+            .padding(vertical = OrpheusSpacing.xs, horizontal = 0.dp)
     )
 }
 
@@ -1784,13 +1779,13 @@ private fun EfficientTimeLabels(
         ) {
             Text(
                 posStr,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 color = textColor
             )
             Text(
                 durStr,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.SemiBold,
                 color = textColor
             )
@@ -2002,21 +1997,25 @@ private fun PlayerSongInfo(
     val resolvedArtistId by remember(artists, artistId) {
         derivedStateOf { artists.firstOrNull { it.id != 0L && it.id != -1L }?.id ?: artistId }
     }
-    val titleStyle = MaterialTheme.typography.headlineSmall.copy(
+    val showTerminalChrome = LocalTerminalChrome.current
+    val baseTitleStyle = MaterialTheme.typography.titleLarge.copy(
         fontWeight = FontWeight.Bold,
-        fontFamily = RoundedSans,
         color = textColor
     )
+    val titleStyle = if (showTerminalChrome) {
+        baseTitleStyle
+    } else {
+        baseTitleStyle.copy(fontFamily = RoundedSans)
+    }
 
-    val artistStyle = MaterialTheme.typography.titleMedium.copy(
-        letterSpacing = 0.sp,
+    val artistStyle = MaterialTheme.typography.bodyMedium.copy(
         color = artistTextColor
     )
 
     Column(
         horizontalAlignment = Alignment.Start,
             modifier = modifier
-                .padding(vertical = 4.dp)
+                .padding(vertical = OrpheusSpacing.xxs)
                 .fillMaxWidth()
             .graphicsLayer {
                 val fraction = expansionFractionProvider()
@@ -2137,7 +2136,7 @@ private fun MetadataPlaceholder(
                 translationY = (1f - expansionFraction.coerceIn(0f, 1f)) * 24f
             },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm)
     ) {
         Column(
             modifier = Modifier
@@ -2201,7 +2200,7 @@ private fun ProgressPlaceholder(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = OrpheusSpacing.xs),
             contentAlignment = Alignment.CenterStart
         ) {
             PlaceholderBox(
@@ -2269,6 +2268,7 @@ private fun ProgressPlaceholder(
 
 @Composable
 private fun ControlsPlaceholder(color: Color, onColor: Color) {
+    val showTerminalChrome = LocalTerminalChrome.current
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -2276,7 +2276,7 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
     ) {
         Box(
             modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = OrpheusSpacing.sm, vertical = OrpheusSpacing.xs)
                 .fillMaxWidth()
                 .height(80.dp)
         ) {
@@ -2316,9 +2316,15 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                 .heightIn(min = 66.dp, max = 86.dp)
                 .padding(horizontal = 26.dp)
                 .padding(bottom = 6.dp)
-                .background(
-                    color = onColor.copy(alpha = 0.1f),
-                    shape = TerminalCornerShape
+                .then(
+                    if (!showTerminalChrome) {
+                        Modifier.background(
+                            color = onColor.copy(alpha = 0.1f),
+                            shape = TerminalCornerShape
+                        )
+                    } else {
+                        Modifier
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -2334,7 +2340,7 @@ private fun ControlsPlaceholder(color: Color, onColor: Color) {
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
-                        color = onColor.copy(alpha = 0.1f)
+                        color = if (showTerminalChrome) onColor else onColor.copy(alpha = 0.1f)
                     )
                 }
             }

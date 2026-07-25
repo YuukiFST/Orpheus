@@ -150,8 +150,11 @@ import com.yuukifst.orpheus.presentation.viewmodel.SetupEvent
 import com.yuukifst.orpheus.presentation.viewmodel.SetupUiState
 import com.yuukifst.orpheus.presentation.viewmodel.SetupViewModel
 import com.yuukifst.orpheus.ui.theme.ExpTitleTypography
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.ui.theme.terminalBorder
+import androidx.compose.ui.text.TextStyle
 import com.yuukifst.orpheus.utils.StorageInfo
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -591,29 +594,21 @@ fun WelcomePage() {
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.md)
     ) {
         Column(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .padding(top = 12.dp),
+                .padding(top = OrpheusSpacing.sm),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = stringResource(R.string.setup_welcome_prefix),
-                style = ExpTitleTypography.displayLarge.copy(
-                    fontSize = 42.sp,
-                    lineHeight = 1.1.em
-                ),
+                style = setupHeroPrefixStyle(),
             )
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 46.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 1.1.em
-                ),
+                style = setupHeroTitleStyle(),
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -626,7 +621,7 @@ fun WelcomePage() {
             modifier = Modifier.setupOutline(),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = OrpheusSpacing.sm, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -741,14 +736,11 @@ fun PermissionsPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.md)
     ) {
         Text(
             text = stringResource(R.string.setup_permissions_title),
-            style = MaterialTheme.typography.displayMedium.copy(
-                fontFamily = RoundedSans,
-                fontSize = 32.sp
-            ),
+            style = setupPageTitleStyle(),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
@@ -854,12 +846,12 @@ private fun PermissionOptionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(OrpheusSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm)
             ) {
                 Surface(
                     shape = TerminalCornerShape,
@@ -955,7 +947,7 @@ fun BackupRestorePage(
                     .animateContentSize()
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    modifier = Modifier.padding(horizontal = OrpheusSpacing.md, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (uiState.isInspectingBackup && progress == null) {
@@ -1048,16 +1040,13 @@ fun ThemeSelectionPage(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(OrpheusSpacing.lg)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.sm))
             Text(
                 text = stringResource(R.string.setup_theme_title),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 32.sp
-                ),
+                style = setupPageTitleStyle(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -1088,7 +1077,7 @@ fun ThemeSelectionPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = OrpheusSpacing.sm, vertical = 6.dp)
             )
         }
     }
@@ -1116,7 +1105,7 @@ private fun ThemeModeOptionCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 16.dp),
+                .padding(horizontal = 18.dp, vertical = OrpheusSpacing.md),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.Top
         ) {
@@ -1228,16 +1217,13 @@ fun ExternalServicesPage(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(OrpheusSpacing.lg)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.sm))
             Text(
                 text = stringResource(R.string.setup_external_services_title),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 32.sp
-                ),
+                style = setupPageTitleStyle(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -1275,7 +1261,7 @@ fun ExternalServicesPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = OrpheusSpacing.sm, vertical = 6.dp)
             )
         }
     }
@@ -1298,7 +1284,7 @@ private fun ExternalServiceToggleCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
-                .padding(horizontal = 18.dp, vertical = 16.dp),
+                .padding(horizontal = 18.dp, vertical = OrpheusSpacing.md),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1359,18 +1345,15 @@ fun LibraryLayoutPage(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(OrpheusSpacing.lg)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.md))
             Text(
                 text = stringResource(R.string.setup_library_layout_title),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 32.sp
-                ),
+                style = setupPageTitleStyle(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -1408,7 +1391,7 @@ fun LibraryLayoutPage(
             ) {
                 Row(
                    modifier = Modifier
-                       .padding(horizontal = 20.dp, vertical = 16.dp)
+                       .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.md)
                        .fillMaxWidth(),
                    verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1440,16 +1423,17 @@ fun LibraryLayoutPage(
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = OrpheusSpacing.md)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.lg))
         }
     }
 }
 
 @Composable
 fun LibraryHeaderPreview(isCompact: Boolean) {
+    val showTerminalChrome = LocalTerminalChrome.current
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
@@ -1506,11 +1490,21 @@ fun LibraryHeaderPreview(isCompact: Boolean) {
                     ) {
                         Text(
                             text = stringResource(R.string.tab_library),
-                            fontFamily = RoundedSans,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 40.sp,
-                            letterSpacing = 1.sp
+                            style = if (showTerminalChrome) {
+                                MaterialTheme.typography.displaySmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    letterSpacing = 1.sp
+                                )
+                            } else {
+                                MaterialTheme.typography.displayLarge.copy(
+                                    fontFamily = RoundedSans,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontSize = 40.sp,
+                                    letterSpacing = 1.sp
+                                )
+                            }
                         )
                         Spacer(modifier = Modifier.height(18.dp))
                         Row(
@@ -1631,7 +1625,7 @@ fun FinishPage() {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.md)
     ) {
         Text(text = stringResource(R.string.setup_all_set_title), style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
@@ -1660,16 +1654,13 @@ fun PermissionPageLayout(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(OrpheusSpacing.lg)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-             Spacer(modifier = Modifier.height(16.dp))
+             Spacer(modifier = Modifier.height(OrpheusSpacing.md))
             Text(
                 text = title,
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 32.sp
-                ),
+                style = setupPageTitleStyle(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -1769,8 +1760,8 @@ private fun SetupRestoreDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                .padding(horizontal = OrpheusSpacing.md, vertical = 14.dp),
+                            horizontalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             OrpheusTextButton(
@@ -1810,9 +1801,7 @@ private fun SetupRestoreDialog(
                 ) {
                     Text(
                         text = stringResource(R.string.setup_restore_backup_title),
-                        style = MaterialTheme.typography.displaySmall.copy(
-                            fontFamily = RoundedSans
-                        ),
+                        style = setupDialogTitleStyle(),
                         fontWeight = FontWeight.Bold
                     )
                     Text(
@@ -1827,7 +1816,7 @@ private fun SetupRestoreDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                            modifier = Modifier.padding(OrpheusSpacing.md),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
@@ -1884,7 +1873,7 @@ private fun SetupRestoreDialog(
                                     text = warning,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = OrpheusSpacing.sm)
                                 )
                             }
                         }
@@ -1893,7 +1882,7 @@ private fun SetupRestoreDialog(
                     LazyColumn(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        contentPadding = PaddingValues(bottom = 12.dp)
+                        contentPadding = PaddingValues(bottom = OrpheusSpacing.sm)
                     ) {
                         items(availableModules) { section ->
                             val detail = plan.moduleDetails[section]
@@ -2151,7 +2140,7 @@ fun SetupBottomBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                    .padding(OrpheusSpacing.sm),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -2279,18 +2268,15 @@ fun NavBarLayoutPage(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(OrpheusSpacing.lg)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.md))
             Text(
                 text = stringResource(R.string.setup_app_navigation_title),
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontFamily = RoundedSans,
-                    fontSize = 32.sp
-                ),
+                style = setupPageTitleStyle(),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -2328,7 +2314,7 @@ fun NavBarLayoutPage(
             ) {
                 Column(
                     modifier = Modifier
-                       .padding(horizontal = 20.dp, vertical = 16.dp)
+                       .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.md)
                        .fillMaxWidth()
                 ) {
                     Row(
@@ -2364,10 +2350,10 @@ fun NavBarLayoutPage(
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = OrpheusSpacing.md)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(OrpheusSpacing.lg))
         }
     }
 }
@@ -2399,8 +2385,8 @@ fun NavBarPreview(isDefault: Boolean) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(OrpheusSpacing.md),
+                verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.sm)
             ) {
                  // Fake content lines
                  repeat(3) {
@@ -2431,7 +2417,7 @@ fun NavBarPreview(isDefault: Boolean) {
                          Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(OrpheusSpacing.md)
                                 .height(80.dp),
                             shape = TerminalCornerShape,
                             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -2472,6 +2458,60 @@ fun NavBarPreview(isDefault: Boolean) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun setupPageTitleStyle(): TextStyle {
+    val showTerminalChrome = LocalTerminalChrome.current
+    return if (showTerminalChrome) {
+        MaterialTheme.typography.headlineMedium
+    } else {
+        MaterialTheme.typography.displayMedium.copy(
+            fontFamily = RoundedSans,
+            fontSize = 32.sp
+        )
+    }
+}
+
+@Composable
+private fun setupHeroPrefixStyle(): TextStyle {
+    val showTerminalChrome = LocalTerminalChrome.current
+    return if (showTerminalChrome) {
+        MaterialTheme.typography.headlineSmall
+    } else {
+        ExpTitleTypography.displayLarge.copy(
+            fontSize = 42.sp,
+            lineHeight = 1.1.em
+        )
+    }
+}
+
+@Composable
+private fun setupHeroTitleStyle(): TextStyle {
+    val showTerminalChrome = LocalTerminalChrome.current
+    return if (showTerminalChrome) {
+        MaterialTheme.typography.displaySmall.copy(
+            color = MaterialTheme.colorScheme.primary,
+            lineHeight = 1.1.em
+        )
+    } else {
+        MaterialTheme.typography.displayLarge.copy(
+            fontFamily = RoundedSans,
+            fontSize = 46.sp,
+            color = MaterialTheme.colorScheme.primary,
+            lineHeight = 1.1.em
+        )
+    }
+}
+
+@Composable
+private fun setupDialogTitleStyle(): TextStyle {
+    val showTerminalChrome = LocalTerminalChrome.current
+    return if (showTerminalChrome) {
+        MaterialTheme.typography.displaySmall
+    } else {
+        MaterialTheme.typography.displaySmall.copy(fontFamily = RoundedSans)
     }
 }
 
