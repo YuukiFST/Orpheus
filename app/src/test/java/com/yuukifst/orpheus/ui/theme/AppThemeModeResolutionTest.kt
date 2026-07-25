@@ -35,6 +35,42 @@ class AppThemeModeResolutionTest {
     }
 
     @Test
+    fun etherealForcesDarkAndEtherealScheme() {
+        val r = resolveAppTheme(AppThemeMode.ETHEREAL, systemDark = false)
+        assertTrue(r.darkTheme)
+        assertEquals(AppThemeScheme.ETHEREAL, r.scheme)
+    }
+
+    @Test
+    fun rosePineForcesLightAndRosePineScheme() {
+        val r = resolveAppTheme(AppThemeMode.ROSE_PINE, systemDark = true)
+        assertFalse(r.darkTheme)
+        assertEquals(AppThemeScheme.ROSE_PINE, r.scheme)
+    }
+
+    @Test
+    fun catppuccinMochaForcesDarkAndScheme() {
+        val r = resolveAppTheme(AppThemeMode.CATPPUCCIN_MOCHA, systemDark = false)
+        assertTrue(r.darkTheme)
+        assertEquals(AppThemeScheme.CATPPUCCIN_MOCHA, r.scheme)
+    }
+
+    @Test
+    fun sakuraForcesLightAndSakuraScheme() {
+        val r = resolveAppTheme(AppThemeMode.SAKURA, systemDark = true)
+        assertFalse(r.darkTheme)
+        assertEquals(AppThemeScheme.SAKURA, r.scheme)
+    }
+
+    @Test
+    fun followSystemNeverSelectsColorfulThemes() {
+        val light = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = false)
+        val dark = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = true)
+        assertEquals(AppThemeScheme.LIGHT, light.scheme)
+        assertEquals(AppThemeScheme.DARK, dark.scheme)
+    }
+
+    @Test
     fun unknownModeFallsBackToLight() {
         val r = resolveAppTheme("garbage", systemDark = true)
         assertEquals(AppThemeScheme.LIGHT, r.scheme)

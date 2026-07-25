@@ -46,6 +46,10 @@ object AppThemeMode {
     const val LIGHT = "light"
     const val DARK = "dark"
     const val PIXEL = "pixel"
+    const val ETHEREAL = "ethereal"
+    const val ROSE_PINE = "rose_pine"
+    const val CATPPUCCIN_MOCHA = "catppuccin_mocha"
+    const val SAKURA = "sakura"
 }
 
 const val MIN_NAV_BAR_CORNER_RADIUS = 0
