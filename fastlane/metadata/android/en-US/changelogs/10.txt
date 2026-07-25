@@ -1,1 +1,0 @@
-Fix Library crash on Liked tab with YouTube favorites (Paging 3 pageEventFlow double collection).

@@ -1,1 +1,0 @@
-Mini player updates instantly when switching tracks from search or library. Faster color transition on song change.

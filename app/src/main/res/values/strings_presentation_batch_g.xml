@@ -472,7 +472,7 @@ Backslash (\) can be used to escape character delimiters.</string>
         <item>Removed release paths that depended on local/private signing artifacts, dummy signing values, or app-store-only assumptions.</item>
     </string-array>
     <string-array name="presentation_batch_g_changelog_070_fixes">
-        <item>Added F-Droid metadata, Fastlane store metadata, privacy notes, security notes, dependency/license documentation, and contributor guidance.</item>
+        <item>Added privacy notes, security notes, and contributor guidance.</item>
         <item>Release builds stay unsigned when local signing keys are absent.</item>
         <item>Added orpheus.disableReleaseSigning=true for deterministic unsigned verification builds.</item>
         <item>Documented asset and dependency license trails, including native/binary Maven artifacts and JitPack dependencies.</item>
