@@ -2,6 +2,18 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.27] - 2026-07-25
+
+### Changed
+- Player, library, and search screens collect narrow UI state slices to reduce recomposition during playback.
+- Cold start defers notification channel setup, YouTube init, sync, and DataStore mirror refresh to a background scope.
+- Media controller connects on demand instead of binding during `MainActivity` creation.
+- Setup theme picker no longer marks Dark Mode as recommended.
+
+### Fixed
+- YouTube search and download requests cancel in-flight OkHttp calls when superseded.
+- YouTube thumbnails pick the correct URL variant for list target sizes.
+
 ## [1.0.26] - 2026-07-25
 
 ### Added
