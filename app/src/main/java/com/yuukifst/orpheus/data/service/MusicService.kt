@@ -991,6 +991,14 @@ class MusicService : MediaLibraryService() {
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = mediaSession
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        stopPlaybackAndUnload(
+            reason = "task_removed",
+            preservePlaybackSnapshot = false,
+        )
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
         PlaybackActivityTracker.setPlaybackActive(false)
         listeningStatsTracker.finalizeCurrentSession(forceSynchronousPersistence = true)
