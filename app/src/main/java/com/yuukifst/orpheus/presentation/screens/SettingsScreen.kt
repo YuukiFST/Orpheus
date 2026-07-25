@@ -256,7 +256,7 @@ fun SettingsScreen(
                         title = stringResource(R.string.settings_accounts_row_title),
                         subtitle = stringResource(R.string.settings_accounts_row_subtitle),
                         icon = Icons.Rounded.AccountCircle,
-                        colors = if (uiState.appThemeMode == AppThemeMode.PIXEL) {
+                        colors = if (isColorfulAppThemeMode(uiState.appThemeMode)) {
                             getAccountsColors(isDark)
                         } else {
                             mono
@@ -454,16 +454,20 @@ fun ExpressiveSettingsGroup(content: @Composable () -> Unit) {
     }
 }
 
+internal fun isColorfulAppThemeMode(appThemeMode: String): Boolean =
+    appThemeMode == AppThemeMode.PIXEL ||
+        appThemeMode == AppThemeMode.ETHEREAL ||
+        appThemeMode == AppThemeMode.ROSE_PINE ||
+        appThemeMode == AppThemeMode.CATPPUCCIN_MOCHA ||
+        appThemeMode == AppThemeMode.SAKURA
+
 internal fun settingsCategoryColorsOrMono(
     category: SettingsCategory,
     isDark: Boolean,
     appThemeMode: String,
     monoPair: Pair<Color, Color>,
 ): Pair<Color, Color> =
-    when (appThemeMode) {
-        AppThemeMode.PIXEL -> getCategoryColors(category, isDark)
-        else -> monoPair
-    }
+    if (isColorfulAppThemeMode(appThemeMode)) getCategoryColors(category, isDark) else monoPair
 
 private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair<Color, Color> {
     // Pixel mode only uses dark scheme; accents cycle PixelPlayerOSS primary/secondary/tertiary

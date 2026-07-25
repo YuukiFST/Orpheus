@@ -80,6 +80,7 @@ fun NavBarCornerRadiusScreen(
     navController: NavController, settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
+    val useSmoothCorners by settingsViewModel.useSmoothCorners.collectAsStateWithLifecycle()
     val isFullWidth = uiState.navBarStyle == NavBarStyle.FULL_WIDTH
     
     NavBarCornerRadiusContent(
@@ -88,7 +89,8 @@ fun NavBarCornerRadiusScreen(
         onDone = { navController.popBackStack() },
         onBack = { navController.popBackStack() },
         isFullWidth = isFullWidth,
-        isCompactMode = uiState.navBarCompactMode
+        isCompactMode = uiState.navBarCompactMode,
+        useSmoothCorners = useSmoothCorners,
     )
 }
 
@@ -100,7 +102,8 @@ fun NavBarCornerRadiusContent(
     onDone: () -> Unit,
     onBack: () -> Unit,
     isFullWidth: Boolean,
-    isCompactMode: Boolean = false
+    isCompactMode: Boolean = false,
+    useSmoothCorners: Boolean = true,
 ) {
     fun Float.safeRadius(): Float =
         coerceIn(MIN_NAV_BAR_CORNER_RADIUS.toFloat(), MAX_NAV_BAR_CORNER_RADIUS.toFloat())
@@ -202,6 +205,11 @@ fun NavBarCornerRadiusContent(
             }
 
             // Controls Area
+            val effectiveRadius = if (useSmoothCorners && sliderValue <= 0f) {
+                DEFAULT_NAV_BAR_CORNER_RADIUS
+            } else {
+                sliderValue
+            }
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -305,7 +313,7 @@ fun NavBarCornerRadiusContent(
                                 modifier = Modifier.width(46.dp),
                                 text = stringResource(
                                     R.string.presentation_batch_b_corner_dp_format,
-                                    sliderValue.toInt()
+                                    effectiveRadius.toInt()
                                 ),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.labelLarge,
@@ -322,18 +330,23 @@ fun NavBarCornerRadiusContent(
                     systemNavBarInset = bottomPadding,
                     compactMode = isCompactMode
                 )
+                val previewShape = if (!useSmoothCorners) {
+                    RoundedCornerShape(0.dp)
+                } else {
+                    RoundedCornerShape(
+                        topStart = effectiveRadius.dp,
+                        topEnd = effectiveRadius.dp,
+                        bottomStart = if (isFullWidth) 0.dp else effectiveRadius.dp,
+                        bottomEnd = if (isFullWidth) 0.dp else effectiveRadius.dp,
+                    )
+                }
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(previewHeight)
                         .padding(horizontal = if (isFullWidth) 0.dp else bottomPadding), // Full Width: No horizontal padding
                     color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(
-                        topStart = sliderValue.dp,
-                        topEnd = sliderValue.dp,
-                        bottomStart = if (isFullWidth) 0.dp else sliderValue.dp,
-                        bottomEnd = if (isFullWidth) 0.dp else sliderValue.dp
-                    )
+                    shape = previewShape,
                 ) {
 
                 }

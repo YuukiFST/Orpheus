@@ -79,6 +79,27 @@ object OrpheusShapeSets {
         expressiveHero = RectangleShape,
     )
 
+    /** Pixel copy with +4.dp on medium radii for petal-soft chrome. */
+    val Sakura = OrpheusShapeSet(
+        terminal = RoundedCornerShape(12.dp),
+        button = RoundedCornerShape(8.dp),
+        iconButton = RoundedCornerShape(16.dp),
+        searchBar = RoundedCornerShape(28.dp),
+        smooth8 = RoundedCornerShape(8.dp),
+        smooth10 = RoundedCornerShape(10.dp),
+        smooth12 = RoundedCornerShape(12.dp),
+        smooth14 = RoundedCornerShape(14.dp),
+        smooth16 = RoundedCornerShape(20.dp),
+        smooth20 = RoundedCornerShape(24.dp),
+        smooth24 = RoundedCornerShape(24.dp),
+        smooth28 = RoundedCornerShape(32.dp),
+        smooth32 = RoundedCornerShape(32.dp),
+        smoothPill = RoundedCornerShape(50),
+        expressiveAvatar = RoundedCornerShape(20.dp),
+        expressiveClover = RoundedCornerShape(24.dp),
+        expressiveHero = RoundedCornerShape(28.dp),
+    )
+
     val Rounded = OrpheusShapeSet(
         terminal = RoundedCornerShape(12.dp),
         button = RoundedCornerShape(12.dp),

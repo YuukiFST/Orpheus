@@ -68,10 +68,14 @@
     <!-- Appearance -->
     <string name="setcat_global_theme">Global Theme</string>
     <string name="setcat_app_theme_label">App Theme</string>
-    <string name="setcat_app_theme_desc">Switch between light, dark, Pixel, Terminal, or follow system.</string>
+    <string name="setcat_app_theme_desc">Switch between Light, Dark, Pixel, Ethereal, Rose Pine, Catppuccin Mocha, Sakura, or follow system.</string>
     <string name="setcat_theme_light">Light Theme</string>
     <string name="setcat_theme_dark">Dark Theme</string>
     <string name="setcat_theme_pixel">Pixel</string>
+    <string name="setcat_theme_ethereal">Ethereal</string>
+    <string name="setcat_theme_rose_pine">Rose Pine</string>
+    <string name="setcat_theme_catppuccin_mocha">Catppuccin Mocha</string>
+    <string name="setcat_theme_sakura">Sakura</string>
     <string name="setcat_theme_follow_system">Follow System</string>
     <string name="setcat_visual_style_label">Visual Style</string>
     <string name="setcat_visual_style_desc">Choose square corners or rounded corners for buttons and surfaces.</string>

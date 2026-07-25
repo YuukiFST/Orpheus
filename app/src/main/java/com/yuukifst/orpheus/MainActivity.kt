@@ -97,6 +97,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.yuukifst.orpheus.data.preferences.AppThemeMode
+import com.yuukifst.orpheus.data.preferences.DEFAULT_NAV_BAR_CORNER_RADIUS_DP
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.data.preferences.sanitizeNavBarCornerRadius
 import com.yuukifst.orpheus.data.preferences.ThemePreferencesRepository
@@ -627,8 +628,10 @@ class MainActivity : ComponentActivity() {
         val navBarStyle by playerViewModel.navBarStyle.collectAsStateWithLifecycle()
         val navBarCompactMode by playerViewModel.navBarCompactMode.collectAsStateWithLifecycle()
         val navBarCornerRadiusRaw by playerViewModel.navBarCornerRadius.collectAsStateWithLifecycle()
-        val navBarCornerRadius = sanitizeNavBarCornerRadius(navBarCornerRadiusRaw)
         val useSmoothCorners by playerViewModel.useSmoothCorners.collectAsStateWithLifecycle()
+        val navBarCornerRadius = sanitizeNavBarCornerRadius(navBarCornerRadiusRaw).let { radius ->
+            if (useSmoothCorners && radius == 0) DEFAULT_NAV_BAR_CORNER_RADIUS_DP else radius
+        }
         val isMiniPlayerDismissing by playerViewModel.isMiniPlayerDismissing.collectAsStateWithLifecycle()
         val hapticsEnabled by playerViewModel.hapticsEnabled.collectAsStateWithLifecycle()
         val rootView = LocalView.current

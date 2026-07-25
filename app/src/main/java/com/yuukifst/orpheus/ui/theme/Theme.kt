@@ -197,6 +197,167 @@ val PixelColorScheme = darkColorScheme(
     surfaceTint = PixelPrimary,
 )
 
+// Ethereal — Omarchy dark navy palette
+private val EtherealSurfaceLow = EtherealColor0
+private val EtherealSurfaceHigh = EtherealColor8
+private val EtherealSurfaceHighest = Color(0xFF4A5680)
+private val EtherealPrimaryContainer = Color(0xFF5A5FA8)
+private val EtherealSecondaryContainer = Color(0xFF6B8578)
+private val EtherealTertiaryContainer = Color(0xFF8A7340)
+private val EtherealOutline = EtherealColor6
+private val EtherealSurfaceVariant = EtherealColor0
+
+val EtherealColorScheme = darkColorScheme(
+    primary = EtherealAccent,
+    onPrimary = EtherealBackground,
+    primaryContainer = EtherealPrimaryContainer,
+    onPrimaryContainer = EtherealForeground,
+    secondary = EtherealColor2,
+    onSecondary = EtherealBackground,
+    secondaryContainer = EtherealSecondaryContainer,
+    onSecondaryContainer = EtherealForeground,
+    tertiary = EtherealColor3,
+    onTertiary = EtherealBackground,
+    tertiaryContainer = EtherealTertiaryContainer,
+    onTertiaryContainer = EtherealForeground,
+    background = EtherealBackground,
+    onBackground = EtherealForeground,
+    surface = EtherealColor0,
+    onSurface = EtherealForeground,
+    surfaceVariant = EtherealSurfaceVariant,
+    onSurfaceVariant = EtherealForeground.copy(alpha = 0.85f),
+    outline = EtherealOutline,
+    outlineVariant = EtherealOutline.copy(alpha = 0.5f),
+    error = EtherealColor1,
+    onError = EtherealBackground,
+    surfaceContainerLowest = EtherealBackground,
+    surfaceContainerLow = EtherealSurfaceLow,
+    surfaceContainer = EtherealColor0,
+    surfaceContainerHigh = EtherealSurfaceHigh,
+    surfaceContainerHighest = EtherealSurfaceHighest,
+    surfaceTint = EtherealAccent,
+)
+
+// Rose Pine — Omarchy light cream palette
+private val RosePineSurfaceLow = RosePineColor0
+private val RosePineSurfaceHigh = Color(0xFFE8DFD5)
+private val RosePineSurfaceHighest = Color(0xFFDFD5C9)
+private val RosePinePrimaryContainer = Color(0xFFB8D4D8)
+private val RosePineSecondaryContainer = Color(0xFFB8C8D4)
+private val RosePineTertiaryContainer = Color(0xFFF0D4A8)
+private val RosePineOutline = RosePineColor8
+private val RosePineSurfaceVariant = RosePineColor0
+
+val RosePineColorScheme = lightColorScheme(
+    primary = RosePineAccent,
+    onPrimary = RosePineBackground,
+    primaryContainer = RosePinePrimaryContainer,
+    onPrimaryContainer = RosePineForeground,
+    secondary = RosePineColor2,
+    onSecondary = RosePineBackground,
+    secondaryContainer = RosePineSecondaryContainer,
+    onSecondaryContainer = RosePineForeground,
+    tertiary = RosePineColor3,
+    onTertiary = RosePineBackground,
+    tertiaryContainer = RosePineTertiaryContainer,
+    onTertiaryContainer = RosePineForeground,
+    background = RosePineBackground,
+    onBackground = RosePineForeground,
+    surface = RosePineColor0,
+    onSurface = RosePineForeground,
+    surfaceVariant = RosePineSurfaceVariant,
+    onSurfaceVariant = RosePineForeground.copy(alpha = 0.85f),
+    outline = RosePineOutline,
+    outlineVariant = RosePineOutline.copy(alpha = 0.5f),
+    error = RosePineColor1,
+    onError = RosePineBackground,
+    surfaceContainerLowest = RosePineBackground,
+    surfaceContainerLow = RosePineSurfaceLow,
+    surfaceContainer = RosePineColor0,
+    surfaceContainerHigh = RosePineSurfaceHigh,
+    surfaceContainerHighest = RosePineSurfaceHighest,
+    surfaceTint = RosePineAccent,
+)
+
+// Catppuccin Mocha — Omarchy dark pastel palette
+private val CatppuccinMochaSurfaceLow = CatppuccinMochaColor0
+private val CatppuccinMochaSurfaceHigh = CatppuccinMochaColor8
+private val CatppuccinMochaSurfaceHighest = Color(0xFF6C7086)
+private val CatppuccinMochaPrimaryContainer = Color(0xFF7A5A72)
+private val CatppuccinMochaSecondaryContainer = Color(0xFF5A7A58)
+private val CatppuccinMochaTertiaryContainer = Color(0xFF7A7048)
+private val CatppuccinMochaOutline = CatppuccinMochaColor6
+private val CatppuccinMochaSurfaceVariant = CatppuccinMochaColor0
+
+val CatppuccinMochaColorScheme = darkColorScheme(
+    primary = CatppuccinMochaAccent,
+    onPrimary = CatppuccinMochaBackground,
+    primaryContainer = CatppuccinMochaPrimaryContainer,
+    onPrimaryContainer = CatppuccinMochaForeground,
+    secondary = CatppuccinMochaColor2,
+    onSecondary = CatppuccinMochaBackground,
+    secondaryContainer = CatppuccinMochaSecondaryContainer,
+    onSecondaryContainer = CatppuccinMochaForeground,
+    tertiary = CatppuccinMochaColor3,
+    onTertiary = CatppuccinMochaBackground,
+    tertiaryContainer = CatppuccinMochaTertiaryContainer,
+    onTertiaryContainer = CatppuccinMochaForeground,
+    background = CatppuccinMochaBackground,
+    onBackground = CatppuccinMochaForeground,
+    surface = CatppuccinMochaColor0,
+    onSurface = CatppuccinMochaForeground,
+    surfaceVariant = CatppuccinMochaSurfaceVariant,
+    onSurfaceVariant = CatppuccinMochaForeground.copy(alpha = 0.85f),
+    outline = CatppuccinMochaOutline,
+    outlineVariant = CatppuccinMochaOutline.copy(alpha = 0.5f),
+    error = CatppuccinMochaColor1,
+    onError = CatppuccinMochaBackground,
+    surfaceContainerLowest = CatppuccinMochaBackground,
+    surfaceContainerLow = CatppuccinMochaSurfaceLow,
+    surfaceContainer = CatppuccinMochaColor0,
+    surfaceContainerHigh = CatppuccinMochaSurfaceHigh,
+    surfaceContainerHighest = CatppuccinMochaSurfaceHighest,
+    surfaceTint = CatppuccinMochaAccent,
+)
+
+// Sakura — creative pink palette
+private val SakuraSurfaceLow = SakuraSurface
+private val SakuraSurfaceHighest = Color(0xFFFFC8D6)
+private val SakuraSecondaryContainer = Color(0xFFFFD0DC)
+private val SakuraTertiaryContainer = Color(0xFFE8A0B0)
+private val SakuraSurfaceVariant = SakuraSurface
+
+val SakuraColorScheme = lightColorScheme(
+    primary = SakuraPrimary,
+    onPrimary = SakuraOnPrimary,
+    primaryContainer = SakuraPrimaryContainer,
+    onPrimaryContainer = SakuraOnBackground,
+    secondary = SakuraSecondary,
+    onSecondary = SakuraOnBackground,
+    secondaryContainer = SakuraSecondaryContainer,
+    onSecondaryContainer = SakuraOnBackground,
+    tertiary = SakuraTertiary,
+    onTertiary = SakuraOnPrimary,
+    tertiaryContainer = SakuraTertiaryContainer,
+    onTertiaryContainer = SakuraOnBackground,
+    background = SakuraBackground,
+    onBackground = SakuraOnBackground,
+    surface = SakuraSurface,
+    onSurface = SakuraOnBackground,
+    surfaceVariant = SakuraSurfaceVariant,
+    onSurfaceVariant = SakuraOnBackground.copy(alpha = 0.85f),
+    outline = SakuraOutline,
+    outlineVariant = SakuraOutline.copy(alpha = 0.5f),
+    error = SakuraError,
+    onError = SakuraOnPrimary,
+    surfaceContainerLowest = SakuraBackground,
+    surfaceContainerLow = SakuraSurfaceLow,
+    surfaceContainer = SakuraSurface,
+    surfaceContainerHigh = SakuraSurfaceHigh,
+    surfaceContainerHighest = SakuraSurfaceHighest,
+    surfaceTint = SakuraPrimary,
+)
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OrpheusTheme(
@@ -206,28 +367,41 @@ fun OrpheusTheme(
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
-    val isPixel = scheme == AppThemeScheme.PIXEL
+    val personality = remember(scheme, useSmoothCorners) { themePersonalityFor(scheme, useSmoothCorners) }
+    val isSoftChrome = personality.softChrome
     val finalColorScheme = when {
         colorSchemePairOverride != null -> {
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
-        isPixel -> PixelColorScheme
+        scheme == AppThemeScheme.PIXEL -> PixelColorScheme
+        scheme == AppThemeScheme.ETHEREAL -> EtherealColorScheme
+        scheme == AppThemeScheme.ROSE_PINE -> RosePineColorScheme
+        scheme == AppThemeScheme.CATPPUCCIN_MOCHA -> CatppuccinMochaColorScheme
+        scheme == AppThemeScheme.SAKURA -> SakuraColorScheme
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    val shapeSet = remember(isPixel, useSmoothCorners) {
+    val shapeSet = remember(scheme, useSmoothCorners, isSoftChrome) {
         when {
-            isPixel -> OrpheusShapeSets.Pixel
+            scheme == AppThemeScheme.SAKURA -> OrpheusShapeSets.Sakura
+            scheme == AppThemeScheme.PIXEL || scheme == AppThemeScheme.ETHEREAL || scheme == AppThemeScheme.CATPPUCCIN_MOCHA -> OrpheusShapeSets.Pixel
+            scheme == AppThemeScheme.ROSE_PINE -> OrpheusShapeSets.Rounded
             useSmoothCorners -> OrpheusShapeSets.Rounded
             else -> OrpheusShapeSets.Square
         }
     }
     OrpheusActiveShapes.set = shapeSet
-    val materialShapes = remember(isPixel, shapeSet) {
-        if (isPixel) PixelPlayerMaterialShapes else orpheusMaterialShapes(shapeSet)
+    val materialShapes = remember(scheme, shapeSet) {
+        if (scheme == AppThemeScheme.PIXEL || scheme == AppThemeScheme.SAKURA ||
+            scheme == AppThemeScheme.ETHEREAL || scheme == AppThemeScheme.CATPPUCCIN_MOCHA
+        ) {
+            if (scheme == AppThemeScheme.PIXEL) PixelPlayerMaterialShapes else orpheusMaterialShapes(shapeSet)
+        } else {
+            orpheusMaterialShapes(shapeSet)
+        }
     }
-    val typography = if (isPixel) Typography else TerminalTypography
+    val typography = if (isSoftChrome) Typography else TerminalTypography
 
     OrpheusStatusBarStyle(
         color = finalColorScheme.background,
@@ -237,7 +411,8 @@ fun OrpheusTheme(
     CompositionLocalProvider(
         LocalOrpheusDarkTheme provides darkTheme,
         LocalOrpheusShapes provides shapeSet,
-        LocalTerminalChrome provides !isPixel,
+        LocalTerminalChrome provides !isSoftChrome,
+        LocalThemePersonality provides personality,
     ) {
         MaterialTheme(
             colorScheme = finalColorScheme,
