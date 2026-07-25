@@ -2,6 +2,16 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.20] - 2026-07-25
+
+### Changed
+- Setup: Next/Back use directional icon slide instead of the large spinning FAB morph.
+- Mini player swipe dismiss stops playback without the Playlist dismissed undo bar.
+
+### Fixed
+- System media notification swipe pauses audio but keeps the in-app mini player so playback can resume from the same point.
+- Closing Orpheus from Recents always stops and unloads playback.
+
 ## [1.0.19] - 2026-07-24
 
 ### Added
