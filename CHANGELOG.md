@@ -2,6 +2,13 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.24] - 2026-07-25
+
+### Fixed
+- Library Liked song rows no longer use NavBar corner radius as card chrome; default list shape restored.
+- Mini player keeps Rounded corners on screens where the tab NavBar is hidden (e.g. Settings).
+- Setup Back/Next sit above system navigation via `navigationBarsPadding()`.
+
 ## [1.0.23] - 2026-07-25
 
 ### Added
