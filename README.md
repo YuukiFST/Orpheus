@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/orpheus_header.png" alt="Orpheus — open-source music player for Android"/>
+  <img src="assets/orpheus_header.png" alt="Orpheus — open-source music player for Android" width="220"/>
 </p>
 
 <p align="center">

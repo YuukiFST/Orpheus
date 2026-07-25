@@ -378,13 +378,12 @@ private fun AboutHeroCard(
                 ) {
                     Surface(
                         shape = TerminalCornerShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.surface,
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.pixelplayer_base_monochrome),
+                        Image(
+                            painter = painterResource(R.drawable.orpheus_logo),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(10.dp).size(28.dp),
+                            modifier = Modifier.size(48.dp),
                         )
                     }
 
