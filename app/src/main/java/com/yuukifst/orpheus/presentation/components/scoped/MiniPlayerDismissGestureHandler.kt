@@ -121,7 +121,8 @@ internal class MiniPlayerDismissGestureHandler(
                     )
                 )
                 onDismissPlaylistAndShowUndo()
-                offsetAnimatable.snapTo(0f)
+                // Keep offset off-screen: dismiss clears song async, and snapTo(0)
+                // would flash the mini player behind the undo bar for that race.
             }
         } else {
             offsetJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {

@@ -1872,6 +1872,17 @@ class PlayerViewModel @Inject constructor(
                 getUiState = { _playerUiState.value },
                 onHideDismissUndoBar = { hideDismissUndoBar() }
             )
+
+            viewModelScope.launch {
+                _playerUiState
+                    .map { it.showDismissUndoBar }
+                    .distinctUntilChanged()
+                    .collect { showingUndo ->
+                        if (!showingUndo) {
+                            setMiniPlayerDismissing(false)
+                        }
+                    }
+            }
         }
     }
 
@@ -4349,11 +4360,16 @@ class PlayerViewModel @Inject constructor(
 
     fun dismissPlaylistAndShowUndo() {
         if (_playerUiState.value.showDismissUndoBar) return
-        setMiniPlayerDismissing(false)
+        val currentSong = playbackStateHolder.stablePlayerState.value.currentSong
+        val queue = _playerUiState.value.currentPlaybackQueue
+        if (currentSong == null && queue.isEmpty()) {
+            setMiniPlayerDismissing(false)
+            return
+        }
         playlistDismissUndoStateHolder.dismissPlaylistAndShowUndo(
             scope = viewModelScope,
-            currentSong = playbackStateHolder.stablePlayerState.value.currentSong,
-            queue = _playerUiState.value.currentPlaybackQueue,
+            currentSong = currentSong,
+            queue = queue,
             queueName = _playerUiState.value.currentQueueSourceName,
             position = playbackStateHolder.currentPosition.value,
             getUiState = { _playerUiState.value },
@@ -4394,6 +4410,7 @@ class PlayerViewModel @Inject constructor(
         playlistDismissUndoStateHolder.hideDismissUndoBar { mutation ->
             _playerUiState.update(mutation)
         }
+        setMiniPlayerDismissing(false)
     }
 
     fun undoDismissPlaylist() {

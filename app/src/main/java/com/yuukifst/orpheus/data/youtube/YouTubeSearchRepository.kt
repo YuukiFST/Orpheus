@@ -59,8 +59,26 @@ private fun InfoItem.toYouTubeTrack(): YouTubeTrack? {
     return YouTubeTrack(
         videoId = id,
         title = name.orEmpty(),
-        channelName = uploaderName.orEmpty(),
+        channelName = preferPrimaryYouTubeUploader(uploaderName.orEmpty()),
         thumbnailUrl = selectBestThumbnailUrl(thumbnails, id),
         durationMs = duration * 1000L,
     )
+}
+
+/**
+ * YouTube search bylines for collabs concatenate artists ("A and B") while the
+ * publishing channel is the first name (matches StreamInfo.uploaderName / uploaderUrl).
+ *
+ * ponytail: heuristic only; switch to StreamInfo.uploaderName if false positives appear.
+ */
+internal fun preferPrimaryYouTubeUploader(uploaderName: String): String {
+    if (uploaderName.isBlank()) return uploaderName
+    val delimiters = listOf(" and ", " & ", " e ")
+    for (delimiter in delimiters) {
+        val index = uploaderName.indexOf(delimiter, ignoreCase = true)
+        if (index > 0) {
+            return uploaderName.substring(0, index).trim().ifBlank { uploaderName }
+        }
+    }
+    return uploaderName
 }

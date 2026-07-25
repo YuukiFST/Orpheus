@@ -732,7 +732,12 @@ class MainActivity : ComponentActivity() {
                                 .map { it.currentSong?.id }
                                 .distinctUntilChanged()
                         }.collectAsStateWithLifecycle(initialValue = null)
-                        val showPlayerContentArea = currentSongId != null
+                        val showDismissUndoBar by remember {
+                            playerViewModel.playerUiState
+                                .map { it.showDismissUndoBar }
+                                .distinctUntilChanged()
+                        }.collectAsStateWithLifecycle(initialValue = false)
+                        val showPlayerContentArea = currentSongId != null && !showDismissUndoBar
                         val navBarElevation = 3.dp
 
                         val animatedNavBarCornerRadius = animateDpAsState(

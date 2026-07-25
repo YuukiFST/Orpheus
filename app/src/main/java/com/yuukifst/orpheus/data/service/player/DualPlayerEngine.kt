@@ -515,6 +515,21 @@ class DualPlayerEngine @Inject constructor(
 
     fun getAudioSessionId(): Int = if (::playerA.isInitialized) playerA.audioSessionId else 0
 
+    fun stopAndClearAllPlayers() {
+        transitionJob?.cancel()
+        transitionRunning = false
+        if (::playerA.isInitialized) {
+            playerA.playWhenReady = false
+            playerA.stop()
+            playerA.clearMediaItems()
+        }
+        playerB?.let { auxiliary ->
+            auxiliary.playWhenReady = false
+            auxiliary.stop()
+            auxiliary.clearMediaItems()
+        }
+    }
+
     private var isReleased = false
 
     fun initialize() {

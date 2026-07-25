@@ -93,7 +93,8 @@ import kotlin.math.roundToInt
 
 private data class PlayerUiSheetSliceV2(
     val currentQueueSourceName: String = "",
-    val preparingSongId: String? = null
+    val preparingSongId: String? = null,
+    val showDismissUndoBar: Boolean = false,
 )
 
 /**
@@ -174,13 +175,15 @@ fun UnifiedPlayerSheetV2(
             .map { state ->
                 PlayerUiSheetSliceV2(
                     currentQueueSourceName = state.currentQueueSourceName,
-                    preparingSongId = state.preparingSongId
+                    preparingSongId = state.preparingSongId,
+                    showDismissUndoBar = state.showDismissUndoBar,
                 )
             }
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = PlayerUiSheetSliceV2())
     val currentQueueSourceName = playerUiSheetSlice.currentQueueSourceName
     val preparingSongId = playerUiSheetSlice.preparingSongId
+    val showDismissUndoBar = playerUiSheetSlice.showDismissUndoBar
 
     val currentSheetContentState by playerViewModel.sheetState.collectAsStateWithLifecycle()
     val predictiveBackCollapseProgress by playerViewModel.predictiveBackCollapseFraction.collectAsStateWithLifecycle()
@@ -218,8 +221,19 @@ fun UnifiedPlayerSheetV2(
     val miniPlayerContentHeightPx = remember { with(density) { MiniPlayerHeight.toPx() } }
 
     val isOutputConnecting = false
-    val showPlayerContentArea by remember(infrequentPlayerState.currentSong) {
-        derivedStateOf { infrequentPlayerState.currentSong != null }
+    val showPlayerContentArea by remember(
+        infrequentPlayerState.currentSong,
+        showDismissUndoBar,
+    ) {
+        derivedStateOf {
+            infrequentPlayerState.currentSong != null && !showDismissUndoBar
+        }
+    }
+
+    LaunchedEffect(showPlayerContentArea) {
+        if (showPlayerContentArea && offsetAnimatable.value != 0f) {
+            offsetAnimatable.snapTo(0f)
+        }
     }
 
     val playerContentExpansionFraction = playerViewModel.playerContentExpansionFraction

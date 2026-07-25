@@ -209,6 +209,9 @@ class MusicService : MediaLibraryService() {
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.yuukifst.orpheus.ACTION_SLEEP_TIMER_EXPIRED"
         const val ACTION_STOP_AND_UNLOAD = "com.yuukifst.orpheus.ACTION_STOP_AND_UNLOAD"
+        // Media3 packs this on notification swipe deleteIntent (KEYCODE_MEDIA_STOP path).
+        private const val MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY =
+            "androidx.media3.session.NOTIFICATION_DISMISSED_EVENT_KEY"
         const val EXTRA_FORCE_FOREGROUND_ON_START =
             "com.yuukifst.orpheus.extra.FORCE_FOREGROUND_ON_START"
         // Queue/index/flags snapshot is only used for restore on process death. A full-queue
@@ -841,6 +844,15 @@ class MusicService : MediaLibraryService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Media3 default deleteIntent only hides the shade card; treat swipe as full unload.
+        if (intent?.getBooleanExtra(MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY, false) == true) {
+            stopPlaybackAndUnload(
+                reason = "notification_dismissed_media3",
+                preservePlaybackSnapshot = false,
+            )
+            return START_NOT_STICKY
+        }
+
         val startedTemporaryForegroundInOnCreate = temporaryForegroundStartedInOnCreate
         temporaryForegroundStartedInOnCreate = false
         val pendingMediaButtonForegroundStart = consumePendingMediaButtonForegroundStart()
@@ -2245,6 +2257,8 @@ class MusicService : MediaLibraryService() {
         }
 
         listeningStatsTracker.finalizeCurrentSession(forceSynchronousPersistence = true)
+
+        engine.stopAndClearAllPlayers()
 
         player.playWhenReady = false
         player.stop()
