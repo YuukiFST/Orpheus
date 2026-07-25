@@ -1,0 +1,1 @@
+Fix ghost mini player behind dismiss undo. Notification swipe stops audio. YouTube artist label uses channel, not collab byline.

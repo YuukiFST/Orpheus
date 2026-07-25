@@ -2,6 +2,13 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.18] - 2026-07-24
+
+### Fixed
+- Mini player no longer flashes behind the Playlist dismissed undo bar after swipe dismiss.
+- Swiping away the media notification stops and unloads playback (both DualPlayer engines).
+- YouTube Search/player artist label prefers the publishing channel when NewPipe returns a collab byline (e.g. `nikmouu and Novatroop` → `nikmouu`).
+
 ## [1.0.17] - 2026-07-24
 
 ### Added
