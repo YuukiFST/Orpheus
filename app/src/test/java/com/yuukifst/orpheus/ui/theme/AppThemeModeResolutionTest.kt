@@ -98,4 +98,23 @@ class AppThemeModeResolutionTest {
         )
         assertTrue(pair.first != Color.Black)
     }
+
+    @Test
+    fun settingsCategoryColors_pastelWhenColorfulThemes() {
+        listOf(
+            AppThemeMode.PIXEL,
+            AppThemeMode.ETHEREAL,
+            AppThemeMode.ROSE_PINE,
+            AppThemeMode.CATPPUCCIN_MOCHA,
+            AppThemeMode.SAKURA,
+        ).forEach { mode ->
+            val pair = settingsCategoryColorsOrMono(
+                category = SettingsCategory.APPEARANCE,
+                isDark = mode != AppThemeMode.ROSE_PINE && mode != AppThemeMode.SAKURA,
+                appThemeMode = mode,
+                monoPair = Color.Black to Color.White
+            )
+            assertTrue("expected pastel for $mode", pair.first != Color.Black)
+        }
+    }
 }
