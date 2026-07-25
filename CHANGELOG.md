@@ -2,6 +2,11 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.25] - 2026-07-25
+
+### Fixed
+- Mini player reappears after swipe-dismiss when starting a new song (stale dismiss clear no longer wipes the new session).
+
 ## [1.0.24] - 2026-07-25
 
 ### Fixed

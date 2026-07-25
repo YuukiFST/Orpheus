@@ -1,0 +1,1 @@
+Mini player returns after swipe-dismiss when you start another song.
