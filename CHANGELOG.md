@@ -2,6 +2,17 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.22] - 2026-07-25
+
+### Fixed
+- App defaults to Rounded corners; navbar radius promotes from 0 to 28 when Rounded is on (legacy installs no longer show square tips).
+- Setup Back/Next share the same directional icon slide+fade (no spinning FAB).
+- Library bottom-nav tap no longer sticks when the nav graph was briefly unavailable.
+
+### Changed
+- Pixel theme surface/container roles filled for closer PixelPlayerOSS look; CRT overlay experiment removed.
+- Device helper script `scripts/celular.sh` for opening the emulator without agent UI driving.
+
 ## [1.0.21] - 2026-07-25
 
 ### Changed
