@@ -116,6 +116,41 @@ class PlaylistDismissUndoStateHolderTest {
     }
 
     @Test
+    fun dismissWithoutUndoClearsPlaybackAndNeverShowsUndoBar() = runTest {
+        val holder = PlaylistDismissUndoStateHolder(appContext)
+        var state = PlayerUiState(
+            currentPlaybackQueue = persistentListOf(fakeSong),
+            currentQueueSourceName = "Q",
+        )
+        var cleared = false
+        var sheet = true
+        var committed = false
+
+        holder.dismissPlaylistWithoutUndo(
+            scope = this,
+            currentSong = fakeSong,
+            queue = listOf(fakeSong),
+            queueName = "Q",
+            getUiState = { state },
+            updateUiState = { mut -> state = mut(state) },
+            disconnectRemoteIfNeeded = {},
+            clearPlayback = { cleared = true },
+            clearStablePlaybackState = {},
+            setCurrentPosition = {},
+            setSheetVisible = { sheet = it },
+            onDismissCommitted = { committed = true },
+        )
+        runCurrent()
+
+        assertFalse(state.showDismissUndoBar)
+        assertTrue(cleared)
+        assertFalse(sheet)
+        assertTrue(state.currentPlaybackQueue.isEmpty())
+        assertTrue(committed)
+        assertEquals(null, state.dismissedSong)
+    }
+
+    @Test
     fun undoTimeoutCommitsDismissAndKeepsSheetHidden() = runTest {
         val holder = PlaylistDismissUndoStateHolder(appContext)
         var state = PlayerUiState(

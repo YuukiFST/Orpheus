@@ -23,6 +23,40 @@ class PlaylistDismissUndoStateHolder @Inject constructor(
     private var dismissUndoTimerJob: Job? = null
     private var undoObserverJob: Job? = null
 
+    fun dismissPlaylistWithoutUndo(
+        scope: CoroutineScope,
+        currentSong: Song?,
+        queue: List<Song>,
+        queueName: String,
+        getUiState: () -> PlayerUiState,
+        updateUiState: (((PlayerUiState) -> PlayerUiState) -> Unit),
+        disconnectRemoteIfNeeded: suspend () -> Unit,
+        clearPlayback: () -> Unit,
+        clearStablePlaybackState: () -> Unit,
+        setCurrentPosition: (Long) -> Unit,
+        setSheetVisible: (Boolean) -> Unit,
+        onDismissCommitted: () -> Unit = {},
+    ) {
+        scope.launch {
+            if (currentSong == null && queue.isEmpty()) return@launch
+
+            dismissUndoTimerJob?.cancel()
+
+            disconnectRemoteIfNeeded()
+            updateUiState {
+                it.copy(
+                    currentPlaybackQueue = persistentListOf(),
+                    currentQueueSourceName = ""
+                )
+            }
+            clearStablePlaybackState()
+            clearPlayback()
+            setCurrentPosition(0L)
+            setSheetVisible(false)
+            onDismissCommitted()
+        }
+    }
+
     fun dismissPlaylistAndShowUndo(
         scope: CoroutineScope,
         currentSong: Song?,

@@ -4420,12 +4420,11 @@ class PlayerViewModel @Inject constructor(
             setMiniPlayerDismissing(false)
             return
         }
-        playlistDismissUndoStateHolder.dismissPlaylistAndShowUndo(
+        playlistDismissUndoStateHolder.dismissPlaylistWithoutUndo(
             scope = viewModelScope,
             currentSong = currentSong,
             queue = queue,
             queueName = _playerUiState.value.currentQueueSourceName,
-            position = playbackStateHolder.currentPosition.value,
             getUiState = { _playerUiState.value },
             updateUiState = { mutation -> _playerUiState.update(mutation) },
             disconnectRemoteIfNeeded = {},
