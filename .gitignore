@@ -53,6 +53,6 @@ TMPDIR*
 
 PRD.md
 docs/BASELINE_PROFILES.md
-**/superpowers/plans/
+docs/superpowers/
 
 .worktrees/
