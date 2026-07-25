@@ -1,7 +1,10 @@
 package com.yuukifst.orpheus.presentation.screens
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.OrpheusSearchBarShape
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.OrpheusTextButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
+import com.yuukifst.orpheus.ui.theme.terminalBorder
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +37,7 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -126,10 +130,15 @@ fun YouTubeSearchScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, top = statusBarTopInset + 12.dp, end = 24.dp),
+                    .padding(
+                        start = OrpheusSpacing.lg,
+                        top = statusBarTopInset + OrpheusSpacing.sm,
+                        end = OrpheusSpacing.lg,
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val searchBarShape = OrpheusSearchBarShape
+                val showTerminalChrome = LocalTerminalChrome.current
                 DockedSearchBar(
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -161,7 +170,13 @@ fun YouTubeSearchScreen(
                     onExpandedChange = {},
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                        .then(
+                            if (showTerminalChrome) {
+                                Modifier.border(1.dp, MaterialTheme.colorScheme.outline, searchBarShape)
+                            } else {
+                                Modifier
+                            }
+                        )
                         .clip(searchBarShape),
                     shape = searchBarShape,
                     colors = SearchBarDefaults.colors(
@@ -187,12 +202,12 @@ fun YouTubeSearchScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 12.dp,
-                            bottom = bottomBarHeightDp + 16.dp,
+                            start = OrpheusSpacing.lg,
+                            end = OrpheusSpacing.lg,
+                            top = OrpheusSpacing.sm,
+                            bottom = bottomBarHeightDp + OrpheusSpacing.md,
                         ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.xs),
                     ) {
                         items(uiState.results, key = { it.videoId }) { track ->
                             YouTubeSearchResultItem(
@@ -214,10 +229,10 @@ fun YouTubeSearchScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 12.dp,
-                            bottom = bottomBarHeightDp + 16.dp,
+                            start = OrpheusSpacing.lg,
+                            end = OrpheusSpacing.lg,
+                            top = OrpheusSpacing.sm,
+                            bottom = bottomBarHeightDp + OrpheusSpacing.md,
                         ),
                     ) {
                         if (uiState.isLoading) {
@@ -240,7 +255,7 @@ fun YouTubeSearchScreen(
                                         searchQuery = suggestion
                                         viewModel.searchSuggestion(suggestion)
                                     }
-                                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                                    .padding(horizontal = OrpheusSpacing.xs, vertical = OrpheusSpacing.sm),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
@@ -271,7 +286,7 @@ fun YouTubeSearchScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 24.dp),
+                            .padding(horizontal = OrpheusSpacing.lg),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -284,7 +299,7 @@ fun YouTubeSearchScreen(
                 else -> {
                     YouTubeSearchHistorySection(
                         historyItems = uiState.searchHistory,
-                        bottomPadding = bottomBarHeightDp + 16.dp,
+                        bottomPadding = bottomBarHeightDp + OrpheusSpacing.md,
                         onHistoryClick = { query ->
                             searchQuery = query
                             viewModel.updateQuery(query)
@@ -329,7 +344,7 @@ private fun YouTubeSearchHistorySection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 12.dp),
+                .padding(horizontal = OrpheusSpacing.lg, vertical = OrpheusSpacing.sm),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -348,11 +363,11 @@ private fun YouTubeSearchHistorySection(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
+                start = OrpheusSpacing.lg,
+                end = OrpheusSpacing.lg,
                 bottom = bottomPadding,
             ),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(OrpheusSpacing.xxs),
         ) {
             items(historyItems, key = { "history_${it.id ?: it.query}" }) { item ->
                 Row(
@@ -361,7 +376,7 @@ private fun YouTubeSearchHistorySection(
                         .pointerInput(item.query) {
                             detectTapGestures(onTap = { onHistoryClick(item.query) })
                         }
-                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                        .padding(horizontal = OrpheusSpacing.xs, vertical = OrpheusSpacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -391,6 +406,7 @@ private fun YouTubeSearchHistorySection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun YouTubeSearchResultItem(
     track: YouTubeTrack,
@@ -403,14 +419,20 @@ private fun YouTubeSearchResultItem(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    Row(
+    Surface(
+        onClick = onPlay,
+        shape = TerminalCornerShape,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(TerminalCornerShape)
-            .clickable(onClick = onPlay)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(OrpheusSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
         SmartImage(
             model = track.thumbnailUrl,
             contentDescription = track.effectiveTitle,
@@ -483,6 +505,7 @@ private fun YouTubeSearchResultItem(
                     leadingIcon = { Icon(Icons.Rounded.Download, contentDescription = null) },
                 )
             }
+        }
         }
     }
 }
