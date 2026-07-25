@@ -21,6 +21,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 import com.yuukifst.orpheus.ui.theme.terminalPressScale
 
@@ -68,7 +69,7 @@ fun TabAnimation(
 
     Tab(
         modifier = modifier
-            .padding(all = 5.dp)
+            .padding(all = OrpheusSpacing.xxs)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale

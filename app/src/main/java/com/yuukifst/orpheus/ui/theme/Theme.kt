@@ -25,6 +25,9 @@ import androidx.core.graphics.ColorUtils
 
 val LocalOrpheusDarkTheme = staticCompositionLocalOf { false }
 
+/** Hard terminal borders only for Orpheus Dark/Light — off in Pixel (PixelPlayer parity). */
+val LocalTerminalChrome = staticCompositionLocalOf { false }
+
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
@@ -213,6 +216,7 @@ fun OrpheusTheme(
         else -> LightColorScheme
     }
 
+    val isPixel = scheme == AppThemeScheme.PIXEL
     val shapeSet = remember(useSmoothCorners) {
         if (useSmoothCorners) OrpheusShapeSets.Rounded else OrpheusShapeSets.Square
     }
@@ -227,6 +231,7 @@ fun OrpheusTheme(
     CompositionLocalProvider(
         LocalOrpheusDarkTheme provides darkTheme,
         LocalOrpheusShapes provides shapeSet,
+        LocalTerminalChrome provides !isPixel,
     ) {
         MaterialTheme(
             colorScheme = finalColorScheme,
