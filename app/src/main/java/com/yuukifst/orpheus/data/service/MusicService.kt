@@ -215,6 +215,7 @@ class MusicService : MediaLibraryService() {
             "com.yuukifst.orpheus.ACTION_PAUSE_AND_HIDE_NOTIFICATION"
         // Soft clear for mini-player swipe dismiss (keeps service alive for Undo).
         const val ACTION_CLEAR_PLAYBACK = "com.yuukifst.orpheus.ACTION_CLEAR_PLAYBACK"
+        const val EXTRA_PLAYBACK_CLEAR_TOKEN = "com.yuukifst.orpheus.extra.PLAYBACK_CLEAR_TOKEN"
         // Media3 packs this on notification swipe deleteIntent (KEYCODE_MEDIA_STOP path).
         private const val MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY =
             "androidx.media3.session.NOTIFICATION_DISMISSED_EVENT_KEY"
@@ -871,6 +872,17 @@ class MusicService : MediaLibraryService() {
         }
 
         if (action == ACTION_CLEAR_PLAYBACK) {
+            val clearToken = intent.getLongExtra(EXTRA_PLAYBACK_CLEAR_TOKEN, -1L)
+            // A newer play bumped the generation after dismiss captured this token —
+            // do not wipe the new session's engines/media.
+            if (MusicServiceShould.skipStalePlaybackClear(clearToken, PlaybackClearGeneration.current())) {
+                Timber.tag(TAG).d(
+                    "Skipping stale ACTION_CLEAR_PLAYBACK token=%s current=%s",
+                    clearToken,
+                    PlaybackClearGeneration.current(),
+                )
+                return START_NOT_STICKY
+            }
             clearPlaybackKeepService(reason = "mini_player_dismiss")
             return START_NOT_STICKY
         }

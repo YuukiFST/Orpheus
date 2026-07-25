@@ -64,7 +64,9 @@ import com.yuukifst.orpheus.data.repository.LyricsSearchResult
 import com.yuukifst.orpheus.data.repository.MusicRepository
 import com.yuukifst.orpheus.data.service.MusicNotificationProvider
 import com.yuukifst.orpheus.data.service.MusicService
+import com.yuukifst.orpheus.data.service.PlaybackClearGeneration
 import com.yuukifst.orpheus.data.service.player.DualPlayerEngine
+import com.yuukifst.orpheus.presentation.components.MiniPlayerVisibilityPolicy
 import com.yuukifst.orpheus.data.worker.SyncManager
 import com.yuukifst.orpheus.utils.AppShortcutManager
 import com.yuukifst.orpheus.utils.ValidatedLyricsImport
@@ -413,19 +415,26 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun clearPlaybackForDismiss() {
+        // Capture before clears so a later play (bump) can invalidate the async service clear.
+        val clearToken = PlaybackClearGeneration.current()
         mediaController?.playWhenReady = false
         mediaController?.pause()
         mediaController?.stop()
         mediaController?.clearMediaItems()
         // DualPlayer can keep an auxiliary engine playing after MediaController.clear;
-        // ask the service to stop both engines without unloading (Undo still needs service).
+        // clear sync here, then ask the service for notification/widget soft-clear.
+        runCatching { dualPlayerEngine.stopAndClearAllPlayers() }
         runCatching {
             context.startService(
                 Intent(context, MusicService::class.java).apply {
                     action = MusicService.ACTION_CLEAR_PLAYBACK
+                    putExtra(MusicService.EXTRA_PLAYBACK_CLEAR_TOKEN, clearToken)
                 }
             )
         }
+        // New play may have started on Main between controller clear and here.
+        if (!PlaybackClearGeneration.matches(clearToken)) return
+        setPreparingSong(null)
         playbackStateHolder.updateStablePlayerState {
             it.copy(
                 currentSong = null,
@@ -2855,6 +2864,9 @@ class PlayerViewModel @Inject constructor(
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                // New media after swipe-dismiss must revive the mini player; the early
+                // return below used to leave dismissJustCommitted stuck true forever.
+                clearDismissCommittedIfPlayingNewSong(mediaItem?.mediaId)
                 if (_playerUiState.value.showDismissUndoBar || _dismissJustCommitted.value) {
                     if (mediaItem == null) {
                         playbackStateHolder.updateStablePlayerState {
@@ -2867,7 +2879,6 @@ class PlayerViewModel @Inject constructor(
                     }
                     return
                 }
-                clearDismissCommittedIfPlayingNewSong(mediaItem?.mediaId)
                 playbackStateHolder.onPlaybackOccurrenceTransition(mediaItem?.mediaId)
                 preparePlaybackAudioMetadataForMedia(mediaItem?.mediaId)
                 transitionSchedulerJob?.cancel()
@@ -2934,6 +2945,9 @@ class PlayerViewModel @Inject constructor(
                             loadLyricsForCurrentSong()
                         }
                     } ?: run {
+                        if (shouldIgnoreStaleEmptyPlayerClear()) {
+                            return@launch
+                        }
                         lyricsStateHolder.cancelLoading()
                         playbackStateHolder.updateStablePlayerState {
                             it.copy(
@@ -2985,6 +2999,9 @@ class PlayerViewModel @Inject constructor(
                     startProgressUpdates()
                 }
                 if (playbackState == Player.STATE_IDLE && playerCtrl.mediaItemCount == 0) {
+                    if (shouldIgnoreStaleEmptyPlayerClear()) {
+                        return
+                    }
                     clearPreparingSongIfMatching()
                     lyricsStateHolder.cancelLoading()
                     playbackStateHolder.updateStablePlayerState {
@@ -3203,12 +3220,23 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    private fun shouldIgnoreStaleEmptyPlayerClear(): Boolean {
+        return MiniPlayerVisibilityPolicy.shouldIgnoreStaleEmptyPlayerClear(
+            preparingSongId = _playerUiState.value.preparingSongId,
+            currentSongId = playbackStateHolder.stablePlayerState.value.currentSong?.id,
+            showDismissUndoBar = _playerUiState.value.showDismissUndoBar,
+            dismissJustCommitted = _dismissJustCommitted.value,
+        )
+    }
+
     private fun applyImmediatePlaybackUi(
         song: Song,
         queueSongs: List<Song>,
         queueName: String,
         mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
     ) {
+        // Invalidate any in-flight dismiss ACTION_CLEAR_PLAYBACK for the prior session.
+        PlaybackClearGeneration.bump()
         _dismissJustCommitted.value = false
         setMiniPlayerDismissing(false)
         beginPreparingSong(song)

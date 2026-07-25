@@ -15,4 +15,20 @@ object MiniPlayerVisibilityPolicy {
         contentBecameVisible: Boolean,
         dismissJustCommitted: Boolean,
     ): Boolean = showPlayerContentArea && contentBecameVisible && !dismissJustCommitted
+
+    /**
+     * Stale MediaController empties from dismiss clear can arrive after optimistic
+     * [applyImmediatePlaybackUi]. Ignore those so the mini player can reappear.
+     */
+    fun shouldIgnoreStaleEmptyPlayerClear(
+        preparingSongId: String?,
+        currentSongId: String?,
+        showDismissUndoBar: Boolean,
+        dismissJustCommitted: Boolean,
+    ): Boolean {
+        if (showDismissUndoBar || dismissJustCommitted) return false
+        return preparingSongId != null &&
+            currentSongId != null &&
+            preparingSongId == currentSongId
+    }
 }
