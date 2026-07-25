@@ -203,6 +203,7 @@ class MusicService : MediaLibraryService() {
     private var lastNoisyPauseRealtimeMs = 0L
     private var resumeOnHeadsetReconnectEnabled = false
     private var temporaryForegroundStartedInOnCreate = false
+    @Volatile
     private var suppressMediaNotificationAfterUserDismiss = false
 
     companion object {
@@ -856,15 +857,16 @@ class MusicService : MediaLibraryService() {
             intent?.getBooleanExtra(MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY, false) == true
         val action = intent?.action
         // Return early: falling through to super.onStartCommand (START_STICKY) can revive playback.
-        if (MusicServiceShould.returnEarlyAfterPark(action, media3Dismissed)) {
-            pausePlaybackKeepUi(reason = "notification_dismissed")
-            return START_NOT_STICKY
-        }
+        // Unload before park so ACTION_STOP_AND_UNLOAD wins even when media3Dismissed is also set.
         if (MusicServiceShould.returnEarlyAfterUnload(action, media3Dismissed)) {
             stopPlaybackAndUnload(
                 reason = "stop_and_unload",
                 preservePlaybackSnapshot = false,
             )
+            return START_NOT_STICKY
+        }
+        if (MusicServiceShould.returnEarlyAfterPark(action, media3Dismissed)) {
+            pausePlaybackKeepUi(reason = "notification_dismissed")
             return START_NOT_STICKY
         }
 
@@ -2251,8 +2253,12 @@ class MusicService : MediaLibraryService() {
     }
 
     private fun pausePlaybackKeepUi(reason: String) {
-        Timber.tag(TAG).d("Pausing playback, keeping UI. reason=%s", reason)
         val player = mediaSession?.player ?: engine.masterPlayer
+        if (player.mediaItemCount == 0 || player.playbackState == Player.STATE_IDLE) {
+            Timber.tag(TAG).d("Park no-op: already idle or no media. reason=%s", reason)
+            return
+        }
+        Timber.tag(TAG).d("Pausing playback, keeping UI. reason=%s", reason)
         if (engine.isTransitionRunning()) {
             engine.cancelNext()
         }

@@ -10,6 +10,7 @@ object MusicServiceShould {
     }
 
     fun returnEarlyAfterPark(action: String?, media3Dismissed: Boolean): Boolean {
+        if (action == MusicService.ACTION_STOP_AND_UNLOAD) return false
         return media3Dismissed || action == MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION
     }
 }

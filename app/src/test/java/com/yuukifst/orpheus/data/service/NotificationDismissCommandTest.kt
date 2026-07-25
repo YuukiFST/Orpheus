@@ -33,6 +33,22 @@ class NotificationDismissCommandTest {
     }
 
     @Test
+    fun stopAndUnloadWithMedia3DismissShouldUnloadNotPark() {
+        assertTrue(
+            MusicServiceShould.returnEarlyAfterUnload(
+                action = MusicService.ACTION_STOP_AND_UNLOAD,
+                media3Dismissed = true,
+            )
+        )
+        assertFalse(
+            MusicServiceShould.returnEarlyAfterPark(
+                action = MusicService.ACTION_STOP_AND_UNLOAD,
+                media3Dismissed = true,
+            )
+        )
+    }
+
+    @Test
     fun pauseAndHideActionShouldPark() {
         assertTrue(
             MusicServiceShould.returnEarlyAfterPark(
