@@ -63,4 +63,11 @@ class NotificationDismissCommandTest {
             )
         )
     }
+
+    @Test
+    fun stalePlaybackClearTokenShouldSkipClear() {
+        assertTrue(MusicServiceShould.skipStalePlaybackClear(clearToken = 3L, currentGeneration = 4L))
+        assertFalse(MusicServiceShould.skipStalePlaybackClear(clearToken = 4L, currentGeneration = 4L))
+        assertFalse(MusicServiceShould.skipStalePlaybackClear(clearToken = -1L, currentGeneration = 4L))
+    }
 }

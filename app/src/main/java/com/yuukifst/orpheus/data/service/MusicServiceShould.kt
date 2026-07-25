@@ -13,4 +13,8 @@ object MusicServiceShould {
         if (action == MusicService.ACTION_STOP_AND_UNLOAD) return false
         return media3Dismissed || action == MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION
     }
+
+    fun skipStalePlaybackClear(clearToken: Long, currentGeneration: Long): Boolean {
+        return clearToken >= 0L && clearToken != currentGeneration
+    }
 }

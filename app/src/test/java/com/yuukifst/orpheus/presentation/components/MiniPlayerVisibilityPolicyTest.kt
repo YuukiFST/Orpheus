@@ -68,4 +68,40 @@ class MiniPlayerVisibilityPolicyTest {
             )
         )
     }
+
+    @Test
+    fun ignoreStaleEmptyClearWhileOptimisticNewSongPreparing() {
+        assertTrue(
+            MiniPlayerVisibilityPolicy.shouldIgnoreStaleEmptyPlayerClear(
+                preparingSongId = "song-2",
+                currentSongId = "song-2",
+                showDismissUndoBar = false,
+                dismissJustCommitted = false,
+            )
+        )
+    }
+
+    @Test
+    fun allowEmptyClearWhileDismissCommitted() {
+        assertFalse(
+            MiniPlayerVisibilityPolicy.shouldIgnoreStaleEmptyPlayerClear(
+                preparingSongId = "song-1",
+                currentSongId = "song-1",
+                showDismissUndoBar = false,
+                dismissJustCommitted = true,
+            )
+        )
+    }
+
+    @Test
+    fun allowEmptyClearWhenNoOptimisticSong() {
+        assertFalse(
+            MiniPlayerVisibilityPolicy.shouldIgnoreStaleEmptyPlayerClear(
+                preparingSongId = null,
+                currentSongId = null,
+                showDismissUndoBar = false,
+                dismissJustCommitted = false,
+            )
+        )
+    }
 }
