@@ -203,12 +203,15 @@ class MusicService : MediaLibraryService() {
     private var lastNoisyPauseRealtimeMs = 0L
     private var resumeOnHeadsetReconnectEnabled = false
     private var temporaryForegroundStartedInOnCreate = false
+    private var suppressMediaNotificationAfterUserDismiss = false
 
     companion object {
         private const val TAG = "MusicService_Orpheus"
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.yuukifst.orpheus.ACTION_SLEEP_TIMER_EXPIRED"
         const val ACTION_STOP_AND_UNLOAD = "com.yuukifst.orpheus.ACTION_STOP_AND_UNLOAD"
+        const val ACTION_PAUSE_AND_HIDE_NOTIFICATION =
+            "com.yuukifst.orpheus.ACTION_PAUSE_AND_HIDE_NOTIFICATION"
         // Soft clear for mini-player swipe dismiss (keeps service alive for Undo).
         const val ACTION_CLEAR_PLAYBACK = "com.yuukifst.orpheus.ACTION_CLEAR_PLAYBACK"
         // Media3 packs this on notification swipe deleteIntent (KEYCODE_MEDIA_STOP path).
@@ -764,7 +767,10 @@ class MusicService : MediaLibraryService() {
             .setBitmapLoader(CoilBitmapLoader(this, serviceScope))
             .build()
 
-        val localOnlyProvider = LocalOnlyMediaNotificationProvider(this).also {
+        val localOnlyProvider = LocalOnlyMediaNotificationProvider(
+            this,
+            shouldSuppress = { suppressMediaNotificationAfterUserDismiss },
+        ).also {
             it.setSmallIcon(R.drawable.monochrome_player)
         }
         setMediaNotificationProvider(localOnlyProvider)
@@ -849,15 +855,14 @@ class MusicService : MediaLibraryService() {
         val media3Dismissed =
             intent?.getBooleanExtra(MEDIA3_NOTIFICATION_DISMISSED_EVENT_KEY, false) == true
         val action = intent?.action
-        // Media3 default deleteIntent only hides the shade card; treat swipe as full unload.
         // Return early: falling through to super.onStartCommand (START_STICKY) can revive playback.
+        if (MusicServiceShould.returnEarlyAfterPark(action, media3Dismissed)) {
+            pausePlaybackKeepUi(reason = "notification_dismissed")
+            return START_NOT_STICKY
+        }
         if (MusicServiceShould.returnEarlyAfterUnload(action, media3Dismissed)) {
             stopPlaybackAndUnload(
-                reason = if (media3Dismissed) {
-                    "notification_dismissed_media3"
-                } else {
-                    "notification_dismissed"
-                },
+                reason = "stop_and_unload",
                 preservePlaybackSnapshot = false,
             )
             return START_NOT_STICKY
@@ -1032,6 +1037,9 @@ class MusicService : MediaLibraryService() {
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             val player = mediaSession?.player ?: engine.masterPlayer
+            if (isPlaying) {
+                suppressMediaNotificationAfterUserDismiss = false
+            }
             Timber.tag(TAG).d("onIsPlayingChanged: $isPlaying. Duration: ${player.duration}, Seekable: ${player.isCurrentMediaItemSeekable}")
             // Surface playback state to background workers so they can defer
             // non-urgent work (incremental sync, artwork, metadata) while audio
@@ -1052,6 +1060,9 @@ class MusicService : MediaLibraryService() {
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (playWhenReady) {
+                suppressMediaNotificationAfterUserDismiss = false
+            }
             when {
                 playWhenReady -> clearHeadsetReconnectResume()
                 !resumeOnHeadsetReconnectEnabled -> clearHeadsetReconnectResume()
@@ -2237,6 +2248,22 @@ class MusicService : MediaLibraryService() {
             reason = "notification_close_button",
             preservePlaybackSnapshot = false
         )
+    }
+
+    private fun pausePlaybackKeepUi(reason: String) {
+        Timber.tag(TAG).d("Pausing playback, keeping UI. reason=%s", reason)
+        val player = mediaSession?.player ?: engine.masterPlayer
+        if (engine.isTransitionRunning()) {
+            engine.cancelNext()
+        }
+        player.playWhenReady = false
+        if (player.isPlaying) {
+            player.pause()
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        suppressMediaNotificationAfterUserDismiss = true
+        requestWidgetFullUpdate(force = true)
+        mediaSession?.let { refreshMediaSessionUi(it) }
     }
 
     private fun clearPlaybackKeepService(reason: String) {

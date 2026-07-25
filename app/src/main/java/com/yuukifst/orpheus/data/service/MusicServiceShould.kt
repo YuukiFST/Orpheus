@@ -6,6 +6,10 @@ package com.yuukifst.orpheus.data.service
  */
 object MusicServiceShould {
     fun returnEarlyAfterUnload(action: String?, media3Dismissed: Boolean): Boolean {
-        return media3Dismissed || action == MusicService.ACTION_STOP_AND_UNLOAD
+        return action == MusicService.ACTION_STOP_AND_UNLOAD
+    }
+
+    fun returnEarlyAfterPark(action: String?, media3Dismissed: Boolean): Boolean {
+        return media3Dismissed || action == MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION
     }
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class NotificationDismissCommandTest {
 
     @Test
-    fun stopAndUnloadActionShouldReturnEarlyWithoutSuper() {
+    fun stopAndUnloadActionShouldReturnEarlyAfterUnload() {
         assertTrue(
             MusicServiceShould.returnEarlyAfterUnload(
                 action = MusicService.ACTION_STOP_AND_UNLOAD,
@@ -17,9 +17,15 @@ class NotificationDismissCommandTest {
     }
 
     @Test
-    fun media3DismissFlagShouldReturnEarlyWithoutSuper() {
-        assertTrue(
+    fun media3DismissShouldParkNotUnload() {
+        assertFalse(
             MusicServiceShould.returnEarlyAfterUnload(
+                action = null,
+                media3Dismissed = true,
+            )
+        )
+        assertTrue(
+            MusicServiceShould.returnEarlyAfterPark(
                 action = null,
                 media3Dismissed = true,
             )
@@ -27,10 +33,16 @@ class NotificationDismissCommandTest {
     }
 
     @Test
-    fun unrelatedActionShouldNotReturnEarly() {
+    fun pauseAndHideActionShouldPark() {
+        assertTrue(
+            MusicServiceShould.returnEarlyAfterPark(
+                action = MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION,
+                media3Dismissed = false,
+            )
+        )
         assertFalse(
             MusicServiceShould.returnEarlyAfterUnload(
-                action = MusicService.ACTION_SLEEP_TIMER_EXPIRED,
+                action = MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION,
                 media3Dismissed = false,
             )
         )

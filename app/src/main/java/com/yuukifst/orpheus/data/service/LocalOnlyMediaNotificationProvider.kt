@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -18,14 +19,16 @@ import com.google.common.collect.ImmutableList
 @androidx.annotation.OptIn(UnstableApi::class)
 class LocalOnlyMediaNotificationProvider(
     private val context: Context,
+    private val shouldSuppress: () -> Boolean = { false },
     private val delegate: DefaultMediaNotificationProvider =
         DefaultMediaNotificationProvider.Builder(context).build(),
 ) : MediaNotification.Provider {
 
-    private val stopPendingIntent: PendingIntent by lazy {
+    private var smallIconResId: Int = 0
+
+    private val pauseAndHidePendingIntent: PendingIntent by lazy {
         val intent = Intent(context, MusicService::class.java).apply {
-            action = MusicService.ACTION_STOP_AND_UNLOAD
-            // Also set Media3's dismissed key so either OEM path unloads playback.
+            action = MusicService.ACTION_PAUSE_AND_HIDE_NOTIFICATION
             putExtra(
                 "androidx.media3.session.NOTIFICATION_DISMISSED_EVENT_KEY",
                 true,
@@ -36,13 +39,14 @@ class LocalOnlyMediaNotificationProvider(
         // when the shade dismisses while the app process is background-cached.
         PendingIntent.getService(
             context,
-            REQUEST_CODE_STOP_AND_UNLOAD,
+            REQUEST_CODE_PAUSE_AND_HIDE,
             intent,
             flags,
         )
     }
 
     fun setSmallIcon(iconResId: Int) {
+        smallIconResId = iconResId
         delegate.setSmallIcon(iconResId)
     }
 
@@ -52,6 +56,20 @@ class LocalOnlyMediaNotificationProvider(
         actionFactory: MediaNotification.ActionFactory,
         callback: MediaNotification.Provider.Callback,
     ): MediaNotification {
+        if (shouldSuppress()) {
+            // Park already removed FGS; suppress prevents re-promote until play.
+            val channelId = getNotificationChannelInfo().id
+            val suppressed = NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(smallIconResId)
+                .setLocalOnly(true)
+                .setOngoing(false)
+                .setSilent(true)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setDeleteIntent(pauseAndHidePendingIntent)
+                .build()
+            return MediaNotification(MusicService.NOTIFICATION_ID, suppressed)
+        }
+
         val notification = delegate.createNotification(
             mediaSession,
             customLayout,
@@ -75,7 +93,7 @@ class LocalOnlyMediaNotificationProvider(
         return runCatching {
             Notification.Builder.recoverBuilder(context, base)
                 .setLocalOnly(true)
-                .setDeleteIntent(stopPendingIntent)
+                .setDeleteIntent(pauseAndHidePendingIntent)
                 .build()
         }.getOrElse {
             rebuildNotificationWithDeleteIntent(base)
@@ -91,7 +109,7 @@ class LocalOnlyMediaNotificationProvider(
             .setSubText(base.extras.getCharSequence(Notification.EXTRA_SUB_TEXT))
             .setLargeIcon(base.getLargeIcon())
             .setContentIntent(base.contentIntent)
-            .setDeleteIntent(stopPendingIntent)
+            .setDeleteIntent(pauseAndHidePendingIntent)
             .setLocalOnly(true)
             .setShowWhen(base.extras.getBoolean(Notification.EXTRA_SHOW_WHEN, false))
             .setOnlyAlertOnce(true)
@@ -111,6 +129,6 @@ class LocalOnlyMediaNotificationProvider(
     }
 
     private companion object {
-        private const val REQUEST_CODE_STOP_AND_UNLOAD = 1001
+        private const val REQUEST_CODE_PAUSE_AND_HIDE = 1001
     }
 }
