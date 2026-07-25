@@ -30,7 +30,35 @@ data class OrpheusShapeSet(
     val expressiveHero: Shape,
 )
 
+/** 1:1 with PixelPlayerOSS Shape.kt Material roles + rounded chrome for Orpheus widgets. */
+val PixelPlayerMaterialShapes = Shapes(
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(24.dp),
+)
+
 object OrpheusShapeSets {
+    /** Matches PixelPlayer Material shapes for shared buttons/surfaces. */
+    val Pixel = OrpheusShapeSet(
+        terminal = RoundedCornerShape(12.dp),
+        button = RoundedCornerShape(8.dp),
+        iconButton = RoundedCornerShape(16.dp),
+        searchBar = RoundedCornerShape(28.dp),
+        smooth8 = RoundedCornerShape(8.dp),
+        smooth10 = RoundedCornerShape(10.dp),
+        smooth12 = RoundedCornerShape(12.dp),
+        smooth14 = RoundedCornerShape(14.dp),
+        smooth16 = RoundedCornerShape(16.dp),
+        smooth20 = RoundedCornerShape(20.dp),
+        smooth24 = RoundedCornerShape(24.dp),
+        smooth28 = RoundedCornerShape(28.dp),
+        smooth32 = RoundedCornerShape(32.dp),
+        smoothPill = RoundedCornerShape(50),
+        expressiveAvatar = RoundedCornerShape(16.dp),
+        expressiveClover = RoundedCornerShape(20.dp),
+        expressiveHero = RoundedCornerShape(24.dp),
+    )
+
     val Square = OrpheusShapeSet(
         terminal = RoundedCornerShape(0.dp),
         button = RoundedCornerShape(0.dp),
@@ -74,11 +102,11 @@ object OrpheusShapeSets {
 
 /** Synced from [OrpheusTheme]; safe to read outside @Composable (defaults, remember keys). */
 object OrpheusActiveShapes {
-    var set: OrpheusShapeSet = OrpheusShapeSets.Square
+    var set: OrpheusShapeSet = OrpheusShapeSets.Rounded
         internal set
 }
 
-val LocalOrpheusShapes = staticCompositionLocalOf { OrpheusShapeSets.Square }
+val LocalOrpheusShapes = staticCompositionLocalOf { OrpheusShapeSets.Rounded }
 
 val TerminalShape: Shape get() = OrpheusActiveShapes.set.terminal
 

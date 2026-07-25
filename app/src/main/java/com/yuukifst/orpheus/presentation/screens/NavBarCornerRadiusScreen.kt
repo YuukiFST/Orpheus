@@ -62,6 +62,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yuukifst.orpheus.R
+import com.yuukifst.orpheus.data.preferences.DEFAULT_NAV_BAR_CORNER_RADIUS_DP
 import com.yuukifst.orpheus.data.preferences.MAX_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.data.preferences.MIN_NAV_BAR_CORNER_RADIUS
 import com.yuukifst.orpheus.presentation.viewmodel.SettingsViewModel
@@ -71,7 +72,7 @@ import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 
-const val DEFAULT_NAV_BAR_CORNER_RADIUS = 28f
+const val DEFAULT_NAV_BAR_CORNER_RADIUS = DEFAULT_NAV_BAR_CORNER_RADIUS_DP.toFloat()
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable

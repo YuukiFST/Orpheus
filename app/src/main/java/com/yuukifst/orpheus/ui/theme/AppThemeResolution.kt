@@ -10,6 +10,8 @@ fun resolveAppTheme(appThemeMode: String, systemDark: Boolean): ResolvedAppTheme
     when (appThemeMode) {
         AppThemeMode.DARK -> ResolvedAppTheme(darkTheme = true, scheme = AppThemeScheme.DARK)
         AppThemeMode.PIXEL -> ResolvedAppTheme(darkTheme = true, scheme = AppThemeScheme.PIXEL)
+        // Legacy "terminal" theme → dark (Terminal mode removed)
+        "terminal" -> ResolvedAppTheme(darkTheme = true, scheme = AppThemeScheme.DARK)
         AppThemeMode.FOLLOW_SYSTEM -> ResolvedAppTheme(
             darkTheme = systemDark,
             scheme = if (systemDark) AppThemeScheme.DARK else AppThemeScheme.LIGHT

@@ -17,6 +17,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -2123,7 +2124,22 @@ fun SetupBottomBar(
     isFinishButtonEnabled: Boolean
 ) {
     val shape = TerminalCornerShape
-    val distancePx = with(LocalDensity.current) { 8.dp.roundToPx() }
+    val iconDistancePx = with(LocalDensity.current) { OrpheusMotion.DistanceBase.roundToPx() }
+    val setupNavIconTransition: AnimatedContentTransitionScope<Int>.() -> ContentTransform = {
+        if (targetState > initialState) {
+            (slideInHorizontally { iconDistancePx } + fadeIn(
+                tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+            )).togetherWith(
+                slideOutHorizontally { -iconDistancePx } + fadeOut(tween(OrpheusMotion.DurationQuick))
+            )
+        } else {
+            (slideInHorizontally { -iconDistancePx } + fadeIn(
+                tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)
+            )).togetherWith(
+                slideOutHorizontally { iconDistancePx } + fadeOut(tween(OrpheusMotion.DurationQuick))
+            )
+        }.using(SizeTransform(clip = false))
+    }
 
     Surface(
         modifier = modifier
@@ -2148,15 +2164,7 @@ fun SetupBottomBar(
                     IconButton(onClick = onBackClicked) {
                         AnimatedContent(
                             targetState = pagerState.currentPage,
-                            transitionSpec = {
-                                if (targetState > initialState) {
-                                    (slideInHorizontally { distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
-                                        .togetherWith(slideOutHorizontally { -distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
-                                } else {
-                                    (slideInHorizontally { -distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
-                                        .togetherWith(slideOutHorizontally { distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
-                                }.using(SizeTransform(clip = false))
-                            },
+                            transitionSpec = setupNavIconTransition,
                             label = "BackIconAnimation",
                         ) { targetPage ->
                             key(targetPage) {
@@ -2229,15 +2237,7 @@ fun SetupBottomBar(
                 ) {
                     AnimatedContent(
                         targetState = pagerState.currentPage,
-                        transitionSpec = {
-                            if (targetState > initialState) {
-                                (slideInHorizontally { distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
-                                    .togetherWith(slideOutHorizontally { -distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
-                            } else {
-                                (slideInHorizontally { -distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
-                                    .togetherWith(slideOutHorizontally { distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
-                            }.using(SizeTransform(clip = false))
-                        },
+                        transitionSpec = setupNavIconTransition,
                         label = "AnimatedFabIcon",
                     ) { targetPage ->
                         if (targetPage < pagerState.pageCount - 1) {

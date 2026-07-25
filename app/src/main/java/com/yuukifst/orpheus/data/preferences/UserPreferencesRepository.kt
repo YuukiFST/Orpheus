@@ -50,6 +50,8 @@ object AppThemeMode {
 
 const val MIN_NAV_BAR_CORNER_RADIUS = 0
 const val MAX_NAV_BAR_CORNER_RADIUS = 60
+/** Default navbar corner radius (dp) when Rounded is active / fresh install. */
+const val DEFAULT_NAV_BAR_CORNER_RADIUS_DP = 28
 
 internal fun sanitizeNavBarCornerRadius(radius: Int): Int =
         radius.coerceIn(MIN_NAV_BAR_CORNER_RADIUS, MAX_NAV_BAR_CORNER_RADIUS)
@@ -210,7 +212,6 @@ constructor(
         val ALBUM_ART_QUALITY = stringPreferencesKey("album_art_quality")
         val ALBUM_ART_CACHE_LIMIT_MB = intPreferencesKey("album_art_cache_limit_mb")
         val TAP_BACKGROUND_CLOSES_PLAYER = booleanPreferencesKey("tap_background_closes_player")
-        val CRT_SCREEN_OVERLAY_ENABLED = booleanPreferencesKey("crt_screen_overlay_enabled")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
         val IMMERSIVE_LYRICS_ENABLED = booleanPreferencesKey("immersive_lyrics_enabled")
         val IMMERSIVE_LYRICS_TIMEOUT = longPreferencesKey("immersive_lyrics_timeout")
@@ -1251,7 +1252,10 @@ constructor(
 
     val navBarCornerRadiusFlow: Flow<Int> =
             dataStore.data.map { preferences ->
-                sanitizeNavBarCornerRadius(preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS] ?: 0)
+                sanitizeNavBarCornerRadius(
+                    preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS]
+                        ?: DEFAULT_NAV_BAR_CORNER_RADIUS_DP
+                )
             }
 
     suspend fun setNavBarCornerRadius(radius: Int) {
@@ -1515,12 +1519,34 @@ constructor(
 
     val useSmoothCornersFlow: Flow<Boolean> = dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.USE_SMOOTH_CORNERS] ?: false
+            preferences[PreferencesKeys.USE_SMOOTH_CORNERS] ?: true
         }
 
     suspend fun setUseSmoothCorners(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.USE_SMOOTH_CORNERS] = enabled
+            if (enabled) {
+                val radius = preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS]
+                if (radius == null || radius == 0) {
+                    preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS] =
+                        DEFAULT_NAV_BAR_CORNER_RADIUS_DP
+                }
+            }
+        }
+    }
+
+    /**
+     * Legacy installs may have Rounded ON with navbar radius still 0 (old default).
+     * Promote once so Rounded actually shows rounded tips.
+     */
+    suspend fun promoteZeroNavBarRadiusIfRounded() {
+        dataStore.edit { preferences ->
+            val rounded = preferences[PreferencesKeys.USE_SMOOTH_CORNERS] ?: true
+            val radius = preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS]
+            if (rounded && (radius == null || radius == 0)) {
+                preferences[PreferencesKeys.NAV_BAR_CORNER_RADIUS] =
+                    DEFAULT_NAV_BAR_CORNER_RADIUS_DP
+            }
         }
     }
 
@@ -1610,17 +1636,6 @@ constructor(
     suspend fun setTapBackgroundClosesPlayer(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TAP_BACKGROUND_CLOSES_PLAYER] = enabled
-        }
-    }
-
-    val crtScreenOverlayEnabledFlow: Flow<Boolean> =
-        dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.CRT_SCREEN_OVERLAY_ENABLED] ?: true
-        }
-
-    suspend fun setCrtScreenOverlayEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CRT_SCREEN_OVERLAY_ENABLED] = enabled
         }
     }
 

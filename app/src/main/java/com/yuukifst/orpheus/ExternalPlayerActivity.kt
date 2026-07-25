@@ -51,7 +51,7 @@ class ExternalPlayerActivity : ComponentActivity() {
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
-                .collectAsStateWithLifecycle(initialValue = false)
+                .collectAsStateWithLifecycle(initialValue = true)
             val resolvedTheme = resolveAppTheme(appThemeMode, systemDarkTheme)
             OrpheusTheme(
                 darkTheme = resolvedTheme.darkTheme,

@@ -237,13 +237,19 @@ fun UnifiedPlayerSheetV2(
         }
     }
 
-    LaunchedEffect(showPlayerContentArea, dismissJustCommitted) {
+    var previousShowPlayerContentArea by remember { mutableStateOf(showPlayerContentArea) }
+    LaunchedEffect(showPlayerContentArea, dismissJustCommitted, infrequentPlayerState.currentSong?.id) {
+        val contentBecameVisible = showPlayerContentArea && !previousShowPlayerContentArea
+        previousShowPlayerContentArea = showPlayerContentArea
         val shouldSnap = MiniPlayerVisibilityPolicy.shouldSnapOffsetOnScreen(
             showPlayerContentArea = showPlayerContentArea,
-            contentBecameVisible = showPlayerContentArea,
+            contentBecameVisible = contentBecameVisible,
             dismissJustCommitted = dismissJustCommitted,
         )
-        if (shouldSnap && offsetAnimatable.value != 0f) {
+        val newSongWhileSwipedOffScreen = showPlayerContentArea &&
+            !dismissJustCommitted &&
+            infrequentPlayerState.currentSong?.id != null
+        if ((shouldSnap || newSongWhileSwipedOffScreen) && offsetAnimatable.value != 0f) {
             offsetAnimatable.snapTo(0f)
         }
     }
