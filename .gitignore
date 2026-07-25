@@ -52,6 +52,7 @@ release-artifacts/
 TMPDIR*
 
 PRD.md
+docs/BASELINE_PROFILES.md
 **/superpowers/plans/
 
 .worktrees/
