@@ -22,7 +22,6 @@ val JetBrainsMonoNerd = FontFamily(
     Font(R.font.jetbrains_mono_nerd_extrabold, FontWeight.ExtraBold),
 )
 
-// 1:1 with PixelPlayerOSS Type.kt — bundled variable font, no downloadable provider.
 @OptIn(ExperimentalTextApi::class)
 val MontserratFamily = FontFamily(
     Font(
@@ -137,7 +136,6 @@ val RoundedSans = FontFamily(
     ),
 )
 
-/** PixelPlayerOSS Material typography — used for AppThemeMode.PIXEL. */
 val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = RoundedSans,

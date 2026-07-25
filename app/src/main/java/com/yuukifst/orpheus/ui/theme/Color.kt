@@ -42,7 +42,6 @@ val LightPrimaryContainer = Color(0xFFD4EDCE)
 val LightOnPrimaryContainer = Color(0xFF0A1F08)
 val LightOutline = Color(0xFF8A9A84)
 
-// Pixel theme — PixelPlayerOSS dark tokens only (1:1 with their Color.kt)
 val PixelPrimary = Color(0xFFAB47BC)
 val PixelOnPrimary = Color(0xFFFFFFFF)
 val PixelSecondary = Color(0xFFF06292)

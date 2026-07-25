@@ -25,7 +25,6 @@ import androidx.core.graphics.ColorUtils
 
 val LocalOrpheusDarkTheme = staticCompositionLocalOf { false }
 
-/** Hard terminal borders only for Orpheus Dark/Light — off in Pixel (PixelPlayer parity). */
 val LocalTerminalChrome = staticCompositionLocalOf { false }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {
@@ -155,8 +154,6 @@ val LightColorScheme = lightColorScheme(
     onTertiaryFixedVariant = MonoBlack,
 )
 
-// PixelPlayerOSS dark seed + filled surface/container roles so list/buttons match PP look
-// (upstream leaves most roles to Material defaults / dynamic; static Pixel needs explicit fills)
 private val PixelSurfaceLow = Color(0xFF24183A)
 private val PixelSurfaceHigh = Color(0xFF34284A)
 private val PixelSurfaceHighest = Color(0xFF3E3254)

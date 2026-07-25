@@ -470,7 +470,6 @@ internal fun settingsCategoryColorsOrMono(
     if (isColorfulAppThemeMode(appThemeMode)) getCategoryColors(category, isDark) else monoPair
 
 private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair<Color, Color> {
-    // Pixel mode only uses dark scheme; accents cycle PixelPlayerOSS primary/secondary/tertiary
     return if (isDark) {
         when (category) {
             SettingsCategory.LIBRARY -> PixelPrimary to PixelOnPrimary

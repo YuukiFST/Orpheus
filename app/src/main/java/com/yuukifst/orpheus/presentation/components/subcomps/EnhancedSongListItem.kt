@@ -147,7 +147,6 @@ fun EnhancedSongListItem(
         if (state.isSelected) 1f else 0f
     }
 
-    // Pixel theme: PixelPlayerOSS shapes (22→50dp row, 10→50dp album). Terminal Dark/Light: square.
     val usePixelChrome = !LocalTerminalChrome.current
     val animatedCornerRadius = if (usePixelChrome) {
         lerpDp(22.dp, 50.dp, highlightProgress)

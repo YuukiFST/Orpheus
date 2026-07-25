@@ -30,7 +30,6 @@ data class OrpheusShapeSet(
     val expressiveHero: Shape,
 )
 
-/** 1:1 with PixelPlayerOSS Shape.kt Material roles + rounded chrome for Orpheus widgets. */
 val PixelPlayerMaterialShapes = Shapes(
     small = RoundedCornerShape(8.dp),
     medium = RoundedCornerShape(16.dp),
@@ -38,7 +37,6 @@ val PixelPlayerMaterialShapes = Shapes(
 )
 
 object OrpheusShapeSets {
-    /** Matches PixelPlayer Material shapes for shared buttons/surfaces. */
     val Pixel = OrpheusShapeSet(
         terminal = RoundedCornerShape(12.dp),
         button = RoundedCornerShape(8.dp),
