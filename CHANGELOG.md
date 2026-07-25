@@ -2,6 +2,15 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.23] - 2026-07-25
+
+### Added
+- Settings-only themes: Ethereal, Rose Pine, Catppuccin Mocha (Omarchy palettes), and Sakura (creative pink), with ThemePersonality soft chrome.
+
+### Fixed
+- Setup Next no longer uses square FAB/outline chrome; matches Back IconButton family.
+- Rounded Visual Style: navbar tips and corner-radius preview coerce radius 0 → 28; dp label matches preview.
+
 ## [1.0.22] - 2026-07-25
 
 ### Fixed
