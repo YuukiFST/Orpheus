@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 
 /**
  * Motion tokens aligned with transitions.dev scale.
@@ -21,6 +22,13 @@ object OrpheusMotion {
     const val DurationMedium = 350
     const val DurationSlow = 400
     const val DurationVerySlow = 500
+
+    // Travel distances (transitions.dev) — enter phase carries these; closes may shrink/drop.
+    val DistanceMicro = 4.dp   // text / content swap
+    val DistanceSmall = 6.dp   // small shake segment
+    val DistanceBase = 8.dp    // page slide, badge diagonal
+    val DistanceMedium = 12.dp // text reveal
+    val DistanceLarge = 30.dp  // ceremonial appear only
 
     val EaseSmoothOut: Easing = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
     val EaseBounce: Easing = CubicBezierEasing(0.34f, 1.36f, 0.64f, 1f)
