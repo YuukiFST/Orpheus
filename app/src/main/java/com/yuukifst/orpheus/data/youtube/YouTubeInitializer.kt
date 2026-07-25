@@ -1,8 +1,13 @@
 package com.yuukifst.orpheus.data.youtube
 
 import org.schabi.newpipe.extractor.NewPipe
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object YouTubeInitializer {
+@Singleton
+class YouTubeInitializer @Inject constructor(
+    private val downloader: YouTubeDownloaderImpl,
+) {
     @Volatile
     private var initialized = false
 
@@ -10,7 +15,7 @@ object YouTubeInitializer {
         if (initialized) return
         synchronized(this) {
             if (initialized) return
-            NewPipe.init(YouTubeDownloaderImpl.getInstance())
+            NewPipe.init(downloader)
             initialized = true
         }
     }

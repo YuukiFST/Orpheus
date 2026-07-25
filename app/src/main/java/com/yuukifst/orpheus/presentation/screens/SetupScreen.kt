@@ -998,8 +998,7 @@ private data class ThemeOptionItem(
     val mode: String,
     val title: String,
     val description: String,
-    val icon: ImageVector,
-    val recommended: Boolean = false
+    val icon: ImageVector
 )
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
@@ -1013,8 +1012,7 @@ fun ThemeSelectionPage(
             mode = AppThemeMode.DARK,
             title = stringResource(R.string.setup_theme_dark_title),
             description = stringResource(R.string.setup_theme_dark_description),
-            icon = Icons.Rounded.DarkMode,
-            recommended = true
+            icon = Icons.Rounded.DarkMode
         ),
         ThemeOptionItem(
             mode = AppThemeMode.LIGHT,
@@ -1141,28 +1139,6 @@ private fun ThemeModeOptionCard(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                if (option.recommended) {
-                    Surface(
-                        color = if (selected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.primaryContainer
-                        },
-                        contentColor = if (selected) {
-                            MaterialTheme.colorScheme.onPrimary
-                        } else {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        },
-                        shape = TerminalCornerShape
-                    ) {
-                        Text(
-                            text = stringResource(R.string.setup_recommended),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
-                }
                 Text(
                     text = option.description,
                     style = MaterialTheme.typography.bodyMedium,

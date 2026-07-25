@@ -2,6 +2,7 @@ package com.yuukifst.orpheus
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.yuukifst.orpheus.data.youtube.YouTubeDownloaderImpl
 import com.yuukifst.orpheus.data.youtube.YouTubeInitializer
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import org.junit.Assert.assertEquals
@@ -19,7 +20,7 @@ class OrpheusSmokeTest {
 
     @Test
     fun youTubeInitializer_runsOnDevice() {
-        YouTubeInitializer.ensureInitialized()
+        YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()).ensureInitialized()
         assertTrue(true)
     }
 

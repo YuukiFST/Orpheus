@@ -257,6 +257,7 @@ class PlayerViewModelTest {
             mockMediaControllerFactory,
             mockYouTubePlaybackController,
         )
+        playerViewModel.onMainActivityStart()
     }
 
     @AfterEach

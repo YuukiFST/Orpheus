@@ -12,6 +12,7 @@ import coil.size.Size
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.albumArtMemoryCacheKey
 import com.yuukifst.orpheus.presentation.components.safeAlbumArtTargetSize
+import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.utils.LocalArtworkUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -102,5 +103,28 @@ fun PrefetchAlbumNeighbors(
                     }
                 }
             }
+    }
+}
+
+@Composable
+fun PrefetchQueuePaletteNeighbors(
+    isActive: Boolean,
+    currentSong: Song?,
+    queue: ImmutableList<Song>,
+    playerViewModel: PlayerViewModel,
+    radius: Int = 1,
+) {
+    if (!isActive || currentSong == null || queue.isEmpty()) return
+    val themeStateHolder = playerViewModel.themeStateHolder
+    LaunchedEffect(currentSong.id, queue, radius) {
+        val index = queue.indexOfFirst { it.id == currentSong.id }
+        if (index == -1) return@LaunchedEffect
+        val bounds = (maxOf(0, index - radius))..(minOf(queue.lastIndex, index + radius))
+        for (neighborIndex in bounds) {
+            if (neighborIndex == index) continue
+            queue[neighborIndex].albumArtUriString
+                ?.takeIf { it.isNotBlank() }
+                ?.let(themeStateHolder::ensureAlbumColorScheme)
+        }
     }
 }

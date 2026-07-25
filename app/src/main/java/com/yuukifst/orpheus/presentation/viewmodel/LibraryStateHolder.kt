@@ -210,6 +210,7 @@ class LibraryStateHolder @Inject constructor(
             }
                 .toImmutableList()
         }
+        .distinctUntilChanged()
         .flowOn(Dispatchers.Default)
 
 

@@ -48,7 +48,6 @@
     <string name="setup_theme_title">App Theme</string>
     <string name="setup_theme_subtitle">Pick the look you want before you start exploring your library.</string>
     <string name="setup_theme_footer">You can change this later in Settings &gt; Appearance &gt; App Theme.</string>
-    <string name="setup_recommended">Recommended</string>
     <string name="setup_external_services_title">Optional Online Services</string>
     <string name="setup_external_services_subtitle">Orpheus works offline by default. Enable only the lookups you want.</string>
     <string name="setup_external_lyrics_title">Online lyrics from LRCLIB</string>

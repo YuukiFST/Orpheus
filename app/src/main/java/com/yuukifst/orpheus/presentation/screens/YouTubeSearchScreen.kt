@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -62,6 +63,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
@@ -103,6 +105,7 @@ fun YouTubeSearchScreen(
 
     LaunchedEffect(Unit) {
         onSearchBarActiveChange(false)
+        viewModel.warmUpConnection()
     }
 
     LaunchedEffect(uiState.snackbarMessage) {
@@ -199,8 +202,27 @@ fun YouTubeSearchScreen(
                     }
                 }
                 uiState.results.isNotEmpty() -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        if (uiState.isLoading) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = OrpheusSpacing.lg,
+                                        vertical = OrpheusSpacing.xs,
+                                    ),
+                            )
+                        }
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(
+                                    if (uiState.isLoading) {
+                                        Modifier.alpha(0.55f)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                         contentPadding = PaddingValues(
                             start = OrpheusSpacing.lg,
                             end = OrpheusSpacing.lg,
@@ -223,6 +245,7 @@ fun YouTubeSearchScreen(
                                 },
                             )
                         }
+                    }
                     }
                 }
                 uiState.suggestions.isNotEmpty() -> {
@@ -302,7 +325,6 @@ fun YouTubeSearchScreen(
                         bottomPadding = bottomBarHeightDp + OrpheusSpacing.md,
                         onHistoryClick = { query ->
                             searchQuery = query
-                            viewModel.updateQuery(query)
                             viewModel.search(query)
                         },
                         onHistoryDelete = viewModel::deleteSearchHistoryItem,

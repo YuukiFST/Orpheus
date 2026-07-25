@@ -57,24 +57,30 @@ class OrpheusApplication : Application(), ImageLoaderFactory, Configuration.Prov
     @Inject
     lateinit var syncManager: dagger.Lazy<com.yuukifst.orpheus.data.worker.SyncManager>
 
+    @Inject
+    lateinit var youTubeInitializer: dagger.Lazy<YouTubeInitializer>
+
     private val startupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // ADD THE COMPANION OBJECT
+    @Volatile
+    private var libraryTrimRestorePending = false
+
     companion object {
         const val NOTIFICATION_CHANNEL_ID = "orpheus_music_channel"
     }
 
     private val appLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
-            libraryStateHolder.get().restoreAfterTrimIfNeeded()
+            if (libraryTrimRestorePending) {
+                libraryStateHolder.get().restoreAfterTrimIfNeeded()
+                libraryTrimRestorePending = false
+            }
         }
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        // Benchmark variant intentionally restarts/kills app process during tests.
-        // Avoid persisting those events as user-facing crash reports.
         if (BuildConfig.BUILD_TYPE != "benchmark") {
             CrashHandler.install(this)
         }
@@ -82,29 +88,24 @@ class OrpheusApplication : Application(), ImageLoaderFactory, Configuration.Prov
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            // Release tree: only WARN/ERROR/WTF - no DEBUG/VERBOSE/INFO
             Timber.plant(ReleaseTree())
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                "Orpheus Music Playback",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
         }
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
 
-        YouTubeInitializer.ensureInitialized()
-
-        // Explicit launch site for SyncManager's background observers (storage changes,
-        // foreground catch-up sync, periodic maintenance) — see SyncManager.start().
-        syncManager.get().start()
-
         startupScope.launch {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    "Orpheus Music Playback",
+                    NotificationManager.IMPORTANCE_LOW,
+                )
+                val notificationManager = getSystemService(NotificationManager::class.java)
+                notificationManager?.createNotificationChannel(channel)
+            }
+            runCatching { userPreferencesRepository.get().refreshStartupMirrorFromDataStore() }
+            youTubeInitializer.get().ensureInitialized()
+            syncManager.get().start()
             AlbumArtUtils.migrateLegacyCacheLocation(this@OrpheusApplication)
             val savedLimit = runCatching {
                 userPreferencesRepository.get().albumArtCacheLimitMbFlow.first()
@@ -146,7 +147,10 @@ class OrpheusApplication : Application(), ImageLoaderFactory, Configuration.Prov
             MediaMetadataRetrieverPool.clear()
         }
 
-        libraryStateHolder.get().trimMemory(level)
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE) {
+            libraryTrimRestorePending = true
+            libraryStateHolder.get().trimMemory(level)
+        }
 
         if (
             level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
@@ -156,10 +160,8 @@ class OrpheusApplication : Application(), ImageLoaderFactory, Configuration.Prov
         }
     }
 
-    // 3. Override the method to provide the WorkManager configuration
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
-
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class YouTubeSearchRepositoryCacheTest {
     @Test
     fun searchCache_returnsSameListInstanceForSameQuery() {
-        val repo = YouTubeSearchRepository()
+        val repo = YouTubeSearchRepository.createForTests()
         repo.clearSearchCacheForTests()
         val cached = listOf(
             YouTubeTrack(

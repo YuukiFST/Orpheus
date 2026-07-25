@@ -17,6 +17,8 @@ import coil.size.Size
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.preferences.CarouselStyle
 import com.yuukifst.orpheus.presentation.components.scoped.PrefetchAlbumNeighbors
+import com.yuukifst.orpheus.presentation.components.scoped.PrefetchQueuePaletteNeighbors
+import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.first
 
@@ -46,7 +48,8 @@ fun AlbumCarouselSection(
     modifier: Modifier = Modifier,
     carouselStyle: String = CarouselStyle.NO_PEEK,
     itemSpacing: Dp = 8.dp,
-    albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM
+    albumArtQuality: AlbumArtQuality = AlbumArtQuality.MEDIUM,
+    playerViewModel: PlayerViewModel? = null,
 ) {
     if (queue.isEmpty()) return
 
@@ -94,6 +97,15 @@ fun AlbumCarouselSection(
         targetSize = targetSize,
         anchorIndex = effectiveTargetIndex
     )
+    playerViewModel?.let { viewModel ->
+        PrefetchQueuePaletteNeighbors(
+            isActive = expansionFraction > 0.08f,
+            currentSong = currentSong,
+            queue = queue,
+            playerViewModel = viewModel,
+            radius = 1,
+        )
+    }
     var ignoreNextSettledSelectionForPage by remember { mutableStateOf<Int?>(null) }
     var programmaticScrollInProgress by remember { mutableStateOf(false) }
     var lastSettledSongId by remember { mutableStateOf(currentSong?.id) }

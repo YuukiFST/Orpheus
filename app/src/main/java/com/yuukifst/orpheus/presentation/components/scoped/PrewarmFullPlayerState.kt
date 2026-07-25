@@ -8,11 +8,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun rememberPrewarmFullPlayer(currentSongId: String?): Boolean {
+internal fun rememberPrewarmFullPlayer(
+    currentSongId: String?,
+    sheetExpansionFraction: Float = 0f,
+): Boolean {
     val context = LocalContext.current
 
     // OPT #5: Skip prewarm entirely on low-RAM devices. Having two FullPlayerContent
@@ -27,10 +31,14 @@ internal fun rememberPrewarmFullPlayer(currentSongId: String?): Boolean {
 
     if (isLowRamDevice) return false
 
-    LaunchedEffect(currentSongId) {
-        if (currentSongId != null) {
-            prewarmFullPlayer = true
-        }
+    LaunchedEffect(currentSongId, sheetExpansionFraction) {
+        if (currentSongId == null) return@LaunchedEffect
+        // Defer prewarm until after the tap frame paints; only warm when the sheet is
+        // already partially expanded so we do not compose a second FullPlayerContent on
+        // every song change while collapsed.
+        if (sheetExpansionFraction <= 0.01f) return@LaunchedEffect
+        withFrameNanos { }
+        prewarmFullPlayer = true
     }
     LaunchedEffect(currentSongId, prewarmFullPlayer) {
         if (prewarmFullPlayer) {

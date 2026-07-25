@@ -79,9 +79,14 @@ enum class AlbumArtQuality(val maxSize: Int, val label: String) {
 class UserPreferencesRepository
 @Inject
 constructor(
+        @dagger.hilt.android.qualifiers.ApplicationContext private val context: Context,
         private val dataStore: DataStore<Preferences>,
         private val json: Json // Inject Json for serialization
 ) {
+
+    private val startupMirror by lazy {
+        context.getSharedPreferences(STARTUP_MIRROR_PREFS, Context.MODE_PRIVATE)
+    }
 
     private val backupExcludedKeyNames = setOf(
         PreferencesKeys.INITIAL_SETUP_DONE.name,
@@ -1036,6 +1041,33 @@ constructor(
 
     suspend fun setInitialSetupDone(isDone: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.INITIAL_SETUP_DONE] = isDone }
+        writeInitialSetupDoneMirror(isDone)
+    }
+
+    fun readInitialSetupDoneSync(): Boolean? {
+        return if (startupMirror.contains(KEY_INITIAL_SETUP_DONE)) {
+            startupMirror.getBoolean(KEY_INITIAL_SETUP_DONE, false)
+        } else {
+            null
+        }
+    }
+
+    fun readLaunchTabSync(): String? {
+        return startupMirror.getString(KEY_LAUNCH_TAB, null)
+    }
+
+    suspend fun refreshStartupMirrorFromDataStore() {
+        val preferences = dataStore.data.first()
+        writeInitialSetupDoneMirror(preferences[PreferencesKeys.INITIAL_SETUP_DONE] ?: false)
+        writeLaunchTabMirror(preferences[PreferencesKeys.LAUNCH_TAB] ?: LaunchTab.HOME)
+    }
+
+    private fun writeInitialSetupDoneMirror(isDone: Boolean) {
+        startupMirror.edit().putBoolean(KEY_INITIAL_SETUP_DONE, isDone).apply()
+    }
+
+    private fun writeLaunchTabMirror(tab: String) {
+        startupMirror.edit().putString(KEY_LAUNCH_TAB, tab).apply()
     }
 
     // Flows for Sort Options
@@ -1247,6 +1279,10 @@ constructor(
     }
 
     companion object {
+        private const val STARTUP_MIRROR_PREFS = "orpheus_startup_mirror"
+        private const val KEY_INITIAL_SETUP_DONE = "initial_setup_done"
+        private const val KEY_LAUNCH_TAB = "launch_tab"
+
         /** Default character delimiters for splitting multi-artist tags */
         val DEFAULT_ARTIST_DELIMITERS = listOf("/", ";", ",", "+", "&")
         /** Default word-based delimiters (matched case-insensitively with whitespace boundaries) */
@@ -1316,6 +1352,7 @@ constructor(
 
     suspend fun setLaunchTab(tab: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.LAUNCH_TAB] = tab }
+        writeLaunchTabMirror(tab)
     }
 
     suspend fun setKeepPlayingInBackground(enabled: Boolean) {

@@ -2,6 +2,9 @@ package com.yuukifst.orpheus.data.preferences
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.edit
+import android.content.Context
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -13,11 +16,20 @@ import java.nio.file.Files
 
 class UserPreferencesRepositoryTest {
 
+    private fun createTestContext(): Context {
+        val context = mockk<Context>(relaxed = true)
+        every {
+            context.getSharedPreferences("orpheus_startup_mirror", Context.MODE_PRIVATE)
+        } returns mockk(relaxed = true)
+        return context
+    }
+
     private fun createRepository(
         backgroundScope: kotlinx.coroutines.CoroutineScope,
         tempDir: java.nio.file.Path
     ): UserPreferencesRepository {
         return UserPreferencesRepository(
+            context = createTestContext(),
             dataStore = PreferenceDataStoreFactory.create(
                 scope = backgroundScope,
                 produceFile = { tempDir.resolve("settings.preferences_pb").toFile() }
@@ -158,7 +170,11 @@ class UserPreferencesRepositoryTest {
                 produceFile = { tempDir.resolve("settings.preferences_pb").toFile() }
             )
             // Simulate legacy: Rounded ON with explicit radius 0 via public APIs.
-            val repository = UserPreferencesRepository(dataStore = dataStore, json = Json)
+            val repository = UserPreferencesRepository(
+                context = createTestContext(),
+                dataStore = dataStore,
+                json = Json,
+            )
             repository.setUseSmoothCorners(false)
             repository.setNavBarCornerRadius(0)
             // Force rounded + zero without promotion: write via edit after square path.
