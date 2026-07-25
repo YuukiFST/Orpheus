@@ -23,6 +23,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -122,7 +123,6 @@ import com.yuukifst.orpheus.presentation.navigation.Screen
 import com.yuukifst.orpheus.presentation.screens.SetupScreen
 import com.yuukifst.orpheus.presentation.viewmodel.MainViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
-import com.yuukifst.orpheus.ui.theme.CrtScreenOverlay
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.ui.theme.OrpheusTheme
 import com.yuukifst.orpheus.ui.theme.resolveAppTheme
@@ -228,11 +228,9 @@ class MainActivity : ComponentActivity() {
             val systemDarkTheme = isSystemInDarkTheme()
             val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
-                .collectAsStateWithLifecycle(initialValue = false)
+                .collectAsStateWithLifecycle(initialValue = true)
             val resolvedTheme = resolveAppTheme(appThemeMode, systemDarkTheme)
             val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
-            val crtScreenOverlayEnabled by userPreferencesRepository.crtScreenOverlayEnabledFlow
-                .collectAsStateWithLifecycle(initialValue = true)
 
             // Crash report dialog state
             var showCrashReportDialog by remember { mutableStateOf(false) }
@@ -279,10 +277,15 @@ class MainActivity : ComponentActivity() {
             ) {
                 var contentVisible by remember { mutableStateOf(true) }
                 val contentAlpha = if (contentVisible) 1f else 0f
+                val animatedBackground by animateColorAsState(
+                    targetValue = MaterialTheme.colorScheme.background,
+                    animationSpec = OrpheusMotion.openColorTween(),
+                    label = "appThemeBackground"
+                )
 
                 Surface(
-                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }, 
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
+                    color = animatedBackground
                 ) {
                     Box(Modifier.fillMaxSize()) {
                         if (showSetupScreen == null) {
@@ -319,8 +322,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-
-                        CrtScreenOverlay(enabled = crtScreenOverlayEnabled)
                     }
                 }
             }
@@ -700,6 +701,7 @@ class MainActivity : ComponentActivity() {
 
         LaunchedEffect(userPreferencesRepository) {
             userPreferencesRepository.clearDeprecatedPlayerSheetPreference()
+            userPreferencesRepository.promoteZeroNavBarRadiusIfRounded()
         }
 
         CompositionLocalProvider(

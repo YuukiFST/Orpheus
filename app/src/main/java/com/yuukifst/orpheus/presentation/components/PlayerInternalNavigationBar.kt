@@ -106,7 +106,6 @@ private fun PlayerInternalNavigationItemsRow(
     val innerRowPadding = (navBarInsetPadding - bottomBarPadding).coerceAtLeast(0.dp)
     val latestCurrentRoute by rememberUpdatedState(currentRoute)
     val latestOnSearchIconDoubleTap by rememberUpdatedState(onSearchIconDoubleTap)
-    val latestNavigationEnabled by rememberUpdatedState(currentRoute != null)
 
     val rowModifier = if (navBarStyle == NavBarStyle.FULL_WIDTH) {
         modifier
@@ -160,11 +159,6 @@ private fun PlayerInternalNavigationItemsRow(
             }
             val onClickLambda: () -> Unit = remember(item.screen.route, navController, scope) {
                 click@{
-                    if (!latestNavigationEnabled) {
-                        lastSearchTapTimestamp = 0L
-                        return@click
-                    }
-
                     val itemRoute = item.screen.route
                     val isSearchTab = itemRoute == Screen.Search.route
                     val isAlreadySelected = latestCurrentRoute == itemRoute
@@ -204,7 +198,7 @@ private fun PlayerInternalNavigationItemsRow(
                 modifier = Modifier.weight(1f),
                 selected = isSelected,
                 onClick = onClickLambda,
-                enabled = currentRoute != null,
+                enabled = true,
                 compactMode = compactMode,
                 icon = iconLambda,
                 selectedIcon = selectedIconLambda,

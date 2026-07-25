@@ -72,13 +72,17 @@ fun OrpheusSwitch(
         if (checked) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.onSurface
     val borderColor = MaterialTheme.colorScheme.outline
+    val showTerminalChrome = LocalTerminalChrome.current
 
     Box(
         modifier = modifier
             .size(trackWidth, trackHeight)
             .clip(thumbShape)
             .background(trackColor)
-            .border(1.dp, borderColor, thumbShape)
+            .then(
+                if (showTerminalChrome) Modifier.border(1.dp, borderColor, thumbShape)
+                else Modifier
+            )
             .semantics {
                 role = Role.Switch
                 toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
@@ -97,7 +101,10 @@ fun OrpheusSwitch(
                 .size(thumbSize)
                 .clip(thumbShape)
                 .background(thumbColor)
-                .border(1.dp, borderColor, thumbShape),
+                .then(
+                    if (showTerminalChrome) Modifier.border(1.dp, borderColor, thumbShape)
+                    else Modifier
+                ),
             contentAlignment = Alignment.Center,
         ) {
             thumbContent?.invoke()

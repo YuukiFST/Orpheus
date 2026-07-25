@@ -51,6 +51,7 @@ import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.data.model.toLibraryTabIdOrNull
 import com.yuukifst.orpheus.data.provider.SharedArtworkContentProvider
 import com.yuukifst.orpheus.data.preferences.CarouselStyle
+import com.yuukifst.orpheus.data.preferences.DEFAULT_NAV_BAR_CORNER_RADIUS_DP
 import com.yuukifst.orpheus.data.preferences.LibraryNavigationMode
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.data.preferences.FullPlayerLoadingTweaks
@@ -451,7 +452,11 @@ class PlayerViewModel @Inject constructor(
             initialValue = ThemePreference.DEFAULT
         )
 
-    val navBarCornerRadius: StateFlow<Int> = userPreferencesRepository.navBarCornerRadiusFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val navBarCornerRadius: StateFlow<Int> = userPreferencesRepository.navBarCornerRadiusFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        DEFAULT_NAV_BAR_CORNER_RADIUS_DP
+    )
 
     val navBarStyle: StateFlow<String> = userPreferencesRepository.navBarStyleFlow
         .stateIn(
@@ -1317,12 +1322,12 @@ class PlayerViewModel @Inject constructor(
     // sheet recomposition when any preference changed.
     // ---------------------------------------------------------------------------
     data class PlayerConfigSlice(
-        val navBarCornerRadius: Int = 0,
+        val navBarCornerRadius: Int = DEFAULT_NAV_BAR_CORNER_RADIUS_DP,
         val navBarStyle: String = NavBarStyle.DEFAULT,
         val carouselStyle: String = CarouselStyle.NO_PEEK,
         val fullPlayerLoadingTweaks: FullPlayerLoadingTweaks = FullPlayerLoadingTweaks(),
         val tapBackgroundClosesPlayer: Boolean = false,
-        val useSmoothCorners: Boolean = false,
+        val useSmoothCorners: Boolean = true,
         val playerThemePreference: String = ThemePreference.DEFAULT
     )
 
@@ -3205,6 +3210,7 @@ class PlayerViewModel @Inject constructor(
         mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
     ) {
         _dismissJustCommitted.value = false
+        setMiniPlayerDismissing(false)
         beginPreparingSong(song)
         _playerUiState.update {
             it.copy(
@@ -4443,6 +4449,11 @@ class PlayerViewModel @Inject constructor(
             setCurrentPosition = { playbackStateHolder.setCurrentPosition(it) },
             setSheetVisible = { _isSheetVisible.value = it },
             onDismissCommitted = {
+                // New playback can start while the async dismiss clear is still running.
+                if (playbackStateHolder.stablePlayerState.value.currentSong != null) {
+                    setMiniPlayerDismissing(false)
+                    return@dismissPlaylistWithoutUndo
+                }
                 _dismissJustCommitted.value = true
                 setMiniPlayerDismissing(false)
             },

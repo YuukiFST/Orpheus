@@ -18,6 +18,13 @@ class AppThemeModeResolutionTest {
     }
 
     @Test
+    fun legacyTerminalMapsToDark() {
+        val r = resolveAppTheme("terminal", systemDark = false)
+        assertTrue(r.darkTheme)
+        assertEquals(AppThemeScheme.DARK, r.scheme)
+    }
+
+    @Test
     fun followSystemNeverSelectsPixel() {
         val light = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = false)
         val dark = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = true)

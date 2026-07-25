@@ -155,73 +155,79 @@ val LightColorScheme = lightColorScheme(
     onTertiaryFixedVariant = MonoBlack,
 )
 
+// PixelPlayerOSS dark seed + filled surface/container roles so list/buttons match PP look
+// (upstream leaves most roles to Material defaults / dynamic; static Pixel needs explicit fills)
+private val PixelSurfaceLow = Color(0xFF24183A)
+private val PixelSurfaceHigh = Color(0xFF34284A)
+private val PixelSurfaceHighest = Color(0xFF3E3254)
+private val PixelPrimaryContainer = Color(0xFF5C2D6B)
+private val PixelSecondaryContainer = Color(0xFF6B2F4A)
+private val PixelTertiaryContainer = Color(0xFF6B3A2A)
+private val PixelOutline = Color(0xFF8A7A9A)
+private val PixelSurfaceVariant = Color(0xFF3A2F50)
+
 val PixelColorScheme = darkColorScheme(
     primary = PixelPrimary,
     onPrimary = PixelOnPrimary,
     primaryContainer = PixelPrimaryContainer,
-    onPrimaryContainer = PixelOnPrimaryContainer,
+    onPrimaryContainer = PixelOnSurface,
     secondary = PixelSecondary,
     onSecondary = PixelOnSecondary,
     secondaryContainer = PixelSecondaryContainer,
-    onSecondaryContainer = PixelOnSecondaryContainer,
+    onSecondaryContainer = PixelOnSurface,
     tertiary = PixelTertiary,
     onTertiary = PixelOnTertiary,
     tertiaryContainer = PixelTertiaryContainer,
-    onTertiaryContainer = PixelOnTertiaryContainer,
+    onTertiaryContainer = PixelOnSurface,
     background = PixelBackground,
     onBackground = PixelOnBackground,
     surface = PixelSurface,
     onSurface = PixelOnSurface,
     surfaceVariant = PixelSurfaceVariant,
-    onSurfaceVariant = PixelOnSurfaceVariant,
+    onSurfaceVariant = PixelOnSurface.copy(alpha = 0.85f),
     outline = PixelOutline,
-    outlineVariant = PixelOutlineVariant,
-    surfaceTint = Color.Transparent,
-    error = VantaHazard,
-    onError = MonoBlack,
+    outlineVariant = PixelOutline.copy(alpha = 0.5f),
+    error = PixelError,
+    onError = PixelOnPrimary,
     surfaceContainerLowest = PixelBackground,
-    surfaceContainerLow = Color(0xFF242628),
-    surfaceContainer = Color(0xFF2E3033),
-    surfaceContainerHigh = Color(0xFF393B3E),
-    surfaceContainerHighest = Color(0xFF44474F),
-    primaryFixed = PixelPrimary,
-    onPrimaryFixed = PixelOnPrimary,
-    primaryFixedDim = PixelPrimary.copy(alpha = 0.7f),
-    onPrimaryFixedVariant = PixelOnPrimaryContainer,
-    secondaryFixed = PixelSecondary,
-    onSecondaryFixed = PixelOnSecondary,
-    secondaryFixedDim = PixelSecondary.copy(alpha = 0.7f),
-    onSecondaryFixedVariant = PixelOnSecondaryContainer,
-    tertiaryFixed = PixelTertiary,
-    onTertiaryFixed = PixelOnTertiary,
-    tertiaryFixedDim = PixelTertiary.copy(alpha = 0.7f),
-    onTertiaryFixedVariant = PixelOnTertiaryContainer,
+    surfaceContainerLow = PixelSurfaceLow,
+    surfaceContainer = PixelSurface,
+    surfaceContainerHigh = PixelSurfaceHigh,
+    surfaceContainerHighest = PixelSurfaceHighest,
+    surfaceTint = PixelPrimary,
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OrpheusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    useSmoothCorners: Boolean = false,
+    useSmoothCorners: Boolean = true,
     scheme: AppThemeScheme = AppThemeScheme.LIGHT,
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
 ) {
+    val isPixel = scheme == AppThemeScheme.PIXEL
     val finalColorScheme = when {
         colorSchemePairOverride != null -> {
             if (darkTheme) colorSchemePairOverride.dark else colorSchemePairOverride.light
         }
-        scheme == AppThemeScheme.PIXEL -> PixelColorScheme
+        isPixel -> PixelColorScheme
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    val isPixel = scheme == AppThemeScheme.PIXEL
-    val shapeSet = remember(useSmoothCorners) {
-        if (useSmoothCorners) OrpheusShapeSets.Rounded else OrpheusShapeSets.Square
+    val shapeSet = remember(isPixel, useSmoothCorners) {
+        when {
+            isPixel -> OrpheusShapeSets.Pixel
+            useSmoothCorners -> OrpheusShapeSets.Rounded
+            else -> OrpheusShapeSets.Square
+        }
     }
     OrpheusActiveShapes.set = shapeSet
-    val materialShapes = remember(shapeSet) { orpheusMaterialShapes(shapeSet) }
+    val materialShapes = remember(isPixel, shapeSet) {
+        if (isPixel) PixelPlayerMaterialShapes else orpheusMaterialShapes(shapeSet)
+    }
+    val typography = if (isPixel) Typography else TerminalTypography
 
     OrpheusStatusBarStyle(
         color = finalColorScheme.background,
@@ -236,7 +242,7 @@ fun OrpheusTheme(
         MaterialTheme(
             colorScheme = finalColorScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = Typography,
+            typography = typography,
             shapes = materialShapes,
             content = content
         )
