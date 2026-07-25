@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.material.icons.Icons
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp as lerpColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
@@ -56,9 +58,13 @@ import com.yuukifst.orpheus.presentation.components.ShimmerBox
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.SmartImage
-import com.yuukifst.orpheus.ui.theme.OrpheusMotion
-import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.OrpheusIconButtonShape
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
+import com.yuukifst.orpheus.ui.theme.terminalBorder
+import com.yuukifst.orpheus.ui.theme.terminalStaggerEnter
 
 @Immutable
 private data class EnhancedSongAnimationTarget(
@@ -143,24 +149,74 @@ fun EnhancedSongListItem(
         if (state.isSelected) 1f else 0f
     }
 
-    val surfaceShape = remember(customShape) {
-        customShape ?: RectangleShape
+    // Pixel theme: PixelPlayerOSS shapes (22→50dp row, 10→50dp album). Terminal Dark/Light: square.
+    val usePixelChrome = !LocalTerminalChrome.current
+    val animatedCornerRadius = if (usePixelChrome) {
+        lerpDp(22.dp, 50.dp, highlightProgress)
+    } else {
+        0.dp
+    }
+    val animatedAlbumCornerRadius = if (usePixelChrome) {
+        lerpDp(10.dp, 50.dp, highlightProgress)
+    } else {
+        0.dp
     }
 
-    val albumShape = RectangleShape
+    val surfaceShape: Shape = remember(animatedCornerRadius, customShape, isHighlighted, usePixelChrome) {
+        when {
+            customShape != null && !isHighlighted -> customShape
+            usePixelChrome -> RoundedCornerShape(animatedCornerRadius)
+            else -> customShape ?: RectangleShape
+        }
+    }
+    val albumShape: Shape = if (usePixelChrome) {
+        RoundedCornerShape(animatedAlbumCornerRadius)
+    } else {
+        RectangleShape
+    }
+    val albumLoadingShape: Shape = if (usePixelChrome) CircleShape else RectangleShape
+    val trailingLoadingShape: Shape = if (usePixelChrome) CircleShape else RectangleShape
+    val shimmerTextShape = if (usePixelChrome) RoundedCornerShape(4.dp) else RoundedCornerShape(0.dp)
+    val trailingButtonShape: Shape = if (usePixelChrome) CircleShape else OrpheusIconButtonShape
 
     val colors = MaterialTheme.colorScheme
-    val baseContainerColor = containerColorOverride ?: colors.surface
-    val containerColor = lerpColor(baseContainerColor, colors.surfaceContainerLow, selectionVisualProgress * 0.35f)
+    val baseContainerColor = containerColorOverride
+        ?: if (usePixelChrome) colors.surfaceContainerLow else colors.surface
+    val playbackContainerColor = if (usePixelChrome) {
+        lerpColor(baseContainerColor, colors.primaryContainer, highlightProgress)
+    } else {
+        baseContainerColor
+    }
+    val containerColor = if (usePixelChrome) {
+        lerpColor(playbackContainerColor, colors.secondaryContainer, selectionVisualProgress)
+    } else {
+        lerpColor(baseContainerColor, colors.surfaceContainerLow, selectionVisualProgress * 0.35f)
+    }
 
     val baseContentColor = colors.onSurface
-    val contentColor = lerpColor(baseContentColor, colors.primary, highlightProgress)
-    val titleColor = lerpColor(baseContentColor, colors.primary, highlightProgress)
+    val contentColor = if (usePixelChrome) {
+        val playback = lerpColor(baseContentColor, colors.onPrimaryContainer, highlightProgress)
+        lerpColor(playback, colors.onSecondaryContainer, selectionVisualProgress)
+    } else {
+        lerpColor(baseContentColor, colors.primary, highlightProgress)
+    }
+    val titleColor = contentColor
 
-    val selectionBorderColor = lerpColor(colors.outline.copy(alpha = 0f), colors.primary, selectionVisualProgress)
-    val selectionBorderWidth = lerpDp(0.dp, 1.dp, selectionVisualProgress)
-    val highlightBorderWidth = lerpDp(0.dp, 2.dp, highlightProgress)
-    val selectionScale = lerpFloat(1f, 0.96f, selectionScaleProgress)
+    val selectionBorderColor = lerpColor(colors.primary.copy(alpha = 0f), colors.primary, selectionVisualProgress)
+    val selectionBorderWidth = lerpDp(0.dp, if (usePixelChrome) 2.5.dp else 1.dp, selectionVisualProgress)
+    val highlightBorderWidth = if (usePixelChrome) 0.dp else lerpDp(0.dp, 2.dp, highlightProgress)
+    val idleOutlineColor = colors.outline.copy(alpha = 0.5f)
+    val rowBorderColor = when {
+        selectionVisualProgress > 0.001f -> selectionBorderColor
+        highlightProgress > 0.001f -> colors.primary.copy(alpha = highlightProgress)
+        else -> idleOutlineColor
+    }
+    val rowBorderWidth = when {
+        selectionVisualProgress > 0.001f -> selectionBorderWidth
+        highlightProgress > 0.001f -> highlightBorderWidth
+        else -> 1.dp
+    }
+    val selectionScale = lerpFloat(1f, if (usePixelChrome) 0.98f else 0.96f, selectionScaleProgress)
     val selectionOverlayColor = lerpColor(
         Color.Transparent,
         colors.primary.copy(alpha = 0.7f),
@@ -185,49 +241,49 @@ fun EnhancedSongListItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 13.dp, vertical = 12.dp),
+                    .padding(horizontal = OrpheusSpacing.sm, vertical = OrpheusSpacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if(showAlbumArt) {
                     ShimmerBox(
                         modifier = Modifier
                             .size(albumArtSize)
-                            .clip(RectangleShape)
+                            .clip(albumLoadingShape)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(OrpheusSpacing.sm))
                 }
                 
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = if(showAlbumArt) 0.dp else 4.dp)
+                        .padding(start = if(showAlbumArt) 0.dp else OrpheusSpacing.xxs)
                 ) {
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.7f)
                             .height(20.dp)
-                            .clip(RoundedCornerShape(0.dp))
+                            .clip(shimmerTextShape)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(OrpheusSpacing.xxs))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(0.dp))
+                            .clip(shimmerTextShape)
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     ShimmerBox(
                         modifier = Modifier
                             .fillMaxWidth(0.3f)
                             .height(16.dp)
-                            .clip(RoundedCornerShape(0.dp))
+                            .clip(shimmerTextShape)
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(OrpheusSpacing.sm))
                 ShimmerBox(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(RectangleShape)
+                        .clip(trailingLoadingShape)
                 )
             }
         }
@@ -238,13 +294,10 @@ fun EnhancedSongListItem(
                 .fillMaxWidth()
                 .scale(selectionScale)
                 .clip(surfaceShape)
-                .border(
-                    width = highlightBorderWidth,
-                    color = colors.primary.copy(alpha = highlightProgress),
-                    shape = surfaceShape
-                )
                 .then(
-                    if (showSelectionDecoration) {
+                    if (!usePixelChrome) {
+                        Modifier.terminalBorder(width = rowBorderWidth, color = rowBorderColor)
+                    } else if (showSelectionDecoration) {
                         Modifier.border(
                             width = selectionBorderWidth,
                             color = selectionBorderColor,
@@ -253,11 +306,6 @@ fun EnhancedSongListItem(
                     } else {
                         Modifier
                     }
-                )
-                .border(
-                    width = 1.dp,
-                    color = colors.outline.copy(alpha = 0.5f),
-                    shape = surfaceShape
                 )
                 // Expose a button + click/long-click actions to TalkBack (the raw
                 // pointerInput gestures below are invisible to the a11y tree). Merge the
@@ -296,15 +344,21 @@ fun EnhancedSongListItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 13.dp, vertical = 12.dp),
+                    .padding(horizontal = OrpheusSpacing.sm, vertical = OrpheusSpacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (showAlbumArt) {
                     Box(
                         modifier = Modifier
                             .size(albumArtSize)
-                            .border(1.dp, colors.outline, RectangleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RectangleShape)
+                            .then(
+                                if (usePixelChrome) {
+                                    Modifier
+                                } else {
+                                    Modifier.border(1.dp, colors.outline, RectangleShape)
+                                }
+                            )
+                            .background(MaterialTheme.colorScheme.surfaceVariant, albumShape)
                     ) {
                         SmartImage(
                             model = song.albumArtUriString,
@@ -344,9 +398,9 @@ fun EnhancedSongListItem(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.width(14.dp))
+                    Spacer(modifier = Modifier.width(OrpheusSpacing.sm))
                 } else {
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(OrpheusSpacing.xxs))
                 }
 
                 Column(
@@ -356,24 +410,24 @@ fun EnhancedSongListItem(
                     if (isHighlighted && !isSelectionMode) {
                         AutoScrollingText(
                             text = song.title,
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             gradientEdgeColor = containerColor,
                         )
 
                     } else {
                         Text(
                             text = song.title,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             color = titleColor,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(OrpheusSpacing.xxs))
                     Text(
                         text = song.displayArtist,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = contentColor.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -386,7 +440,7 @@ fun EnhancedSongListItem(
                 if (showPlayingIndicator) {
                      PlayingEqIcon(
                          modifier = Modifier
-                             .padding(start = 8.dp)
+                             .padding(start = OrpheusSpacing.xs)
                              .size(width = 18.dp, height = 16.dp),
                          color = contentColor,
                          isPlaying = isPlaying
@@ -394,7 +448,7 @@ fun EnhancedSongListItem(
                 }
 
                 if (showPlayingIndicator || showTrailingAction) {
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(OrpheusSpacing.sm))
                 }
 
                 if (showTrailingAction) {
@@ -404,10 +458,10 @@ fun EnhancedSongListItem(
                             containerColor = colors.surfaceContainerHigh,
                             contentColor = colors.onSurface
                         ),
-                        shape = RectangleShape,
+                        shape = trailingButtonShape,
                         modifier = Modifier
                             .size(36.dp)
-                            .padding(end = 4.dp)
+                            .padding(end = OrpheusSpacing.xxs)
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.MoreVert,
