@@ -88,12 +88,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
+import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledTonalButton
 
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import com.yuukifst.orpheus.ui.theme.OrpheusSwitch
@@ -2109,9 +2109,7 @@ fun LibraryNavigationPillSetupShow(
  * @param onNextClicked Lambda invoked when the "Next" button is pressed.
  * @param onFinishClicked Lambda invoked when the "Finish" button is pressed.
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
-)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SetupBottomBar(
     modifier: Modifier = Modifier,
@@ -2225,20 +2223,20 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                MediumExtendedFloatingActionButton(
+                OrpheusFilledIconButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
-                    shape = TerminalCornerShape,
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
-                    containerColor = containerColor,
-                    contentColor = contentColor,
-                    modifier = Modifier
-                        .setupOutline()
-                        .padding(end = 0.dp)
+                    enabled = isPrimaryButtonEnabled,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = containerColor,
+                        contentColor = contentColor,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.58f),
+                    ),
                 ) {
                     AnimatedContent(
                         targetState = pagerState.currentPage,
                         transitionSpec = setupNavIconTransition,
-                        label = "AnimatedFabIcon",
+                        label = "AnimatedNextIcon",
                     ) { targetPage ->
                         if (targetPage < pagerState.pageCount - 1) {
                             Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = stringResource(R.string.cd_next_step))
