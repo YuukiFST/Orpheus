@@ -393,7 +393,7 @@ fun OrpheusTheme(
         if (scheme == AppThemeScheme.PIXEL || scheme == AppThemeScheme.SAKURA ||
             scheme == AppThemeScheme.ETHEREAL || scheme == AppThemeScheme.CATPPUCCIN_MOCHA
         ) {
-            if (scheme == AppThemeScheme.PIXEL) PixelPlayerMaterialShapes else orpheusMaterialShapes(shapeSet)
+            if (scheme == AppThemeScheme.PIXEL) pixelThemeMaterialShapes else orpheusMaterialShapes(shapeSet)
         } else {
             orpheusMaterialShapes(shapeSet)
         }

@@ -30,7 +30,7 @@ data class OrpheusShapeSet(
     val expressiveHero: Shape,
 )
 
-val PixelPlayerMaterialShapes = Shapes(
+val pixelThemeMaterialShapes = Shapes(
     small = RoundedCornerShape(8.dp),
     medium = RoundedCornerShape(16.dp),
     large = RoundedCornerShape(24.dp),

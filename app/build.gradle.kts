@@ -19,7 +19,7 @@ val keystoreProperties = Properties().apply {
 }
 
 val releaseSigningStoreFile = rootProject.file(
-    keystoreProperties.getProperty("storeFile") ?: "vz-pixelplay.jks"
+    keystoreProperties.getProperty("storeFile") ?: "orpheus-release.jks"
 )
 val disableReleaseSigning = providers.gradleProperty("orpheus.disableReleaseSigning")
     .getOrElse("false")

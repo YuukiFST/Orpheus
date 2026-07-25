@@ -8,7 +8,7 @@ humans too).
 ## Getting started
 
 ```sh
-git clone https://github.com/lostf1sh/Orpheus.git
+git clone https://github.com/YuukiFST/Orpheus.git
 cd Orpheus
 
 # Universal debug APK for local installation
