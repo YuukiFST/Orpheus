@@ -10,6 +10,8 @@ class ThemePersonalityTest {
     fun softChromeForColorfulSchemes() {
         assertTrue(themePersonalityFor(AppThemeScheme.PIXEL, useSmoothCorners = true).softChrome)
         assertTrue(themePersonalityFor(AppThemeScheme.ETHEREAL, useSmoothCorners = true).softChrome)
+        assertTrue(themePersonalityFor(AppThemeScheme.ROSE_PINE, useSmoothCorners = true).softChrome)
+        assertTrue(themePersonalityFor(AppThemeScheme.CATPPUCCIN_MOCHA, useSmoothCorners = true).softChrome)
         assertTrue(themePersonalityFor(AppThemeScheme.SAKURA, useSmoothCorners = true).softChrome)
         assertFalse(themePersonalityFor(AppThemeScheme.DARK, useSmoothCorners = true).softChrome)
     }
