@@ -11,10 +11,9 @@
 </p>
 
 <p align="center">
-  <img src="assets/screenshot1.jpeg" alt="Orpheus home screen" width="205"/>
-  <img src="assets/screenshot2.jpeg" alt="Orpheus now playing screen" width="205"/>
-  <img src="assets/screenshot3.jpeg" alt="Orpheus library screen" width="205"/>
-  <img src="assets/screenshot4.jpeg" alt="Orpheus lyrics screen" width="205"/>
+  <img src="assets/screenshot1.jpeg" alt="Orpheus now playing screen" width="205"/>
+  <img src="assets/screenshot2.jpeg" alt="Orpheus now playing screen (light)" width="205"/>
+  <img src="assets/screenshot3.jpeg" alt="Orpheus appearance settings" width="205"/>
 </p>
 
 ## What is Orpheus?
