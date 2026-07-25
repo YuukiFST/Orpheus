@@ -116,6 +116,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -2131,31 +2132,8 @@ fun SetupBottomBar(
     isNextButtonEnabled: Boolean,
     isFinishButtonEnabled: Boolean
 ) {
-    // --- Animations for morphing and rotation ---
-    val morphAnimationSpec = tween<Float>(durationMillis = OrpheusMotion.DurationVerySlow, easing = OrpheusMotion.EaseSmoothOut)
-    val rotationAnimationSpec = tween<Float>(durationMillis = 900, easing = OrpheusMotion.EaseSmoothOut)
-
-    // 1. Determine the corner percentages for the target shape
-    val targetShapeValues = when (pagerState.currentPage % 3) {
-        0 -> listOf(50f, 50f, 50f, 50f) // Circle (50% on all corners)
-        1 -> listOf(26f, 26f, 26f, 26f) // Rounded square
-        else -> listOf(18f, 50f, 18f, 50f) // "Leaf" shape
-    }
-
-    // 2. Animate each corner individually toward the target value
-    val animatedTopStart by animateFloatAsState(targetShapeValues[0], morphAnimationSpec, label = "TopStart")
-    val animatedTopEnd by animateFloatAsState(targetShapeValues[1], morphAnimationSpec, label = "TopEnd")
-    val animatedBottomStart by animateFloatAsState(targetShapeValues[2], morphAnimationSpec, label = "BottomStart")
-    val animatedBottomEnd by animateFloatAsState(targetShapeValues[3], morphAnimationSpec, label = "BottomEnd")
-
-    // 3. Animate the button rotation so it spins 360 degrees on each page change.
-    val animatedRotation by animateFloatAsState(
-        targetValue = pagerState.currentPage * 360f,
-        animationSpec = rotationAnimationSpec,
-        label = "Rotation"
-    )
-
     val shape = TerminalCornerShape
+    val distancePx = with(LocalDensity.current) { 8.dp.roundToPx() }
 
     Surface(
         modifier = modifier
@@ -2178,11 +2156,25 @@ fun SetupBottomBar(
             ) {
                 if (pagerState.currentPage > 0) {
                     IconButton(onClick = onBackClicked) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_previous_step),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        AnimatedContent(
+                            targetState = pagerState.currentPage,
+                            transitionSpec = {
+                                if (targetState > initialState) {
+                                    (slideInHorizontally { distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
+                                        .togetherWith(slideOutHorizontally { -distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
+                                } else {
+                                    (slideInHorizontally { -distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
+                                        .togetherWith(slideOutHorizontally { distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
+                                }.using(SizeTransform(clip = false))
+                            },
+                            label = "BackIconAnimation",
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = stringResource(R.string.cd_previous_step),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
                 // --- KEY CHANGE: animated text ---
@@ -2233,7 +2225,6 @@ fun SetupBottomBar(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 }
 
-                // 4. Apply the animated shape and rotation to the button
                 MediumExtendedFloatingActionButton(
                     onClick = if (isLastPage) onFinishClicked else onNextClicked,
                     shape = TerminalCornerShape,
@@ -2241,30 +2232,28 @@ fun SetupBottomBar(
                     containerColor = containerColor,
                     contentColor = contentColor,
                     modifier = Modifier
-                        .rotate(animatedRotation)
                         .setupOutline()
                         .padding(end = 0.dp)
                 ) {
-                    // 5. Apply a counter-rotation to the button content (the icon)
                     AnimatedContent(
-                        modifier = Modifier.rotate(-animatedRotation),
-                        targetState = pagerState.currentPage < pagerState.pageCount - 1,
+                        targetState = pagerState.currentPage,
                         transitionSpec = {
-                            ContentTransform(
-                                targetContentEnter = fadeIn(animationSpec = tween(OrpheusMotion.DurationQuick, delayMillis = OrpheusMotion.DurationMicro, easing = OrpheusMotion.EaseSmoothOut)) + scaleIn(initialScale = 0.9f, animationSpec = tween(OrpheusMotion.DurationQuick, delayMillis = OrpheusMotion.DurationMicro, easing = OrpheusMotion.EaseSmoothOut)),
-                                initialContentExit = fadeOut(animationSpec = tween(OrpheusMotion.DurationMicro)) + scaleOut(targetScale = 0.9f, animationSpec = tween(OrpheusMotion.DurationMicro))
-                            ).using(SizeTransform(clip = false))
-                        },
-                        label = "AnimatedFabIcon"
-                    ) { isNextPage ->
-                        if (isNextPage) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = stringResource(R.string.cd_next_step))
-                        } else {
-                            if (isFinishButtonEnabled) {
-                                Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.cd_finish))
+                            if (targetState > initialState) {
+                                (slideInHorizontally { distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
+                                    .togetherWith(slideOutHorizontally { -distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
                             } else {
-                                Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.cd_close))
-                            }
+                                (slideInHorizontally { -distancePx } + fadeIn(tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut)))
+                                    .togetherWith(slideOutHorizontally { distancePx } + fadeOut(tween(OrpheusMotion.DurationQuick)))
+                            }.using(SizeTransform(clip = false))
+                        },
+                        label = "AnimatedFabIcon",
+                    ) { targetPage ->
+                        if (targetPage < pagerState.pageCount - 1) {
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = stringResource(R.string.cd_next_step))
+                        } else if (isFinishButtonEnabled) {
+                            Icon(Icons.Rounded.Check, contentDescription = stringResource(R.string.cd_finish))
+                        } else {
+                            Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.cd_close))
                         }
                     }
                 }
