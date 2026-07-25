@@ -1,5 +1,14 @@
 package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
+import com.yuukifst.orpheus.ui.theme.PixelOnPrimary
+import com.yuukifst.orpheus.ui.theme.PixelOnSecondary
+import com.yuukifst.orpheus.ui.theme.PixelOnSurface
+import com.yuukifst.orpheus.ui.theme.PixelOnTertiary
+import com.yuukifst.orpheus.ui.theme.PixelPrimary
+import com.yuukifst.orpheus.ui.theme.PixelSecondary
+import com.yuukifst.orpheus.ui.theme.PixelSurface
+import com.yuukifst.orpheus.ui.theme.PixelTertiary
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
@@ -222,7 +231,7 @@ fun SettingsScreen(
                             shape = shapeFor(itemIndex)
                         )
                         if (itemIndex < totalItems - 1) {
-                            Spacer(modifier = Modifier.height(2.dp))
+                            Spacer(modifier = Modifier.height(OrpheusSpacing.xs))
                         }
                         itemIndex++
                     }
@@ -239,7 +248,7 @@ fun SettingsScreen(
                         shape = shapeFor(itemIndex)
                     )
                     if (itemIndex < totalItems - 1) {
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(OrpheusSpacing.xs))
                     }
                     itemIndex++
 
@@ -256,7 +265,7 @@ fun SettingsScreen(
                         shape = shapeFor(itemIndex)
                     )
                     if (itemIndex < totalItems - 1) {
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(OrpheusSpacing.xs))
                     }
                     itemIndex++
 
@@ -341,6 +350,13 @@ fun ExpressiveNavigationItem(
                     maxLines = 2
                 )
             }
+
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = stringResource(R.string.cd_open),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -407,16 +423,20 @@ fun ExpressiveCategoryItem(
                     maxLines = 2
                 )
             }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
+
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = stringResource(R.string.cd_open),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
 
 private fun getAccountsColors(isDark: Boolean): Pair<Color, Color> {
     return if (isDark) {
-        Color(0xFF37474F) to Color(0xFFBBD9E8)
+        PixelSecondary to PixelOnSecondary
     } else {
         Color(0xFFD6EAF5) to Color(0xFF103548)
     }
@@ -440,20 +460,24 @@ internal fun settingsCategoryColorsOrMono(
     appThemeMode: String,
     monoPair: Pair<Color, Color>,
 ): Pair<Color, Color> =
-    if (appThemeMode == AppThemeMode.PIXEL) getCategoryColors(category, isDark) else monoPair
+    when (appThemeMode) {
+        AppThemeMode.PIXEL -> getCategoryColors(category, isDark)
+        else -> monoPair
+    }
 
 private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair<Color, Color> {
+    // Pixel mode only uses dark scheme; accents cycle PixelPlayerOSS primary/secondary/tertiary
     return if (isDark) {
         when (category) {
-            SettingsCategory.LIBRARY -> Color(0xFF004A77) to Color(0xFFC2E7FF) 
-            SettingsCategory.APPEARANCE -> Color(0xFF7D5260) to Color(0xFFFFD8E4) 
-            SettingsCategory.PLAYBACK -> Color(0xFF633B48) to Color(0xFFFFD8EC) 
-            SettingsCategory.BEHAVIOR -> Color(0xFF3E4C63) to Color(0xFFD7E3FF)
-            SettingsCategory.BACKUP_RESTORE -> Color(0xFF3B4869) to Color(0xFFD9E2FF)
-            SettingsCategory.DEVELOPER -> Color(0xFF324F34) to Color(0xFFCBEFD0) 
-            SettingsCategory.EQUALIZER -> Color(0xFF6E4E13) to Color(0xFFFFDEAC) 
-            SettingsCategory.DEVICE_CAPABILITIES -> Color(0xFF004D61) to Color(0xFFACEFEE) // Custom teal/cyan mix
-            SettingsCategory.ABOUT -> Color(0xFF3F474D) to Color(0xFFDEE3EB) 
+            SettingsCategory.LIBRARY -> PixelPrimary to PixelOnPrimary
+            SettingsCategory.APPEARANCE -> PixelSecondary to PixelOnSecondary
+            SettingsCategory.PLAYBACK -> PixelTertiary to PixelOnTertiary
+            SettingsCategory.BEHAVIOR -> PixelPrimary to PixelOnSurface
+            SettingsCategory.BACKUP_RESTORE -> PixelSecondary to PixelOnSurface
+            SettingsCategory.DEVELOPER -> PixelTertiary to PixelOnTertiary
+            SettingsCategory.EQUALIZER -> PixelSecondary to PixelOnSecondary
+            SettingsCategory.DEVICE_CAPABILITIES -> PixelPrimary to PixelOnPrimary
+            SettingsCategory.ABOUT -> PixelSurface to PixelOnSurface
         }
     } else {
         when (category) {

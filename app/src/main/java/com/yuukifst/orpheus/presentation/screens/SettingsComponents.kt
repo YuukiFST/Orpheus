@@ -157,7 +157,10 @@ fun SwitchSettingItem(
 
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .clip(TerminalCornerShape)
+                            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
     ) {
         Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -277,13 +280,22 @@ fun ThemeSelectorItem(
                         shape = TerminalCornerShape,
                         modifier = Modifier.align(Alignment.Start)
                     ) {
-                        Text(
-                             text = selectedOption,
-                             style = MaterialTheme.typography.labelMedium,
-                             color = MaterialTheme.colorScheme.primary,
-                             fontWeight = FontWeight.Bold,
-                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
+                        AnimatedContent(
+                            targetState = selectedOption,
+                            transitionSpec = {
+                                fadeIn(animationSpec = OrpheusMotion.openTween()) togetherWith
+                                    fadeOut(animationSpec = OrpheusMotion.closeTween())
+                            },
+                            label = "themeSelectorValue"
+                        ) { value ->
+                            Text(
+                                 text = value,
+                                 style = MaterialTheme.typography.labelMedium,
+                                 color = MaterialTheme.colorScheme.primary,
+                                 fontWeight = FontWeight.Bold,
+                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -380,7 +392,10 @@ fun SliderSettingsItem(
 ) {
     Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
-            modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .clip(TerminalCornerShape)
+                            .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -660,7 +675,10 @@ fun ActionSettingsItem(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
-        modifier = Modifier.fillMaxWidth().clip(TerminalCornerShape)
+        modifier =
+                Modifier.fillMaxWidth()
+                        .clip(TerminalCornerShape)
+                        .terminalBorder(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
