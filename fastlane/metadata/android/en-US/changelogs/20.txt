@@ -1,0 +1,1 @@
+Setup Back button. Notification swipe fully unloads. Mini player stays gone after dismiss undo timeout.

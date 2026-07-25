@@ -2,6 +2,15 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.19] - 2026-07-24
+
+### Added
+- Setup: Back control on the bottom bar for previous steps.
+
+### Fixed
+- Notification swipe unload no longer falls through to Media3 sticky start and revive playback.
+- Mini player stay hidden after Playlist dismissed undo timeout; DualPlayer engines cleared on dismiss.
+
 ## [1.0.18] - 2026-07-24
 
 ### Fixed
