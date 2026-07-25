@@ -425,7 +425,10 @@ fun LyricsSheet(
             dampingRatio = Spring.DampingRatioLowBouncy
         )
     } else {
-        tween(durationMillis = 450, easing = FastOutSlowInEasing)
+        tween(
+            durationMillis = OrpheusMotion.DurationSlow,
+            easing = OrpheusMotion.EaseSmoothOut
+        )
     }
 
     var showFetchLyricsDialog by remember { mutableStateOf(false) }
@@ -1274,7 +1277,10 @@ fun SyncedLyricsList(
                         listState = listState,
                         layoutInfo = snapperLayoutInfo,
                         targetIndex = currentLineIndex,
-                        animationSpec = tween(durationMillis = 110, easing = FastOutSlowInEasing)
+                        animationSpec = tween(
+                            durationMillis = OrpheusMotion.DurationQuick,
+                            easing = OrpheusMotion.EaseSmoothOut
+                        )
                     )
                 }
                 lastAutoScrolledLineIndex = currentLineIndex

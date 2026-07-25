@@ -1,8 +1,8 @@
 package com.yuukifst.orpheus.presentation.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -119,7 +119,7 @@ fun WavySliderExpressive(
 
     val thumbInteractionFraction by animateFloatAsState(
         targetValue = if (isInteracting) 1f else 0f,
-        animationSpec = tween(250, easing = FastOutSlowInEasing),
+        animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut),
         label = "ThumbInteractionAnim"
     )
     val animatedAmplitude by animateFloatAsState(

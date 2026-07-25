@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.util.lerp
+import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 
 /**
  * A custom slider with a wave effect that moves along the progress track.
@@ -94,7 +95,7 @@ fun WavyMusicSlider(
 
     val thumbInteractionFraction by animateFloatAsState(
         targetValue = if (isInteracting) 1f else 0f,
-        animationSpec = tween(250, easing = FastOutSlowInEasing),
+        animationSpec = tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseSmoothOut),
         label = "ThumbInteractionAnim"
     )
 
@@ -103,7 +104,7 @@ fun WavyMusicSlider(
 
     val animatedWaveAmplitude by animateDpAsState(
         targetValue = if (shouldShowWave) waveAmplitudeWhenPlaying else 0.dp,
-        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        animationSpec = tween(OrpheusMotion.DurationMedium, easing = OrpheusMotion.EaseSmoothOut),
         label = "WaveAmplitudeAnim"
     )
 
