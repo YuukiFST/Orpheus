@@ -45,19 +45,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.size.Size
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
-import com.yuukifst.orpheus.ui.theme.RoundedSans
+import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.terminalAccentLine
 
 internal val LocalMaterialTheme = staticCompositionLocalOf<ColorScheme> { error("No ColorScheme provided") }
 
-val MiniPlayerHeight = 64.dp
+val MiniPlayerHeight = 72.dp
 const val ANIMATION_DURATION_MS = OrpheusMotion.DurationFast
-val MiniPlayerBottomSpacer = 8.dp
+val MiniPlayerBottomSpacer = OrpheusSpacing.xs
 
 @Composable
 fun getNavigationBarHeight(): Dp {
@@ -90,7 +89,7 @@ internal fun MiniPlayerContentInternal(
             .fillMaxWidth()
             .height(MiniPlayerHeight)
             .terminalAccentLine()
-            .padding(start = 10.dp, end = 12.dp),
+            .padding(horizontal = OrpheusSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val albumArtModel = song.albumArtUriString?.takeIf { it.isNotBlank() }
@@ -114,22 +113,16 @@ internal fun MiniPlayerContentInternal(
                 CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
             }
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(OrpheusSpacing.sm))
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             val titleStyle = MaterialTheme.typography.titleSmall.copy(
-                fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.2).sp,
-                fontFamily = RoundedSans,
                 color = LocalMaterialTheme.current.onPrimaryContainer
             )
             val artistStyle = MaterialTheme.typography.bodySmall.copy(
-                fontSize = 13.sp,
-                letterSpacing = 0.sp,
-                fontFamily = RoundedSans,
                 color = LocalMaterialTheme.current.onPrimaryContainer.copy(alpha = 0.7f)
             )
 
@@ -150,7 +143,7 @@ internal fun MiniPlayerContentInternal(
                 canScroll = canScroll
             )
         }
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(OrpheusSpacing.xs))
 
         Box(
             modifier = Modifier
@@ -175,7 +168,7 @@ internal fun MiniPlayerContentInternal(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(OrpheusSpacing.xs))
 
         val playPauseCorner by animateDpAsState(
             targetValue = if (isPlaying) 10.dp else 18.dp,
@@ -204,7 +197,7 @@ internal fun MiniPlayerContentInternal(
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(OrpheusSpacing.xs))
 
         Box(
             modifier = Modifier
