@@ -7,10 +7,22 @@ import org.schabi.newpipe.extractor.downloader.Request
 import org.schabi.newpipe.extractor.downloader.Response
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class YouTubeDownloaderImpl private constructor(
-    private val client: OkHttpClient,
+@Singleton
+class YouTubeDownloaderImpl @Inject constructor(
+    sharedClient: OkHttpClient,
 ) : Downloader() {
+
+    private val client: OkHttpClient = sharedClient.newBuilder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
+        .build()
+
+    @Volatile
+    private var activeCall: okhttp3.Call? = null
 
     override fun execute(request: Request): Response {
         val httpRequest = okhttp3.Request.Builder()
@@ -23,42 +35,68 @@ class YouTubeDownloaderImpl private constructor(
             }
             .build()
 
-        val httpResponse = client.newCall(httpRequest).execute()
-        if (httpResponse.code == 429) {
-            httpResponse.close()
-            throw ReCaptchaException("HTTP 429", request.url())
+        val call = client.newCall(httpRequest)
+        synchronized(this) {
+            activeCall?.cancel()
+            activeCall = call
         }
 
-        val body = httpResponse.body?.string().orEmpty()
-        val responseHeaders = mutableMapOf<String, List<String>>()
-        httpResponse.headers.forEach { (name, value) ->
-            responseHeaders.getOrPut(name) { emptyList() } + value
-            responseHeaders[name] = (responseHeaders[name] ?: emptyList()) + value
-        }
+        try {
+            val httpResponse = call.execute()
+            if (httpResponse.code == 429) {
+                httpResponse.close()
+                throw ReCaptchaException("HTTP 429", request.url())
+            }
 
-        return Response(
-            httpResponse.code,
-            httpResponse.message,
-            responseHeaders,
-            body,
-            httpResponse.request.url.toString(),
-        )
+            val body = httpResponse.body?.string().orEmpty()
+            val responseHeaders = mutableMapOf<String, List<String>>()
+            httpResponse.headers.forEach { (name, value) ->
+                responseHeaders[name] = (responseHeaders[name] ?: emptyList()) + value
+            }
+
+            return Response(
+                httpResponse.code,
+                httpResponse.message,
+                responseHeaders,
+                body,
+                httpResponse.request.url.toString(),
+            )
+        } finally {
+            synchronized(this) {
+                if (activeCall == call) {
+                    activeCall = null
+                }
+            }
+        }
+    }
+
+    fun cancelActiveRequest() {
+        synchronized(this) {
+            activeCall?.cancel()
+            activeCall = null
+        }
+    }
+
+    fun warmUpConnection() {
+        runCatching {
+            client.newCall(
+                okhttp3.Request.Builder()
+                    .url("https://www.youtube.com")
+                    .head()
+                    .build(),
+            ).execute().close()
+        }
     }
 
     companion object {
-        @Volatile
-        private var instance: YouTubeDownloaderImpl? = null
-
-        fun getInstance(): YouTubeDownloaderImpl {
-            return instance ?: synchronized(this) {
-                instance ?: YouTubeDownloaderImpl(
-                    OkHttpClient.Builder()
-                        .connectTimeout(30, TimeUnit.SECONDS)
-                        .readTimeout(30, TimeUnit.SECONDS)
-                        .writeTimeout(30, TimeUnit.SECONDS)
-                        .build(),
-                ).also { instance = it }
-            }
+        internal fun createStandalone(): YouTubeDownloaderImpl {
+            return YouTubeDownloaderImpl(
+                OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .build(),
+            )
         }
     }
 }

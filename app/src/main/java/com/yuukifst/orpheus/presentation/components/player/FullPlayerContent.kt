@@ -508,6 +508,7 @@ fun FullPlayerContent(
             placeholderOnColor = placeholderOnColor,
             albumArtQuality = albumArtQuality,
             requestedScrollIndex = pendingCarouselIndex,
+            playerViewModel = playerViewModel,
             onSongSelected = onAlbumSongSelected,
             onAlbumClick = { albumSong ->
                 playerViewModel.triggerAlbumNavigationFromPlayer(albumSong.albumId)
@@ -888,6 +889,7 @@ private fun FullPlayerAlbumCoverSection(
     placeholderOnColor: Color,
     albumArtQuality: AlbumArtQuality,
     requestedScrollIndex: Int?,
+    playerViewModel: PlayerViewModel,
     onSongSelected: (Song, Int) -> Unit,
     onAlbumClick: (Song) -> Unit,
     modifier: Modifier = Modifier
@@ -972,7 +974,8 @@ private fun FullPlayerAlbumCoverSection(
                         scaleX = albumArtScale
                         scaleY = albumArtScale
                     },
-                albumArtQuality = albumArtQuality
+                albumArtQuality = albumArtQuality,
+                playerViewModel = playerViewModel,
             )
         }
     }

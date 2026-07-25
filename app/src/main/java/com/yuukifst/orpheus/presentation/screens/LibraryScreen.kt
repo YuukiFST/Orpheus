@@ -166,7 +166,7 @@ import com.yuukifst.orpheus.presentation.components.PlaylistCreationTypeDialog
 import com.yuukifst.orpheus.presentation.components.subcomps.SelectionActionRow
 import com.yuukifst.orpheus.presentation.components.subcomps.SelectionCountPill
 import com.yuukifst.orpheus.presentation.viewmodel.ColorSchemePair
-import com.yuukifst.orpheus.presentation.viewmodel.PlayerUiState
+import com.yuukifst.orpheus.presentation.viewmodel.LibraryPrefsUiState
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistUiState
@@ -261,47 +261,6 @@ private const val PULL_REFRESH_MIN_VISIBLE_MS = 900L
 private const val PULL_REFRESH_MAX_VISIBLE_MS = 1_500L
 private const val INLINE_SYNC_MIN_VISIBLE_MS = 600L
 
-private data class LibraryScreenPlayerProjection(
-    val currentFolder: MusicFolder? = null,
-    val folderSourceRootPath: String = "",
-    val folderSource: FolderSource = FolderSource.INTERNAL,
-    val isFoldersPlaylistView: Boolean = false,
-    val currentStorageFilter: StorageFilter = StorageFilter.ALL,
-    val currentSongSortOption: SortOption = SortOption.SongTitleAZ,
-    val currentAlbumSortOption: SortOption = SortOption.AlbumTitleAZ,
-    val currentArtistSortOption: SortOption = SortOption.ArtistNameAZ,
-    val currentFavoriteSortOption: SortOption = SortOption.LikedSongDateLiked,
-    val currentFolderSortOption: SortOption = SortOption.FolderNameAZ,
-    val isAlbumsListView: Boolean = false,
-    val isSdCardAvailable: Boolean = false,
-    val musicFolders: ImmutableList<MusicFolder> = persistentListOf(),
-    val isLoadingLibraryCategories: Boolean = true,
-    val isSyncingLibrary: Boolean = false,
-    val isLoadingInitialSongs: Boolean = true,
-    val hideLocalMedia: Boolean = false
-)
-
-private fun PlayerUiState.toLibraryScreenProjection(): LibraryScreenPlayerProjection =
-    LibraryScreenPlayerProjection(
-        currentFolder = currentFolder,
-        folderSourceRootPath = folderSourceRootPath,
-        folderSource = folderSource,
-        isFoldersPlaylistView = isFoldersPlaylistView,
-        currentStorageFilter = currentStorageFilter,
-        currentSongSortOption = currentSongSortOption,
-        currentAlbumSortOption = currentAlbumSortOption,
-        currentArtistSortOption = currentArtistSortOption,
-        currentFavoriteSortOption = currentFavoriteSortOption,
-        currentFolderSortOption = currentFolderSortOption,
-        isAlbumsListView = isAlbumsListView,
-        isSdCardAvailable = isSdCardAvailable,
-        musicFolders = musicFolders,
-        isLoadingLibraryCategories = isLoadingLibraryCategories,
-        isSyncingLibrary = isSyncingLibrary,
-        isLoadingInitialSongs = isLoadingInitialSongs,
-        hideLocalMedia = hideLocalMedia
-    )
-
 @RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -360,7 +319,7 @@ fun LibraryScreen(
     }
     val isSortSheetVisible by playerViewModel.isSortingSheetVisible.collectAsStateWithLifecycle()
     val canNavigateBackInFolders by remember(playerViewModel) {
-        playerViewModel.playerUiState
+        playerViewModel.libraryPrefsUiState
             .map { uiState -> uiState.currentFolder != null && uiState.folderBackGestureNavigationEnabled }
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
@@ -765,11 +724,9 @@ fun LibraryScreen(
             }
         }
     ) { innerScaffoldPadding ->
-        val playerUiState by remember(playerViewModel) {
-            playerViewModel.playerUiState
-                .map { uiState -> uiState.toLibraryScreenProjection() }
-                .distinctUntilChanged()
-        }.collectAsStateWithLifecycle(initialValue = LibraryScreenPlayerProjection())
+        val libraryPrefs by remember(playerViewModel) {
+            playerViewModel.libraryPrefsUiState
+        }.collectAsStateWithLifecycle(initialValue = LibraryPrefsUiState())
         val isLibraryContentEmpty by remember(playerViewModel) {
             combine(
                 playerViewModel.songCountFlow,
@@ -833,12 +790,12 @@ fun LibraryScreen(
                         }.collectAsStateWithLifecycle(initialValue = false)
 
                         val currentSelectedSortOption: SortOption? = when (currentTabId) {
-                            LibraryTabId.SONGS -> playerUiState.currentSongSortOption
-                            LibraryTabId.ALBUMS -> playerUiState.currentAlbumSortOption
-                            LibraryTabId.ARTISTS -> playerUiState.currentArtistSortOption
+                            LibraryTabId.SONGS -> libraryPrefs.currentSongSortOption
+                            LibraryTabId.ALBUMS -> libraryPrefs.currentAlbumSortOption
+                            LibraryTabId.ARTISTS -> libraryPrefs.currentArtistSortOption
                             LibraryTabId.PLAYLISTS -> playlistUiState.currentPlaylistSortOption
-                            LibraryTabId.LIKED -> playerUiState.currentFavoriteSortOption
-                            LibraryTabId.FOLDERS -> playerUiState.currentFolderSortOption
+                            LibraryTabId.LIKED -> libraryPrefs.currentFavoriteSortOption
+                            LibraryTabId.FOLDERS -> libraryPrefs.currentFolderSortOption
                         }
 
                         val showLocateButton = when (currentTabId) {
@@ -936,7 +893,7 @@ fun LibraryScreen(
                                                 }
                                                 LibraryTabId.FOLDERS -> {
                                                     val songsToSelect =
-                                                        playerViewModel.playerUiState.value.currentFolder?.songs ?: emptyList()
+                                                        libraryPrefs.currentFolder?.songs ?: emptyList()
                                                     multiSelectionState.selectAll(songsToSelect)
                                                 }
                                                 LibraryTabId.SONGS -> {
@@ -973,13 +930,13 @@ fun LibraryScreen(
                                     onSortClick = { playerViewModel.showSortingSheet() },
                                     onLocateClick = { locateAction?.invoke() },
                                     isPlaylistTab = currentTabId == LibraryTabId.PLAYLISTS,
-                                    isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!playerUiState.isFoldersPlaylistView || playerUiState.currentFolder != null),
+                                    isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!libraryPrefs.isFoldersPlaylistView || libraryPrefs.currentFolder != null),
                                     onImportM3uClick = { m3uImportLauncher.launch("audio/x-mpegurl") },
-                                    currentFolder = playerUiState.currentFolder,
-                                    folderRootPath = playerUiState.folderSourceRootPath.ifBlank {
+                                    currentFolder = libraryPrefs.currentFolder,
+                                    folderRootPath = libraryPrefs.folderSourceRootPath.ifBlank {
                                         Environment.getExternalStorageDirectory().path
                                     },
-                                    folderRootLabel = playerUiState.folderSource.displayName,
+                                    folderRootLabel = libraryPrefs.folderSource.displayName,
                                     onFolderClick = { playerViewModel.navigateToFolder(it) },
                                     onNavigateBack = { playerViewModel.navigateBackFolder() },
                                     isShuffleEnabled = isShuffleEnabled,
@@ -988,7 +945,7 @@ fun LibraryScreen(
                                             currentTabId == LibraryTabId.ARTISTS ||
                                             currentTabId == LibraryTabId.LIKED ||
                                             (ENABLE_FOLDERS_STORAGE_FILTER && currentTabId == LibraryTabId.FOLDERS),
-                                    currentStorageFilter = playerUiState.currentStorageFilter,
+                                    currentStorageFilter = libraryPrefs.currentStorageFilter,
                                     onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
                                 )
                             }
@@ -1030,7 +987,7 @@ fun LibraryScreen(
                                 showViewToggle = isFoldersTab,
                                 viewSectionTitle = stringResource(R.string.presentation_batch_d_view_section_view),
                                 viewToggleLabel = stringResource(R.string.presentation_batch_d_playlist_view),
-                                viewToggleChecked = playerUiState.isFoldersPlaylistView,
+                                viewToggleChecked = libraryPrefs.isFoldersPlaylistView,
                                 onViewToggleChange = { isChecked ->
                                     playerViewModel.setFoldersPlaylistView(isChecked)
                                 },
@@ -1040,7 +997,7 @@ fun LibraryScreen(
                                             modifier = Modifier.fillMaxWidth().height(48.dp),
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            val isList = playerUiState.isAlbumsListView
+                                            val isList = libraryPrefs.isAlbumsListView
                                             val primaryColor = MaterialTheme.colorScheme.tertiaryContainer
                                             val onPrimaryColor = MaterialTheme.colorScheme.onTertiaryContainer
                                             val surfaceColor = MaterialTheme.colorScheme.surfaceVariant
@@ -1082,10 +1039,10 @@ fun LibraryScreen(
                                             modifier = Modifier.fillMaxWidth().height(48.dp),
                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            val isSdAvailable = playerUiState.isSdCardAvailable
+                                            val isSdAvailable = libraryPrefs.isSdCardAvailable
                                             ToggleSegmentButton(
                                                 modifier = Modifier.weight(1f),
-                                                active = playerUiState.folderSource == FolderSource.INTERNAL,
+                                                active = libraryPrefs.folderSource == FolderSource.INTERNAL,
                                                 activeColor = MaterialTheme.colorScheme.primary,
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -1098,7 +1055,7 @@ fun LibraryScreen(
                                                 modifier = Modifier
                                                     .weight(1f)
                                                     .alpha(if (isSdAvailable) 1f else 0.5f),
-                                                active = playerUiState.folderSource == FolderSource.SD_CARD,
+                                                active = libraryPrefs.folderSource == FolderSource.SD_CARD,
                                                 activeColor = MaterialTheme.colorScheme.primary,
                                                 inactiveColor = MaterialTheme.colorScheme.surfaceVariant,
                                                 activeContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -1112,7 +1069,7 @@ fun LibraryScreen(
                                                 text = stringResource(R.string.presentation_batch_d_storage_sd_card)
                                             )
                                         }
-                                        if (!playerUiState.isSdCardAvailable) {
+                                        if (!libraryPrefs.isSdCardAvailable) {
                                             Text(
                                                 text = stringResource(R.string.presentation_batch_d_sd_card_unavailable),
                                                 style = MaterialTheme.typography.bodySmall,
@@ -1134,8 +1091,8 @@ fun LibraryScreen(
                                         )
                                         com.yuukifst.orpheus.presentation.components.LibrarySheetToggleCard(
                                             label = stringResource(R.string.presentation_batch_d_cloud_only),
-                                            checked = playerUiState.hideLocalMedia,
-                                            boxBackgroundColor = if (playerUiState.hideLocalMedia)
+                                            checked = libraryPrefs.hideLocalMedia,
+                                            boxBackgroundColor = if (libraryPrefs.hideLocalMedia)
                                                 MaterialTheme.colorScheme.tertiary
                                             else
                                                 MaterialTheme.colorScheme.surfaceContainerLow,
@@ -1185,15 +1142,15 @@ fun LibraryScreen(
                                             getSelectionIndex = playerViewModel.multiSelectionStateHolder::getSelectionIndex,
                                             onLocateCurrentSongVisibilityChanged = { songsShowLocateButton = it },
                                             onRegisterLocateCurrentSongAction = { songsLocateAction = it },
-                                            sortOption = playerUiState.currentSongSortOption,
-                                            storageFilter = playerUiState.currentStorageFilter,
+                                            sortOption = libraryPrefs.currentSongSortOption,
+                                            storageFilter = libraryPrefs.currentStorageFilter,
                                             hasCurrentSong = hasCurrentSong
                                         )
                                     }
                                     LibraryTabId.ALBUMS -> {
                                         val albumsLazyPagingItems =
                                             libraryViewModel.albumsPagingFlow.collectAsLazyPagingItems()
-                                        val isLoading = playerUiState.isLoadingLibraryCategories
+                                        val isLoading = libraryPrefs.isLoadingLibraryCategories
 
                                         val stableOnAlbumClick: (Long) -> Unit = remember(navController) {
                                             { albumId: Long ->
@@ -1208,8 +1165,8 @@ fun LibraryScreen(
                                             isLoading = isLoading,
                                             playerViewModel = playerViewModel,
                                             bottomBarHeight = bottomBarHeightDp,
-                                            isListView = playerUiState.isAlbumsListView,
-                                            currentAlbumSortOption = playerUiState.currentAlbumSortOption,
+                                            isListView = libraryPrefs.isAlbumsListView,
+                                            currentAlbumSortOption = libraryPrefs.currentAlbumSortOption,
                                             onAlbumClick = stableOnAlbumClick,
                                             isRefreshing = isRefreshing,
                                             onRefresh = onRefresh,
@@ -1218,21 +1175,21 @@ fun LibraryScreen(
                                             onAlbumLongPress = onAlbumLongPress,
                                             onAlbumSelectionToggle = onAlbumSelectionToggle,
                                             getSelectionIndex = getAlbumSelectionIndex,
-                                            storageFilter = playerUiState.currentStorageFilter
+                                            storageFilter = libraryPrefs.currentStorageFilter
                                         )
                                     }
 
                                     LibraryTabId.ARTISTS -> {
                                         val artistsLazyPagingItems =
                                             libraryViewModel.artistsPagingFlow.collectAsLazyPagingItems()
-                                        val isLoading = playerUiState.isLoadingLibraryCategories
+                                        val isLoading = libraryPrefs.isLoadingLibraryCategories
 
                                         LibraryArtistsTab(
                                             artists = artistsLazyPagingItems,
                                             isLoading = isLoading,
                                             playerViewModel = playerViewModel,
                                             bottomBarHeight = bottomBarHeightDp,
-                                            currentArtistSortOption = playerUiState.currentArtistSortOption,
+                                            currentArtistSortOption = libraryPrefs.currentArtistSortOption,
                                             onArtistClick = { artistId ->
                                                 navController.navigateSafelyReplacing(
                                                     route = Screen.ArtistDetail.createRoute(artistId),
@@ -1241,7 +1198,7 @@ fun LibraryScreen(
                                             },
                                             isRefreshing = isRefreshing,
                                             onRefresh = onRefresh,
-                                            storageFilter = playerUiState.currentStorageFilter
+                                            storageFilter = libraryPrefs.currentStorageFilter
                                         )
                                     }
 
@@ -1284,18 +1241,18 @@ fun LibraryScreen(
                                             onSongLongPress = onSongLongPress,
                                             onSongSelectionToggle = onSongSelectionToggle,
                                             getSelectionIndex = playerViewModel.multiSelectionStateHolder::getSelectionIndex,
-                                            sortOption = playerUiState.currentFavoriteSortOption,
+                                            sortOption = libraryPrefs.currentFavoriteSortOption,
                                             onLocateCurrentSongVisibilityChanged = { likedShowLocateButton = it },
                                             onRegisterLocateCurrentSongAction = { likedLocateAction = it },
-                                            storageFilter = playerUiState.currentStorageFilter,
+                                            storageFilter = libraryPrefs.currentStorageFilter,
                                             hasCurrentSong = hasCurrentSong
                                         )
                                     }
 
                                     LibraryTabId.FOLDERS -> {
-                                        val folders = playerUiState.musicFolders
-                                        val currentFolder = playerUiState.currentFolder
-                                        val isLoading = playerUiState.isLoadingLibraryCategories
+                                        val folders = libraryPrefs.musicFolders
+                                        val currentFolder = libraryPrefs.currentFolder
+                                        val isLoading = libraryPrefs.isLoadingLibraryCategories
                                         val stablePlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
                                         val defaultFolderName = stringResource(R.string.presentation_batch_d_folder_name_fallback)
 
@@ -1324,8 +1281,8 @@ fun LibraryScreen(
                                                 )
                                             },
                                             onMoreOptionsClick = stableOnMoreOptionsClick,
-                                            isPlaylistView = playerUiState.isFoldersPlaylistView,
-                                            currentSortOption = playerUiState.currentFolderSortOption,
+                                            isPlaylistView = libraryPrefs.isFoldersPlaylistView,
+                                            currentSortOption = libraryPrefs.currentFolderSortOption,
                                             isRefreshing = isRefreshing,
                                             onRefresh = onRefresh,
                                             isSelectionMode = isSelectionMode,
@@ -1366,9 +1323,9 @@ fun LibraryScreen(
                 if (
                     isLibraryContentEmpty &&
                     (
-                            playerUiState.isSyncingLibrary ||
-                                    playerUiState.isLoadingInitialSongs ||
-                                    playerUiState.isLoadingLibraryCategories
+                            libraryPrefs.isSyncingLibrary ||
+                                    libraryPrefs.isLoadingInitialSongs ||
+                                    libraryPrefs.isLoadingLibraryCategories
                             )
                 ) {
                     // The full-screen overlay is reserved for first-launch / empty library

@@ -66,6 +66,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -170,7 +171,6 @@ class MainActivity : ComponentActivity() {
     private val playerViewModel: PlayerViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
     private var isUIVisiblyReady = false
-    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository // Inject here
     @Inject
@@ -258,8 +258,9 @@ class MainActivity : ComponentActivity() {
             // Sync Trigger: When we are NOT showing setup (meaning permissions are good and setup is done)
             LaunchedEffect(showSetupScreen) {
                 if (showSetupScreen == false) {
-                     LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
-                     mainViewModel.startSync()
+                    withFrameNanos { }
+                    LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
+                    mainViewModel.startSync()
                 }
             }
 
@@ -1043,19 +1044,6 @@ class MainActivity : ComponentActivity() {
 
         if (intent.getBooleanExtra("is_benchmark", false)) {
             // Benchmark mode no longer loads dummy data - uses real library data instead
-        }
-
-        val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
-        mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-        mediaControllerFuture?.addListener({
-        }, MoreExecutors.directExecutor())
-    }
-
-    override fun onStop() {
-        super.onStop()
-        LogUtils.d(this, "onStop")
-        mediaControllerFuture?.let {
-            MediaController.releaseFuture(it)
         }
     }
 

@@ -1,1 +1,0 @@
-CRT terminal UI redesign with flat corners, black monochrome palette, green accent, and square sliders/widgets.

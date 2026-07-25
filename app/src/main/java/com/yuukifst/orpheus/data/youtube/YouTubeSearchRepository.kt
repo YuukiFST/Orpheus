@@ -2,7 +2,12 @@ package com.yuukifst.orpheus.data.youtube
 
 import android.util.LruCache
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.extractor.InfoItem
 import org.schabi.newpipe.extractor.ServiceList
@@ -13,24 +18,63 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class YouTubeSearchRepository @Inject constructor() {
+class YouTubeSearchRepository @Inject constructor(
+    private val youTubeInitializer: YouTubeInitializer,
+    private val youTubeDownloader: YouTubeDownloaderImpl,
+) {
 
     private val searchCache = LruCache<String, List<YouTubeTrack>>(32)
+    private val inFlightSearches = mutableMapOf<String, Deferred<List<YouTubeTrack>>>()
+    private val inFlightMutex = Mutex()
 
     suspend fun search(query: String): List<YouTubeTrack> = withContext(Dispatchers.IO) {
         val key = query.trim().lowercase()
         if (key.isBlank()) return@withContext emptyList()
         searchCache.get(key)?.let { return@withContext it }
 
-        YouTubeInitializer.ensureInitialized()
+        val shared = inFlightMutex.withLock {
+            inFlightSearches[key]?.takeIf { it.isActive }
+        }
+        if (shared != null) {
+            return@withContext shared.await()
+        }
+
+        coroutineScope {
+            val deferred = async {
+                performSearch(query.trim(), key)
+            }
+            inFlightMutex.withLock {
+                inFlightSearches[key] = deferred
+            }
+            try {
+                deferred.await()
+            } finally {
+                inFlightMutex.withLock {
+                    if (inFlightSearches[key] === deferred) {
+                        inFlightSearches.remove(key)
+                    }
+                }
+            }
+        }
+    }
+
+    fun cancelActiveRequest() {
+        youTubeDownloader.cancelActiveRequest()
+    }
+
+    fun warmUpConnection() {
+        youTubeDownloader.warmUpConnection()
+    }
+
+    private fun performSearch(trimmedQuery: String, cacheKey: String): List<YouTubeTrack> {
+        youTubeInitializer.ensureInitialized()
         val handler = YoutubeSearchQueryHandlerFactory.getInstance()
-            .fromQuery(query.trim(), listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
-        // Must use the service overload so NewPipe calls fetchPage() before reading results.
+            .fromQuery(trimmedQuery, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
         val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
         val results = searchInfo.relatedItems
             .mapNotNull { item -> item.toYouTubeTrack() }
-        searchCache.put(key, results)
-        results
+        searchCache.put(cacheKey, results)
+        return results
     }
 
     internal fun clearSearchCacheForTests() {
@@ -43,6 +87,16 @@ class YouTubeSearchRepository @Inject constructor() {
 
     internal fun searchCachedOnly(query: String): List<YouTubeTrack>? {
         return searchCache.get(query.trim().lowercase())
+    }
+
+    internal companion object {
+        fun createForTests(): YouTubeSearchRepository {
+            val downloader = YouTubeDownloaderImpl.createStandalone()
+            return YouTubeSearchRepository(
+                youTubeInitializer = YouTubeInitializer(downloader),
+                youTubeDownloader = downloader,
+            )
+        }
     }
 }
 
@@ -68,8 +122,6 @@ private fun InfoItem.toYouTubeTrack(): YouTubeTrack? {
 /**
  * YouTube search bylines for collabs concatenate artists ("A and B") while the
  * publishing channel is the first name (matches StreamInfo.uploaderName / uploaderUrl).
- *
- * ponytail: heuristic only; switch to StreamInfo.uploaderName if false positives appear.
  */
 internal fun preferPrimaryYouTubeUploader(uploaderName: String): String {
     if (uploaderName.isBlank()) return uploaderName

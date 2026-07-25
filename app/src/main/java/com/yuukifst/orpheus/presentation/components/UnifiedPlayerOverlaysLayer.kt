@@ -33,7 +33,6 @@ import androidx.media3.common.util.UnstableApi
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.PlaylistViewModel
-import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -61,7 +60,10 @@ internal fun UnifiedPlayerQueueLayer(
     currentPlaybackQueue: ImmutableList<Song>,
     currentQueueSourceName: String,
     currentMediaItemIndex: Int,
-    infrequentPlayerState: StablePlayerState,
+    currentSongId: String?,
+    isPlaying: Boolean,
+    repeatMode: Int,
+    isShuffleOn: Boolean,
     activeTimerValueDisplay: State<String?>,
     activeTimerDurationMinutes: State<Int?>,
     playCount: State<Float>,
@@ -127,17 +129,17 @@ internal fun UnifiedPlayerQueueLayer(
                         },
                     queue = currentPlaybackQueue,
                     currentQueueSourceName = currentQueueSourceName,
-                    currentSongId = infrequentPlayerState.currentSong?.id,
+                    currentSongId = currentSongId,
                     currentMediaItemIndex = currentMediaItemIndex,
                     isVisible = showQueueSheet,
-                    isPlaying = infrequentPlayerState.isPlaying,
+                    isPlaying = isPlaying,
                     onDismiss = onDismissQueue,
                     onSongInfoClick = onSongInfoClick,
                     onPlaySong = onPlaySong,
                     onRemoveSong = onRemoveSong,
                     onReorder = onReorder,
-                    repeatMode = infrequentPlayerState.repeatMode,
-                    isShuffleOn = infrequentPlayerState.isShuffleEnabled,
+                    repeatMode = repeatMode,
+                    isShuffleOn = isShuffleOn,
                     onToggleRepeat = onToggleRepeat,
                     onToggleShuffle = onToggleShuffle,
                     onClearQueue = onClearQueue,
@@ -278,7 +280,6 @@ internal fun UnifiedPlayerQueueAndSongInfoHost(
     onQueueSheetHeightPxChange: (Float) -> Unit,
     configurationResetKey: Any,
     currentQueueSourceName: String,
-    infrequentPlayerState: StablePlayerState,
     playerViewModel: PlayerViewModel,
     selectedSongForInfo: Song?,
     onSelectedSongForInfoChange: (Song?) -> Unit,
@@ -292,6 +293,8 @@ internal fun UnifiedPlayerQueueAndSongInfoHost(
     onNavigateToGenre: (Song) -> Unit
 ) {
     if (!shouldRenderHost) return
+
+    val playerControls by playerViewModel.stablePlayerControlsSlice.collectAsStateWithLifecycle()
 
     // Scoped queue collection: only the queue sheet / song-info host observes
     // the queue. The outer player sheet no longer recomposes on queue changes.
@@ -396,8 +399,11 @@ internal fun UnifiedPlayerQueueAndSongInfoHost(
                 configurationResetKey = configurationResetKey,
                 currentPlaybackQueue = currentPlaybackQueue,
                 currentQueueSourceName = currentQueueSourceName,
-                currentMediaItemIndex = infrequentPlayerState.currentMediaItemIndex,
-                infrequentPlayerState = infrequentPlayerState,
+                currentMediaItemIndex = playerControls.currentMediaItemIndex,
+                currentSongId = playerControls.currentSong?.id,
+                isPlaying = playerControls.isPlaying,
+                repeatMode = playerControls.repeatMode,
+                isShuffleOn = playerControls.isShuffleEnabled,
                 activeTimerValueDisplay = activeTimerValueDisplay,
                 activeTimerDurationMinutes = activeTimerDurationMinutes,
                 playCount = playCount,

@@ -50,7 +50,7 @@ keyPassword=...
 
 `storeFile` is optional when the release keystore is available as `vz-pixelplay.jks` at the repository root. `storePassword`, `keyAlias`, and `keyPassword` are required for signing. If signing properties or the keystore file are missing, release builds are unsigned. CI workflows create temporary CI signing keys for artifacts; those are not official release keys.
 
-For F-Droid-compatible unsigned verification builds, pass `-Porpheus.disableReleaseSigning=true` even when local signing files exist.
+For unsigned local verification builds (CI or when you want to confirm the release artifact without signing keys), pass `-Porpheus.disableReleaseSigning=true` even when local signing files exist.
 
 ## Device Smoke Test
 
@@ -71,12 +71,4 @@ Install the release candidate and verify:
 3. Push the tag: `git push origin v<APP_VERSION_NAME>`.
 4. Create a GitHub release from the tag.
 5. Attach APK artifacts and paste the changelog section.
-
-## F-Droid Metadata
-
-Before submitting a tagged release to F-Droid-compatible app stores:
-
-1. Update `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
-2. Verify the unsigned universal release build from [FDROID.md](FDROID.md).
-3. Check `PRIVACY.md` still matches the optional network services present in the app.
-4. Create source archives from git, not from the working tree, so ignored local artifacts are excluded.
+6. Check `PRIVACY.md` still matches the optional network services present in the app.

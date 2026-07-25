@@ -6,7 +6,7 @@
         user-installed CAs lets a user opt in by importing their root cert via
         Android Settings > Security > Install a certificate; the app then honors
         it. This is a declarative, user-controlled trust decision (not a
-        validation bypass) and keeps F-Droid compliance intact.
+        validation bypass) for user-controlled self-hosted server trust.
     -->
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>

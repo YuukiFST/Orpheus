@@ -10,7 +10,7 @@ class YouTubeVideoIdExtractionTest {
         @BeforeAll
         @JvmStatic
         fun initNewPipe() {
-            YouTubeInitializer.ensureInitialized()
+            YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()).ensureInitialized()
         }
     }
 

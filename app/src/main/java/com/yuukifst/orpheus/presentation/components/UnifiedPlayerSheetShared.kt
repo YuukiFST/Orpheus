@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -45,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.size.Size
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
@@ -77,7 +75,7 @@ internal fun MiniPlayerContentInternal(
     canScroll: Boolean = true
 ) {
     val hapticFeedback = LocalHapticFeedback.current
-    val controlsEnabled = !isOutputConnecting && !isPreparingPlayback
+    val controlsEnabled = !isOutputConnecting
 
     val previousInteraction = remember { MutableInteractionSource() }
     val playPauseInteraction = remember { MutableInteractionSource() }
@@ -94,16 +92,15 @@ internal fun MiniPlayerContentInternal(
     ) {
         val albumArtModel = song.albumArtUriString?.takeIf { it.isNotBlank() }
         Box(contentAlignment = Alignment.Center) {
-            key(song.id) {
-                SmartImage(
-                    model = albumArtModel,
-                    contentDescription = stringResource(R.string.cd_album_art_for_title, song.title),
-                    shape = TerminalCornerShape,
-                    targetSize = Size(150, 150),
-                    crossfadeDurationMillis = 0,
-                    modifier = Modifier.size(44.dp)
-                )
-            }
+            SmartImage(
+                model = albumArtModel,
+                contentDescription = stringResource(R.string.cd_album_art_for_title, song.title),
+                shape = TerminalCornerShape,
+                targetSize = SmartImageListTargetSize,
+                crossfadeDurationMillis = 0,
+                allowHardware = true,
+                modifier = Modifier.size(44.dp)
+            )
             if (isOutputConnecting) {
                 LoadingIndicator(
                     modifier = Modifier.size(24.dp),
@@ -127,17 +124,13 @@ internal fun MiniPlayerContentInternal(
             )
 
             AutoScrollingText(
-                text = when {
-                    isOutputConnecting -> "Connecting to device…"
-                    isPreparingPlayback -> "Preparing playback…"
-                    else -> song.title
-                },
+                text = if (isOutputConnecting) "Connecting to device…" else song.title,
                 style = titleStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer,
                 canScroll = canScroll
             )
             AutoScrollingText(
-                text = if (isPreparingPlayback) "Loading audio…" else song.displayArtist,
+                text = song.displayArtist,
                 style = artistStyle,
                 gradientEdgeColor = LocalMaterialTheme.current.primaryContainer,
                 canScroll = canScroll

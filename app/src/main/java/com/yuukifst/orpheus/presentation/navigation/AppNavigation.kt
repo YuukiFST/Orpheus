@@ -73,19 +73,14 @@ fun AppNavigation(
     onSearchBarActiveChange: (Boolean) -> Unit,
     onOpenSidebar: () -> Unit
 ) {
-    var startDestination by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        startDestination = userPreferencesRepository.launchTabFlow
-            .first()
-            .toRoute()
+    val startDestination = remember(userPreferencesRepository) {
+        userPreferencesRepository.readLaunchTabSync()?.toRoute() ?: Screen.Library.route
     }
 
-    startDestination?.let { initialRoute ->
-        NavHost(
-            navController = navController,
-            startDestination = initialRoute
-        ) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
             composable(
                 Screen.Home.route,
                 enterTransition = {
@@ -580,7 +575,6 @@ fun AppNavigation(
                 }
             }
         }
-    }
 }
 
 private fun String.toRoute(): String = when (this) {

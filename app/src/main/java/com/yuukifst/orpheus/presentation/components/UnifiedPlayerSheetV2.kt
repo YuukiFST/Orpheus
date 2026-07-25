@@ -81,7 +81,7 @@ import com.yuukifst.orpheus.presentation.components.scoped.rememberSheetThemeSta
 import com.yuukifst.orpheus.presentation.components.scoped.rememberSheetVisualState
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerSheetState
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
-import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
+import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerSheetShellSlice
 import com.yuukifst.orpheus.ui.theme.LocalOrpheusDarkTheme
 import com.yuukifst.orpheus.ui.theme.OrpheusMotion
 import com.yuukifst.orpheus.utils.MediaItemBuilder
@@ -157,8 +157,9 @@ fun UnifiedPlayerSheetV2(
         }
     }
 
-    val infrequentPlayerStateReference = playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
-    val infrequentPlayerState = infrequentPlayerStateReference.value
+    val playerSheetShell by remember(playerViewModel) {
+        playerViewModel.stablePlayerSheetShellSlice
+    }.collectAsStateWithLifecycle(initialValue = StablePlayerSheetShellSlice())
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     // Keyed on the State instance: an unkeyed remember would keep a lambda closing over a
@@ -189,7 +190,6 @@ fun UnifiedPlayerSheetV2(
     val currentSheetContentState by playerViewModel.sheetState.collectAsStateWithLifecycle()
     val predictiveBackCollapseProgress by playerViewModel.predictiveBackCollapseFraction.collectAsStateWithLifecycle()
     val predictiveBackSwipeEdge by playerViewModel.predictiveBackSwipeEdge.collectAsStateWithLifecycle()
-    val prewarmFullPlayer = rememberPrewarmFullPlayer(infrequentPlayerState.currentSong?.id)
 
     val playerConfig by playerViewModel.playerConfigSlice.collectAsStateWithLifecycle()
     val navBarCornerRadius = sanitizeNavBarCornerRadius(playerConfig.navBarCornerRadius)
@@ -224,13 +224,13 @@ fun UnifiedPlayerSheetV2(
     val isOutputConnecting = false
     val dismissJustCommitted by playerViewModel.dismissJustCommitted.collectAsStateWithLifecycle()
     val showPlayerContentArea by remember(
-        infrequentPlayerState.currentSong,
+        playerSheetShell.currentSong,
         showDismissUndoBar,
         dismissJustCommitted,
     ) {
         derivedStateOf {
             MiniPlayerVisibilityPolicy.shouldShowPlayerContent(
-                currentSongId = infrequentPlayerState.currentSong?.id,
+                currentSongId = playerSheetShell.currentSong?.id,
                 showDismissUndoBar = showDismissUndoBar,
                 dismissJustCommitted = dismissJustCommitted,
             )
@@ -238,7 +238,7 @@ fun UnifiedPlayerSheetV2(
     }
 
     var previousShowPlayerContentArea by remember { mutableStateOf(showPlayerContentArea) }
-    LaunchedEffect(showPlayerContentArea, dismissJustCommitted, infrequentPlayerState.currentSong?.id) {
+    LaunchedEffect(showPlayerContentArea, dismissJustCommitted, playerSheetShell.currentSong?.id) {
         val contentBecameVisible = showPlayerContentArea && !previousShowPlayerContentArea
         previousShowPlayerContentArea = showPlayerContentArea
         val shouldSnap = MiniPlayerVisibilityPolicy.shouldSnapOffsetOnScreen(
@@ -248,13 +248,17 @@ fun UnifiedPlayerSheetV2(
         )
         val newSongWhileSwipedOffScreen = showPlayerContentArea &&
             !dismissJustCommitted &&
-            infrequentPlayerState.currentSong?.id != null
+            playerSheetShell.currentSong?.id != null
         if ((shouldSnap || newSongWhileSwipedOffScreen) && offsetAnimatable.value != 0f) {
             offsetAnimatable.snapTo(0f)
         }
     }
 
     val playerContentExpansionFraction = playerViewModel.playerContentExpansionFraction
+    val prewarmFullPlayer = rememberPrewarmFullPlayer(
+        currentSongId = playerSheetShell.currentSong?.id,
+        sheetExpansionFraction = playerContentExpansionFraction.value,
+    )
     val visualOvershootScaleY = remember { Animatable(1f) }
     val initialFullPlayerOffsetY = remember(density) { with(density) { 24.dp.toPx() } }
     val sheetAnimationSpec = remember {
@@ -310,7 +314,7 @@ fun UnifiedPlayerSheetV2(
         initialOffsetY = initialFullPlayerOffsetY
     )
     val fullPlayerCompositionPolicy = rememberFullPlayerCompositionPolicy(
-        currentSongId = infrequentPlayerState.currentSong?.id,
+        currentSongId = playerSheetShell.currentSong?.id,
         currentSheetState = currentSheetContentState,
         expansionFraction = playerContentExpansionFraction
     )
@@ -399,8 +403,8 @@ fun UnifiedPlayerSheetV2(
         navBarStyle = navBarStyle,
         navBarCornerRadiusDp = navBarCornerRadius.dp,
         isNavBarHidden = isNavBarHidden,
-        isPlaying = infrequentPlayerState.isPlaying,
-        hasCurrentSong = infrequentPlayerState.currentSong != null,
+        isPlaying = playerSheetShell.isPlaying,
+        hasCurrentSong = playerSheetShell.currentSong != null,
         swipeDismissProgress = swipeDismissProgress
     )
     val currentBottomPadding = sheetVisualState.currentBottomPadding
@@ -525,7 +529,7 @@ fun UnifiedPlayerSheetV2(
     val activePlayerSchemePair by playerViewModel.activePlayerColorSchemePair.collectAsStateWithLifecycle()
     val themedAlbumArtUri by playerViewModel.currentThemedAlbumArtUri.collectAsStateWithLifecycle()
     val isDarkTheme = LocalOrpheusDarkTheme.current
-    val currentSong = infrequentPlayerState.currentSong
+    val currentSong = playerSheetShell.currentSong
     val suppressPreparingIndicator = remember(currentSong?.id) {
         currentSong?.let { song ->
             val scheme = MediaItemBuilder.playbackUri(song).scheme?.lowercase()
@@ -603,10 +607,10 @@ fun UnifiedPlayerSheetV2(
 
     val playerSheetSemanticsDescription = remember(
         currentSheetContentState,
-        infrequentPlayerState.currentSong?.title
+        playerSheetShell.currentSong?.title
     ) {
         "Orpheus player sheet ${currentSheetContentState.name.lowercase()} " +
-            (infrequentPlayerState.currentSong?.title ?: "")
+            (playerSheetShell.currentSong?.title ?: "")
     }
 
     Surface(
@@ -711,10 +715,9 @@ fun UnifiedPlayerSheetV2(
                             }
                     ) {
                         UnifiedPlayerMiniAndFullLayers(
-                            currentSong = infrequentPlayerState.currentSong,
+                            currentSong = playerSheetShell.currentSong,
                             miniPlayerScheme = miniPlayerScheme,
                             overallSheetTopCornerRadiusProvider = overallSheetTopCornerRadiusProvider,
-                            infrequentPlayerState = infrequentPlayerState,
                             isOutputConnecting = isOutputConnecting,
                             isPreparingPlayback = isPreparingPlayback,
                             playerContentExpansionFraction = playerContentExpansionFraction,
@@ -741,11 +744,10 @@ fun UnifiedPlayerSheetV2(
 
                 UnifiedPlayerPrewarmLayer(
                     prewarmFullPlayer = prewarmFullPlayer && !shouldRenderFullPlayer,
-                    currentSong = infrequentPlayerState.currentSong,
+                    currentSong = playerSheetShell.currentSong,
                     containerHeight = containerHeight,
                     albumColorScheme = albumColorScheme,
                     currentQueueSourceName = currentQueueSourceName,
-                    infrequentPlayerState = infrequentPlayerState,
                     carouselStyle = carouselStyle,
                     fullPlayerLoadingTweaks = fullPlayerLoadingTweaks,
                     playerViewModel = playerViewModel,
@@ -777,7 +779,6 @@ fun UnifiedPlayerSheetV2(
                 onQueueSheetHeightPxChange = onQueueSheetHeightPxChange,
                 configurationResetKey = configuration,
                 currentQueueSourceName = currentQueueSourceName,
-                infrequentPlayerState = infrequentPlayerState,
                 playerViewModel = playerViewModel,
                 selectedSongForInfo = selectedSongForInfo,
                 onSelectedSongForInfoChange = sheetActionHandlers.onSelectedSongForInfoChange,

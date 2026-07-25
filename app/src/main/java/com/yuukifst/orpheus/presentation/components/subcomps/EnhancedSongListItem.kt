@@ -47,17 +47,16 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp as lerpDp
-import coil.size.Size
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.presentation.components.AutoScrollingText
 import com.yuukifst.orpheus.presentation.components.ShimmerBox
 import androidx.compose.ui.res.stringResource
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.SmartImage
+import com.yuukifst.orpheus.presentation.components.SmartImageListTargetSize
 import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
 import com.yuukifst.orpheus.ui.theme.OrpheusIconButtonShape
@@ -118,7 +117,6 @@ fun EnhancedSongListItem(
     } else {
         modifier
     }
-    val albumArtTargetSizePx = with(LocalDensity.current) { albumArtSize.roundToPx() }
     val isHighlighted = isCurrentSong && !isLoading
     val transition = updateTransition(
         targetState = EnhancedSongAnimationTarget(
@@ -365,7 +363,8 @@ fun EnhancedSongListItem(
                             // Decorative here: the title is already announced via the row's merged semantics.
                             contentDescription = null,
                             shape = albumShape,
-                            targetSize = Size(albumArtTargetSizePx, albumArtTargetSizePx),
+                            targetSize = SmartImageListTargetSize,
+                            allowHardware = true,
                             modifier = Modifier.fillMaxSize()
                         )
                         

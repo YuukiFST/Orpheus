@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Orpheus is licensed under the GNU General Public License v3.0 (GPL-3.0). The app also includes third-party libraries and font assets. This file records source and license evidence useful for app-store and F-Droid review.
+Orpheus is licensed under the GNU General Public License v3.0 (GPL-3.0). The app also includes third-party libraries and font assets. This file records source and license evidence for compliance review.
 
 ## Bundled Font Assets
 
@@ -50,5 +50,3 @@ The Jellyfin FFmpeg decoder bundled in the APK is GPL-3.0, consistent with the O
 | Security/compatibility transitive constraints | Bouncy Castle, Commons Lang, HttpClient, JDOM2, jose4j | MIT/Apache-2.0/Bouncy Castle/JDOM-style licenses; verify current POMs when versions change |
 
 Run a dependency/license review again whenever `gradle/libs.versions.toml` changes.
-
-The current review notes are tracked in `docs/DEPENDENCY_LICENSES.md`.

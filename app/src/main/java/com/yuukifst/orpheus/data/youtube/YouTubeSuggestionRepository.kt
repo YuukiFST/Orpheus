@@ -7,12 +7,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class YouTubeSuggestionRepository @Inject constructor() {
+class YouTubeSuggestionRepository @Inject constructor(
+    private val youTubeInitializer: YouTubeInitializer,
+) {
 
     suspend fun suggestions(query: String): List<String> = withContext(Dispatchers.IO) {
         val trimmed = query.trim()
         if (trimmed.length < MIN_QUERY_LENGTH) return@withContext emptyList()
-        YouTubeInitializer.ensureInitialized()
+        youTubeInitializer.ensureInitialized()
         runCatching {
             ServiceList.YouTube.suggestionExtractor
                 .suggestionList(trimmed)

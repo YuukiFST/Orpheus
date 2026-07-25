@@ -45,7 +45,6 @@ internal fun BoxScope.UnifiedPlayerMiniAndFullLayers(
     currentSong: Song?,
     miniPlayerScheme: ColorScheme?,
     overallSheetTopCornerRadiusProvider: () -> Dp,
-    infrequentPlayerState: StablePlayerState,
     isOutputConnecting: Boolean,
     isPreparingPlayback: Boolean,
     playerContentExpansionFraction: Animatable<Float, AnimationVector1D>,
@@ -67,6 +66,8 @@ internal fun BoxScope.UnifiedPlayerMiniAndFullLayers(
     onQueueDrag: (Float) -> Unit,
     onQueueRelease: (Float, Float) -> Unit
 ) {
+    val playerControls by playerViewModel.stablePlayerControlsSlice.collectAsStateWithLifecycle()
+    val infrequentPlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
     currentSong?.let { currentSongNonNull ->
         miniPlayerScheme?.let { readyScheme ->
             CompositionLocalProvider(
@@ -95,13 +96,13 @@ internal fun BoxScope.UnifiedPlayerMiniAndFullLayers(
                     }
                     MiniPlayerContentInternal(
                         song = currentSongNonNull,
-                        isPlaying = infrequentPlayerState.isPlaying,
+                        isPlaying = playerControls.isPlaying,
                         isOutputConnecting = isOutputConnecting,
                         isPreparingPlayback = isPreparingPlayback,
                         onPlayPause = { playerViewModel.playPause() },
                         onPrevious = { playerViewModel.previousSong() },
                         onNext = { playerViewModel.nextSong() },
-                        canScroll = isMiniPlayerVisible && infrequentPlayerState.isPlaying,
+                        canScroll = isMiniPlayerVisible && playerControls.isPlaying,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -198,10 +199,10 @@ internal fun BoxScope.UnifiedPlayerMiniAndFullLayers(
                         currentSong = currentSongNonNull,
                         currentPlaybackQueue = currentPlaybackQueue,
                         currentQueueSourceName = currentQueueSourceName,
-                        currentMediaItemIndex = infrequentPlayerState.currentMediaItemIndex,
-                        isShuffleEnabled = infrequentPlayerState.isShuffleEnabled,
-                        shuffleTransitionInProgress = infrequentPlayerState.isShuffleTransitionInProgress,
-                        repeatMode = infrequentPlayerState.repeatMode,
+                        currentMediaItemIndex = playerControls.currentMediaItemIndex,
+                        isShuffleEnabled = playerControls.isShuffleEnabled,
+                        shuffleTransitionInProgress = playerControls.isShuffleTransitionInProgress,
+                        repeatMode = playerControls.repeatMode,
                         allowRealtimeUpdates = fullPlayerRuntimePolicy.allowRealtimeUpdates,
                         expansionFractionProvider = expansionFractionProvider,
                         currentSheetState = currentSheetContentState,
@@ -245,7 +246,6 @@ internal fun UnifiedPlayerPrewarmLayer(
     containerHeight: Dp,
     albumColorScheme: ColorScheme,
     currentQueueSourceName: String,
-    infrequentPlayerState: StablePlayerState,
     carouselStyle: String,
     fullPlayerLoadingTweaks: FullPlayerLoadingTweaks,
     playerViewModel: PlayerViewModel,
@@ -257,6 +257,8 @@ internal fun UnifiedPlayerPrewarmLayer(
     onQueueDrag: (Float) -> Unit,
     onQueueRelease: (Float, Float) -> Unit
 ) {
+    val playerControls by playerViewModel.stablePlayerControlsSlice.collectAsStateWithLifecycle()
+    val infrequentPlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
     if (prewarmFullPlayer && currentSong != null) {
         // Scoped queue collection: the prewarmed FullPlayer owns its own
         // subscription, keeping the queue out of the outer sheet's state.
@@ -295,10 +297,10 @@ internal fun UnifiedPlayerPrewarmLayer(
                     currentSong = currentSong,
                     currentPlaybackQueue = currentPlaybackQueue,
                     currentQueueSourceName = currentQueueSourceName,
-                    currentMediaItemIndex = infrequentPlayerState.currentMediaItemIndex,
-                    isShuffleEnabled = infrequentPlayerState.isShuffleEnabled,
-                    shuffleTransitionInProgress = infrequentPlayerState.isShuffleTransitionInProgress,
-                    repeatMode = infrequentPlayerState.repeatMode,
+                    currentMediaItemIndex = playerControls.currentMediaItemIndex,
+                    isShuffleEnabled = playerControls.isShuffleEnabled,
+                    shuffleTransitionInProgress = playerControls.isShuffleTransitionInProgress,
+                    repeatMode = playerControls.repeatMode,
                     allowRealtimeUpdates = false,
                     expansionFractionProvider = { 1f },
                     currentSheetState = PlayerSheetState.EXPANDED,

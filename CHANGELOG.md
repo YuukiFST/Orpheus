@@ -2,6 +2,18 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.27] - 2026-07-25
+
+### Changed
+- Player, library, and search screens collect narrow UI state slices to reduce recomposition during playback.
+- Cold start defers notification channel setup, YouTube init, sync, and DataStore mirror refresh to a background scope.
+- Media controller connects on demand instead of binding during `MainActivity` creation.
+- Setup theme picker no longer marks Dark Mode as recommended.
+
+### Fixed
+- YouTube search and download requests cancel in-flight OkHttp calls when superseded.
+- YouTube thumbnails pick the correct URL variant for list target sizes.
+
 ## [1.0.26] - 2026-07-25
 
 ### Added
@@ -104,7 +116,7 @@ All notable changes to Orpheus will be documented in this file.
 - Liked queue wraps to the first track at the end of the list when repeat is off.
 - Dismissing the mini player or swiping away the notification stops playback; sheet no longer revives after a single dismiss swipe.
 - Corner radius preview, Liked song rows, and mini player sheet honor the nav bar radius preference.
-- About screen no longer shows GitHub Sponsors or F-Droid links.
+- About screen no longer shows GitHub Sponsors links.
 
 ## [1.0.15] - 2026-07-22
 
@@ -200,7 +212,7 @@ All notable changes to Orpheus will be documented in this file.
 - Removed release paths that depended on local/private signing artifacts, dummy signing values, or app-store-only assumptions.
 
 ### Release readiness
-- Added F-Droid metadata, Fastlane store metadata, dependency/license documentation, privacy notes, security notes, and contributor guidance.
+- Added privacy notes, security notes, and contributor guidance.
 - Release builds now stay unsigned when local signing keys are absent, and `orpheus.disableReleaseSigning=true` forces unsigned verification builds even on a maintainer machine.
 - Documented third-party asset and dependency licenses, including native/binary Maven artifacts and JitPack source trails.
 

@@ -17,6 +17,7 @@ import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +61,7 @@ class YouTubeSearchViewModel @Inject constructor(
     private val latestSearchRequestId = AtomicLong(0L)
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MS = 200L
+        const val SEARCH_DEBOUNCE_MS = 450L
         const val SUGGESTION_DEBOUNCE_MS = 150L
         const val MIN_QUERY_LENGTH = 2
     }
@@ -153,21 +154,42 @@ class YouTubeSearchViewModel @Inject constructor(
         }
     }
 
+    fun warmUpConnection() {
+        viewModelScope.launch(Dispatchers.IO) {
+            searchRepository.warmUpConnection()
+        }
+    }
+
     private suspend fun executeSearch(trimmed: String, saveHistory: Boolean) {
         val requestId = latestSearchRequestId.incrementAndGet()
+
+        searchRepository.searchCachedOnly(trimmed)?.let { cached ->
+            if (requestId != latestSearchRequestId.get()) return
+            _uiState.update {
+                it.copy(
+                    results = cached,
+                    isLoading = false,
+                    error = null,
+                    hasSearched = true,
+                    suggestions = emptyList(),
+                )
+            }
+            if (saveHistory) {
+                persistSearchHistory(trimmed)
+            }
+            return
+        }
+
+        searchRepository.cancelActiveRequest()
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
         try {
             val results = searchRepository.search(trimmed)
             if (requestId != latestSearchRequestId.get()) return
-            if (saveHistory) {
-                searchHistoryDao.deleteByQuery(trimmed)
-                searchHistoryDao.insert(
-                    SearchHistoryEntity(query = trimmed, timestamp = System.currentTimeMillis()),
-                )
-                refreshSearchHistory()
-            }
             _uiState.update {
                 it.copy(results = results, isLoading = false, suggestions = emptyList())
+            }
+            if (saveHistory) {
+                persistSearchHistory(trimmed)
             }
         } catch (e: CancellationException) {
             throw e
@@ -184,6 +206,16 @@ class YouTubeSearchViewModel @Inject constructor(
                     error = message.ifBlank { "Search failed" },
                 )
             }
+        }
+    }
+
+    private fun persistSearchHistory(trimmed: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            searchHistoryDao.deleteByQuery(trimmed)
+            searchHistoryDao.insert(
+                SearchHistoryEntity(query = trimmed, timestamp = System.currentTimeMillis()),
+            )
+            refreshSearchHistory()
         }
     }
 

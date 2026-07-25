@@ -48,7 +48,6 @@
     <string name="setup_theme_title">App Theme</string>
     <string name="setup_theme_subtitle">Pick the look you want before you start exploring your library.</string>
     <string name="setup_theme_footer">You can change this later in Settings &gt; Appearance &gt; App Theme.</string>
-    <string name="setup_recommended">Recommended</string>
     <string name="setup_external_services_title">Optional Online Services</string>
     <string name="setup_external_services_subtitle">Orpheus works offline by default. Enable only the lookups you want.</string>
     <string name="setup_external_lyrics_title">Online lyrics from LRCLIB</string>
@@ -199,8 +198,6 @@
     <string name="about_project_subtitle">Source, releases, and community entry points.</string>
     <string name="about_link_source_title">Source code</string>
     <string name="about_link_source_subtitle">github.com/YuukiFST/Orpheus</string>
-    <string name="about_link_fdroid_title">F-Droid</string>
-    <string name="about_link_fdroid_subtitle">Available on the F-Droid catalog</string>
     <string name="cd_about_open_link">Open %1$s</string>
     <string name="about_signal_open_source">Open source</string>
     <string name="about_signal_community_first">Community-first</string>
