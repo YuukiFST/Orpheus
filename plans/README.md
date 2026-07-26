@@ -25,7 +25,7 @@ update your row when done.
 | 002 | Cut YouTube Search latency (debounce, suggestion cache, HTTP call slot) | P1 | M | MED | — | DONE |
 | 003 | Make taps feel instant (press feedback + optimistic toggles) | P1 | M | MED | — | DONE |
 | 004 | Trim cold start (defer non-first-frame work) | P2 | M | MED | — | DONE |
-| 005 | Prefetch the stream URL of the first search result | P3 | S | MED | 001, 002 | TODO |
+| 005 | Prefetch the stream URL of the first search result | P3 | S | MED | 001, 002 | DONE |
 
 ## Dependency notes
 
