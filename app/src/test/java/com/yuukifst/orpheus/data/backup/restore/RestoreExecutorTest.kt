@@ -82,7 +82,7 @@ class RestoreExecutorTest {
 
         val failure = assertInstanceOf(RestoreResult.TotalFailure::class.java, result)
         assertEquals(
-            "Restore failed at Favorites: Module 'favorites' not found in backup. All applied changes were rolled back.",
+            "Restore failed at Liked: Module 'favorites' not found in backup. All applied changes were rolled back.",
             failure.error
         )
         coVerify(exactly = 0) { favoritesHandler.restore(any()) }
