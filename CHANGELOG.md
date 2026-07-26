@@ -2,6 +2,12 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.30] - 2026-07-26
+
+### Changed
+- Playlist import no longer wipes existing playlists; new playlists are added automatically.
+- Conflicting playlists (same id or name) ask for Merge, Replace, or Ignore during restore in Settings and Setup.
+
 ## [1.0.29] - 2026-07-26
 
 ### Changed
