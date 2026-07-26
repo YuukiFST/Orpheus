@@ -28,9 +28,44 @@ class ModuleSchemaValidatorTest {
     }
 
     @Test
-    fun `non-array module fails validation`() {
-        val payload = """{"key": "value"}"""
+    fun `favorites v2 object with local and youtube passes`() {
+        val payload = """
+            {
+              "version": 2,
+              "local": [{"songId": 123, "isFavorite": true, "timestamp": 1700000000000}],
+              "youtube": [{
+                "videoId": "abc",
+                "title": "Song",
+                "channelName": "Artist",
+                "thumbnailUrl": "https://i.ytimg.com/vi/abc/hqdefault.jpg",
+                "durationMs": 180000,
+                "favoritedAt": 1700000000000
+              }]
+            }
+        """.trimIndent()
         val result = validator.validate(BackupSection.FAVORITES, payload)
+        assertTrue(result.isValid())
+    }
+
+    @Test
+    fun `favorites v2 youtube missing videoId emits warning`() {
+        val payload = """
+            {
+              "version": 2,
+              "local": [],
+              "youtube": [{"videoId": "", "title": "Song", "channelName": "Artist"}]
+            }
+        """.trimIndent()
+        val result = validator.validate(BackupSection.FAVORITES, payload)
+        assertTrue(result is BackupValidationResult.Invalid)
+        val warnings = (result as BackupValidationResult.Invalid).warnings
+        assertTrue(warnings.any { it.code == "MISSING_VIDEO_ID" })
+    }
+
+    @Test
+    fun `lyrics non-array still fails validation`() {
+        val payload = """{"key": "value"}"""
+        val result = validator.validate(BackupSection.LYRICS, payload)
         assertTrue(result is BackupValidationResult.Invalid)
         assertTrue((result as BackupValidationResult.Invalid).fatalErrors.any { it.code == "NOT_ARRAY" })
     }
