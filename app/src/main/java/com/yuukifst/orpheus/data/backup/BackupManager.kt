@@ -13,9 +13,11 @@ import com.yuukifst.orpheus.data.backup.model.BackupSection
 import com.yuukifst.orpheus.data.backup.model.BackupTransferProgressUpdate
 import com.yuukifst.orpheus.data.backup.model.BackupValidationResult
 import com.yuukifst.orpheus.data.backup.model.DeviceInfo
+import com.yuukifst.orpheus.data.backup.model.PlaylistConflict
 import com.yuukifst.orpheus.data.backup.model.RestorePlan
 import com.yuukifst.orpheus.data.backup.model.RestoreResult
 import com.yuukifst.orpheus.data.backup.module.BackupModuleHandler
+import com.yuukifst.orpheus.data.backup.module.PlaylistsModuleHandler
 import com.yuukifst.orpheus.data.backup.restore.RestoreExecutor
 import com.yuukifst.orpheus.data.backup.restore.RestorePlanner
 import com.yuukifst.orpheus.data.backup.validation.ValidationPipeline
@@ -125,6 +127,8 @@ class BackupManager @Inject constructor(
                 warnings.addAll(manifestValidation.warnings.map { it.message })
             }
 
+            var playlistConflicts = emptyList<PlaylistConflict>()
+
             plan.availableModules.toList().sortedBy { it.key }.forEach { section ->
                 val moduleInfo = plan.manifest.modules[section.key]
                 if (moduleInfo != null && moduleInfo.sizeBytes > BackupReader.MAX_MODULE_PAYLOAD_BYTES) {
@@ -154,9 +158,21 @@ class BackupManager @Inject constructor(
                         }
                     )
                 }
+
+                if (section == BackupSection.PLAYLISTS) {
+                    val playlistsHandler = handlers[BackupSection.PLAYLISTS] as? PlaylistsModuleHandler
+                    if (playlistsHandler != null) {
+                        playlistConflicts = playlistsHandler.detectConflicts(payload)
+                        if (playlistConflicts.isNotEmpty()) {
+                            warnings.add(
+                                "Playlists: ${playlistConflicts.size} conflict(s) need Merge/Replace/Ignore before restore."
+                            )
+                        }
+                    }
+                }
             }
 
-            plan.copy(warnings = warnings)
+            plan.copy(warnings = warnings, playlistConflicts = playlistConflicts)
         }
     }
 

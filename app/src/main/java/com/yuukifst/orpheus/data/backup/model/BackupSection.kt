@@ -12,7 +12,7 @@ enum class BackupSection(
     PLAYLISTS(
         key = "playlists",
         label = "Playlists",
-        description = "Your custom playlists and ordering preferences.",
+        description = "Custom playlists. Import adds new ones and asks on conflicts.",
         iconRes = R.drawable.rounded_playlist_play_24
     ),
     GLOBAL_SETTINGS(

@@ -532,7 +532,17 @@ private fun BackupSectionSelectableCardShared(
                     )
                     if (detail != null && detail.entryCount > 0) {
                         Text(
-                            text = stringResource(R.string.presentation_batch_g_backup_entries_will_replace, detail.entryCount),
+                            text = if (detail.willOverwrite) {
+                                stringResource(
+                                    R.string.presentation_batch_g_backup_entries_will_replace,
+                                    detail.entryCount
+                                )
+                            } else {
+                                stringResource(
+                                    R.string.presentation_batch_g_backup_entries_will_merge,
+                                    detail.entryCount
+                                )
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.tertiary
                         )

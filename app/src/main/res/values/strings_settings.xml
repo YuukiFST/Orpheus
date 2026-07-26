@@ -170,7 +170,7 @@
     <string name="setcat_export_backup_subtitle">%1$s Creates a .pxpl backup file.</string>
     <string name="setcat_restore_backup_section">Restore Backup</string>
     <string name="setcat_import_backup_title">Import Backup</string>
-    <string name="setcat_import_backup_subtitle">Browse or pick from recent backups. Selected data will replace current data.</string>
+    <string name="setcat_import_backup_subtitle">Browse or pick from recent backups. Most sections replace current data; playlists merge and ask on conflicts.</string>
     <string name="setcat_experiments">Experiments</string>
     <string name="setcat_experimental_title">Experimental</string>
     <string name="setcat_experimental_subtitle">Player UI loading experiments and toggles.</string>
@@ -193,7 +193,7 @@
     <string name="backup_summary_all">All sections selected.</string>
     <string name="backup_summary_partial">Selected %1$d of %2$d sections.</string>
     <string name="backup_how_title">How backup works</string>
-    <string name="backup_how_body">Choose sections, export a .pxpl file, and import it later. Restore only replaces the sections you select.</string>
+    <string name="backup_how_body">Choose sections, export a .pxpl file, and import it later. Most sections replace selected data; playlists add new ones and ask Merge/Replace/Ignore on name or id conflicts.</string>
     <string name="backup_dialog_supporting_export">Choose exactly what you want to include in the backup package.</string>
     <string name="backup_confirm_export_pxpl">Export .pxpl</string>
     <string name="backup_sections_selected_format">%1$d of %2$d sections selected</string>
@@ -204,6 +204,18 @@
     <string name="backup_dialog_restoring">Restoring Backup</string>
     <string name="backup_step_format">Step %1$d of %2$d</string>
     <string name="backup_entries_will_replace">%1$d entries · Will replace current data</string>
+    <string name="backup_entries_will_merge">%1$d entries · Adds new playlists; conflicts need a choice</string>
+    <string name="backup_playlist_conflicts_title">Playlist conflicts</string>
+    <string name="backup_playlist_conflicts_subtitle">These playlists already exist on this device. Choose Merge, Replace, or Ignore for each one. New playlists without conflicts import automatically.</string>
+    <string name="backup_playlist_conflict_device_label">On device: %1$s</string>
+    <string name="backup_playlist_conflict_backup_label">In backup: %1$s</string>
+    <string name="backup_playlist_conflict_match_id">Matched by id</string>
+    <string name="backup_playlist_conflict_match_name">Matched by name</string>
+    <string name="backup_playlist_action_merge">Merge</string>
+    <string name="backup_playlist_action_replace">Replace</string>
+    <string name="backup_playlist_action_ignore">Ignore</string>
+    <string name="backup_playlist_conflicts_continue">Continue restore</string>
+    <string name="backup_playlist_conflicts_choose_all">Choose an action for every conflict to continue.</string>
 
     <string name="dialog_palette_regenerated">Palette regenerated for %1$s</string>
     <string name="dialog_palette_regenerate_failed">Could not regenerate palette for %1$s</string>

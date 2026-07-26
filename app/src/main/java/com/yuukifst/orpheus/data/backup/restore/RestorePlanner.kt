@@ -34,7 +34,8 @@ class RestorePlanner @Inject constructor(
                 moduleDetails[section] = ModuleRestoreDetail(
                     entryCount = info?.entryCount ?: 0,
                     sizeBytes = info?.sizeBytes ?: 0,
-                    willOverwrite = true
+                    // Playlists merge/create with optional per-conflict replace; other modules still replace.
+                    willOverwrite = section != BackupSection.PLAYLISTS
                 )
             }
 

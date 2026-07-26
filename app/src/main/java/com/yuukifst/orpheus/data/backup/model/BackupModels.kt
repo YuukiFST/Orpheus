@@ -41,13 +41,35 @@ data class BackupHistoryEntry(
     val appVersion: String = ""
 )
 
+enum class PlaylistConflictAction {
+    MERGE,
+    REPLACE,
+    IGNORE
+}
+
+enum class PlaylistConflictMatchReason {
+    ID,
+    NAME
+}
+
+data class PlaylistConflict(
+    val backupPlaylistId: String,
+    val backupPlaylistName: String,
+    val devicePlaylistId: String,
+    val devicePlaylistName: String,
+    val matchReason: PlaylistConflictMatchReason
+)
+
 data class RestorePlan(
     val manifest: BackupManifest,
     val backupUri: String,
     val availableModules: Set<BackupSection>,
     val selectedModules: Set<BackupSection>,
     val moduleDetails: Map<BackupSection, ModuleRestoreDetail>,
-    val warnings: List<String> = emptyList()
+    val warnings: List<String> = emptyList(),
+    val playlistConflicts: List<PlaylistConflict> = emptyList(),
+    /** Keyed by [PlaylistConflict.backupPlaylistId]. Required for every conflict when Playlists is restored. */
+    val playlistConflictDecisions: Map<String, PlaylistConflictAction> = emptyMap()
 )
 
 data class ModuleRestoreDetail(
