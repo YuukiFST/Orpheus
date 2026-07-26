@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 internal fun shouldReplaceQueueForSearchPlay(
     currentIsYouTubeSession: Boolean,
@@ -50,6 +51,27 @@ internal fun YouTubeTrack.toPlaybackSong(filePath: String? = null): Song = Song(
     mimeType = null,
     bitrate = null,
     sampleRate = null,
+)
+
+internal data class OptimisticYouTubePlaybackUi(
+    val song: Song,
+    val mediaItemIndex: Int,
+    val queueName: String,
+)
+
+/**
+ * The mini player is gated on `currentSong != null`, so the search-result
+ * metadata is published before the stream is resolved. Must not read the
+ * player: `DualPlayerEngine.masterPlayer` builds ExoPlayer on first access.
+ */
+internal fun optimisticUiForTrack(
+    track: YouTubeTrack,
+    index: Int = 0,
+    queueName: String = "YouTube",
+): OptimisticYouTubePlaybackUi = OptimisticYouTubePlaybackUi(
+    song = track.toPlaybackSong(),
+    mediaItemIndex = index.coerceAtLeast(0),
+    queueName = queueName,
 )
 
 data class YouTubePlaybackQueueUpdate(
@@ -87,12 +109,17 @@ class YouTubePlaybackController @Inject constructor(
     val queueUpdates: SharedFlow<YouTubePlaybackQueueUpdate> = _queueUpdates.asSharedFlow()
 
     suspend fun playOnce(track: YouTubeTrack): Boolean {
+        val previousSong = playbackStateHolder.stablePlayerState.value.currentSong
+        val optimistic = optimisticUiForTrack(track)
+        currentMixedTracks = listOf(PlaylistMixedTrack.YouTube(track = track, sortOrder = 0))
+        sessionStopOnEnd = true
+        withContext(Dispatchers.Main.immediate) {
+            publishOptimisticPlaybackState(optimistic)
+        }
+        listeningStatsTracker.onVoluntarySelection(track.mediaId)
+        scope.launch { runCatching { cachedTrackRepository.recordPlayed(track) } }
+
         return runCatching {
-            cachedTrackRepository.recordPlayed(track)
-            listeningStatsTracker.onVoluntarySelection(track.mediaId)
-            val entry = PlaylistMixedTrack.YouTube(track = track, sortOrder = 0)
-            currentMixedTracks = listOf(entry)
-            sessionStopOnEnd = true
             startPlayback(
                 tracks = currentMixedTracks,
                 startIndex = 0,
@@ -102,6 +129,7 @@ class YouTubePlaybackController @Inject constructor(
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
+            rollbackOptimisticPlaybackState(track, previousSong)
             _playbackErrors.emit(userFacingPlaybackError(error))
         }.isSuccess
     }
@@ -316,6 +344,38 @@ class YouTubePlaybackController @Inject constructor(
         }
         playbackListener = listener
         player.addListener(listener)
+    }
+
+    private fun publishOptimisticPlaybackState(optimistic: OptimisticYouTubePlaybackUi) {
+        playbackStateHolder.updateStablePlayerState {
+            it.copy(
+                currentSong = optimistic.song,
+                currentMediaItemIndex = optimistic.mediaItemIndex,
+                isPlaying = true,
+                playWhenReady = true,
+                totalDuration = optimistic.song.duration.coerceAtLeast(0L),
+            )
+        }
+        publishQueueUpdate(optimistic.mediaItemIndex, optimistic.queueName)
+    }
+
+    private suspend fun rollbackOptimisticPlaybackState(
+        track: YouTubeTrack,
+        previousSong: Song?,
+    ) = withContext(Dispatchers.Main.immediate) {
+        val current = playbackStateHolder.stablePlayerState.value.currentSong
+        if (current?.id != track.mediaId) return@withContext
+        Timber.w("Rolling back optimistic YouTube playback for videoId=%s", track.videoId)
+        currentMixedTracks = emptyList()
+        sessionStopOnEnd = false
+        playbackStateHolder.updateStablePlayerState {
+            it.copy(
+                currentSong = previousSong,
+                isPlaying = false,
+                playWhenReady = false,
+                totalDuration = previousSong?.duration?.coerceAtLeast(0L) ?: 0L,
+            )
+        }
     }
 
     private fun publishPlaybackState(
