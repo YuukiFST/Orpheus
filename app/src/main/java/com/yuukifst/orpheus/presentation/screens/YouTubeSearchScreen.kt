@@ -33,6 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlaylistAdd
@@ -84,6 +86,7 @@ import com.yuukifst.orpheus.presentation.components.SmartImageYouTubeListTargetS
 import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.YouTubeSearchViewModel
+import com.yuukifst.orpheus.presentation.viewmodel.toPlaybackSong
 import com.yuukifst.orpheus.utils.formatDuration
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -101,6 +104,7 @@ fun YouTubeSearchScreen(
     val statusBarTopInset = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val navBarCompactMode by playerViewModel.navBarCompactMode.collectAsStateWithLifecycle()
+    val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsStateWithLifecycle()
     val bottomBarHeightDp = resolveNavBarOccupiedHeight(systemNavBarInset, navBarCompactMode)
 
     LaunchedEffect(Unit) {
@@ -235,7 +239,11 @@ fun YouTubeSearchScreen(
                             YouTubeSearchResultItem(
                                 track = track,
                                 isDownloading = track.videoId in uiState.downloadingVideoIds,
+                                isFavorite = track.mediaId in favoriteSongIds,
                                 onPlay = { viewModel.playOnce(track) },
+                                onToggleFavorite = {
+                                    playerViewModel.toggleFavoriteSpecificSong(track.toPlaybackSong())
+                                },
                                 onAddToQueue = { viewModel.addToQueue(track) },
                                 onAddToPlaylist = { showPlaylistPickerForTrack = track },
                                 onDownload = { viewModel.download(track) },
@@ -433,7 +441,9 @@ private fun YouTubeSearchHistorySection(
 private fun YouTubeSearchResultItem(
     track: YouTubeTrack,
     isDownloading: Boolean,
+    isFavorite: Boolean,
     onPlay: () -> Unit,
+    onToggleFavorite: () -> Unit,
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
     onDownload: () -> Unit,
@@ -500,6 +510,29 @@ private fun YouTubeSearchResultItem(
                 }
             }
             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                if (isFavorite) {
+                                    R.string.cd_remove_from_favorites
+                                } else {
+                                    R.string.cd_add_to_favorites
+                                },
+                            ),
+                        )
+                    },
+                    onClick = {
+                        showMenu = false
+                        onToggleFavorite()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = null,
+                        )
+                    },
+                )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_add_to_queue)) },
                     onClick = {
