@@ -28,7 +28,7 @@ class YouTubeSearchRepository @Inject constructor(
     private val inFlightMutex = Mutex()
 
     suspend fun search(query: String): List<YouTubeTrack> = withContext(Dispatchers.IO) {
-        val key = query.trim().lowercase()
+        val key = youtubeQueryCacheKey(query)
         if (key.isBlank()) return@withContext emptyList()
         searchCache.get(key)?.let { return@withContext it }
 
@@ -82,11 +82,11 @@ class YouTubeSearchRepository @Inject constructor(
     }
 
     internal fun seedSearchCacheForTests(query: String, results: List<YouTubeTrack>) {
-        searchCache.put(query.trim().lowercase(), results)
+        searchCache.put(youtubeQueryCacheKey(query), results)
     }
 
     internal fun searchCachedOnly(query: String): List<YouTubeTrack>? {
-        return searchCache.get(query.trim().lowercase())
+        return searchCache.get(youtubeQueryCacheKey(query))
     }
 
     internal companion object {
@@ -99,6 +99,9 @@ class YouTubeSearchRepository @Inject constructor(
         }
     }
 }
+
+/** Shared cache key for YouTube search/suggestion memory caches. */
+internal fun youtubeQueryCacheKey(query: String): String = query.trim().lowercase()
 
 internal fun extractYouTubeVideoId(url: String?): String? {
     if (url.isNullOrBlank()) return null

@@ -13,6 +13,7 @@ import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
+import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,16 +53,20 @@ class YouTubeSearchViewModel @Inject constructor(
     private val playlistPreferencesRepository: PlaylistPreferencesRepository,
     private val mixedTrackResolver: PlaylistMixedTrackResolver,
     private val playbackController: YouTubePlaybackController,
+    private val streamExtractor: YouTubeStreamExtractor,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(YouTubeSearchUiState())
     val uiState: StateFlow<YouTubeSearchUiState> = _uiState.asStateFlow()
     private var debouncedSearchJob: Job? = null
     private var debouncedSuggestionJob: Job? = null
+    private var prefetchJob: Job? = null
     private val latestSearchRequestId = AtomicLong(0L)
+    private var activeNetworkQuery: String? = null
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MS = 450L
+        const val SEARCH_DEBOUNCE_MS = 260L
+        const val SEARCH_DEBOUNCE_CACHED_MS = 0L
         const val SUGGESTION_DEBOUNCE_MS = 150L
         const val MIN_QUERY_LENGTH = 2
     }
@@ -100,6 +105,20 @@ class YouTubeSearchViewModel @Inject constructor(
             return
         }
 
+        if (trimmed.length >= MIN_QUERY_LENGTH) {
+            searchRepository.searchCachedOnly(trimmed)?.let { cached ->
+                _uiState.update {
+                    it.copy(
+                        results = cached,
+                        isLoading = false,
+                        error = null,
+                        hasSearched = true,
+                        suggestions = emptyList(),
+                    )
+                }
+            }
+        }
+
         debouncedSuggestionJob = viewModelScope.launch {
             delay(SUGGESTION_DEBOUNCE_MS)
             if (trimmed.length < MIN_QUERY_LENGTH) {
@@ -113,7 +132,8 @@ class YouTubeSearchViewModel @Inject constructor(
         }
 
         debouncedSearchJob = viewModelScope.launch {
-            delay(SEARCH_DEBOUNCE_MS)
+            val cachedAlready = searchRepository.searchCachedOnly(trimmed) != null
+            delay(if (cachedAlready) SEARCH_DEBOUNCE_CACHED_MS else SEARCH_DEBOUNCE_MS)
             if (trimmed.length < MIN_QUERY_LENGTH) {
                 _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
                 return@launch
@@ -174,13 +194,17 @@ class YouTubeSearchViewModel @Inject constructor(
                     suggestions = emptyList(),
                 )
             }
+            prefetchTopResult(cached)
             if (saveHistory) {
                 persistSearchHistory(trimmed)
             }
             return
         }
 
-        searchRepository.cancelActiveRequest()
+        if (activeNetworkQuery != null && activeNetworkQuery != trimmed) {
+            searchRepository.cancelActiveRequest()
+        }
+        activeNetworkQuery = trimmed
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
         try {
             val results = searchRepository.search(trimmed)
@@ -188,6 +212,7 @@ class YouTubeSearchViewModel @Inject constructor(
             _uiState.update {
                 it.copy(results = results, isLoading = false, suggestions = emptyList())
             }
+            prefetchTopResult(results)
             if (saveHistory) {
                 persistSearchHistory(trimmed)
             }
@@ -206,6 +231,18 @@ class YouTubeSearchViewModel @Inject constructor(
                     error = message.ifBlank { "Search failed" },
                 )
             }
+        } finally {
+            if (activeNetworkQuery == trimmed) {
+                activeNetworkQuery = null
+            }
+        }
+    }
+
+    private fun prefetchTopResult(results: List<YouTubeTrack>) {
+        val videoId = results.firstOrNull()?.videoId ?: return
+        prefetchJob?.cancel()
+        prefetchJob = viewModelScope.launch(Dispatchers.IO) {
+            streamExtractor.prefetchBestAudio(videoId)
         }
     }
 

@@ -2,6 +2,16 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.29] - 2026-07-26
+
+### Changed
+- YouTube search tap publishes the mini player optimistically before stream resolution.
+- YouTube search uses shorter adaptive debounce, suggestion cache, and no longer cross-cancels concurrent NewPipe HTTP calls.
+- Soft-chrome taps get Material ripple; press scale is faster; play/pause and favorite toggle optimistically.
+- Full-player controls appear earlier (default delay off, lower content appear threshold).
+- Cold start defers SyncManager construction, non-Library flows, and one-shot favorites migration.
+- First search result stream URL is prefetched into the stream cache.
+
 ## [1.0.28] - 2026-07-25
 
 ### Fixed

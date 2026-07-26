@@ -176,7 +176,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themePreferencesRepository: ThemePreferencesRepository
     @Inject
-    lateinit var syncManager: SyncManager
+    lateinit var syncManager: dagger.Lazy<SyncManager>
     // For handling shortcut navigation - using StateFlow so composables can observe changes
     private val _pendingPlaylistNavigation = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     private val _pendingShuffleAll = kotlinx.coroutines.flow.MutableStateFlow(false)
@@ -219,7 +219,7 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 userPreferencesRepository.setInitialSetupDone(true)
                 Timber.tag("OrpheusBenchmark").i("Enqueueing benchmark database rebuild")
-                syncManager.rebuildDatabase()
+                syncManager.get().rebuildDatabase()
                 delay(1_500L)
                 playerViewModel.prepareBenchmarkPlayerFromLibrary()
             }

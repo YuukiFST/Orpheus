@@ -110,6 +110,8 @@ constructor(
         // Sort Option Keys
         val SONGS_SORT_OPTION = stringPreferencesKey("songs_sort_option")
         val SONGS_SORT_OPTION_MIGRATED = booleanPreferencesKey("songs_sort_option_migrated_v2")
+        val LEGACY_FAVORITES_MIGRATION_DONE =
+            booleanPreferencesKey("legacy_favorites_migration_done")
         val ALBUMS_SORT_OPTION = stringPreferencesKey("albums_sort_option")
         val ARTISTS_SORT_OPTION = stringPreferencesKey("artists_sort_option")
         val PLAYLISTS_SORT_OPTION = stringPreferencesKey("playlists_sort_option")
@@ -882,7 +884,7 @@ constructor(
             val delayAlbum = preferences[PreferencesKeys.FULL_PLAYER_DELAY_ALBUM] ?: true
             val delayMetadata = preferences[PreferencesKeys.FULL_PLAYER_DELAY_METADATA] ?: true
             val delayProgress = preferences[PreferencesKeys.FULL_PLAYER_DELAY_PROGRESS] ?: true
-            val delayControls = preferences[PreferencesKeys.FULL_PLAYER_DELAY_CONTROLS] ?: true
+            val delayControls = preferences[PreferencesKeys.FULL_PLAYER_DELAY_CONTROLS] ?: false
 
             val delayAll = delayAlbum && delayMetadata && delayProgress && delayControls
 
@@ -896,7 +898,7 @@ constructor(
                 transparentPlaceholders = preferences[PreferencesKeys.FULL_PLAYER_PLACEHOLDER_TRANSPARENT] ?: false,
                 applyPlaceholdersOnClose = preferences[PreferencesKeys.FULL_PLAYER_PLACEHOLDERS_ON_CLOSE] ?: false,
                 switchOnDragRelease = preferences[PreferencesKeys.FULL_PLAYER_SWITCH_ON_DRAG_RELEASE] ?: true,
-                contentAppearThresholdPercent = preferences[PreferencesKeys.FULL_PLAYER_DELAY_THRESHOLD] ?: 98,
+                contentAppearThresholdPercent = preferences[PreferencesKeys.FULL_PLAYER_DELAY_THRESHOLD] ?: 70,
                 contentCloseThresholdPercent = preferences[PreferencesKeys.FULL_PLAYER_CLOSE_THRESHOLD] ?: 0
             )
         }
@@ -1039,6 +1041,16 @@ constructor(
         }
     }
 
+    fun readLegacyFavoritesMigrationDoneSync(): Boolean =
+        startupMirror.getBoolean(KEY_LEGACY_FAVORITES_MIGRATION_DONE, false)
+
+    suspend fun setLegacyFavoritesMigrationDone(done: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LEGACY_FAVORITES_MIGRATION_DONE] = done
+        }
+        startupMirror.edit().putBoolean(KEY_LEGACY_FAVORITES_MIGRATION_DONE, done).apply()
+    }
+
     suspend fun setInitialSetupDone(isDone: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.INITIAL_SETUP_DONE] = isDone }
         writeInitialSetupDoneMirror(isDone)
@@ -1060,6 +1072,12 @@ constructor(
         val preferences = dataStore.data.first()
         writeInitialSetupDoneMirror(preferences[PreferencesKeys.INITIAL_SETUP_DONE] ?: false)
         writeLaunchTabMirror(preferences[PreferencesKeys.LAUNCH_TAB] ?: LaunchTab.HOME)
+        startupMirror.edit()
+            .putBoolean(
+                KEY_LEGACY_FAVORITES_MIGRATION_DONE,
+                preferences[PreferencesKeys.LEGACY_FAVORITES_MIGRATION_DONE] ?: false,
+            )
+            .apply()
     }
 
     private fun writeInitialSetupDoneMirror(isDone: Boolean) {
@@ -1282,6 +1300,7 @@ constructor(
         private const val STARTUP_MIRROR_PREFS = "orpheus_startup_mirror"
         private const val KEY_INITIAL_SETUP_DONE = "initial_setup_done"
         private const val KEY_LAUNCH_TAB = "launch_tab"
+        private const val KEY_LEGACY_FAVORITES_MIGRATION_DONE = "legacy_favorites_migration_done"
 
         /** Default character delimiters for splitting multi-artist tags */
         val DEFAULT_ARTIST_DELIMITERS = listOf("/", ";", ",", "+", "&")

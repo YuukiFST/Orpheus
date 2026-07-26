@@ -28,10 +28,12 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +71,9 @@ fun RowScope.CustomNavigationBarItem(
     indicatorColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
+    val showTerminalChrome = LocalTerminalChrome.current
+    val pressIndication = if (showTerminalChrome) null else remember { ripple(bounded = true) }
+
     // Animated colors - only recompose when 'selected' changes
     val iconColor by animateColorAsState(
         targetValue = if (selected) selectedIconColor else unselectedIconColor,
@@ -112,7 +117,7 @@ fun RowScope.CustomNavigationBarItem(
                 enabled = enabled,
                 role = Role.Tab,
                 interactionSource = interactionSource,
-                indication = null //ripple(bounded = true, radius = 24.dp) // Contained ripple
+                indication = pressIndication,
             )
             .semantics {
                  if (contentDescription != null) {

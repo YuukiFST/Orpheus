@@ -66,7 +66,10 @@ class PlaybackStateHolder @Inject constructor(
          */
         private const val BULK_REPLACE_THRESHOLD = 80
         private const val SHUFFLE_TOGGLE_COOLDOWN_MS = 400L
+        private const val OPTIMISTIC_PLAY_STATE_TIMEOUT_MS = 600L
     }
+
+    private var optimisticPlayingRevertJob: Job? = null
 
     // Written on the main thread in initialize(), read from coroutines on other
     // dispatchers — @Volatile so those readers can't observe a stale null.
@@ -378,11 +381,33 @@ class PlaybackStateHolder @Inject constructor(
         val controller = activeLocalPlayer()
         if (controller.isPlaying) {
             controller.pause()
+            setOptimisticIsPlaying(false)
         } else {
             if (controller.playbackState == Player.STATE_IDLE && controller.mediaItemCount > 0) {
                 controller.prepare()
             }
             controller.play()
+            setOptimisticIsPlaying(true)
+        }
+    }
+
+    /**
+     * The transport icon is driven by `isPlaying`, which otherwise only changes
+     * when `onIsPlayingChanged` comes back from the player. Flip it locally and
+     * let the real callback confirm; revert if it never arrives.
+     *
+     * Revert reads `mediaController` only — `activeLocalPlayer()` can construct
+     * ExoPlayer via `DualPlayerEngine.masterPlayer`.
+     */
+    internal fun setOptimisticIsPlaying(isPlaying: Boolean) {
+        _stablePlayerState.update { it.copy(isPlaying = isPlaying, playWhenReady = isPlaying) }
+        optimisticPlayingRevertJob?.cancel()
+        optimisticPlayingRevertJob = scope?.launch {
+            delay(OPTIMISTIC_PLAY_STATE_TIMEOUT_MS)
+            val actual = mediaController?.takeIf { it.isConnected }?.isPlaying ?: return@launch
+            if (actual != _stablePlayerState.value.isPlaying) {
+                _stablePlayerState.update { it.copy(isPlaying = actual, playWhenReady = actual) }
+            }
         }
     }
 

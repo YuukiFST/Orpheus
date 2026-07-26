@@ -77,6 +77,8 @@ import com.yuukifst.orpheus.utils.LyricsUtils
 import com.yuukifst.orpheus.utils.StorageType
 import com.yuukifst.orpheus.utils.StorageUtils
 import com.yuukifst.orpheus.utils.traceSection
+import com.yuukifst.orpheus.ui.mergeFavoriteOverrides
+import com.yuukifst.orpheus.ui.pruneAgreedFavoriteOverrides
 import com.yuukifst.orpheus.utils.isYouTubeMediaId
 import com.yuukifst.orpheus.utils.toPlaylistMixedTracks
 import com.yuukifst.orpheus.utils.ZipShareHelper
@@ -1166,7 +1168,7 @@ class PlayerViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
+            initialValue = false
         )
 
     private val _isInitialDataLoaded = MutableStateFlow(false)
@@ -1183,22 +1185,29 @@ class PlayerViewModel @Inject constructor(
             initialValue = persistentListOf()
         )
 
-    val paletteRegenerationTargets: StateFlow<List<Song>> = musicRepository.getDistinctAlbumArtSongs()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    // Settings-only consumer (SettingsCategoryScreen) — not on Library start destination.
+    val paletteRegenerationTargets: StateFlow<List<Song>> by lazy {
+        musicRepository.getDistinctAlbumArtSongs()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+    }
 
-    val homeMixPreviewSongs: StateFlow<ImmutableList<Song>> = musicRepository.getHomeMixPreviewSongs(
-        limit = HOME_MIX_PREVIEW_LIMIT
-    ).map { it.toImmutableList() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = persistentListOf()
-        )
+    // HomeScreen only; start destination redirects Home → Library.
+    val homeMixPreviewSongs: StateFlow<ImmutableList<Song>> by lazy {
+        musicRepository.getHomeMixPreviewSongs(
+            limit = HOME_MIX_PREVIEW_LIMIT
+        ).map { it.toImmutableList() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = persistentListOf()
+            )
+    }
 
+    // LibraryScreen reads this on the start destination — keep eager.
     val songCountFlow: StateFlow<Int> = musicRepository.getSongCountFlow()
         .stateIn(
             scope = viewModelScope,
@@ -1206,14 +1215,17 @@ class PlayerViewModel @Inject constructor(
             initialValue = 0
         )
 
-    val hasCloudSongsFlow: StateFlow<Boolean?> = musicRepository.getCloudSongCountFlow()
-        .map<Int, Boolean?> { it > 0 }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    // SongPickerBottomSheet only — not on first frame.
+    val hasCloudSongsFlow: StateFlow<Boolean?> by lazy {
+        musicRepository.getCloudSongCountFlow()
+            .map<Int, Boolean?> { it > 0 }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null
+            )
+    }
 
     val albumsFlow: StateFlow<ImmutableList<Album>> = libraryStateHolder.albums
     val artistsFlow: StateFlow<ImmutableList<Artist>> = libraryStateHolder.artists
@@ -1263,9 +1275,22 @@ class PlayerViewModel @Inject constructor(
     private val _playbackAudioMetadata = MutableStateFlow(PlaybackAudioMetadata())
     val playbackAudioMetadata: StateFlow<PlaybackAudioMetadata> = _playbackAudioMetadata.asStateFlow()
 
-    val favoriteSongIds: StateFlow<Set<String>> = musicRepository
-        .getFavoriteSongIdsFlow()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    private val favoriteOverrides = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+
+    val favoriteSongIds: StateFlow<Set<String>> = combine(
+        musicRepository.getFavoriteSongIdsFlow(),
+        favoriteOverrides,
+    ) { dbIds, overrides ->
+        mergeFavoriteOverrides(dbIds, overrides)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    init {
+        viewModelScope.launch {
+            musicRepository.getFavoriteSongIdsFlow().collect { dbIds ->
+                favoriteOverrides.update { pruneAgreedFavoriteOverrides(dbIds, it) }
+            }
+        }
+    }
 
     val isCurrentSongFavorite: StateFlow<Boolean> = combine(
         stablePlayerState
@@ -1660,16 +1685,19 @@ class PlayerViewModel @Inject constructor(
                 userPreferencesRepository.ensureLibrarySortDefaults()
             }
 
-            viewModelScope.launch {
-                val legacyFavoriteIds = userPreferencesRepository.favoriteSongIdsFlow.first()
-                if (legacyFavoriteIds.isNotEmpty()) {
-                    val roomFavoriteIds = musicRepository.getFavoriteSongIdsOnce()
-                    if (roomFavoriteIds.isEmpty()) {
-                        legacyFavoriteIds.forEach { songId ->
-                            musicRepository.setFavoriteStatus(songId, true)
+            if (!userPreferencesRepository.readLegacyFavoritesMigrationDoneSync()) {
+                viewModelScope.launch {
+                    val legacyFavoriteIds = userPreferencesRepository.favoriteSongIdsFlow.first()
+                    if (legacyFavoriteIds.isNotEmpty()) {
+                        val roomFavoriteIds = musicRepository.getFavoriteSongIdsOnce()
+                        if (roomFavoriteIds.isEmpty()) {
+                            legacyFavoriteIds.forEach { songId ->
+                                musicRepository.setFavoriteStatus(songId, true)
+                            }
                         }
+                        userPreferencesRepository.clearFavoriteSongIds()
                     }
-                    userPreferencesRepository.clearFavoriteSongIds()
+                    userPreferencesRepository.setLegacyFavoritesMigrationDone(true)
                 }
             }
 
@@ -3624,12 +3652,26 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             if (currentSong.id.isYouTubeMediaId()) {
                 val currentlyFavorite = favoriteSongIds.value.contains(currentSong.id)
-                musicRepository.setYouTubeFavorite(currentSong, !currentlyFavorite)
+                val targetFavoriteState = !currentlyFavorite
+                favoriteOverrides.update { it + (currentSong.id to targetFavoriteState) }
+                runCatching {
+                    musicRepository.setYouTubeFavorite(currentSong, targetFavoriteState)
+                }.onFailure { error ->
+                    Timber.w(error, "Favorite toggle failed for YouTube id=%s", currentSong.id)
+                    favoriteOverrides.update { it - currentSong.id }
+                }
                 return@launch
             }
             val favoriteSongId = resolveFavoriteSongId(currentSong) ?: return@launch
             val currentlyFavorite = favoriteSongIds.value.contains(favoriteSongId)
-            setFavoriteStatusEverywhere(favoriteSongId, !currentlyFavorite)
+            val targetFavoriteState = !currentlyFavorite
+            favoriteOverrides.update { it + (favoriteSongId to targetFavoriteState) }
+            runCatching {
+                setFavoriteStatusEverywhere(favoriteSongId, targetFavoriteState)
+            }.onFailure { error ->
+                Timber.w(error, "Favorite toggle failed for songId=%s", favoriteSongId)
+                favoriteOverrides.update { it - favoriteSongId }
+            }
         }
     }
 
@@ -3638,13 +3680,25 @@ class PlayerViewModel @Inject constructor(
             if (song.id.isYouTubeMediaId()) {
                 val currentlyFavorite = favoriteSongIds.value.contains(song.id)
                 val targetFavoriteState = if (removing) false else !currentlyFavorite
-                musicRepository.setYouTubeFavorite(song, targetFavoriteState)
+                favoriteOverrides.update { it + (song.id to targetFavoriteState) }
+                runCatching {
+                    musicRepository.setYouTubeFavorite(song, targetFavoriteState)
+                }.onFailure { error ->
+                    Timber.w(error, "Favorite toggle failed for YouTube id=%s", song.id)
+                    favoriteOverrides.update { it - song.id }
+                }
                 return@launch
             }
             val favoriteSongId = resolveFavoriteSongId(song) ?: return@launch
             val currentlyFavorite = favoriteSongIds.value.contains(favoriteSongId)
             val targetFavoriteState = if (removing) false else !currentlyFavorite
-            setFavoriteStatusEverywhere(favoriteSongId, targetFavoriteState)
+            favoriteOverrides.update { it + (favoriteSongId to targetFavoriteState) }
+            runCatching {
+                setFavoriteStatusEverywhere(favoriteSongId, targetFavoriteState)
+            }.onFailure { error ->
+                Timber.w(error, "Favorite toggle failed for songId=%s", favoriteSongId)
+                favoriteOverrides.update { it - favoriteSongId }
+            }
         }
     }
 
@@ -4289,6 +4343,7 @@ class PlayerViewModel @Inject constructor(
 
         if (controller.isPlaying) {
             controller.pause()
+            playbackStateHolder.setOptimisticIsPlaying(false)
         } else {
             if (controller.currentMediaItem == null) {
                 val currentQueue = _playerUiState.value.currentPlaybackQueue
@@ -4321,6 +4376,7 @@ class PlayerViewModel @Inject constructor(
                     controller.prepare()
                 }
                 controller.play()
+                playbackStateHolder.setOptimisticIsPlaying(true)
             }
         }
     }

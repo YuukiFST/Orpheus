@@ -1,10 +1,11 @@
 package com.yuukifst.orpheus.data.youtube
 
 import android.util.LruCache
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.schabi.newpipe.extractor.MediaFormat
 import org.schabi.newpipe.extractor.stream.StreamInfo
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,8 +47,31 @@ class YouTubeStreamExtractor @Inject constructor(
         }
     }
 
+    /**
+     * Warms [streamCache] for a track the user is likely to tap. Never throws:
+     * a prefetch failure must be indistinguishable from not having prefetched.
+     * Returns true when the cache now holds a valid entry for [videoId].
+     */
+    suspend fun prefetchBestAudio(videoId: String): Boolean {
+        if (videoId.isBlank()) return false
+        if (isCached(videoId)) return true
+        return runCatching { extractBestAudio(videoId) }
+            .onFailure { error ->
+                if (error is CancellationException) throw error
+                Timber.tag("YouTubeStreamExtractor").w("Prefetch failed for %s", videoId)
+            }
+            .isSuccess
+    }
+
+    internal fun isCached(videoId: String): Boolean =
+        streamCache.get(videoId)?.isValid(System.currentTimeMillis()) == true
+
     internal fun clearStreamCacheForTests() {
         streamCache.evictAll()
+    }
+
+    internal fun seedStreamCacheForTests(videoId: String, result: YouTubeStreamResult) {
+        streamCache.put(videoId, CachedStreamResult(result, System.currentTimeMillis()))
     }
 
     private data class CachedStreamResult(
@@ -57,7 +81,13 @@ class YouTubeStreamExtractor @Inject constructor(
         fun isValid(now: Long): Boolean = now - cachedAtMs < STREAM_CACHE_TTL_MS
     }
 
-    private companion object {
-        const val STREAM_CACHE_TTL_MS = 2 * 60 * 60 * 1000L
+    internal companion object {
+        fun createForTests(): YouTubeStreamExtractor {
+            return YouTubeStreamExtractor(
+                youTubeInitializer = YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()),
+            )
+        }
+
+        private const val STREAM_CACHE_TTL_MS = 2 * 60 * 60 * 1000L
     }
 }
