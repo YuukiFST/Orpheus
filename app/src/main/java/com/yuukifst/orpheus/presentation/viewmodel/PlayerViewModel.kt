@@ -1168,7 +1168,7 @@ class PlayerViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
+            initialValue = false
         )
 
     private val _isInitialDataLoaded = MutableStateFlow(false)
@@ -1185,22 +1185,29 @@ class PlayerViewModel @Inject constructor(
             initialValue = persistentListOf()
         )
 
-    val paletteRegenerationTargets: StateFlow<List<Song>> = musicRepository.getDistinctAlbumArtSongs()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    // Settings-only consumer (SettingsCategoryScreen) — not on Library start destination.
+    val paletteRegenerationTargets: StateFlow<List<Song>> by lazy {
+        musicRepository.getDistinctAlbumArtSongs()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+    }
 
-    val homeMixPreviewSongs: StateFlow<ImmutableList<Song>> = musicRepository.getHomeMixPreviewSongs(
-        limit = HOME_MIX_PREVIEW_LIMIT
-    ).map { it.toImmutableList() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = persistentListOf()
-        )
+    // HomeScreen only; start destination redirects Home → Library.
+    val homeMixPreviewSongs: StateFlow<ImmutableList<Song>> by lazy {
+        musicRepository.getHomeMixPreviewSongs(
+            limit = HOME_MIX_PREVIEW_LIMIT
+        ).map { it.toImmutableList() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = persistentListOf()
+            )
+    }
 
+    // LibraryScreen reads this on the start destination — keep eager.
     val songCountFlow: StateFlow<Int> = musicRepository.getSongCountFlow()
         .stateIn(
             scope = viewModelScope,
@@ -1208,14 +1215,17 @@ class PlayerViewModel @Inject constructor(
             initialValue = 0
         )
 
-    val hasCloudSongsFlow: StateFlow<Boolean?> = musicRepository.getCloudSongCountFlow()
-        .map<Int, Boolean?> { it > 0 }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    // SongPickerBottomSheet only — not on first frame.
+    val hasCloudSongsFlow: StateFlow<Boolean?> by lazy {
+        musicRepository.getCloudSongCountFlow()
+            .map<Int, Boolean?> { it > 0 }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null
+            )
+    }
 
     val albumsFlow: StateFlow<ImmutableList<Album>> = libraryStateHolder.albums
     val artistsFlow: StateFlow<ImmutableList<Artist>> = libraryStateHolder.artists
@@ -1675,16 +1685,19 @@ class PlayerViewModel @Inject constructor(
                 userPreferencesRepository.ensureLibrarySortDefaults()
             }
 
-            viewModelScope.launch {
-                val legacyFavoriteIds = userPreferencesRepository.favoriteSongIdsFlow.first()
-                if (legacyFavoriteIds.isNotEmpty()) {
-                    val roomFavoriteIds = musicRepository.getFavoriteSongIdsOnce()
-                    if (roomFavoriteIds.isEmpty()) {
-                        legacyFavoriteIds.forEach { songId ->
-                            musicRepository.setFavoriteStatus(songId, true)
+            if (!userPreferencesRepository.readLegacyFavoritesMigrationDoneSync()) {
+                viewModelScope.launch {
+                    val legacyFavoriteIds = userPreferencesRepository.favoriteSongIdsFlow.first()
+                    if (legacyFavoriteIds.isNotEmpty()) {
+                        val roomFavoriteIds = musicRepository.getFavoriteSongIdsOnce()
+                        if (roomFavoriteIds.isEmpty()) {
+                            legacyFavoriteIds.forEach { songId ->
+                                musicRepository.setFavoriteStatus(songId, true)
+                            }
                         }
+                        userPreferencesRepository.clearFavoriteSongIds()
                     }
-                    userPreferencesRepository.clearFavoriteSongIds()
+                    userPreferencesRepository.setLegacyFavoritesMigrationDone(true)
                 }
             }
 

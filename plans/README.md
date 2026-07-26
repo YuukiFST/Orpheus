@@ -24,7 +24,7 @@ update your row when done.
 | 001 | Publish the mini player optimistically on YouTube search tap | P1 | M | MED | — | DONE |
 | 002 | Cut YouTube Search latency (debounce, suggestion cache, HTTP call slot) | P1 | M | MED | — | DONE |
 | 003 | Make taps feel instant (press feedback + optimistic toggles) | P1 | M | MED | — | DONE |
-| 004 | Trim cold start (defer non-first-frame work) | P2 | M | MED | — | TODO |
+| 004 | Trim cold start (defer non-first-frame work) | P2 | M | MED | — | DONE |
 | 005 | Prefetch the stream URL of the first search result | P3 | S | MED | 001, 002 | TODO |
 
 ## Dependency notes
