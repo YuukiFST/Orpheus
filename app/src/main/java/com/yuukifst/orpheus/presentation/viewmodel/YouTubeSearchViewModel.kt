@@ -59,9 +59,11 @@ class YouTubeSearchViewModel @Inject constructor(
     private var debouncedSearchJob: Job? = null
     private var debouncedSuggestionJob: Job? = null
     private val latestSearchRequestId = AtomicLong(0L)
+    private var activeNetworkQuery: String? = null
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MS = 450L
+        const val SEARCH_DEBOUNCE_MS = 260L
+        const val SEARCH_DEBOUNCE_CACHED_MS = 0L
         const val SUGGESTION_DEBOUNCE_MS = 150L
         const val MIN_QUERY_LENGTH = 2
     }
@@ -100,6 +102,20 @@ class YouTubeSearchViewModel @Inject constructor(
             return
         }
 
+        if (trimmed.length >= MIN_QUERY_LENGTH) {
+            searchRepository.searchCachedOnly(trimmed)?.let { cached ->
+                _uiState.update {
+                    it.copy(
+                        results = cached,
+                        isLoading = false,
+                        error = null,
+                        hasSearched = true,
+                        suggestions = emptyList(),
+                    )
+                }
+            }
+        }
+
         debouncedSuggestionJob = viewModelScope.launch {
             delay(SUGGESTION_DEBOUNCE_MS)
             if (trimmed.length < MIN_QUERY_LENGTH) {
@@ -113,7 +129,8 @@ class YouTubeSearchViewModel @Inject constructor(
         }
 
         debouncedSearchJob = viewModelScope.launch {
-            delay(SEARCH_DEBOUNCE_MS)
+            val cachedAlready = searchRepository.searchCachedOnly(trimmed) != null
+            delay(if (cachedAlready) SEARCH_DEBOUNCE_CACHED_MS else SEARCH_DEBOUNCE_MS)
             if (trimmed.length < MIN_QUERY_LENGTH) {
                 _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
                 return@launch
@@ -180,7 +197,10 @@ class YouTubeSearchViewModel @Inject constructor(
             return
         }
 
-        searchRepository.cancelActiveRequest()
+        if (activeNetworkQuery != null && activeNetworkQuery != trimmed) {
+            searchRepository.cancelActiveRequest()
+        }
+        activeNetworkQuery = trimmed
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
         try {
             val results = searchRepository.search(trimmed)
@@ -205,6 +225,10 @@ class YouTubeSearchViewModel @Inject constructor(
                     isLoading = false,
                     error = message.ifBlank { "Search failed" },
                 )
+            }
+        } finally {
+            if (activeNetworkQuery == trimmed) {
+                activeNetworkQuery = null
             }
         }
     }

@@ -6,6 +6,8 @@ import org.schabi.newpipe.extractor.downloader.Downloader
 import org.schabi.newpipe.extractor.downloader.Request
 import org.schabi.newpipe.extractor.downloader.Response
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,8 +23,9 @@ class YouTubeDownloaderImpl @Inject constructor(
         .writeTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    @Volatile
-    private var activeCall: okhttp3.Call? = null
+    private val activeCalls = Collections.newSetFromMap(
+        ConcurrentHashMap<okhttp3.Call, Boolean>(),
+    )
 
     override fun execute(request: Request): Response {
         val httpRequest = okhttp3.Request.Builder()
@@ -36,11 +39,7 @@ class YouTubeDownloaderImpl @Inject constructor(
             .build()
 
         val call = client.newCall(httpRequest)
-        synchronized(this) {
-            activeCall?.cancel()
-            activeCall = call
-        }
-
+        activeCalls.add(call)
         try {
             val httpResponse = call.execute()
             if (httpResponse.code == 429) {
@@ -62,19 +61,20 @@ class YouTubeDownloaderImpl @Inject constructor(
                 httpResponse.request.url.toString(),
             )
         } finally {
-            synchronized(this) {
-                if (activeCall == call) {
-                    activeCall = null
-                }
-            }
+            activeCalls.remove(call)
         }
     }
 
+    /**
+     * Coroutine cancellation does not interrupt a blocking OkHttp `execute()`,
+     * so a superseded query's HTTP work has to be cancelled explicitly.
+     * Cancels all in-flight NewPipe calls; only invoked when the caller knows
+     * every outstanding request is stale.
+     */
     fun cancelActiveRequest() {
-        synchronized(this) {
-            activeCall?.cancel()
-            activeCall = null
-        }
+        val snapshot = activeCalls.toList()
+        activeCalls.clear()
+        snapshot.forEach { runCatching { it.cancel() } }
     }
 
     fun warmUpConnection() {
