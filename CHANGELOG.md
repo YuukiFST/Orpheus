@@ -2,6 +2,11 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.31] - 2026-07-26
+
+### Fixed
+- Switching tracks (YouTube or local) now silences the previous audio immediately on tap, instead of waiting for the next stream/media item to resolve.
+
 ## [1.0.30] - 2026-07-26
 
 ### Changed

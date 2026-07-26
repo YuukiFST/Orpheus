@@ -25,9 +25,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 import timber.log.Timber
+
+internal fun isPlaybackRequestCurrent(expectedGeneration: Long, currentGeneration: Long): Boolean =
+    expectedGeneration == currentGeneration
 
 internal fun shouldReplaceQueueForSearchPlay(
     currentIsYouTubeSession: Boolean,
@@ -95,6 +99,7 @@ class YouTubePlaybackController @Inject constructor(
     private var currentMixedTracks: List<PlaylistMixedTrack> = emptyList()
     private var sessionStopOnEnd = false
     private var queueFillJob: kotlinx.coroutines.Job? = null
+    private val playGeneration = AtomicLong(0L)
 
     private val _playbackErrors = MutableSharedFlow<String>(
         extraBufferCapacity = 1,
@@ -108,12 +113,26 @@ class YouTubePlaybackController @Inject constructor(
     )
     val queueUpdates: SharedFlow<YouTubePlaybackQueueUpdate> = _queueUpdates.asSharedFlow()
 
+    private fun beginPlaybackGeneration(): Long {
+        queueFillJob?.cancel()
+        queueFillJob = null
+        return playGeneration.incrementAndGet()
+    }
+
+    private fun throwIfPlaybackGenerationStale(expectedGeneration: Long) {
+        if (!isPlaybackRequestCurrent(expectedGeneration, playGeneration.get())) {
+            throw CancellationException("Stale YouTube playback request")
+        }
+    }
+
     suspend fun playOnce(track: YouTubeTrack): Boolean {
         val previousSong = playbackStateHolder.stablePlayerState.value.currentSong
         val optimistic = optimisticUiForTrack(track)
+        val generation = beginPlaybackGeneration()
         currentMixedTracks = listOf(PlaylistMixedTrack.YouTube(track = track, sortOrder = 0))
         sessionStopOnEnd = true
         withContext(Dispatchers.Main.immediate) {
+            dualPlayerEngine.hushImmediateAudio()
             publishOptimisticPlaybackState(optimistic)
         }
         listeningStatsTracker.onVoluntarySelection(track.mediaId)
@@ -126,6 +145,7 @@ class YouTubePlaybackController @Inject constructor(
                 repeatMode = Player.REPEAT_MODE_OFF,
                 stopOnEnd = true,
                 queueName = "YouTube",
+                expectedGeneration = generation,
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -165,6 +185,14 @@ class YouTubePlaybackController @Inject constructor(
 
     suspend fun playPlaylist(tracks: List<YouTubeTrack>, startIndex: Int = 0) {
         if (tracks.isEmpty()) return
+        val generation = beginPlaybackGeneration()
+        val optimisticTrack = tracks[startIndex.coerceIn(0, tracks.lastIndex)]
+        withContext(Dispatchers.Main.immediate) {
+            dualPlayerEngine.hushImmediateAudio()
+            publishOptimisticPlaybackState(
+                optimisticUiForTrack(optimisticTrack, startIndex, "YouTube Playlist"),
+            )
+        }
         runCatching {
             val mixed = tracks.mapIndexed { index, track ->
                 PlaylistMixedTrack.YouTube(track = track, sortOrder = index)
@@ -181,6 +209,7 @@ class YouTubePlaybackController @Inject constructor(
                 repeatMode = Player.REPEAT_MODE_ALL,
                 stopOnEnd = false,
                 queueName = "YouTube Playlist",
+                expectedGeneration = generation,
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -195,6 +224,23 @@ class YouTubePlaybackController @Inject constructor(
         stopOnEnd: Boolean = false,
     ) {
         if (tracks.isEmpty()) return
+        val generation = beginPlaybackGeneration()
+        val safeIndex = startIndex.coerceIn(0, tracks.lastIndex)
+        currentMixedTracks = tracks
+        withContext(Dispatchers.Main.immediate) {
+            dualPlayerEngine.hushImmediateAudio()
+            songForMixedIndex(safeIndex)?.let { song ->
+                playbackStateHolder.updateStablePlayerState {
+                    it.copy(
+                        currentSong = song,
+                        currentMediaItemIndex = safeIndex,
+                        isPlaying = true,
+                        playWhenReady = true,
+                        totalDuration = song.duration.coerceAtLeast(0L),
+                    )
+                }
+            }
+        }
         runCatching {
             tracks.forEach { entry ->
                 if (entry is PlaylistMixedTrack.YouTube) {
@@ -208,6 +254,7 @@ class YouTubePlaybackController @Inject constructor(
                 repeatMode = repeatMode,
                 stopOnEnd = stopOnEnd,
                 queueName = "Queue",
+                expectedGeneration = generation,
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -221,17 +268,21 @@ class YouTubePlaybackController @Inject constructor(
         repeatMode: Int,
         stopOnEnd: Boolean,
         queueName: String,
+        expectedGeneration: Long,
     ) {
         val safeIndex = startIndex.coerceIn(0, tracks.lastIndex)
         currentMixedTracks = tracks
         retryCountForCurrentItem = 0
         queueFillJob?.cancel()
+        throwIfPlaybackGenerationStale(expectedGeneration)
 
         val startItem = withContext(Dispatchers.IO) {
             resolveMixedEntry(tracks[safeIndex])
         }
+        throwIfPlaybackGenerationStale(expectedGeneration)
 
         withContext(Dispatchers.Main.immediate) {
+            throwIfPlaybackGenerationStale(expectedGeneration)
             val player = dualPlayerEngine.masterPlayer
             attachPlaybackListener(player, stopOnEnd)
             player.shuffleModeEnabled = false
@@ -243,12 +294,15 @@ class YouTubePlaybackController @Inject constructor(
         }
 
         if (tracks.size > 1) {
+            val fillGeneration = expectedGeneration
             queueFillJob = scope.launch {
                 runCatching {
+                    throwIfPlaybackGenerationStale(fillGeneration)
                     val allItems = withContext(Dispatchers.IO) {
                         tracks.map { resolveMixedEntry(it) }
                     }
                     withContext(Dispatchers.Main.immediate) {
+                        throwIfPlaybackGenerationStale(fillGeneration)
                         val player = dualPlayerEngine.masterPlayer
                         if (player.mediaItemCount <= 1) {
                             val position = player.currentPosition
