@@ -2,6 +2,15 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.28] - 2026-07-25
+
+### Fixed
+- Cold start no longer crashes when deferred `SyncManager.start()` registered a lifecycle observer off the main thread.
+- Night splash theme includes required `Theme.SplashScreen` attributes (`postSplashScreenTheme`, icon, background).
+
+### Changed
+- Commit generated Baseline Profiles so ART can AOT hot Orpheus startup and first-screen paths on install.
+
 ## [1.0.27] - 2026-07-25
 
 ### Changed
