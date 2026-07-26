@@ -9,6 +9,7 @@ import com.yuukifst.orpheus.data.backup.model.BackupSection
 import com.yuukifst.orpheus.data.backup.model.BackupOperationType
 import com.yuukifst.orpheus.data.backup.model.BackupTransferProgressUpdate
 import com.yuukifst.orpheus.data.backup.model.BackupHistoryEntry
+import com.yuukifst.orpheus.data.backup.model.PlaylistConflictAction
 import com.yuukifst.orpheus.data.backup.model.RestorePlan
 import com.yuukifst.orpheus.data.backup.model.RestoreResult
 import com.yuukifst.orpheus.data.backup.model.ValidationError
@@ -947,11 +948,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun restoreFromPlan(uri: Uri) {
-        val plan = _uiState.value.restorePlan ?: return
+    fun restoreFromPlan(
+        uri: Uri,
+        playlistDecisions: Map<String, PlaylistConflictAction>? = null
+    ) {
+        val basePlan = _uiState.value.restorePlan ?: return
+        val plan = playlistDecisions?.let { basePlan.copy(playlistConflictDecisions = it) } ?: basePlan
         if (plan.selectedModules.isEmpty() || _uiState.value.isDataTransferInProgress) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isDataTransferInProgress = true) }
+            _uiState.update { it.copy(isDataTransferInProgress = true, restorePlan = plan) }
             _dataTransferProgress.value = BackupTransferProgressUpdate(
                 operation = BackupOperationType.IMPORT,
                 step = 0,

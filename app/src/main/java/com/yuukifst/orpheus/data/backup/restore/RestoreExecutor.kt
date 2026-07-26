@@ -9,6 +9,7 @@ import com.yuukifst.orpheus.data.backup.model.BackupValidationResult
 import com.yuukifst.orpheus.data.backup.model.RestorePlan
 import com.yuukifst.orpheus.data.backup.model.RestoreResult
 import com.yuukifst.orpheus.data.backup.module.BackupModuleHandler
+import com.yuukifst.orpheus.data.backup.module.PlaylistsModuleHandler
 import com.yuukifst.orpheus.data.backup.validation.ValidationPipeline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -97,7 +98,21 @@ class RestoreExecutor @Inject constructor(
 
                 val handler = handlers[section]
                     ?: throw IllegalStateException("No handler for module ${section.key}")
-                handler.restore(payload)
+                if (section == BackupSection.PLAYLISTS) {
+                    val playlistsHandler = handler as? PlaylistsModuleHandler
+                        ?: throw IllegalStateException("Playlists handler missing")
+                    val missingDecisions = plan.playlistConflicts
+                        .map { it.backupPlaylistId }
+                        .filter { it !in plan.playlistConflictDecisions }
+                    if (missingDecisions.isNotEmpty()) {
+                        throw IllegalStateException(
+                            "Playlist conflicts require a Merge/Replace/Ignore choice before restore."
+                        )
+                    }
+                    playlistsHandler.restore(payload, plan.playlistConflictDecisions)
+                } else {
+                    handler.restore(payload)
+                }
                 restoredModules.add(section)
             }
         } catch (e: Exception) {

@@ -9,6 +9,9 @@ import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.model.SortOption
 import com.yuukifst.orpheus.data.model.isSmartPlaylistSource
 import com.yuukifst.orpheus.data.backup.model.BackupSection
+import com.yuukifst.orpheus.data.backup.model.PlaylistConflict
+import com.yuukifst.orpheus.data.backup.model.PlaylistConflictAction
+import com.yuukifst.orpheus.data.backup.model.PlaylistConflictMatchReason
 import com.yuukifst.orpheus.data.database.MusicDao
 import com.yuukifst.orpheus.data.database.SongSummary
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
@@ -104,42 +107,50 @@ class PlaylistsModuleHandler @Inject constructor(
         gson.toJson(payload)
     }
 
-    override suspend fun restore(payload: String) = withContext(Dispatchers.IO) {
+    /**
+     * Interface entry used only when decisions are empty (no conflicts). Prefer
+     * [restore] with explicit decisions from [RestorePlan.playlistConflictDecisions].
+     */
+    override suspend fun restore(payload: String) = restore(payload, emptyMap())
+
+    /**
+     * Import playlists without wiping device data.
+     *
+     * - New playlists (no id/name match) are created.
+     * - Conflicts require a [PlaylistConflictAction] keyed by backup playlist id.
+     * - Sort option and per-playlist song order modes are left untouched.
+     */
+    suspend fun restore(
+        payload: String,
+        decisions: Map<String, PlaylistConflictAction>
+    ) = withContext(Dispatchers.IO) {
         val element = JsonParser.parseString(payload)
         if (element.isJsonArray) {
-            restoreLegacyPreferenceEntries(payload)
+            restoreLegacyPreferenceEntries(payload, decisions)
             return@withContext
         }
 
-        // A payload that fails to deserialize must abort the restore (the executor rolls back
-        // the snapshot) — silently treating it as an empty payload would wipe all playlists
-        // via replaceAllPlaylists(emptyList()) below while reporting success.
-        val parsed = runCatching {
-            gson.fromJson(payload, PlaylistsBackupPayload::class.java)
-        }.getOrElse { e ->
-            throw IllegalStateException("Playlists payload could not be parsed: ${e.message}", e)
-        } ?: throw IllegalStateException("Playlists payload could not be parsed: empty JSON document")
+        val parsed = parsePayloadOrThrow(payload)
+        applyPlaylistImport(
+            backupPlaylists = parsed.playlists.orEmpty(),
+            songMetadata = parsed.songMetadata,
+            coverImages = parsed.coverImages,
+            decisions = decisions
+        )
+        userPreferencesRepository.clearLegacyUserPlaylists()
+    }
 
-        val backupPlaylists = parsed.playlists.orEmpty()
-        val songMetadata = parsed.songMetadata
-        val coverImages = parsed.coverImages
-
-        // Resolve song IDs against the current device library
-        val resolvedPlaylists = if (songMetadata != null && songMetadata.isNotEmpty()) {
-            resolvePlaylists(backupPlaylists, songMetadata)
-        } else {
-            // No metadata available (legacy backup or snapshot rollback) — keep IDs as-is
-            backupPlaylists
+    /** Snapshot rollback must fully replace state, including order modes / sort. */
+    override suspend fun rollback(snapshot: String) = withContext(Dispatchers.IO) {
+        val element = JsonParser.parseString(snapshot)
+        if (element.isJsonArray) {
+            restoreLegacyPreferenceEntriesReplacing(snapshot)
+            return@withContext
         }
 
-        // Restore cover images and update playlist URIs
-        val finalPlaylists = if (coverImages != null && coverImages.isNotEmpty()) {
-            restoreCoverImages(resolvedPlaylists, coverImages)
-        } else {
-            resolvedPlaylists
-        }
-
-        playlistPreferencesRepository.replaceAllPlaylists(finalPlaylists)
+        val parsed = parsePayloadOrThrow(snapshot)
+        val playlists = parsed.playlists.orEmpty()
+        playlistPreferencesRepository.replaceAllPlaylists(playlists)
         playlistPreferencesRepository.setPlaylistSongOrderModes(parsed.playlistSongOrderModes.orEmpty())
         playlistPreferencesRepository.setPlaylistsSortOption(
             parsed.playlistsSortOption ?: SortOption.PlaylistNameAZ.storageKey
@@ -147,7 +158,30 @@ class PlaylistsModuleHandler @Inject constructor(
         userPreferencesRepository.clearLegacyUserPlaylists()
     }
 
-    override suspend fun rollback(snapshot: String) = restore(snapshot)
+    suspend fun detectConflicts(payload: String): List<PlaylistConflict> = withContext(Dispatchers.IO) {
+        val backupPlaylists = parseBackupPlaylists(payload)
+        val devicePlaylists = playlistPreferencesRepository.getPlaylistsOnce()
+            .filter { isBackedUpPlaylistSource(it.source) }
+        detectConflicts(backupPlaylists, devicePlaylists)
+    }
+
+    fun detectConflicts(
+        backupPlaylists: List<Playlist>,
+        devicePlaylists: List<Playlist>
+    ): List<PlaylistConflict> {
+        val claimedDeviceIds = mutableSetOf<String>()
+        return backupPlaylists.mapNotNull { backup ->
+            val match = findDeviceMatch(backup, devicePlaylists, claimedDeviceIds) ?: return@mapNotNull null
+            claimedDeviceIds.add(match.playlist.id)
+            PlaylistConflict(
+                backupPlaylistId = backup.id,
+                backupPlaylistName = backup.name,
+                devicePlaylistId = match.playlist.id,
+                devicePlaylistName = match.playlist.name,
+                matchReason = match.reason
+            )
+        }
+    }
 
     // ---- Cover image helpers ----
 
@@ -313,13 +347,133 @@ class PlaylistsModuleHandler @Inject constructor(
         return cloudIds
     }
 
-    // ---- Legacy format ----
+    // ---- Import helpers ----
 
-    private suspend fun restoreLegacyPreferenceEntries(payload: String) {
+    private suspend fun applyPlaylistImport(
+        backupPlaylists: List<Playlist>,
+        songMetadata: Map<String, SongMetadataEntry>?,
+        coverImages: Map<String, String>?,
+        decisions: Map<String, PlaylistConflictAction>
+    ) {
+        val resolvedPlaylists = if (songMetadata != null && songMetadata.isNotEmpty()) {
+            resolvePlaylists(backupPlaylists, songMetadata)
+        } else {
+            backupPlaylists
+        }
+        val withCovers = if (coverImages != null && coverImages.isNotEmpty()) {
+            restoreCoverImages(resolvedPlaylists, coverImages)
+        } else {
+            resolvedPlaylists
+        }
+
+        val devicePlaylists = playlistPreferencesRepository.getPlaylistsOnce()
+        val claimedDeviceIds = mutableSetOf<String>()
+
+        withCovers.forEach { backupPlaylist ->
+            val match = findDeviceMatch(backupPlaylist, devicePlaylists, claimedDeviceIds)
+            if (match == null) {
+                playlistPreferencesRepository.createPlaylist(
+                    name = backupPlaylist.name,
+                    songIds = backupPlaylist.songIds,
+                    isQueueGenerated = backupPlaylist.isQueueGenerated,
+                    coverImageUri = backupPlaylist.coverImageUri,
+                    coverColorArgb = backupPlaylist.coverColorArgb,
+                    coverIconName = backupPlaylist.coverIconName,
+                    coverShapeType = backupPlaylist.coverShapeType,
+                    coverShapeDetail1 = backupPlaylist.coverShapeDetail1,
+                    coverShapeDetail2 = backupPlaylist.coverShapeDetail2,
+                    coverShapeDetail3 = backupPlaylist.coverShapeDetail3,
+                    coverShapeDetail4 = backupPlaylist.coverShapeDetail4,
+                    customId = backupPlaylist.id,
+                    source = backupPlaylist.source
+                )
+                return@forEach
+            }
+
+            claimedDeviceIds.add(match.playlist.id)
+            val action = decisions[backupPlaylist.id]
+                ?: throw IllegalStateException(
+                    "Missing conflict decision for playlist \"${backupPlaylist.name}\" (${backupPlaylist.id})."
+                )
+            when (action) {
+                PlaylistConflictAction.IGNORE -> Unit
+                PlaylistConflictAction.MERGE -> {
+                    val mergedSongs = (match.playlist.songIds + backupPlaylist.songIds).distinct()
+                    val merged = mergeMetadata(match.playlist, backupPlaylist).copy(songIds = mergedSongs)
+                    playlistPreferencesRepository.updatePlaylist(merged)
+                }
+                PlaylistConflictAction.REPLACE -> {
+                    val replaced = backupPlaylist.copy(
+                        id = match.playlist.id,
+                        createdAt = match.playlist.createdAt,
+                        lastModified = System.currentTimeMillis()
+                    )
+                    playlistPreferencesRepository.updatePlaylist(replaced)
+                }
+            }
+        }
+    }
+
+    private fun mergeMetadata(device: Playlist, backup: Playlist): Playlist {
+        return device.copy(
+            name = backup.name.takeIf { it.isNotBlank() } ?: device.name,
+            coverImageUri = backup.coverImageUri?.takeIf { it.isNotBlank() } ?: device.coverImageUri,
+            coverColorArgb = backup.coverColorArgb ?: device.coverColorArgb,
+            coverIconName = backup.coverIconName?.takeIf { it.isNotBlank() } ?: device.coverIconName,
+            coverShapeType = backup.coverShapeType ?: device.coverShapeType,
+            coverShapeDetail1 = backup.coverShapeDetail1 ?: device.coverShapeDetail1,
+            coverShapeDetail2 = backup.coverShapeDetail2 ?: device.coverShapeDetail2,
+            coverShapeDetail3 = backup.coverShapeDetail3 ?: device.coverShapeDetail3,
+            coverShapeDetail4 = backup.coverShapeDetail4 ?: device.coverShapeDetail4,
+            source = backup.source.takeIf { it.isNotBlank() } ?: device.source,
+            isQueueGenerated = backup.isQueueGenerated,
+            lastModified = System.currentTimeMillis()
+        )
+    }
+
+    private data class DeviceMatch(
+        val playlist: Playlist,
+        val reason: PlaylistConflictMatchReason
+    )
+
+    private fun findDeviceMatch(
+        backup: Playlist,
+        devicePlaylists: List<Playlist>,
+        claimedDeviceIds: Set<String>
+    ): DeviceMatch? {
+        val available = devicePlaylists.filter {
+            it.id !in claimedDeviceIds && isBackedUpPlaylistSource(it.source)
+        }
+        available.firstOrNull { it.id == backup.id }?.let {
+            return DeviceMatch(it, PlaylistConflictMatchReason.ID)
+        }
+        val normalizedBackupName = normalizeText(backup.name)
+        if (normalizedBackupName.isEmpty()) return null
+        val nameMatches = available.filter { normalizeText(it.name) == normalizedBackupName }
+        val best = nameMatches.maxByOrNull { it.lastModified } ?: return null
+        return DeviceMatch(best, PlaylistConflictMatchReason.NAME)
+    }
+
+    private fun parsePayloadOrThrow(payload: String): PlaylistsBackupPayload {
+        return runCatching {
+            gson.fromJson(payload, PlaylistsBackupPayload::class.java)
+        }.getOrElse { e ->
+            throw IllegalStateException("Playlists payload could not be parsed: ${e.message}", e)
+        } ?: throw IllegalStateException("Playlists payload could not be parsed: empty JSON document")
+    }
+
+    private fun parseBackupPlaylists(payload: String): List<Playlist> {
+        val element = JsonParser.parseString(payload)
+        if (element.isJsonArray) {
+            return parseLegacyPlaylists(payload)
+        }
+        return parsePayloadOrThrow(payload).playlists.orEmpty()
+    }
+
+    private fun parseLegacyPlaylists(payload: String): List<Playlist> {
         val type = TypeToken.getParameterized(List::class.java, PreferenceBackupEntry::class.java).type
         val entries: List<PreferenceBackupEntry> = gson.fromJson(payload, type)
-
-        val playlists = entries.firstOrNull { it.key == LEGACY_USER_PLAYLISTS_KEY }
+        return entries.firstOrNull { it.key == LEGACY_USER_PLAYLISTS_KEY }
             ?.stringValue
             ?.let { raw ->
                 runCatching {
@@ -328,6 +482,29 @@ class PlaylistsModuleHandler @Inject constructor(
                 }.getOrDefault(emptyList())
             }
             .orEmpty()
+    }
+
+    // ---- Legacy format ----
+
+    private suspend fun restoreLegacyPreferenceEntries(
+        payload: String,
+        decisions: Map<String, PlaylistConflictAction>
+    ) {
+        val playlists = parseLegacyPlaylists(payload)
+        applyPlaylistImport(
+            backupPlaylists = playlists,
+            songMetadata = null,
+            coverImages = null,
+            decisions = decisions
+        )
+        userPreferencesRepository.clearLegacyUserPlaylists()
+    }
+
+    private suspend fun restoreLegacyPreferenceEntriesReplacing(payload: String) {
+        val type = TypeToken.getParameterized(List::class.java, PreferenceBackupEntry::class.java).type
+        val entries: List<PreferenceBackupEntry> = gson.fromJson(payload, type)
+
+        val playlists = parseLegacyPlaylists(payload)
 
         val playlistSongOrderModes = entries.firstOrNull { it.key == LEGACY_PLAYLIST_ORDER_MODES_KEY }
             ?.stringValue

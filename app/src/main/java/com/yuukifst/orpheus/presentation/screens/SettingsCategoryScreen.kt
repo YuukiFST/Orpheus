@@ -8,6 +8,7 @@ import com.yuukifst.orpheus.ui.theme.OrpheusSwitchThumbIcon
 
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 import com.yuukifst.orpheus.presentation.components.BackupModuleSelectionDialog
+import com.yuukifst.orpheus.presentation.components.PlaylistConflictResolveDialog
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
@@ -222,6 +223,7 @@ fun SettingsCategoryScreen(
     var showRegenerateAllPalettesDialog by remember { mutableStateOf(false) }
     var showExportDataDialog by remember { mutableStateOf(false) }
     var showImportFlow by remember { mutableStateOf(false) }
+    var showPlaylistConflictDialog by remember { mutableStateOf(false) }
     var exportSections by remember { mutableStateOf(BackupSection.defaultSelection) }
     var importFileUri by remember { mutableStateOf<Uri?>(null) }
     var minSongDurationDraft by remember(uiState.minSongDuration) {
@@ -1313,7 +1315,28 @@ fun SettingsCategoryScreen(
 
     if (showImportFlow) {
         val restorePlan = uiState.restorePlan
-        if (restorePlan != null && importFileUri != null) {
+        if (showPlaylistConflictDialog && restorePlan != null && importFileUri != null) {
+            PlaylistConflictResolveDialog(
+                conflicts = restorePlan.playlistConflicts,
+                inProgress = uiState.isDataTransferInProgress,
+                onDismiss = {
+                    showPlaylistConflictDialog = false
+                    showImportFlow = false
+                    importFileUri = null
+                    settingsViewModel.clearRestorePlan()
+                },
+                onBack = {
+                    showPlaylistConflictDialog = false
+                },
+                onConfirm = { decisions ->
+                    val uri = importFileUri ?: return@PlaylistConflictResolveDialog
+                    settingsViewModel.restoreFromPlan(uri, decisions)
+                    showPlaylistConflictDialog = false
+                    showImportFlow = false
+                    importFileUri = null
+                }
+            )
+        } else if (restorePlan != null && importFileUri != null) {
             // Step 2: Module selection from inspected backup
             ImportModuleSelectionDialog(
                 plan = restorePlan,
@@ -1329,9 +1352,16 @@ fun SettingsCategoryScreen(
                 },
                 onSelectionChanged = { settingsViewModel.updateRestorePlanSelection(it) },
                 onConfirm = {
-                    settingsViewModel.restoreFromPlan(importFileUri!!)
-                    showImportFlow = false
-                    importFileUri = null
+                    val needsConflictStep =
+                        BackupSection.PLAYLISTS in restorePlan.selectedModules &&
+                            restorePlan.playlistConflicts.isNotEmpty()
+                    if (needsConflictStep) {
+                        showPlaylistConflictDialog = true
+                    } else {
+                        settingsViewModel.restoreFromPlan(importFileUri!!)
+                        showImportFlow = false
+                        importFileUri = null
+                    }
                 }
             )
         } else {

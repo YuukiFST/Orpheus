@@ -143,6 +143,7 @@ import com.yuukifst.orpheus.data.backup.model.RestorePlan
 import com.yuukifst.orpheus.data.preferences.AppThemeMode
 import com.yuukifst.orpheus.presentation.components.PermissionIconCollage
 import com.yuukifst.orpheus.presentation.components.BackupModuleSelectionDialog
+import com.yuukifst.orpheus.presentation.components.PlaylistConflictResolveDialog
 import com.yuukifst.orpheus.presentation.components.subcomps.MaterialYouVectorDrawable
 import com.yuukifst.orpheus.presentation.components.subcomps.SineWaveLine
 import com.yuukifst.orpheus.presentation.components.FileExplorerDialog
@@ -186,6 +187,7 @@ fun SetupScreen(
     val isExplorerReady by setupViewModel.isExplorerReady.collectAsStateWithLifecycle()
     val isCurrentDirectoryResolved by setupViewModel.isCurrentDirectoryResolved.collectAsStateWithLifecycle()
     var selectedBackupUri by remember { mutableStateOf<Uri?>(null) }
+    var showPlaylistConflictDialog by remember { mutableStateOf(false) }
 
     val backupPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -402,7 +404,26 @@ fun SetupScreen(
     }
 
     val restorePlan = uiState.restorePlan
-    if (restorePlan != null && selectedBackupUri != null) {
+    if (showPlaylistConflictDialog && restorePlan != null && selectedBackupUri != null) {
+        PlaylistConflictResolveDialog(
+            conflicts = restorePlan.playlistConflicts,
+            inProgress = uiState.isRestoringBackup,
+            onDismiss = {
+                showPlaylistConflictDialog = false
+                setupViewModel.clearRestorePlan()
+                selectedBackupUri = null
+            },
+            onBack = {
+                showPlaylistConflictDialog = false
+            },
+            onConfirm = { decisions ->
+                val uri = selectedBackupUri ?: return@PlaylistConflictResolveDialog
+                selectedBackupUri = null
+                showPlaylistConflictDialog = false
+                setupViewModel.restoreFromPlan(uri, decisions)
+            }
+        )
+    } else if (restorePlan != null && selectedBackupUri != null) {
         BackupModuleSelectionDialog(
             plan = restorePlan,
             inProgress = uiState.isRestoringBackup,
@@ -416,9 +437,16 @@ fun SetupScreen(
             },
             onSelectionChanged = setupViewModel::updateRestorePlanSelection,
             onConfirm = {
-                val uri = selectedBackupUri ?: return@BackupModuleSelectionDialog
-                selectedBackupUri = null
-                setupViewModel.restoreFromPlan(uri)
+                val needsConflictStep =
+                    BackupSection.PLAYLISTS in restorePlan.selectedModules &&
+                        restorePlan.playlistConflicts.isNotEmpty()
+                if (needsConflictStep) {
+                    showPlaylistConflictDialog = true
+                } else {
+                    val uri = selectedBackupUri ?: return@BackupModuleSelectionDialog
+                    selectedBackupUri = null
+                    setupViewModel.restoreFromPlan(uri)
+                }
             }
         )
     }
