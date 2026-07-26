@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -105,7 +106,11 @@ class OrpheusApplication : Application(), ImageLoaderFactory, Configuration.Prov
             }
             runCatching { userPreferencesRepository.get().refreshStartupMirrorFromDataStore() }
             youTubeInitializer.get().ensureInitialized()
-            syncManager.get().start()
+            // SyncManager.start() registers a ProcessLifecycleOwner observer; that API
+            // requires the main thread even when the rest of cold-start work stays on IO.
+            withContext(Dispatchers.Main.immediate) {
+                syncManager.get().start()
+            }
             AlbumArtUtils.migrateLegacyCacheLocation(this@OrpheusApplication)
             val savedLimit = runCatching {
                 userPreferencesRepository.get().albumArtCacheLimitMbFlow.first()

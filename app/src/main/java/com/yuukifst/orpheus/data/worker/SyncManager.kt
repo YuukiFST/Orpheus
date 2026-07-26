@@ -1,6 +1,8 @@
 package com.yuukifst.orpheus.data.worker
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
@@ -361,11 +363,19 @@ class SyncManager @Inject constructor(
     private fun observeAppForeground() {
         // ProcessLifecycleOwner is application-scoped; the observer and this @Singleton both
         // live for the whole process, so registering once here cannot leak.
-        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onStart(owner: LifecycleOwner) {
-                maybeRunForegroundCatchUpSync()
-            }
-        })
+        // addObserver must run on the main thread (Lifecycle enforces this).
+        val registerObserver = {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+                override fun onStart(owner: LifecycleOwner) {
+                    maybeRunForegroundCatchUpSync()
+                }
+            })
+        }
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            registerObserver()
+        } else {
+            Handler(Looper.getMainLooper()).post(registerObserver)
+        }
     }
 
     /**
