@@ -45,6 +45,40 @@ class ModuleSchemaValidator @Inject constructor(
             }
         }
 
+        if (section == BackupSection.FAVORITES) {
+            when {
+                jsonElement.isJsonArray -> {
+                    val array = jsonElement.asJsonArray
+                    if (array.size() > MAX_ENTRIES_PER_MODULE) {
+                        errors.add(
+                            ValidationError(
+                                "TOO_MANY_ENTRIES",
+                                "Module '${section.key}' has ${array.size()} entries (max $MAX_ENTRIES_PER_MODULE).",
+                                module = section.key
+                            )
+                        )
+                    } else {
+                        validateFavorites(array, errors)
+                    }
+                }
+                jsonElement.isJsonObject -> validateLikedFavoritesObject(jsonElement.asJsonObject, errors)
+                else -> errors.add(
+                    ValidationError(
+                        "INVALID_FAVORITES_PAYLOAD",
+                        "Module '${section.key}' should be a JSON array or v2 object.",
+                        module = section.key
+                    )
+                )
+            }
+            return if (errors.any { it.severity == Severity.ERROR }) {
+                BackupValidationResult.Invalid(errors)
+            } else if (errors.isNotEmpty()) {
+                BackupValidationResult.Invalid(errors)
+            } else {
+                BackupValidationResult.Valid
+            }
+        }
+
         // Most modules are JSON arrays
         if (section != BackupSection.QUICK_FILL && section != BackupSection.EQUALIZER) {
             if (!jsonElement.isJsonArray) {
@@ -63,7 +97,9 @@ class ModuleSchemaValidator @Inject constructor(
             BackupSection.PLAYLISTS -> {
                 // Already handled above for object/legacy compatibility.
             }
-            BackupSection.FAVORITES -> validateFavorites(jsonElement.asJsonArray, errors)
+            BackupSection.FAVORITES -> {
+                // Already handled above for array/v2 object compatibility.
+            }
             BackupSection.LYRICS -> validateLyrics(jsonElement.asJsonArray, errors)
             BackupSection.SEARCH_HISTORY -> validateSearchHistory(jsonElement.asJsonArray, errors)
             BackupSection.ENGAGEMENT_STATS -> validateEngagementStats(jsonElement.asJsonArray, errors)
@@ -181,6 +217,62 @@ class ModuleSchemaValidator @Inject constructor(
                     ValidationError(
                         "INVALID_SONG_ID",
                         "Favorites[$i]: invalid songId",
+                        module = "favorites",
+                        severity = Severity.WARNING
+                    )
+                )
+            }
+        }
+    }
+
+    private fun validateLikedFavoritesObject(
+        obj: com.google.gson.JsonObject,
+        errors: MutableList<ValidationError>
+    ) {
+        val local = obj.getAsJsonArray("local") ?: com.google.gson.JsonArray()
+        val youtube = obj.getAsJsonArray("youtube") ?: com.google.gson.JsonArray()
+        val total = local.size() + youtube.size()
+        if (total > MAX_ENTRIES_PER_MODULE) {
+            errors.add(
+                ValidationError(
+                    "TOO_MANY_ENTRIES",
+                    "Module 'favorites' has $total entries (max $MAX_ENTRIES_PER_MODULE).",
+                    module = "favorites"
+                )
+            )
+        }
+        validateFavorites(local, errors)
+        youtube.forEachIndexed { i, element ->
+            if (!element.isJsonObject) {
+                errors.add(
+                    ValidationError(
+                        "INVALID_YOUTUBE_ENTRY",
+                        "YouTube[$i] is not a JSON object.",
+                        module = "favorites",
+                        severity = Severity.WARNING
+                    )
+                )
+                return@forEachIndexed
+            }
+            val entry = element.asJsonObject
+            val videoId = entry.get("videoId")?.asString
+                ?: entry.get("video_id")?.asString
+            if (videoId.isNullOrBlank()) {
+                errors.add(
+                    ValidationError(
+                        "MISSING_VIDEO_ID",
+                        "YouTube[$i]: missing videoId",
+                        module = "favorites",
+                        severity = Severity.WARNING
+                    )
+                )
+            }
+            val title = entry.get("title")?.asString.orEmpty()
+            if (title.length > MAX_STRING_LENGTH) {
+                errors.add(
+                    ValidationError(
+                        "TITLE_TOO_LONG",
+                        "YouTube[$i]: title exceeds max length",
                         module = "favorites",
                         severity = Severity.WARNING
                     )

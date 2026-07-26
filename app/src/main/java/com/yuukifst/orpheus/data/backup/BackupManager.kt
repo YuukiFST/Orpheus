@@ -53,14 +53,16 @@ class BackupManager @Inject constructor(
             reportProgress(onProgress, BackupOperationType.EXPORT, ++step, totalSteps,
                 "Preparing backup", "Building your selected backup sections.")
 
-            // Collect module payloads
+            // Collect module payloads and handler-provided entry counts
             val modulePayloads = mutableMapOf<String, String>()
+            val moduleEntryCounts = mutableMapOf<String, Int>()
             selectedSections.forEach { section ->
                 reportProgress(onProgress, BackupOperationType.EXPORT, ++step, totalSteps,
                     "Collecting ${section.label}", section.description, section)
                 val handler = handlers[section]
                     ?: throw IllegalStateException("No handler for module ${section.key}")
                 modulePayloads[section.key] = handler.export()
+                moduleEntryCounts[section.key] = handler.countEntries()
             }
 
             // Build manifest
@@ -88,7 +90,7 @@ class BackupManager @Inject constructor(
             reportProgress(onProgress, BackupOperationType.EXPORT, ++step, totalSteps,
                 "Packaging backup", "Creating .pxpl archive.")
 
-            backupWriter.write(uri, manifest, modulePayloads).getOrThrow()
+            backupWriter.write(uri, manifest, modulePayloads, moduleEntryCounts).getOrThrow()
 
             reportProgress(onProgress, BackupOperationType.EXPORT, ++step, totalSteps,
                 "Backup complete", "Your Orpheus backup was created successfully.")
