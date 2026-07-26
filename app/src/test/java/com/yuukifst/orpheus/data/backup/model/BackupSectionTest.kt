@@ -82,4 +82,10 @@ class BackupSectionTest {
             assertTrue(section.description.isNotBlank(), "${section.key} should have a non-empty description")
         }
     }
+
+    @Test
+    fun `favorites section uses Liked label`() {
+        assertEquals("Liked", BackupSection.FAVORITES.label)
+        assertTrue(BackupSection.FAVORITES.description.contains("YouTube", ignoreCase = true))
+    }
 }

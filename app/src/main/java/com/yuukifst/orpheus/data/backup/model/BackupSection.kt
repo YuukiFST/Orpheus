@@ -23,8 +23,8 @@ enum class BackupSection(
     ),
     FAVORITES(
         key = "favorites",
-        label = "Favorites",
-        description = "Songs marked as favorite.",
+        label = "Liked",
+        description = "Local and YouTube likes saved in Orpheus.",
         iconRes = R.drawable.rounded_favorite_24
     ),
     LYRICS(
