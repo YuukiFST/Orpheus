@@ -5,11 +5,11 @@ data class FullPlayerLoadingTweaks(
     val delayAlbumCarousel: Boolean = true,
     val delaySongMetadata: Boolean = true,
     val delayProgressBar: Boolean = true,
-    val delayControls: Boolean = true,
+    val delayControls: Boolean = false,
     val showPlaceholders: Boolean = true,
     val transparentPlaceholders: Boolean = false,
     val applyPlaceholdersOnClose: Boolean = false,
     val switchOnDragRelease: Boolean = true,
-    val contentAppearThresholdPercent: Int = 98,
+    val contentAppearThresholdPercent: Int = 70,
     val contentCloseThresholdPercent: Int = 0
 )

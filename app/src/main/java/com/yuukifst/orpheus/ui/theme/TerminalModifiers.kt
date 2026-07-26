@@ -62,7 +62,7 @@ fun Modifier.terminalPressScale(
     val scale by animateFloatAsState(
         targetValue = if (pressed) pressedScale else 1f,
         animationSpec = if (pressed) {
-            tween(OrpheusMotion.DurationQuick, easing = OrpheusMotion.EaseSmoothOut)
+            tween(OrpheusMotion.DurationMicro, easing = OrpheusMotion.EaseSmoothOut)
         } else {
             tween(OrpheusMotion.DurationFast, easing = OrpheusMotion.EaseBounceStrong)
         },

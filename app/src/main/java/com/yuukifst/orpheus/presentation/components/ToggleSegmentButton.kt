@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.yuukifst.orpheus.R
 import com.yuukifst.orpheus.presentation.components.LocalMaterialTheme
+import com.yuukifst.orpheus.ui.theme.LocalTerminalChrome
 import com.yuukifst.orpheus.ui.theme.terminalPressScale
 
 @Composable
@@ -206,6 +208,8 @@ private fun ToggleSegmentButtonContainer(
     val stateOn = stringResource(R.string.a11y_toggle_on)
     val stateOff = stringResource(R.string.a11y_toggle_off)
     val interactionSource = remember { MutableInteractionSource() }
+    val showTerminalChrome = LocalTerminalChrome.current
+    val pressIndication = if (showTerminalChrome) null else remember { ripple(bounded = true) }
 
     Box(
         modifier = modifier
@@ -217,7 +221,7 @@ private fun ToggleSegmentButtonContainer(
                 enabled = enabled,
                 onClick = onClick,
                 interactionSource = interactionSource,
-                indication = null,
+                indication = pressIndication,
             )
             .semantics { stateDescription = if (active) stateOn else stateOff },
         contentAlignment = Alignment.Center
