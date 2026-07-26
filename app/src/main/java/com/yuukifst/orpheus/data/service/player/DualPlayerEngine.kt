@@ -515,6 +515,21 @@ class DualPlayerEngine @Inject constructor(
 
     fun getAudioSessionId(): Int = if (::playerA.isInitialized) playerA.audioSessionId else 0
 
+    /**
+     * Silence current audio without creating players or clearing the queue.
+     * Used on track-switch taps so the previous track stops before the next
+     * media item is resolved/prepared. Must not call [initialize]/[masterPlayer].
+     */
+    fun hushImmediateAudio() {
+        if (!::playerA.isInitialized) return
+        playerA.playWhenReady = false
+        playerA.pause()
+        playerB?.let { auxiliary ->
+            auxiliary.playWhenReady = false
+            auxiliary.pause()
+        }
+    }
+
     fun stopAndClearAllPlayers() {
         transitionJob?.cancel()
         transitionRunning = false

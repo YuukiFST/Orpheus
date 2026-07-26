@@ -3209,6 +3209,7 @@ class PlayerViewModel @Inject constructor(
         startAtZero: Boolean = false
     ) {
         cancelPendingFullQueuePlayback()
+        hushCurrentAudioForTrackSwitch()
         val requestToken = beginDirectPlaybackRequest()
         directPlaybackJob = viewModelScope.launch {
             val result = queueStateHolder.prepareShuffledQueueSuspending(songsToPlay, startAtZero)
@@ -3305,12 +3306,21 @@ class PlayerViewModel @Inject constructor(
         )
     }
 
+    private fun hushCurrentAudioForTrackSwitch() {
+        mediaController?.playWhenReady = false
+        mediaController?.pause()
+        runCatching { dualPlayerEngine.hushImmediateAudio() }
+    }
+
     private fun applyImmediatePlaybackUi(
         song: Song,
         queueSongs: List<Song>,
         queueName: String,
         mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
     ) {
+        // Cut prior audio on the same main-thread turn as the tap, before queue
+        // hydrate / MediaItem prepare can finish.
+        hushCurrentAudioForTrackSwitch()
         // Invalidate any in-flight dismiss ACTION_CLEAR_PLAYBACK for the prior session.
         PlaybackClearGeneration.bump()
         _dismissJustCommitted.value = false
