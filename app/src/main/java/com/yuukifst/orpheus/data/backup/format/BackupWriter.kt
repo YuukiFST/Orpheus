@@ -24,6 +24,7 @@ class BackupWriter @Inject constructor(
         uri: Uri,
         manifest: BackupManifest,
         modulePayloads: Map<String, String>,
+        moduleEntryCounts: Map<String, Int> = emptyMap(),
         onProgress: (current: Int, total: Int) -> Unit = { _, _ -> }
     ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
@@ -39,7 +40,7 @@ class BackupWriter @Inject constructor(
                 payloadBytes[key] = bytes
                 modulesInfo[key] = BackupModuleInfo(
                     checksum = "sha256:${sha256(bytes)}",
-                    entryCount = countJsonArrayEntries(jsonPayload),
+                    entryCount = moduleEntryCounts[key] ?: countJsonArrayEntries(jsonPayload),
                     sizeBytes = bytes.size.toLong()
                 )
             }

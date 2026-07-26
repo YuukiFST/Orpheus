@@ -10,6 +10,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -24,6 +25,29 @@ class FavoritesModuleHandlerTest {
         youTubeCachedTrackDao = youTubeCachedTrackDao,
         gson = GsonBuilder().serializeNulls().create()
     )
+
+    @Test
+    fun `countEntries sums local and youtube favorites`() = runTest {
+        coEvery { favoritesDao.getAllFavoritesOnce() } returns listOf(
+            FavoritesEntity(songId = 1L, isFavorite = true, timestamp = 1L),
+            FavoritesEntity(songId = 2L, isFavorite = true, timestamp = 2L)
+        )
+        coEvery { youTubeCachedTrackDao.getFavoriteTracksOnce() } returns listOf(
+            YouTubeCachedTrackEntity(
+                videoId = "abc",
+                title = "Song",
+                channelName = "Artist",
+                thumbnailUrl = "",
+                durationMs = 0L,
+                displayTitle = null,
+                isFavorite = true,
+                lastPlayedAt = 0L,
+                favoritedAt = 1L
+            )
+        )
+
+        assertEquals(3, handler.countEntries())
+    }
 
     @Test
     fun `export uses v2 envelope with local and youtube`() = runTest {
