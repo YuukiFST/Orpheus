@@ -1,7 +1,7 @@
 package com.yuukifst.orpheus.presentation.viewmodel
 
 import com.yuukifst.orpheus.data.database.SearchHistoryDao
-import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
+import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
@@ -36,9 +36,8 @@ class YouTubeSearchViewModelHistoryTest {
     private val searchHistoryDao: SearchHistoryDao = mockk(relaxed = true)
     private val suggestionRepository: YouTubeSuggestionRepository = mockk(relaxed = true)
     private val downloadRepository: YouTubeDownloadRepository = mockk(relaxed = true)
-    private val youTubePlaylistDao = mockk<com.yuukifst.orpheus.data.database.YouTubePlaylistDao>(relaxed = true)
     private val playlistPreferencesRepository: PlaylistPreferencesRepository = mockk(relaxed = true)
-    private val mixedTrackResolver: PlaylistMixedTrackResolver = mockk(relaxed = true)
+    private val playlistYouTubeMembership: PlaylistYouTubeMembership = mockk(relaxed = true)
     private val playbackController: YouTubePlaybackController = mockk(relaxed = true)
     private val streamExtractor: YouTubeStreamExtractor = mockk(relaxed = true)
 
@@ -71,9 +70,8 @@ class YouTubeSearchViewModelHistoryTest {
             suggestionRepository = suggestionRepository,
             searchHistoryDao = searchHistoryDao,
             downloadRepository = downloadRepository,
-            youTubePlaylistDao = youTubePlaylistDao,
             playlistPreferencesRepository = playlistPreferencesRepository,
-            mixedTrackResolver = mixedTrackResolver,
+            playlistYouTubeMembership = playlistYouTubeMembership,
             playbackController = playbackController,
             streamExtractor = streamExtractor,
         )

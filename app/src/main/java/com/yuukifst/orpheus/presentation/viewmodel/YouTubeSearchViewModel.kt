@@ -2,14 +2,12 @@ package com.yuukifst.orpheus.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yuukifst.orpheus.data.database.PlaylistYouTubeTrackEntity
 import com.yuukifst.orpheus.data.database.SearchHistoryDao
 import com.yuukifst.orpheus.data.database.SearchHistoryEntity
-import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.database.toSearchHistoryItem
 import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.model.SearchHistoryItem
-import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
+import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
@@ -24,7 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicLong
@@ -49,9 +46,8 @@ class YouTubeSearchViewModel @Inject constructor(
     private val suggestionRepository: YouTubeSuggestionRepository,
     private val searchHistoryDao: SearchHistoryDao,
     private val downloadRepository: YouTubeDownloadRepository,
-    private val youTubePlaylistDao: YouTubePlaylistDao,
     private val playlistPreferencesRepository: PlaylistPreferencesRepository,
-    private val mixedTrackResolver: PlaylistMixedTrackResolver,
+    private val playlistYouTubeMembership: PlaylistYouTubeMembership,
     private val playbackController: YouTubePlaybackController,
     private val streamExtractor: YouTubeStreamExtractor,
 ) : ViewModel() {
@@ -274,26 +270,33 @@ class YouTubeSearchViewModel @Inject constructor(
 
     fun addToPlaylist(track: YouTubeTrack, playlistId: String) {
         viewModelScope.launch {
-            val existing = youTubePlaylistDao.observeForPlaylist(playlistId).first()
-            if (existing.any { it.videoId == track.videoId }) {
-                _uiState.update { it.copy(snackbarMessage = "Already in playlist") }
-                return@launch
-            }
-            val sortOrder = mixedTrackResolver.nextSortOrder(playlistId)
-            val entity = PlaylistYouTubeTrackEntity(
-                playlistId = playlistId,
-                videoId = track.videoId,
-                sortOrder = sortOrder,
-                title = track.title,
-                channelName = track.channelName,
-                thumbnailUrl = track.thumbnailUrl,
-                durationMs = track.durationMs,
-                displayTitle = track.displayTitle,
-            )
-            youTubePlaylistDao.upsertAll(listOf(entity))
-            val playlistName = _uiState.value.playlists.find { it.id == playlistId }?.name ?: "playlist"
-            _uiState.update { it.copy(snackbarMessage = "Added to $playlistName") }
+            addToPlaylistInternal(track, playlistId)
         }
+    }
+
+    fun createPlaylistAndAdd(track: YouTubeTrack, name: String) {
+        viewModelScope.launch {
+            val trimmed = name.trim()
+            if (trimmed.isEmpty()) return@launch
+            val playlist = playlistPreferencesRepository.createPlaylist(trimmed, emptyList())
+            addToPlaylistInternal(track, playlist.id, playlist.name)
+        }
+    }
+
+    private suspend fun addToPlaylistInternal(
+        track: YouTubeTrack,
+        playlistId: String,
+        playlistName: String? = null,
+    ) {
+        if (playlistId in playlistYouTubeMembership.playlistIdsContainingVideo(track.videoId)) {
+            _uiState.update { it.copy(snackbarMessage = "Already in playlist") }
+            return
+        }
+        playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlistId, track)
+        val resolvedName = playlistName
+            ?: _uiState.value.playlists.find { it.id == playlistId }?.name
+            ?: "playlist"
+        _uiState.update { it.copy(snackbarMessage = "Added to $resolvedName") }
     }
 
     fun download(track: YouTubeTrack) {

@@ -81,6 +81,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yuukifst.orpheus.data.model.SearchHistoryItem
 import com.yuukifst.orpheus.data.model.isSmartPlaylist
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
+import com.yuukifst.orpheus.presentation.components.CreatePlaylistDialogRedesigned
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.presentation.components.SmartImageYouTubeListTargetSize
 import com.yuukifst.orpheus.presentation.components.resolveNavBarOccupiedHeight
@@ -366,7 +367,9 @@ fun YouTubeSearchScreen(
 
     showPlaylistPickerForTrack?.let { track ->
         YouTubePlaylistPickerSheet(
+            track = track,
             playlists = uiState.playlists.filterNot { it.isSmartPlaylist },
+            viewModel = viewModel,
             onDismiss = { showPlaylistPickerForTrack = null },
             onPlaylistSelected = { playlistId ->
                 viewModel.addToPlaylist(track, playlistId)
@@ -582,11 +585,14 @@ private fun YouTubeSearchResultItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun YouTubePlaylistPickerSheet(
+    track: YouTubeTrack,
     playlists: List<com.yuukifst.orpheus.data.model.Playlist>,
+    viewModel: YouTubeSearchViewModel,
     onDismiss: () -> Unit,
     onPlaylistSelected: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showCreate by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -603,26 +609,31 @@ private fun YouTubePlaylistPickerSheet(
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(12.dp))
-            if (playlists.isEmpty()) {
+            playlists.forEach { playlist ->
                 Text(
-                    text = "No playlists available",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 24.dp),
+                    text = playlist.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onPlaylistSelected(playlist.id) }
+                        .padding(vertical = 14.dp),
+                    style = MaterialTheme.typography.bodyLarge,
                 )
-            } else {
-                playlists.forEach { playlist ->
-                    Text(
-                        text = playlist.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPlaylistSelected(playlist.id) }
-                            .padding(vertical = 14.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
+            }
+            OrpheusTextButton(onClick = { showCreate = true }) {
+                Text(stringResource(R.string.presentation_batch_e_create_playlist_title))
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showCreate) {
+        CreatePlaylistDialogRedesigned(
+            onDismiss = { showCreate = false },
+            onCreate = { name ->
+                viewModel.createPlaylistAndAdd(track, name)
+                showCreate = false
+                onDismiss()
+            },
+        )
     }
 }
