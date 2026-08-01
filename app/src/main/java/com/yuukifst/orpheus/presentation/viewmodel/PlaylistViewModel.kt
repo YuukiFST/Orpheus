@@ -801,6 +801,10 @@ class PlaylistViewModel @Inject constructor(
             return
         }
 
+        if (sortOption != SortOption.PlaylistManual) {
+            _isPlaylistReorderMode.value = false
+        }
+
         _uiState.update { it.copy(currentPlaylistSortOption = sortOption) }
 
         val currentPlaylists = _uiState.value.playlists

@@ -559,9 +559,12 @@ class LibraryStateHolder @Inject constructor(
                 userPreferencesRepository.setLikedSongsSortOption(sortOption.storageKey)
             }
             _currentFavoriteSortOption.value = sortOption
+            if (sortOption != SortOption.LikedSongManual) {
+                _isLikedReorderMode.value = false
+            }
             if (sortOption == SortOption.LikedSongManual || _isLikedReorderMode.value) {
                 refreshLikedSongsFullList()
-            } else if (!_isLikedReorderMode.value) {
+            } else {
                 _likedSongsFullList.value = persistentListOf()
             }
         }
