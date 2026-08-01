@@ -132,6 +132,25 @@ class PlaylistViewModelYouTubeMembershipTest {
     }
 
     @Test
+    fun addOrRemoveSongFromPlaylists_youtubeRemove_worksWhenCacheMiss() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns listOf(
+            Playlist(id = playlistId, name = "Test", songIds = listOf(mediaId)),
+        )
+        coEvery { youTubeCachedTrackRepository.getSongsByMediaIds(listOf(mediaId)) } returns emptyList()
+        coEvery { musicRepository.getSongsByIds(listOf(mediaId)) } returns flowOf(emptyList())
+        coEvery { playlistYouTubeMembership.playlistIdsContainingVideo("vid1") } returns setOf(playlistId)
+
+        viewModel.addOrRemoveSongFromPlaylists(mediaId, emptyList(), currentPlaylistId = null)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { youTubePlaylistDao.removeTrack(playlistId, "vid1") }
+        coVerify(exactly = 1) {
+            playlistPreferencesRepository.removeSongFromPlaylist(playlistId, mediaId)
+        }
+        coVerify(exactly = 0) { playlistYouTubeMembership.addYouTubeTrackToPlaylist(any(), any()) }
+    }
+
+    @Test
     fun createPlaylist_withYoutubeIds_addsViaMembershipNotLocalSongIds() = runTest {
         val localId = "local-1"
         val createdPlaylist = Playlist(

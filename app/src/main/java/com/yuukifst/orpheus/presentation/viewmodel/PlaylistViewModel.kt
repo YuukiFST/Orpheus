@@ -950,7 +950,6 @@ class PlaylistViewModel @Inject constructor(
         mediaId: String,
         playlistIds: List<String>,
     ): MutableList<String> {
-        val track = resolveYouTubeTrack(mediaId) ?: return mutableListOf()
         val videoId = mediaId.removePrefix("youtube_")
         val youtubeMembershipIds = playlistYouTubeMembership.playlistIdsContainingVideo(videoId)
         val removedPlaylistIds = mutableListOf<String>()
@@ -963,7 +962,9 @@ class PlaylistViewModel @Inject constructor(
                 val hasLegacyLocalRow = mediaId in playlist.songIds
                 when {
                     shouldContain && !hasInYoutubeTable -> {
-                        playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlist.id, track)
+                        resolveYouTubeTrack(mediaId)?.let { track ->
+                            playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlist.id, track)
+                        }
                     }
                     !shouldContain && (hasInYoutubeTable || hasLegacyLocalRow) -> {
                         youTubePlaylistDao.removeTrack(playlist.id, videoId)
