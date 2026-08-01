@@ -745,7 +745,7 @@ class PlaylistViewModel @Inject constructor(
             val localOrderIds = newOrderIds.filterNot { it.isYouTubeMediaId() }
 
             playlistYouTubeMembership.applyMixedOrder(playlistId, newOrderIds)
-            playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, localOrderIds)
+            playlistPreferencesRepository.touchPlaylistAfterMixedReorder(playlistId)
             playlistPreferencesRepository.setPlaylistSongOrderMode(playlistId, MANUAL_ORDER_MODE)
 
             val reindexedMixedTracks = currentMixedTracks.mapIndexed { index, track ->

@@ -13,6 +13,9 @@ import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.playlist.M3uManager
 import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
 import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
+import com.yuukifst.orpheus.data.database.PlaylistWithSongsEntity
+import com.yuukifst.orpheus.data.database.toEntity
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.repository.MusicRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
@@ -294,6 +297,22 @@ class PlaylistViewModelYouTubeMembershipTest {
         coEvery { youTubePlaylistDao.observeForPlaylist(playlistId) } returns flowOf(listOf(youtubeEntity))
         val youtubeSlot = slot<List<PlaylistYouTubeTrackEntity>>()
         coEvery { youTubePlaylistDao.replaceForPlaylist(playlistId, capture(youtubeSlot)) } returns Unit
+        val localOrderSlot = slot<List<Pair<String, Int>>>()
+        coEvery { localPlaylistDao.replacePlaylistSongsWithOrder(playlistId, capture(localOrderSlot)) } returns Unit
+
+        val userPreferencesRepository = mockk<UserPreferencesRepository>(relaxed = true)
+        every { userPreferencesRepository.playlistSongOrderModesFlow } returns flowOf(emptyMap())
+        every { userPreferencesRepository.playlistsSortOptionFlow } returns flowOf("PlaylistNameAZ")
+        coEvery { localPlaylistDao.observePlaylistsWithSongs() } returns flowOf(
+            listOf(
+                PlaylistWithSongsEntity(
+                    playlist = Playlist(id = playlistId, name = "Mixed", songIds = listOf("local-a")).toEntity(),
+                    songs = listOf(PlaylistSongEntity(playlistId, "local-a", 0)),
+                ),
+            ),
+        )
+        coEvery { localPlaylistDao.getPlaylistCount() } returns 1
+        val realRepository = PlaylistPreferencesRepository(localPlaylistDao, userPreferencesRepository)
 
         val realMembership = PlaylistYouTubeMembership(
             localPlaylistDao = localPlaylistDao,
@@ -301,7 +320,7 @@ class PlaylistViewModelYouTubeMembershipTest {
             mixedTrackResolver = mixedTrackResolver,
         )
         viewModel = PlaylistViewModel(
-            playlistPreferencesRepository = playlistPreferencesRepository,
+            playlistPreferencesRepository = realRepository,
             musicRepository = musicRepository,
             dailyMixManager = dailyMixManager,
             m3uManager = m3uManager,
@@ -318,11 +337,11 @@ class PlaylistViewModelYouTubeMembershipTest {
         advanceUntilIdle()
 
         assertEquals(0, youtubeSlot.captured.single().sortOrder)
+        assertEquals(listOf("local-a" to 1), localOrderSlot.captured)
+        coVerify(exactly = 0) { localPlaylistDao.replacePlaylistSongs(playlistId, any()) }
+        coVerify(exactly = 1) { localPlaylistDao.upsertPlaylist(any()) }
         coVerify(exactly = 1) {
-            playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, listOf("local-a"))
-        }
-        coVerify(exactly = 1) {
-            playlistPreferencesRepository.setPlaylistSongOrderMode(playlistId, "manual")
+            userPreferencesRepository.setPlaylistSongOrderMode(playlistId, "manual")
         }
         assertEquals(
             listOf("youtube_vid1", "local-a"),
