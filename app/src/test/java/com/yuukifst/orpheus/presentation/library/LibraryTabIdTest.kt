@@ -11,6 +11,21 @@ import org.junit.jupiter.api.Test
 class LibraryTabIdTest {
 
     @Test
+    fun `defaultOrder places Playlists immediately after Liked`() {
+        assertEquals(
+            listOf(
+                LibraryTabId.Liked,
+                LibraryTabId.Playlists,
+                LibraryTabId.Songs,
+                LibraryTabId.Albums,
+                LibraryTabId.Artists,
+                LibraryTabId.Folders,
+            ),
+            LibraryTabId.defaultOrder,
+        )
+    }
+
+    @Test
     fun `decodeLibraryTabOrder returns default order when stored value is null`() {
         val order = decodeLibraryTabOrder(null)
         assertIterableEquals(LibraryTabId.defaultOrder, order)

@@ -18,10 +18,10 @@ enum class LibraryTabId(
     companion object {
         val DEFAULT_TAB_ORDER_KEYS: List<String> = listOf(
             LIKED.storageKey,
+            PLAYLISTS.storageKey,
             SONGS.storageKey,
             ALBUMS.storageKey,
             ARTISTS.storageKey,
-            PLAYLISTS.storageKey,
             FOLDERS.storageKey,
         )
 
