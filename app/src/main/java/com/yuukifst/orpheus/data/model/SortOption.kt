@@ -214,6 +214,12 @@ sealed class SortOption(
         methodKey = "playlist_date_created",
         direction = SortDirection.Ascending
     )
+    object PlaylistManual : SortOption(
+        storageKey = "playlist_manual",
+        displayName = "Manual",
+        methodLabel = "Manual",
+        methodKey = "playlist_manual",
+    )
 
     // Liked Sort Options (similar to Songs)
     object LikedSongTitleAZ : SortOption(
@@ -271,6 +277,12 @@ sealed class SortOption(
         methodLabel = "Date Liked",
         methodKey = "liked_date_liked",
         direction = SortDirection.Ascending
+    )
+    object LikedSongManual : SortOption(
+        storageKey = "liked_manual",
+        displayName = "Manual",
+        methodLabel = "Manual",
+        methodKey = "liked_manual",
     )
 
     // Folder Sort Options
@@ -384,7 +396,8 @@ sealed class SortOption(
                 PlaylistNameAZ,
                 PlaylistNameZA,
                 PlaylistDateCreated,
-                PlaylistDateCreatedAsc
+                PlaylistDateCreatedAsc,
+                PlaylistManual,
             )
         }
 
@@ -408,7 +421,8 @@ sealed class SortOption(
                 LikedSongAlbum,
                 LikedSongAlbumDesc,
                 LikedSongDateLiked,
-                LikedSongDateLikedAsc
+                LikedSongDateLikedAsc,
+                LikedSongManual,
             )
         }
 

@@ -110,6 +110,12 @@ class YouTubeCachedTrackRepository @Inject constructor(
             .map { it.toSong().copy(isFavorite = true) }
     }
 
+    suspend fun getFavoriteDateLikedByMediaId(): Map<String, Long> = withContext(Dispatchers.IO) {
+        dao.getFavoriteTracksOnce().associate { entity ->
+            entity.mediaId() to (entity.favoritedAt ?: 0L)
+        }
+    }
+
     private fun sortFavoriteEntities(
         entities: List<YouTubeCachedTrackEntity>,
         sortOption: SortOption,

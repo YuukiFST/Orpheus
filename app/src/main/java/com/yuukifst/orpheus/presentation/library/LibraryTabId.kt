@@ -24,7 +24,8 @@ enum class LibraryTabId(
             SortOption.LikedSongAlbum,
             SortOption.LikedSongAlbumDesc,
             SortOption.LikedSongDateLiked,
-            SortOption.LikedSongDateLikedAsc
+            SortOption.LikedSongDateLikedAsc,
+            SortOption.LikedSongManual,
         )
     ),
     Songs(
@@ -73,7 +74,8 @@ enum class LibraryTabId(
             SortOption.PlaylistNameAZ,
             SortOption.PlaylistNameZA,
             SortOption.PlaylistDateCreated,
-            SortOption.PlaylistDateCreatedAsc
+            SortOption.PlaylistDateCreatedAsc,
+            SortOption.PlaylistManual,
         )
     ),
     Folders(

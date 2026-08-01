@@ -889,6 +889,11 @@ class PlaylistViewModel @Inject constructor(
                     .thenBy { it.name.lowercase() }
                     .thenBy { it.id }
             )
+            SortOption.PlaylistManual -> playlists.sortedWith(
+                compareBy<com.yuukifst.orpheus.data.model.Playlist> { it.displayOrder }
+                    .thenByDescending { it.lastModified }
+                    .thenBy { it.id }
+            )
             else -> playlists.sortedWith(
                 compareBy<com.yuukifst.orpheus.data.model.Playlist> { it.name.lowercase() }
                     .thenByDescending { it.lastModified }
