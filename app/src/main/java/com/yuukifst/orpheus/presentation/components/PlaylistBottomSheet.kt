@@ -85,20 +85,18 @@ fun PlaylistBottomSheet(
     LaunchedEffect(singleSongId) {
         youtubeMemberPlaylistIds = singleSongId?.let { playlistViewModel.playlistIdsContainingSong(it) }
     }
-    val selectedPlaylists = remember {
+    val selectedPlaylists = remember(singleSongId) {
         mutableStateMapOf<String, Boolean>()
     }
-    LaunchedEffect(filteredPlaylists, singleSongId, youtubeMemberPlaylistIds) {
-        if (singleSongId != null) {
-            val youtubeIds = youtubeMemberPlaylistIds.orEmpty()
-            filteredPlaylists.forEach { playlist ->
-                selectedPlaylists[playlist.id] =
+    LaunchedEffect(singleSongId, youtubeMemberPlaylistIds, editablePlaylists) {
+        if (singleSongId != null && youtubeMemberPlaylistIds == null) return@LaunchedEffect
+        editablePlaylists.forEach { playlist ->
+            if (!selectedPlaylists.containsKey(playlist.id)) {
+                selectedPlaylists[playlist.id] = if (singleSongId != null) {
+                    val youtubeIds = youtubeMemberPlaylistIds.orEmpty()
                     playlist.songIds.contains(singleSongId) || playlist.id in youtubeIds
-            }
-        } else {
-            filteredPlaylists.forEach { playlist ->
-                if (!selectedPlaylists.containsKey(playlist.id)) {
-                    selectedPlaylists[playlist.id] = false
+                } else {
+                    false
                 }
             }
         }
