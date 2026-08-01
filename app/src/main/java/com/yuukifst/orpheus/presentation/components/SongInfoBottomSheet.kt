@@ -123,6 +123,7 @@ fun SongInfoBottomSheet(
         coverArtUpdate: CoverArtUpdate?
     ) -> Unit,
     removeFromListTrigger: () -> Unit,
+    showRemoveFromPlaylist: Boolean = false,
     songInfoViewModel: SongInfoBottomSheetViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -532,55 +533,57 @@ fun SongInfoBottomSheet(
                                                     Text(stringResource(R.string.shortcut_playlist_short))
                                                 }
 
-                                                OrpheusFilledTonalButton(
-                                                    modifier = Modifier
-                                                        .weight(0.5f)
-                                                        .heightIn(min = 66.dp),
-                                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                                                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                                                    ),
-                                                    shape = TerminalCornerShape,
-                                                    onClick = {
-                                                        if (isYouTube) {
-                                                            removeFromListTrigger()
-                                                            onDismiss()
-                                                        } else {
-                                                            (context as? Activity)?.let { activity ->
-                                                                onDeleteFromDevice(activity, song) { result ->
-                                                                    if (result) {
-                                                                        removeFromListTrigger()
-                                                                        onDismiss()
+                                                if (!isYouTube || showRemoveFromPlaylist) {
+                                                    OrpheusFilledTonalButton(
+                                                        modifier = Modifier
+                                                            .weight(0.5f)
+                                                            .heightIn(min = 66.dp),
+                                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                                                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                                        ),
+                                                        shape = TerminalCornerShape,
+                                                        onClick = {
+                                                            if (isYouTube) {
+                                                                removeFromListTrigger()
+                                                                onDismiss()
+                                                            } else {
+                                                                (context as? Activity)?.let { activity ->
+                                                                    onDeleteFromDevice(activity, song) { result ->
+                                                                        if (result) {
+                                                                            removeFromListTrigger()
+                                                                            onDismiss()
+                                                                        }
                                                                     }
                                                                 }
                                                             }
                                                         }
+                                                    ) {
+                                                        Icon(
+                                                            if (isYouTube) {
+                                                                Icons.Default.RemoveCircleOutline
+                                                            } else {
+                                                                Icons.Default.DeleteForever
+                                                            },
+                                                            contentDescription = stringResource(
+                                                                if (isYouTube) {
+                                                                    R.string.presentation_batch_e_cd_remove_from_playlist
+                                                                } else {
+                                                                    R.string.delete_action
+                                                                }
+                                                            )
+                                                        )
+                                                        Spacer(Modifier.width(8.dp))
+                                                        Text(
+                                                            stringResource(
+                                                                if (isYouTube) {
+                                                                    R.string.presentation_batch_e_cd_remove_from_playlist
+                                                                } else {
+                                                                    R.string.delete_action
+                                                                }
+                                                            )
+                                                        )
                                                     }
-                                                ) {
-                                                    Icon(
-                                                        if (isYouTube) {
-                                                            Icons.Default.RemoveCircleOutline
-                                                        } else {
-                                                            Icons.Default.DeleteForever
-                                                        },
-                                                        contentDescription = stringResource(
-                                                            if (isYouTube) {
-                                                                R.string.presentation_batch_e_cd_remove_from_playlist
-                                                            } else {
-                                                                R.string.delete_action
-                                                            }
-                                                        )
-                                                    )
-                                                    Spacer(Modifier.width(8.dp))
-                                                    Text(
-                                                        stringResource(
-                                                            if (isYouTube) {
-                                                                R.string.presentation_batch_e_cd_remove_from_playlist
-                                                            } else {
-                                                                R.string.delete_action
-                                                            }
-                                                        )
-                                                    )
                                                 }
                                             }
                                         }
