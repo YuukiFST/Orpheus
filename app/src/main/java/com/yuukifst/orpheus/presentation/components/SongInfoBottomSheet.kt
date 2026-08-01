@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
@@ -87,6 +88,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import com.yuukifst.orpheus.presentation.screens.TabAnimation
 import com.yuukifst.orpheus.ui.theme.RoundedSans
 import com.yuukifst.orpheus.utils.AudioMetaUtils
+import com.yuukifst.orpheus.utils.isYouTubeMediaId
 import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -124,6 +126,7 @@ fun SongInfoBottomSheet(
     songInfoViewModel: SongInfoBottomSheetViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val isYouTube = song.id.isYouTubeMediaId()
     var showEditSheet by remember { mutableStateOf(false) }
     var showArtistPicker by remember { mutableStateOf(false) }
     var showTonePickerDialog by remember { mutableStateOf(false) }
@@ -539,22 +542,45 @@ fun SongInfoBottomSheet(
                                                     ),
                                                     shape = TerminalCornerShape,
                                                     onClick = {
-                                                        (context as? Activity)?.let { activity ->
-                                                            onDeleteFromDevice(activity, song) { result ->
-                                                                if (result) {
-                                                                    removeFromListTrigger()
-                                                                    onDismiss()
+                                                        if (isYouTube) {
+                                                            removeFromListTrigger()
+                                                            onDismiss()
+                                                        } else {
+                                                            (context as? Activity)?.let { activity ->
+                                                                onDeleteFromDevice(activity, song) { result ->
+                                                                    if (result) {
+                                                                        removeFromListTrigger()
+                                                                        onDismiss()
+                                                                    }
                                                                 }
                                                             }
                                                         }
                                                     }
                                                 ) {
                                                     Icon(
-                                                        Icons.Default.DeleteForever,
-                                                        contentDescription = stringResource(R.string.delete_action)
+                                                        if (isYouTube) {
+                                                            Icons.Default.RemoveCircleOutline
+                                                        } else {
+                                                            Icons.Default.DeleteForever
+                                                        },
+                                                        contentDescription = stringResource(
+                                                            if (isYouTube) {
+                                                                R.string.presentation_batch_e_cd_remove_from_playlist
+                                                            } else {
+                                                                R.string.delete_action
+                                                            }
+                                                        )
                                                     )
                                                     Spacer(Modifier.width(8.dp))
-                                                    Text(stringResource(R.string.delete_action))
+                                                    Text(
+                                                        stringResource(
+                                                            if (isYouTube) {
+                                                                R.string.presentation_batch_e_cd_remove_from_playlist
+                                                            } else {
+                                                                R.string.delete_action
+                                                            }
+                                                        )
+                                                    )
                                                 }
                                             }
                                         }
