@@ -10,9 +10,11 @@ import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -169,7 +171,7 @@ class PlaylistsModuleHandlerTest {
         )
 
         coVerify(exactly = 0) { playlistPreferencesRepository.updatePlaylist(any()) }
-        coVerify(exactly = 0) { playlistPreferencesRepository.createPlaylist(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { playlistPreferencesRepository.createPlaylist(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 0) { playlistPreferencesRepository.replaceAllPlaylists(any()) }
     }
 
@@ -193,7 +195,8 @@ class PlaylistsModuleHandlerTest {
                 coverShapeDetail3 = any(),
                 coverShapeDetail4 = any(),
                 customId = any(),
-                source = any()
+                source = any(),
+                displayOrder = any(),
             )
         } returns Playlist(id = "jazz", name = "Jazz", songIds = emptyList())
 
@@ -203,7 +206,8 @@ class PlaylistsModuleHandlerTest {
                 "id": "jazz",
                 "name": "Jazz",
                 "songIds": ["j1"],
-                "source": "LOCAL"
+                "source": "LOCAL",
+                "displayOrder": 3
               }]
             }
         """.trimIndent()
@@ -224,10 +228,57 @@ class PlaylistsModuleHandlerTest {
                 coverShapeDetail3 = null,
                 coverShapeDetail4 = null,
                 customId = "jazz",
-                source = "LOCAL"
+                source = "LOCAL",
+                displayOrder = 3,
             )
         }
         coVerify(exactly = 0) { playlistPreferencesRepository.replaceAllPlaylists(any()) }
+    }
+
+    @Test
+    fun `export includes displayOrder on playlists`() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns listOf(
+            Playlist(id = "p1", name = "A", songIds = listOf("1"), displayOrder = 2, source = "LOCAL"),
+        )
+        every { playlistPreferencesRepository.playlistSongOrderModesFlow } returns flowOf(emptyMap())
+        every { playlistPreferencesRepository.playlistsSortOptionFlow } returns flowOf("playlist_name_az")
+        coEvery { musicDao.getAllLocalSongSummaries() } returns emptyList()
+        coEvery { musicDao.getAllNavidromeSongIds() } returns emptyList()
+        coEvery { musicDao.getAllJellyfinSongIds() } returns emptyList()
+
+        val payload = handler.export()
+
+        assertTrue(payload.contains("\"displayOrder\""))
+        assertTrue(payload.contains("\"displayOrder\": 2") || payload.contains("\"displayOrder\":2"))
+    }
+
+    @Test
+    fun `restore replace preserves displayOrder from backup`() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns listOf(
+            Playlist(id = "device-1", name = "Rock", songIds = listOf("a", "b"), displayOrder = 0)
+        )
+        coEvery { musicDao.getAllLocalSongSummaries() } returns emptyList()
+        val updated = slot<Playlist>()
+        coEvery { playlistPreferencesRepository.updatePlaylist(capture(updated)) } returns Unit
+
+        val payload = """
+            {
+              "playlists": [{
+                "id": "device-1",
+                "name": "Rock From Backup",
+                "songIds": ["z"],
+                "source": "LOCAL",
+                "displayOrder": 5
+              }]
+            }
+        """.trimIndent()
+
+        handler.restore(
+            payload,
+            mapOf("device-1" to PlaylistConflictAction.REPLACE)
+        )
+
+        assertEquals(5, updated.captured.displayOrder)
     }
 
     @Test

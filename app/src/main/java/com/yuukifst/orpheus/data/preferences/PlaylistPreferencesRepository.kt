@@ -60,7 +60,8 @@ class PlaylistPreferencesRepository @Inject constructor(
         coverShapeDetail3: Float? = null,
         coverShapeDetail4: Float? = null,
         customId: String? = null,
-        source: String = "LOCAL"
+        source: String = "LOCAL",
+        displayOrder: Int = 0,
     ): Playlist {
         ensureMigratedIfNeeded()
         val now = System.currentTimeMillis()
@@ -80,6 +81,7 @@ class PlaylistPreferencesRepository @Inject constructor(
             coverShapeDetail3 = coverShapeDetail3,
             coverShapeDetail4 = coverShapeDetail4,
             source = source,
+            displayOrder = displayOrder,
         )
         localPlaylistDao.upsertPlaylist(newPlaylist.toEntity())
         localPlaylistDao.replacePlaylistSongs(newPlaylist.id, newPlaylist.songIds)

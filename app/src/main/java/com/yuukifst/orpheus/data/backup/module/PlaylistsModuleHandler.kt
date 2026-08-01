@@ -385,7 +385,8 @@ class PlaylistsModuleHandler @Inject constructor(
                     coverShapeDetail3 = backupPlaylist.coverShapeDetail3,
                     coverShapeDetail4 = backupPlaylist.coverShapeDetail4,
                     customId = backupPlaylist.id,
-                    source = backupPlaylist.source
+                    source = backupPlaylist.source,
+                    displayOrder = backupPlaylist.displayOrder,
                 )
                 return@forEach
             }
@@ -427,6 +428,7 @@ class PlaylistsModuleHandler @Inject constructor(
             coverShapeDetail4 = backup.coverShapeDetail4 ?: device.coverShapeDetail4,
             source = backup.source.takeIf { it.isNotBlank() } ?: device.source,
             isQueueGenerated = backup.isQueueGenerated,
+            displayOrder = backup.displayOrder,
             lastModified = System.currentTimeMillis()
         )
     }

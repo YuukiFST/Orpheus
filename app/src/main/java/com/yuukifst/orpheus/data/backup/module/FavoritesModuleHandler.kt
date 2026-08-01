@@ -8,8 +8,11 @@ import com.yuukifst.orpheus.data.backup.model.LikedBackupPayload
 import com.yuukifst.orpheus.data.backup.model.YouTubeLikedBackupEntry
 import com.yuukifst.orpheus.data.database.FavoritesDao
 import com.yuukifst.orpheus.data.database.FavoritesEntity
+import com.yuukifst.orpheus.data.database.LikedOrderDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackEntity
+import com.yuukifst.orpheus.data.database.mediaId
+import com.yuukifst.orpheus.data.library.mergeLikedManualOrder
 import com.yuukifst.orpheus.di.BackupGson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,6 +23,7 @@ import javax.inject.Singleton
 class FavoritesModuleHandler @Inject constructor(
     private val favoritesDao: FavoritesDao,
     private val youTubeCachedTrackDao: YouTubeCachedTrackDao,
+    private val likedOrderDao: LikedOrderDao,
     @BackupGson private val gson: Gson
 ) : BackupModuleHandler {
 
@@ -39,12 +43,18 @@ class FavoritesModuleHandler @Inject constructor(
         val parsed = parsePayload(payload)
         mergeLocal(parsed.local)
         mergeYouTube(parsed.youtube)
+        mergeOrder(parsed.order)
     }
 
     override suspend fun rollback(snapshot: String) = withContext(Dispatchers.IO) {
         val parsed = parsePayload(snapshot)
         favoritesDao.replaceAll(parsed.local.filter { it.isFavorite })
         replaceYouTubeFavorites(parsed.youtube)
+        if (parsed.order.isNotEmpty()) {
+            likedOrderDao.replaceAllOrdered(parsed.order)
+        } else {
+            likedOrderDao.clear()
+        }
     }
 
     private suspend fun currentPayload(): LikedBackupPayload {
@@ -60,7 +70,8 @@ class FavoritesModuleHandler @Inject constructor(
                 favoritedAt = entity.favoritedAt
             )
         }
-        return LikedBackupPayload(version = 2, local = local, youtube = youtube)
+        val order = likedOrderDao.getAllOrdered().map { it.mediaId }
+        return LikedBackupPayload(version = 2, local = local, youtube = youtube, order = order)
     }
 
     private fun parsePayload(payload: String): LikedBackupPayload {
@@ -96,6 +107,40 @@ class FavoritesModuleHandler @Inject constructor(
                 )
             )
         }
+    }
+
+    private suspend fun mergeOrder(backupOrder: List<String>) {
+        if (backupOrder.isEmpty()) return
+
+        val favoriteIds = currentFavoriteMediaIds()
+        val existingOrder = likedOrderDao.getAllOrdered().map { it.mediaId }
+        val backupOrdered = backupOrder.filter { it in favoriteIds }
+        val deviceOnlyOrder = existingOrder.filter { it in favoriteIds && it !in backupOrdered.toSet() }
+        val combinedOrder = backupOrdered + deviceOnlyOrder
+        val mergedOrder = mergeLikedManualOrder(
+            favoriteMediaIds = favoriteIds,
+            orderedMediaIds = combinedOrder,
+            dateLikedById = currentDateLikedById(),
+        )
+        likedOrderDao.replaceAllOrdered(mergedOrder)
+    }
+
+    private suspend fun currentFavoriteMediaIds(): Set<String> {
+        val local = favoritesDao.getAllFavoritesOnce()
+            .filter { it.isFavorite }
+            .map { it.songId.toString() }
+        val youtube = youTubeCachedTrackDao.getFavoriteTracksOnce().map { it.mediaId() }
+        return (local + youtube).toSet()
+    }
+
+    private suspend fun currentDateLikedById(): Map<String, Long> {
+        val local = favoritesDao.getAllFavoritesOnce()
+            .filter { it.isFavorite }
+            .associate { it.songId.toString() to it.timestamp }
+        val youtube = youTubeCachedTrackDao.getFavoriteTracksOnce().associate { entity ->
+            entity.mediaId() to (entity.favoritedAt ?: 0L)
+        }
+        return local + youtube
     }
 
     private suspend fun replaceYouTubeFavorites(entries: List<YouTubeLikedBackupEntry>) {

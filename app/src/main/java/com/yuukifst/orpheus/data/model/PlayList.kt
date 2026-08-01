@@ -2,6 +2,7 @@ package com.yuukifst.orpheus.data.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
 @Immutable
@@ -22,6 +23,7 @@ data class Playlist(
     val coverShapeDetail3: Float? = null, // e.g., StarScale
     val coverShapeDetail4: Float? = null, // e.g., Star Sides (Int)
     val source: String = "LOCAL", // Source: "LOCAL", "SMART:<rule>", or self-hosted service IDs.
+    @SerializedName(value = "displayOrder", alternate = ["display_order"])
     val displayOrder: Int = 0,
 )
 

@@ -23,6 +23,8 @@ data class LikedBackupPayload(
     val version: Int = 2,
     val local: List<FavoritesEntity> = emptyList(),
     val youtube: List<YouTubeLikedBackupEntry> = emptyList(),
+    /** Manual liked order as mixed media ids (local numeric + youtube_*). Absent in legacy backups. */
+    val order: List<String> = emptyList(),
 ) {
     fun entryCount(): Int = local.size + youtube.size
 }
