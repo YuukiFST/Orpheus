@@ -2,6 +2,20 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.32] - 2026-08-01
+
+### Added
+- Library Liked and Playlists tabs support Reorder mode: drag to set a manual order (local + YouTube Liked; user playlists). Choosing another sort leaves Manual.
+- Room v5: `liked_order` table and `playlists.display_order`; included in Liked/Playlists backup.
+- Stats Top 20 most-played section with All / Local / YouTube filters.
+- YouTube Search add-to-playlist sheet can create a playlist when none exist.
+
+### Fixed
+- YouTube Search field clear (X); recent searches persist after successful search.
+- Library default tab order puts Playlists immediately after Liked.
+- Liked YouTube tracks add to playlists via the YouTube playlist table; Remove (not Delete) for YouTube items in playlist detail.
+- Mixed local + YouTube playlist drag reorder persists correctly across reopen.
+
 ## [1.0.31] - 2026-07-26
 
 ### Fixed
