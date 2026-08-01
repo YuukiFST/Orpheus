@@ -138,7 +138,7 @@ class YouTubeSearchViewModel @Inject constructor(
                 _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
                 return@launch
             }
-            executeSearch(trimmed, saveHistory = false)
+            executeSearch(trimmed, saveHistory = true)
         }
     }
 
