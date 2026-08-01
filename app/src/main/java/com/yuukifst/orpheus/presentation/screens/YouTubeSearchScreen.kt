@@ -30,7 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
@@ -166,7 +166,21 @@ fun YouTubeSearchScreen(
                                     modifier = Modifier.padding(start = 4.dp)
                                 )
                             },
-                            trailingIcon = {},
+                            trailingIcon = {
+                                if (searchQuery.isNotBlank()) {
+                                    IconButton(
+                                        onClick = {
+                                            searchQuery = ""
+                                            viewModel.updateQuery("")
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Close,
+                                            contentDescription = stringResource(R.string.cd_clear_search_query),
+                                        )
+                                    }
+                                }
+                            },
                             colors = SearchBarDefaults.inputFieldColors(
                                 focusedContainerColor = Color.Transparent,
                                 unfocusedContainerColor = Color.Transparent,
@@ -425,8 +439,8 @@ private fun YouTubeSearchHistorySection(
                     )
                     IconButton(onClick = { onHistoryDelete(item.query) }) {
                         Icon(
-                            imageVector = Icons.Rounded.DeleteForever,
-                            contentDescription = "Delete search history item",
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = stringResource(R.string.cd_delete_search_history_item),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
