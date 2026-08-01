@@ -66,6 +66,20 @@ interface LocalPlaylistDao {
     }
 
     @Transaction
+    suspend fun replacePlaylistSongsWithOrder(playlistId: String, songs: List<Pair<String, Int>>) {
+        clearPlaylistSongs(playlistId)
+        if (songs.isEmpty()) return
+        val rows = songs.map { (songId, sortOrder) ->
+            PlaylistSongEntity(
+                playlistId = playlistId,
+                songId = songId,
+                sortOrder = sortOrder,
+            )
+        }
+        upsertPlaylistSongs(rows)
+    }
+
+    @Transaction
     suspend fun replaceAllPlaylistsTransactional(playlists: List<Pair<PlaylistEntity, List<String>>>) {
         clearAllPlaylistSongs()
         clearAllPlaylists()

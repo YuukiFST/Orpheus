@@ -2,11 +2,17 @@ package com.yuukifst.orpheus.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yuukifst.orpheus.data.database.EngagementDao
+import com.yuukifst.orpheus.data.database.SongEngagementEntity
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.repository.MusicRepository
 import com.yuukifst.orpheus.data.stats.PlaybackStatsRepository
 import com.yuukifst.orpheus.data.stats.PlaybackStatsRepository.PlaybackStatsSummary
 import com.yuukifst.orpheus.data.stats.StatsTimeRange
+import com.yuukifst.orpheus.data.stats.TopPlayedEntry
+import com.yuukifst.orpheus.data.stats.TopPlayedFilter
+import com.yuukifst.orpheus.data.stats.rankTopPlayed
+import kotlinx.coroutines.flow.first
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +31,8 @@ import kotlinx.collections.immutable.toImmutableList
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val playbackStatsRepository: PlaybackStatsRepository,
-    private val musicRepository: MusicRepository
+    private val musicRepository: MusicRepository,
+    private val engagementDao: EngagementDao,
 ) : ViewModel() {
 
     data class StatsUiState(
@@ -45,8 +52,20 @@ class StatsViewModel @Inject constructor(
     private val _homeOverview = MutableStateFlow<PlaybackStatsSummary?>(null)
     val homeOverview: StateFlow<PlaybackStatsSummary?> = _homeOverview.asStateFlow()
 
+    private val _topPlayedFilter = MutableStateFlow(TopPlayedFilter.ALL)
+    val topPlayedFilter: StateFlow<TopPlayedFilter> = _topPlayedFilter.asStateFlow()
+
+    private val _topPlayed = MutableStateFlow<List<TopPlayedEntry>>(emptyList())
+    val topPlayed: StateFlow<List<TopPlayedEntry>> = _topPlayed.asStateFlow()
+
     @Volatile
     private var cachedSongs: List<Song>? = null
+
+    @Volatile
+    private var cachedEngagements: List<SongEngagementEntity>? = null
+
+    @Volatile
+    private var cachedTopPlayedSongsById: Map<String, Song>? = null
 
     init {
         observeStatsRefreshFlow()
@@ -56,6 +75,18 @@ class StatsViewModel @Inject constructor(
             updateWeeklyOverview = true
         )
         refreshHomeOverview()
+        refreshTopPlayed()
+    }
+
+    fun setTopPlayedFilter(filter: TopPlayedFilter) {
+        if (filter == _topPlayedFilter.value) return
+        _topPlayedFilter.value = filter
+        updateTopPlayedRanking()
+    }
+
+    fun topPlayedSongsForPlayback(): List<Song> {
+        val songsById = cachedTopPlayedSongsById ?: return emptyList()
+        return _topPlayed.value.mapNotNull { songsById[it.songId] }
     }
 
     fun onRangeSelected(range: StatsTimeRange) {
@@ -156,6 +187,7 @@ class StatsViewModel @Inject constructor(
                         refreshWeeklyOverview()
                     }
                     refreshHomeOverview()
+                    refreshTopPlayed()
                 }
         }
     }
@@ -166,7 +198,45 @@ class StatsViewModel @Inject constructor(
 
     fun forceRegenerateStats() {
         cachedSongs = null
+        cachedEngagements = null
+        cachedTopPlayedSongsById = null
         playbackStatsRepository.requestRefresh()
+    }
+
+    private fun refreshTopPlayed() {
+        viewModelScope.launch {
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val engagements = engagementDao.getAllEngagements()
+                    val songIds = engagements.map { it.songId }
+                    val songs = if (songIds.isEmpty()) {
+                        emptyList()
+                    } else {
+                        musicRepository.getSongsByIds(songIds).first()
+                    }
+                    engagements to songs.associateBy { it.id }
+                }
+            }.onSuccess { (engagements, songsById) ->
+                cachedEngagements = engagements
+                cachedTopPlayedSongsById = songsById
+                updateTopPlayedRanking()
+            }.onFailure { throwable ->
+                Timber.e(throwable, "Failed to load top played stats")
+                cachedEngagements = null
+                cachedTopPlayedSongsById = null
+                _topPlayed.value = emptyList()
+            }
+        }
+    }
+
+    private fun updateTopPlayedRanking() {
+        val engagements = cachedEngagements ?: return
+        val songsById = cachedTopPlayedSongsById ?: return
+        _topPlayed.value = rankTopPlayed(
+            engagements = engagements,
+            songsById = songsById,
+            filter = _topPlayedFilter.value,
+        )
     }
 
     private suspend fun loadSongs(): List<Song> {

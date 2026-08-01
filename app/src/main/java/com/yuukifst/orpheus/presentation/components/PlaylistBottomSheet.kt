@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -79,18 +80,23 @@ fun PlaylistBottomSheet(
         if (searchQuery.isBlank()) editablePlaylists
         else editablePlaylists.filter { it.name.contains(searchQuery, true) }.toImmutableList()
     }
-    val selectedPlaylists = remember {
-        mutableStateMapOf<String, Boolean>().apply {
-            if (songs.size == 1) {
-                // Single song: pre-select playlists containing it
-                val songId = songs.first().id
-                filteredPlaylists.forEach {
-                    put(it.id, it.songIds.contains(songId))
-                }
-            } else {
-                // Multiple songs: start empty (additive only)
-                filteredPlaylists.forEach {
-                    put(it.id, false)
+    val singleSongId = songs.singleOrNull()?.id
+    var youtubeMemberPlaylistIds by remember(singleSongId) { mutableStateOf<Set<String>?>(null) }
+    LaunchedEffect(singleSongId) {
+        youtubeMemberPlaylistIds = singleSongId?.let { playlistViewModel.playlistIdsContainingSong(it) }
+    }
+    val selectedPlaylists = remember(singleSongId) {
+        mutableStateMapOf<String, Boolean>()
+    }
+    LaunchedEffect(singleSongId, youtubeMemberPlaylistIds, editablePlaylists) {
+        if (singleSongId != null && youtubeMemberPlaylistIds == null) return@LaunchedEffect
+        editablePlaylists.forEach { playlist ->
+            if (!selectedPlaylists.containsKey(playlist.id)) {
+                selectedPlaylists[playlist.id] = if (singleSongId != null) {
+                    val youtubeIds = youtubeMemberPlaylistIds.orEmpty()
+                    playlist.songIds.contains(singleSongId) || playlist.id in youtubeIds
+                } else {
+                    false
                 }
             }
         }

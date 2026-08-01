@@ -90,7 +90,9 @@ enum class LibraryTabId(
     );
 
     companion object {
-        val defaultOrder: List<LibraryTabId> = entries.toList()
+        val defaultOrder: List<LibraryTabId> = listOf(
+            Liked, Playlists, Songs, Albums, Artists, Folders,
+        )
 
         fun fromStableKey(key: String): LibraryTabId? = entries.firstOrNull { it.stableKey == key }
     }

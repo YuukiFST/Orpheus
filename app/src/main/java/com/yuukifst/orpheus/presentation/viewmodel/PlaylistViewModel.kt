@@ -17,7 +17,10 @@ import com.yuukifst.orpheus.data.model.toPlaylistSource
 import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.playlist.M3uManager
 import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
+import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.playlist.SmartPlaylistBuilder
+import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
+import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.repository.MusicRepository
 import com.yuukifst.orpheus.utils.isYouTubeMediaId
@@ -81,6 +84,8 @@ class PlaylistViewModel @Inject constructor(
     private val m3uManager: M3uManager,
     private val mixedTrackResolver: PlaylistMixedTrackResolver,
     private val youTubePlaylistDao: YouTubePlaylistDao,
+    private val playlistYouTubeMembership: PlaylistYouTubeMembership,
+    private val youTubeCachedTrackRepository: YouTubeCachedTrackRepository,
     private val playbackController: YouTubePlaybackController,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -324,9 +329,12 @@ class PlaylistViewModel @Inject constructor(
             }
             val resolvedSource = resolvedSmartRule?.toPlaylistSource() ?: source
 
-            playlistPreferencesRepository.createPlaylist(
+            val localSongIds = resolvedSongIds.filterNot { it.isYouTubeMediaId() }
+            val youtubeMediaIds = resolvedSongIds.filter { it.isYouTubeMediaId() }
+
+            val playlist = playlistPreferencesRepository.createPlaylist(
                 name = name,
-                songIds = resolvedSongIds,
+                songIds = localSongIds,
                 isQueueGenerated = isQueueGenerated,
                 coverImageUri = savedCoverPath,
                 coverColorArgb = coverColor,
@@ -338,6 +346,11 @@ class PlaylistViewModel @Inject constructor(
                 coverShapeDetail4 = coverShapeDetail4,
                 source = resolvedSource
             )
+            for (mediaId in youtubeMediaIds) {
+                resolveYouTubeTrack(mediaId)?.let { track ->
+                    playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlist.id, track)
+                }
+            }
             _playlistCreationEvent.emit(true)
         }
     }
@@ -630,9 +643,12 @@ class PlaylistViewModel @Inject constructor(
                 .map { it.id }
                 .toSet()
             val editablePlaylistIds = playlistIds.filterNot { it in smartPlaylistIds }
-            val removedFromPlaylists =
+            val removedFromPlaylists = if (songId.isYouTubeMediaId()) {
+                addOrRemoveYouTubeTrackFromPlaylists(songId, editablePlaylistIds)
+            } else {
                 playlistPreferencesRepository.addOrRemoveSongFromPlaylists(songId, editablePlaylistIds)
-            if (currentPlaylistId != null && removedFromPlaylists.contains (currentPlaylistId)) {
+            }
+            if (currentPlaylistId != null && removedFromPlaylists.contains(currentPlaylistId)) {
                 removeSongFromPlaylist(currentPlaylistId, songId)
             }
         }
@@ -644,10 +660,25 @@ class PlaylistViewModel @Inject constructor(
                 .filter { it.isSmartPlaylist }
                 .map { it.id }
                 .toSet()
+            val localSongIds = songIds.filterNot { it.isYouTubeMediaId() }
+            val youtubeMediaIds = songIds.filter { it.isYouTubeMediaId() }
             playlistIds.filterNot { it in smartPlaylistIds }.forEach { playlistId ->
-                playlistPreferencesRepository.addSongsToPlaylist(playlistId, songIds)
+                if (localSongIds.isNotEmpty()) {
+                    playlistPreferencesRepository.addSongsToPlaylist(playlistId, localSongIds)
+                }
+                for (mediaId in youtubeMediaIds) {
+                    resolveYouTubeTrack(mediaId)?.let { track ->
+                        playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlistId, track)
+                    }
+                }
             }
         }
+    }
+
+    suspend fun playlistIdsContainingSong(songId: String): Set<String> {
+        if (!songId.isYouTubeMediaId()) return emptySet()
+        val videoId = songId.removePrefix("youtube_")
+        return playlistYouTubeMembership.playlistIdsContainingVideo(videoId)
     }
 
     fun removeSongFromPlaylist(playlistId: String, songIdToRemove: String) {
@@ -659,6 +690,10 @@ class PlaylistViewModel @Inject constructor(
             if (songIdToRemove.isYouTubeMediaId()) {
                 val videoId = songIdToRemove.removePrefix("youtube_")
                 youTubePlaylistDao.removeTrack(playlistId, videoId)
+                val playlist = playlistPreferencesRepository.getPlaylistsOnce().find { it.id == playlistId }
+                if (playlist != null && songIdToRemove in playlist.songIds) {
+                    playlistPreferencesRepository.removeSongFromPlaylist(playlistId, songIdToRemove)
+                }
             } else {
                 playlistPreferencesRepository.removeSongFromPlaylist(playlistId, songIdToRemove)
             }
@@ -696,23 +731,39 @@ class PlaylistViewModel @Inject constructor(
         if (currentPlaylist.id != playlistId || currentPlaylist.isSmartPlaylist) return
         viewModelScope.launch {
             val currentSongs = _uiState.value.currentPlaylistSongs.toMutableList()
-            if (fromIndex in currentSongs.indices && toIndex in currentSongs.indices) {
-                val item = currentSongs.removeAt(fromIndex)
-                currentSongs.add(toIndex, item)
-                val newSongOrderIds = currentSongs.map { it.id }
-                playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, newSongOrderIds)
-                playlistPreferencesRepository.setPlaylistSongOrderMode(
-                    playlistId,
-                    MANUAL_ORDER_MODE
-                )
-                _uiState.update {
-                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
-                    it.copy(
-                        currentPlaylistSongs = currentSongs,
-                        playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
-                        playlistOrderModes = updatedModes
-                    )
+            val currentMixedTracks = _uiState.value.currentPlaylistMixedTracks.toMutableList()
+            if (fromIndex !in currentSongs.indices || toIndex !in currentSongs.indices) return@launch
+
+            val item = currentSongs.removeAt(fromIndex)
+            currentSongs.add(toIndex, item)
+            if (currentMixedTracks.size == currentSongs.size) {
+                val mixedItem = currentMixedTracks.removeAt(fromIndex)
+                currentMixedTracks.add(toIndex, mixedItem)
+            }
+
+            val newOrderIds = currentSongs.map { it.id }
+            val localOrderIds = newOrderIds.filterNot { it.isYouTubeMediaId() }
+
+            playlistYouTubeMembership.applyMixedOrder(playlistId, newOrderIds)
+            playlistPreferencesRepository.touchPlaylistAfterMixedReorder(playlistId)
+            playlistPreferencesRepository.setPlaylistSongOrderMode(playlistId, MANUAL_ORDER_MODE)
+
+            val reindexedMixedTracks = currentMixedTracks.mapIndexed { index, track ->
+                when (track) {
+                    is PlaylistMixedTrack.Local -> track.copy(sortOrder = index)
+                    is PlaylistMixedTrack.YouTube -> track.copy(sortOrder = index)
                 }
+            }
+
+            _uiState.update {
+                val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
+                it.copy(
+                    currentPlaylistDetails = currentPlaylist.copy(songIds = localOrderIds),
+                    currentPlaylistSongs = currentSongs,
+                    currentPlaylistMixedTracks = reindexedMixedTracks,
+                    playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
+                    playlistOrderModes = updatedModes,
+                )
             }
         }
     }
@@ -904,6 +955,52 @@ class PlaylistViewModel @Inject constructor(
             else -> songs
         }
     }
+
+    private suspend fun resolveYouTubeTrack(mediaId: String): YouTubeTrack? {
+        val cachedSong = youTubeCachedTrackRepository.getSongsByMediaIds(listOf(mediaId)).firstOrNull()
+        if (cachedSong != null) return cachedSong.toYouTubeTrack()
+        return musicRepository.getSongsByIds(listOf(mediaId)).first().firstOrNull()?.toYouTubeTrack()
+    }
+
+    private suspend fun addOrRemoveYouTubeTrackFromPlaylists(
+        mediaId: String,
+        playlistIds: List<String>,
+    ): MutableList<String> {
+        val videoId = mediaId.removePrefix("youtube_")
+        val youtubeMembershipIds = playlistYouTubeMembership.playlistIdsContainingVideo(videoId)
+        val removedPlaylistIds = mutableListOf<String>()
+
+        playlistPreferencesRepository.getPlaylistsOnce()
+            .filterNot { it.isSmartPlaylist }
+            .forEach { playlist ->
+                val shouldContain = playlist.id in playlistIds
+                val hasInYoutubeTable = playlist.id in youtubeMembershipIds
+                val hasLegacyLocalRow = mediaId in playlist.songIds
+                when {
+                    shouldContain && !hasInYoutubeTable -> {
+                        resolveYouTubeTrack(mediaId)?.let { track ->
+                            playlistYouTubeMembership.addYouTubeTrackToPlaylist(playlist.id, track)
+                        }
+                    }
+                    !shouldContain && (hasInYoutubeTable || hasLegacyLocalRow) -> {
+                        youTubePlaylistDao.removeTrack(playlist.id, videoId)
+                        if (hasLegacyLocalRow) {
+                            playlistPreferencesRepository.removeSongFromPlaylist(playlist.id, mediaId)
+                        }
+                        removedPlaylistIds.add(playlist.id)
+                    }
+                }
+            }
+        return removedPlaylistIds
+    }
+
+    private fun Song.toYouTubeTrack(): YouTubeTrack = YouTubeTrack(
+        videoId = id.removePrefix("youtube_"),
+        title = title,
+        channelName = artist,
+        thumbnailUrl = albumArtUriString.orEmpty(),
+        durationMs = duration,
+    )
 
     private fun decodeOrderMode(value: String): PlaylistSongsOrderMode {
         return if (value == MANUAL_ORDER_MODE) {

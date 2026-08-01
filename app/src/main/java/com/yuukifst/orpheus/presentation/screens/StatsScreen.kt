@@ -12,6 +12,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -112,6 +113,10 @@ import com.yuukifst.orpheus.presentation.components.ExpressiveTopBarContent
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
 import com.yuukifst.orpheus.presentation.components.SmartImage
 import com.yuukifst.orpheus.presentation.screens.TabAnimation
+import com.yuukifst.orpheus.data.stats.TopPlayedEntry
+import com.yuukifst.orpheus.data.stats.TopPlayedFilter
+import com.yuukifst.orpheus.presentation.components.SmartImageCompactListTargetSize
+import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StatsViewModel
 import com.yuukifst.orpheus.utils.formatListeningDurationCompact
 import com.yuukifst.orpheus.utils.formatListeningDurationLong
@@ -137,9 +142,13 @@ private const val PULL_TO_REFRESH_MIN_DURATION_MS = 3500L
 @Composable
 fun StatsScreen(
     navController: NavController,
+    playerViewModel: PlayerViewModel,
     statsViewModel: StatsViewModel = hiltViewModel()
 ) {
     val uiState by statsViewModel.uiState.collectAsStateWithLifecycle()
+    val topPlayed by statsViewModel.topPlayed.collectAsStateWithLifecycle()
+    val topPlayedFilter by statsViewModel.topPlayedFilter.collectAsStateWithLifecycle()
+    val topPlayedQueueName = stringResource(R.string.presentation_batch_g_stats_top_played_queue)
     val summary = uiState.summary
     val lazyListState = rememberLazyListState()
     val density = LocalDensity.current
@@ -315,6 +324,23 @@ fun StatsScreen(
                     item {
                         TopAlbumsCard(
                             summary = summary,
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
+                    item {
+                        TopPlayedCard(
+                            entries = topPlayed,
+                            selectedFilter = topPlayedFilter,
+                            onFilterSelected = statsViewModel::setTopPlayedFilter,
+                            onEntryClick = { entry ->
+                                val queueSongs = statsViewModel.topPlayedSongsForPlayback()
+                                val startSong = queueSongs.firstOrNull { it.id == entry.songId } ?: return@TopPlayedCard
+                                playerViewModel.playSongs(
+                                    songsToPlay = queueSongs,
+                                    startSong = startSong,
+                                    queueName = topPlayedQueueName,
+                                )
+                            },
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
@@ -2173,6 +2199,162 @@ private fun SongStatsCard(
         }
     }
 }
+
+@Composable
+private fun TopPlayedCard(
+    entries: List<TopPlayedEntry>,
+    selectedFilter: TopPlayedFilter,
+    onFilterSelected: (TopPlayedFilter) -> Unit,
+    onEntryClick: (TopPlayedEntry) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val supportingColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = TerminalCornerShape,
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.presentation_batch_g_stats_top_played_title),
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    fontWeight = FontWeight.SemiBold,
+                    color = contentColor
+                )
+                Text(
+                    text = stringResource(R.string.presentation_batch_g_stats_top_played_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = supportingColor
+                )
+            }
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                TopPlayedFilter.entries.forEach { filter ->
+                    val isSelected = filter == selectedFilter
+                    ToggleButton(
+                        checked = isSelected,
+                        onCheckedChange = { onFilterSelected(filter) },
+                        shapes = ToggleButtonDefaults.shapes(),
+                        colors = ToggleButtonDefaults.toggleButtonColors(
+                            checkedContainerColor = MaterialTheme.colorScheme.primary,
+                            checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(filter.displayNameRes),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            if (entries.isEmpty()) {
+                StatsEmptyState(
+                    icon = Icons.Outlined.MusicNote,
+                    title = stringResource(R.string.presentation_batch_g_stats_top_played_empty_title),
+                    subtitle = stringResource(R.string.presentation_batch_g_stats_top_played_empty_subtitle)
+                )
+            } else {
+                Column(
+                    modifier = Modifier.animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    entries.forEachIndexed { index, entry ->
+                        val accentColor = when {
+                            index == 0 -> MaterialTheme.colorScheme.primary
+                            index < 3 -> MaterialTheme.colorScheme.secondary
+                            else -> MaterialTheme.colorScheme.tertiary
+                        }
+                        val accentOnColor = when {
+                            index == 0 -> MaterialTheme.colorScheme.onPrimary
+                            index < 3 -> MaterialTheme.colorScheme.onSecondary
+                            else -> MaterialTheme.colorScheme.onTertiary
+                        }
+                        val rowContainerColor = when {
+                            index == 0 -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                            index < 3 -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.36f)
+                            else -> MaterialTheme.colorScheme.surfaceContainerLow
+                        }
+
+                        Surface(
+                            shape = TerminalCornerShape,
+                            color = rowContainerColor,
+                            modifier = Modifier.clickable { onEntryClick(entry) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                CategoryRankBadge(
+                                    rank = index + 1,
+                                    accentColor = accentColor,
+                                    accentOnColor = accentOnColor,
+                                    highlighted = index == 0
+                                )
+                                SmartImage(
+                                    model = entry.albumArtUri,
+                                    contentDescription = entry.title,
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(TerminalCornerShape),
+                                    shape = TerminalCornerShape,
+                                    targetSize = SmartImageCompactListTargetSize,
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = entry.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = contentColor,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = entry.artist,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = supportingColor,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = stringResource(
+                                            R.string.presentation_batch_g_stats_n_plays,
+                                            entry.playCount
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = supportingColor
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private val TopPlayedFilter.displayNameRes: Int
+    @StringRes get() = when (this) {
+        TopPlayedFilter.ALL -> R.string.presentation_batch_g_selection_all
+        TopPlayedFilter.LOCAL -> R.string.library_storage_filter_offline
+        TopPlayedFilter.YOUTUBE -> R.string.presentation_batch_g_stats_top_played_filter_youtube
+    }
 
 @Composable
 private fun TrackConcentrationCard(

@@ -145,6 +145,20 @@ class PlaylistPreferencesRepository @Inject constructor(
         updatePlaylist(existing.copy(songIds = newSongOrderIds))
     }
 
+    /**
+     * Bumps playlist metadata after a mixed local/YouTube reorder.
+     * [PlaylistYouTubeMembership.applyMixedOrder] already persisted playlist_songs sort_order;
+     * do not call [replacePlaylistSongs] here or mixed indices are clobbered.
+     */
+    suspend fun touchPlaylistAfterMixedReorder(playlistId: String) {
+        ensureMigratedIfNeeded()
+        val existing = userPlaylistsFlow.first().find { it.id == playlistId } ?: return
+        if (existing.isSmartPlaylist) return
+        localPlaylistDao.upsertPlaylist(
+            existing.copy(lastModified = System.currentTimeMillis()).toEntity()
+        )
+    }
+
     suspend fun setPlaylistSongOrderMode(playlistId: String, modeValue: String) =
         userPreferencesRepository.setPlaylistSongOrderMode(playlistId, modeValue)
 

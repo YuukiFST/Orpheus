@@ -75,6 +75,9 @@ interface YouTubePlaylistDao {
     @Query("SELECT COALESCE(MAX(sort_order), -1) FROM playlist_youtube_tracks WHERE playlist_id = :playlistId")
     suspend fun getMaxSortOrder(playlistId: String): Int
 
+    @Query("SELECT DISTINCT playlist_id FROM playlist_youtube_tracks WHERE video_id = :videoId")
+    suspend fun getPlaylistIdsContainingVideo(videoId: String): List<String>
+
     @Transaction
     suspend fun replaceForPlaylist(playlistId: String, tracks: List<PlaylistYouTubeTrackEntity>) {
         clearForPlaylist(playlistId)

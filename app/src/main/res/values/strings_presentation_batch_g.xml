@@ -485,6 +485,13 @@ Backslash (\) can be used to escape character delimiters.</string>
         <item>Also includes smart playlist persistence, duplicate-track scanning, playback speed control, clearer playback/sync failure messages, and improved accessibility.</item>
     </string-array>
 
+    <string name="presentation_batch_g_stats_top_played_title">Top 20</string>
+    <string name="presentation_batch_g_stats_top_played_subtitle">Your most played tracks by play count.</string>
+    <string name="presentation_batch_g_stats_top_played_filter_youtube">YouTube</string>
+    <string name="presentation_batch_g_stats_top_played_empty_title">No plays yet</string>
+    <string name="presentation_batch_g_stats_top_played_empty_subtitle">Start listening and your most played tracks will show up here.</string>
+    <string name="presentation_batch_g_stats_top_played_queue">Top 20</string>
+
     <string name="presentation_batch_g_changelog_sec_whats_new">What\'s new</string>
     <string name="presentation_batch_g_changelog_sec_improvements">Improvements</string>
     <string name="presentation_batch_g_changelog_sec_under_the_hood">Under the hood</string>

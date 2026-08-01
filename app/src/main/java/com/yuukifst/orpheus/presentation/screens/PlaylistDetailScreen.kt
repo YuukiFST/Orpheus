@@ -931,7 +931,8 @@ fun PlaylistDetailScreen(
                 },
                 removeFromListTrigger = {
                     playlistViewModel.removeSongFromPlaylist(playlistId, currentSong.id)
-                }
+                },
+                showRemoveFromPlaylist = true,
             )
             if (showPlaylistBottomSheet) {
                 val playlistUiState by playlistViewModel.uiState.collectAsStateWithLifecycle()
