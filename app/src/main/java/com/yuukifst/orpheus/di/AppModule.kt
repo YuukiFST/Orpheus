@@ -25,6 +25,8 @@ import com.yuukifst.orpheus.data.database.LocalPlaylistDao
 import com.yuukifst.orpheus.data.database.MIGRATION_1_2
 import com.yuukifst.orpheus.data.database.MIGRATION_2_3
 import com.yuukifst.orpheus.data.database.MIGRATION_3_4
+import com.yuukifst.orpheus.data.database.MIGRATION_4_5
+import com.yuukifst.orpheus.data.database.LikedOrderDao
 import com.yuukifst.orpheus.data.database.YouTubeDownloadDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
@@ -130,7 +132,7 @@ object AppModule {
             "orpheus_database"
         )
             .addCallback(OrpheusDatabase.createRuntimeArtifactsCallback())
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
 
         // P2-4: Only allow destructive recreation in debug builds.
@@ -208,6 +210,12 @@ object AppModule {
     @Provides
     fun provideYouTubeCachedTrackDao(database: OrpheusDatabase): YouTubeCachedTrackDao {
         return database.youTubeCachedTrackDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideLikedOrderDao(database: OrpheusDatabase): LikedOrderDao {
+        return database.likedOrderDao()
     }
 
     @Provides

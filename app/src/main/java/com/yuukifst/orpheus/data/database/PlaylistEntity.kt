@@ -42,6 +42,8 @@ data class PlaylistEntity(
     val coverShapeDetail4: Float? = null,
     @ColumnInfo(name = "source")
     val source: String = "LOCAL",
+    @ColumnInfo(name = "display_order")
+    val displayOrder: Int = 0,
 )
 
 fun PlaylistEntity.toPlaylist(songIds: List<String>): Playlist {
@@ -61,6 +63,7 @@ fun PlaylistEntity.toPlaylist(songIds: List<String>): Playlist {
         coverShapeDetail3 = coverShapeDetail3,
         coverShapeDetail4 = coverShapeDetail4,
         source = source,
+        displayOrder = displayOrder,
     )
 }
 
@@ -80,5 +83,6 @@ fun Playlist.toEntity(): PlaylistEntity {
         coverShapeDetail3 = coverShapeDetail3,
         coverShapeDetail4 = coverShapeDetail4,
         source = source,
+        displayOrder = displayOrder,
     )
 }
