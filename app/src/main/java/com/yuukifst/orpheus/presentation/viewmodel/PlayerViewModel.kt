@@ -770,7 +770,11 @@ class PlayerViewModel @Inject constructor(
         } else {
             baseFilter
         }
-        return musicRepository.getFavoriteSongsOnce(storageFilter)
+        return if (playerUiState.value.currentFavoriteSortOption == SortOption.LikedSongManual) {
+            musicRepository.getLikedSongsInManualOrder(storageFilter)
+        } else {
+            musicRepository.getFavoriteSongsOnce(storageFilter)
+        }
     }
 
     private fun launchLatestFullQueuePlayback(
@@ -4438,6 +4442,22 @@ class PlayerViewModel @Inject constructor(
 
     fun sortFavoriteSongs(sortOption: SortOption, persist: Boolean = true) {
         libraryStateHolder.sortFavoriteSongs(sortOption, persist)
+    }
+
+    val likedSongsFullList: StateFlow<ImmutableList<Song>> = libraryStateHolder.likedSongsFullList
+
+    val isLikedReorderMode: StateFlow<Boolean> = libraryStateHolder.isLikedReorderMode
+
+    fun setLikedReorderMode(enabled: Boolean) {
+        libraryStateHolder.setLikedReorderMode(enabled)
+    }
+
+    suspend fun refreshLikedSongsFullList() {
+        libraryStateHolder.refreshLikedSongsFullList()
+    }
+
+    fun reorderLikedSongs(orderedMediaIds: List<String>) {
+        libraryStateHolder.reorderLikedSongs(orderedMediaIds)
     }
 
     fun sortFolders(sortOption: SortOption, persist: Boolean = true) {

@@ -131,6 +131,12 @@ class LibraryStateHolder @Inject constructor(
     private val _currentFavoriteSortOption = MutableStateFlow<SortOption>(SortOption.LikedSongDateLiked)
     val currentFavoriteSortOption = _currentFavoriteSortOption.asStateFlow()
 
+    private val _likedSongsFullList = MutableStateFlow<ImmutableList<Song>>(persistentListOf())
+    val likedSongsFullList = _likedSongsFullList.asStateFlow()
+
+    private val _isLikedReorderMode = MutableStateFlow(false)
+    val isLikedReorderMode = _isLikedReorderMode.asStateFlow()
+
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val albumsPagingFlow: kotlinx.coroutines.flow.Flow<androidx.paging.PagingData<Album>> =
         kotlinx.coroutines.flow.combine(
@@ -553,8 +559,55 @@ class LibraryStateHolder @Inject constructor(
                 userPreferencesRepository.setLikedSongsSortOption(sortOption.storageKey)
             }
             _currentFavoriteSortOption.value = sortOption
-            // The actual filtering/sorting of favorites happens in ViewModel using this flow
+            if (sortOption == SortOption.LikedSongManual || _isLikedReorderMode.value) {
+                refreshLikedSongsFullList()
+            } else if (!_isLikedReorderMode.value) {
+                _likedSongsFullList.value = persistentListOf()
+            }
         }
+    }
+
+    fun setLikedReorderMode(enabled: Boolean) {
+        if (_isLikedReorderMode.value == enabled) return
+        _isLikedReorderMode.value = enabled
+        scope?.launch {
+            if (enabled || _currentFavoriteSortOption.value == SortOption.LikedSongManual) {
+                refreshLikedSongsFullList()
+            } else {
+                _likedSongsFullList.value = persistentListOf()
+            }
+        }
+    }
+
+    suspend fun refreshLikedSongsFullList() {
+        val filter = resolveEffectiveStorageFilter()
+        val sort = _currentFavoriteSortOption.value
+        val songs = when {
+            sort == SortOption.LikedSongManual ->
+                musicRepository.getLikedSongsInManualOrder(filter)
+            _isLikedReorderMode.value ->
+                musicRepository.getFavoriteSongsOnce(filter)
+            else -> emptyList()
+        }
+        _likedSongsFullList.value = songs.toImmutableList()
+    }
+
+    fun reorderLikedSongs(orderedMediaIds: List<String>) {
+        val songById = _likedSongsFullList.value.associateBy { it.id }
+        val reorderedSongs = orderedMediaIds.mapNotNull { songById[it] }
+
+        _currentFavoriteSortOption.value = SortOption.LikedSongManual
+        _likedSongsFullList.value = reorderedSongs.toImmutableList()
+
+        scope?.launch {
+            musicRepository.reorderLikedSongs(orderedMediaIds)
+            userPreferencesRepository.setLikedSongsSortOption(SortOption.LikedSongManual.storageKey)
+        }
+    }
+
+    private suspend fun resolveEffectiveStorageFilter(): StorageFilter {
+        val hideLocal = userPreferencesRepository.hideLocalMediaFlow.first()
+        return if (hideLocal) StorageFilter.ONLINE else _currentStorageFilter.value
     }
 
     /**

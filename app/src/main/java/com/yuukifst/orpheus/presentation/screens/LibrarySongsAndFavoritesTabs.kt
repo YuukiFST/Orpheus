@@ -4,11 +4,14 @@ package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.OrpheusButton
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +22,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.DragIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,7 +40,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -43,11 +48,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.view.HapticFeedbackConstantsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,20 +74,23 @@ import com.yuukifst.orpheus.presentation.components.ExpressiveScrollBar
 import com.yuukifst.orpheus.presentation.components.MiniPlayerHeight
 import com.yuukifst.orpheus.presentation.components.songFastScrollLabel
 import com.yuukifst.orpheus.presentation.components.subcomps.EnhancedSongListItem
+import com.yuukifst.orpheus.presentation.utils.LocalAppHapticsConfig
+import com.yuukifst.orpheus.presentation.utils.performAppCompatHapticFeedback
 import com.yuukifst.orpheus.presentation.viewmodel.PlayerViewModel
 import com.yuukifst.orpheus.presentation.viewmodel.StablePlayerState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import androidx.compose.ui.text.style.TextOverflow
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun LibraryFavoritesTab(
     favoriteSongs: LazyPagingItems<Song>,
     youtubeFavoriteSongs: ImmutableList<Song> = persistentListOf(),
+    fullListSongs: ImmutableList<Song> = persistentListOf(),
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
     onMoreOptionsClick: (Song) -> Unit,
@@ -90,19 +102,62 @@ fun LibraryFavoritesTab(
     onSongSelectionToggle: (Song) -> Unit = {},
     getSelectionIndex: (String) -> Int? = { null },
     sortOption: SortOption,
+    isReorderModeEnabled: Boolean = false,
+    onReorderPersist: (List<String>) -> Unit = {},
     onLocateCurrentSongVisibilityChanged: (Boolean) -> Unit = {},
     onRegisterLocateCurrentSongAction: ((() -> Unit)?) -> Unit = {},
     storageFilter: StorageFilter = StorageFilter.ALL,
     hasCurrentSong: Boolean = false
 ) {
+    val useFullList = isReorderModeEnabled || sortOption == SortOption.LikedSongManual
+    val canDrag = isReorderModeEnabled && !isSelectionMode
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    val view = LocalView.current
+    val appHapticsConfig = LocalAppHapticsConfig.current
+    val reorderSongCd = stringResource(R.string.presentation_batch_b_reorder_song)
     val visibilityCallback by rememberUpdatedState(onLocateCurrentSongVisibilityChanged)
     val registerActionCallback by rememberUpdatedState(onRegisterLocateCurrentSongAction)
-    val favoriteFastScrollLabelProvider = remember(favoriteSongs, sortOption) {
+    var localReorderableSongs by remember(fullListSongs) { mutableStateOf(fullListSongs.toList()) }
+    var lastMovedFrom by remember { mutableStateOf<Int?>(null) }
+    var lastMovedTo by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(fullListSongs) {
+        localReorderableSongs = fullListSongs.toList()
+    }
+
+    val reorderableState = rememberReorderableLazyListState(
+        lazyListState = listState,
+        onMove = { from, to ->
+            localReorderableSongs = localReorderableSongs.toMutableList().apply {
+                add(to.index, removeAt(from.index))
+            }
+            if (lastMovedFrom == null) {
+                lastMovedFrom = from.index
+            }
+            lastMovedTo = to.index
+        }
+    )
+
+    LaunchedEffect(reorderableState.isAnyItemDragging, canDrag) {
+        if (canDrag && !reorderableState.isAnyItemDragging && lastMovedFrom != null && lastMovedTo != null) {
+            onReorderPersist(localReorderableSongs.map { it.id })
+            lastMovedFrom = null
+            lastMovedTo = null
+        } else if (!canDrag && !reorderableState.isAnyItemDragging) {
+            lastMovedFrom = null
+            lastMovedTo = null
+        }
+    }
+
+    val favoriteFastScrollLabelProvider = remember(favoriteSongs, fullListSongs, sortOption, useFullList) {
         { index: Int ->
+            val song = if (useFullList) {
+                fullListSongs.getOrNull(index)
+            } else {
+                favoriteSongs.peek(index)
+            }
             songFastScrollLabel(
-                song = favoriteSongs.peek(index),
+                song = song,
                 sortOption = sortOption
             )
         }
@@ -116,9 +171,17 @@ fun LibraryFavoritesTab(
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = null)
 
-    val currentSongListIndex = remember(favoriteSongs.itemCount, currentSongId, youtubeFavoriteSongs) {
+    val currentSongListIndex = remember(
+        favoriteSongs.itemCount,
+        currentSongId,
+        youtubeFavoriteSongs,
+        fullListSongs,
+        useFullList
+    ) {
         if (currentSongId == null) -1
-        else {
+        else if (useFullList) {
+            fullListSongs.indexOfFirst { it.id == currentSongId }
+        } else {
             val youtubeIndex = youtubeFavoriteSongs.indexOfFirst { it.id == currentSongId }
             if (youtubeIndex >= 0) {
                 youtubeIndex
@@ -129,7 +192,6 @@ fun LibraryFavoritesTab(
             }
         }
     }
-    // New action just triggers the ViewModel request
     val locateCurrentSongAction: (() -> Unit)? = remember(currentSongId) {
         if (currentSongId == null) {
             null
@@ -139,7 +201,6 @@ fun LibraryFavoritesTab(
             }
         }
     }
-    // Scroll Handler from ViewModel
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(playerViewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -169,8 +230,8 @@ fun LibraryFavoritesTab(
         listState.scrollToItem(0)
     }
 
-    LaunchedEffect(favoriteSongs.loadState.refresh, pendingFavoriteSortScrollReset) {
-        if (!pendingFavoriteSortScrollReset) return@LaunchedEffect
+    LaunchedEffect(favoriteSongs.loadState.refresh, pendingFavoriteSortScrollReset, useFullList) {
+        if (useFullList || !pendingFavoriteSortScrollReset) return@LaunchedEffect
         if (favoriteSongs.loadState.refresh is LoadState.Loading) {
             favoriteSortSawRefreshLoading = true
             return@LaunchedEffect
@@ -180,15 +241,16 @@ fun LibraryFavoritesTab(
         pendingFavoriteSortScrollReset = false
     }
 
-    LaunchedEffect(currentSongListIndex, favoriteSongs.itemCount, listState, currentSongId) {
-        if (currentSongId == null || favoriteSongs.itemCount == 0) {
+    LaunchedEffect(currentSongListIndex, favoriteSongs.itemCount, fullListSongs.size, listState, currentSongId, useFullList) {
+        val itemCount = if (useFullList) fullListSongs.size else favoriteSongs.itemCount
+        if (currentSongId == null || itemCount == 0) {
             visibilityCallback(false)
             return@LaunchedEffect
         }
 
         if (currentSongListIndex == -1) {
-             visibilityCallback(true)
-             return@LaunchedEffect
+            visibilityCallback(true)
+            return@LaunchedEffect
         }
 
         snapshotFlow {
@@ -212,11 +274,15 @@ fun LibraryFavoritesTab(
         }
     }
 
-    if (
+    val isEmpty = if (useFullList) {
+        fullListSongs.isEmpty()
+    } else {
         favoriteSongs.itemCount == 0 &&
             youtubeFavoriteSongs.isEmpty() &&
             favoriteSongs.loadState.refresh !is LoadState.Loading
-    ) {
+    }
+
+    if (isEmpty) {
         LibraryExpressiveEmptyState(
             tabId = LibraryTabId.LIKED,
             storageFilter = storageFilter,
@@ -251,40 +317,86 @@ fun LibraryFavoritesTab(
                             ),
                         state = listState,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
+                        contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp),
+                        userScrollEnabled = !reorderableState.isAnyItemDragging
                     ) {
-                        itemsIndexed(
-                            items = youtubeFavoriteSongs,
-                            key = { _, song -> song.id },
-                            contentType = { _, _ -> "youtube_favorite" }
-                        ) { index, song ->
-                            LibraryPlaybackAwareSongItem(
-                                enterIndex = index,
-                                song = song,
-                                playerViewModel = playerViewModel,
-                                onMoreOptionsClick = { onMoreOptionsClick(song) },
-                                isSelected = selectedSongIds.contains(song.id),
-                                selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
-                                isSelectionMode = isSelectionMode,
-                                onLongPress = { onSongLongPress(song) },
-                                onClick = {
-                                    if (isSelectionMode) {
-                                        onSongSelectionToggle(song)
-                                    } else {
-                                        playerViewModel.showAndPlaySongFromFavorites(song)
+                        if (useFullList) {
+                            itemsIndexed(
+                                items = localReorderableSongs,
+                                key = { _, song -> song.id },
+                                contentType = { _, _ -> "liked_full_song" }
+                            ) { index, song ->
+                                if (canDrag) {
+                                    ReorderableItem(
+                                        state = reorderableState,
+                                        key = song.id,
+                                    ) { isDragging ->
+                                        LikedFavoriteReorderRow(
+                                            index = index,
+                                            song = song,
+                                            isDragging = isDragging,
+                                            dragHandle = {
+                                                IconButton(
+                                                    onClick = {},
+                                                    modifier = Modifier
+                                                        .draggableHandle(
+                                                            onDragStarted = {
+                                                                performAppCompatHapticFeedback(
+                                                                    view,
+                                                                    appHapticsConfig,
+                                                                    HapticFeedbackConstantsCompat.GESTURE_START
+                                                                )
+                                                            },
+                                                            onDragStopped = {
+                                                                performAppCompatHapticFeedback(
+                                                                    view,
+                                                                    appHapticsConfig,
+                                                                    HapticFeedbackConstantsCompat.GESTURE_END
+                                                                )
+                                                            }
+                                                        )
+                                                        .size(40.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.DragIndicator,
+                                                        contentDescription = reorderSongCd,
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            },
+                                            playerViewModel = playerViewModel,
+                                            selectedSongIds = selectedSongIds,
+                                            isSelectionMode = isSelectionMode,
+                                            getSelectionIndex = getSelectionIndex,
+                                            onMoreOptionsClick = onMoreOptionsClick,
+                                            onSongLongPress = onSongLongPress,
+                                            onSongSelectionToggle = onSongSelectionToggle,
+                                        )
                                     }
+                                } else {
+                                    LikedFavoriteReorderRow(
+                                        index = index,
+                                        song = song,
+                                        isDragging = false,
+                                        dragHandle = null,
+                                        playerViewModel = playerViewModel,
+                                        selectedSongIds = selectedSongIds,
+                                        isSelectionMode = isSelectionMode,
+                                        getSelectionIndex = getSelectionIndex,
+                                        onMoreOptionsClick = onMoreOptionsClick,
+                                        onSongLongPress = onSongLongPress,
+                                        onSongSelectionToggle = onSongSelectionToggle,
+                                    )
                                 }
-                            )
-                        }
-                        items(
-                            count = favoriteSongs.itemCount,
-                            key = { index -> favoriteSongs.peek(index)?.id ?: index },
-                            contentType = { "song" }
-                        ) { index ->
-                            val song = favoriteSongs[index]
-                            if (song != null) {
+                            }
+                        } else {
+                            itemsIndexed(
+                                items = youtubeFavoriteSongs,
+                                key = { _, song -> song.id },
+                                contentType = { _, _ -> "youtube_favorite" }
+                            ) { index, song ->
                                 LibraryPlaybackAwareSongItem(
-                                    enterIndex = youtubeFavoriteSongs.size + index,
+                                    enterIndex = index,
                                     song = song,
                                     playerViewModel = playerViewModel,
                                     onMoreOptionsClick = { onMoreOptionsClick(song) },
@@ -300,15 +412,41 @@ fun LibraryFavoritesTab(
                                         }
                                     }
                                 )
-                            } else {
-                                EnhancedSongListItem(
-                                    song = Song.emptySong(),
-                                    isPlaying = false,
-                                    isLoading = true,
-                                    isCurrentSong = false,
-                                    onMoreOptionsClick = {},
-                                    onClick = {}
-                                )
+                            }
+                            items(
+                                count = favoriteSongs.itemCount,
+                                key = { index -> favoriteSongs.peek(index)?.id ?: index },
+                                contentType = { "song" }
+                            ) { index ->
+                                val song = favoriteSongs[index]
+                                if (song != null) {
+                                    LibraryPlaybackAwareSongItem(
+                                        enterIndex = youtubeFavoriteSongs.size + index,
+                                        song = song,
+                                        playerViewModel = playerViewModel,
+                                        onMoreOptionsClick = { onMoreOptionsClick(song) },
+                                        isSelected = selectedSongIds.contains(song.id),
+                                        selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
+                                        isSelectionMode = isSelectionMode,
+                                        onLongPress = { onSongLongPress(song) },
+                                        onClick = {
+                                            if (isSelectionMode) {
+                                                onSongSelectionToggle(song)
+                                            } else {
+                                                playerViewModel.showAndPlaySongFromFavorites(song)
+                                            }
+                                        }
+                                    )
+                                } else {
+                                    EnhancedSongListItem(
+                                        song = Song.emptySong(),
+                                        isPlaying = false,
+                                        isLoading = true,
+                                        isCurrentSong = false,
+                                        onMoreOptionsClick = {},
+                                        onClick = {}
+                                    )
+                                }
                             }
                         }
                     }
@@ -327,6 +465,59 @@ fun LibraryFavoritesTab(
                     )
                 }
             }
+        }
+    }
+}
+
+@androidx.annotation.OptIn(UnstableApi::class)
+@Composable
+private fun LikedFavoriteReorderRow(
+    index: Int,
+    song: Song,
+    isDragging: Boolean,
+    dragHandle: (@Composable () -> Unit)?,
+    playerViewModel: PlayerViewModel,
+    selectedSongIds: Set<String>,
+    isSelectionMode: Boolean,
+    getSelectionIndex: (String) -> Int?,
+    onMoreOptionsClick: (Song) -> Unit,
+    onSongLongPress: (Song) -> Unit,
+    onSongSelectionToggle: (Song) -> Unit,
+) {
+    val scale by animateFloatAsState(
+        if (isDragging) 1.03f else 1f,
+        label = "likedReorderScale"
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedVisibility(visible = dragHandle != null) {
+            dragHandle?.invoke()
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            LibraryPlaybackAwareSongItem(
+                enterIndex = index,
+                song = song,
+                playerViewModel = playerViewModel,
+                onMoreOptionsClick = { onMoreOptionsClick(song) },
+                isSelected = selectedSongIds.contains(song.id),
+                selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
+                isSelectionMode = isSelectionMode,
+                onLongPress = { onSongLongPress(song) },
+                onClick = {
+                    if (isSelectionMode) {
+                        onSongSelectionToggle(song)
+                    } else {
+                        playerViewModel.showAndPlaySongFromFavorites(song)
+                    }
+                }
+            )
         }
     }
 }
