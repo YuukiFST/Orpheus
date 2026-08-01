@@ -758,6 +758,7 @@ class PlaylistViewModel @Inject constructor(
             _uiState.update {
                 val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
                 it.copy(
+                    currentPlaylistDetails = currentPlaylist.copy(songIds = localOrderIds),
                     currentPlaylistSongs = currentSongs,
                     currentPlaylistMixedTracks = reindexedMixedTracks,
                     playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,

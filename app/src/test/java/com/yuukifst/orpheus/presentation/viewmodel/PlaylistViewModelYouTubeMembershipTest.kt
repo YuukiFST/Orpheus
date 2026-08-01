@@ -328,5 +328,9 @@ class PlaylistViewModelYouTubeMembershipTest {
             listOf("youtube_vid1", "local-a"),
             viewModel.uiState.value.currentPlaylistSongs.map { it.id },
         )
+        assertEquals(
+            listOf("local-a"),
+            viewModel.uiState.value.currentPlaylistDetails?.songIds,
+        )
     }
 }
