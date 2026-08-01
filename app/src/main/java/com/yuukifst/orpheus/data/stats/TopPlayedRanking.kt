@@ -29,12 +29,14 @@ fun rankTopPlayed(
     return engagements
         .asSequence()
         .filter { engagement -> engagement.matchesFilter(filter) }
+        .filter { engagement -> songsById.containsKey(engagement.songId) }
         .sortedWith(
             compareByDescending<SongEngagementEntity> { it.playCount }
                 .thenByDescending { it.lastPlayedTimestamp }
         )
-        .mapNotNull { engagement ->
-            val song = songsById[engagement.songId] ?: return@mapNotNull null
+        .take(limit)
+        .map { engagement ->
+            val song = songsById.getValue(engagement.songId)
             TopPlayedEntry(
                 songId = engagement.songId,
                 title = song.title,
@@ -43,7 +45,6 @@ fun rankTopPlayed(
                 playCount = engagement.playCount,
             )
         }
-        .take(limit)
         .toList()
 }
 

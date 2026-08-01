@@ -117,6 +117,38 @@ class TopPlayedRankingTest {
     }
 
     @Test
+    fun `rankTopPlayed returns full limit when orphans rank above resolvable entries`() {
+        val resolvableEngagements = (1..25).map { index ->
+            engagement("song-$index", playCount = index, lastPlayedTimestamp = index.toLong())
+        }
+        val orphanEngagements = (1..10).map { index ->
+            engagement(
+                songId = "missing-$index",
+                playCount = 1_000 - index,
+                lastPlayedTimestamp = 10_000L + index,
+            )
+        }
+        val engagements = buildList {
+            orphanEngagements.forEachIndexed { index, orphan ->
+                add(orphan)
+                resolvableEngagements.getOrNull(index)?.let(::add)
+            }
+            addAll(resolvableEngagements.drop(orphanEngagements.size))
+        }
+        val songs = resolvableEngagements.associate { engagement ->
+            engagement.songId to song(engagement.songId)
+        }
+
+        val result = rankTopPlayed(engagements, songs, TopPlayedFilter.ALL, limit = 20)
+
+        assertThat(result).hasSize(20)
+        assertThat(result.map { it.songId })
+            .containsExactlyElementsIn((25 downTo 6).map { "song-$it" })
+            .inOrder()
+        assertThat(result.none { it.songId.startsWith("missing-") }).isTrue()
+    }
+
+    @Test
     fun `rankTopPlayed maps song metadata into entry`() {
         val song = song(
             id = "1",
