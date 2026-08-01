@@ -730,9 +730,13 @@ fun LibraryScreen(
         }.collectAsStateWithLifecycle(initialValue = LibraryPrefsUiState())
         val isLikedReorderMode by playerViewModel.isLikedReorderMode.collectAsStateWithLifecycle()
         val likedSongsFullList by playerViewModel.likedSongsFullList.collectAsStateWithLifecycle()
+        val isPlaylistReorderMode by playlistViewModel.isPlaylistReorderMode.collectAsStateWithLifecycle()
         LaunchedEffect(currentTabId) {
             if (currentTabId != LibraryTabId.LIKED) {
                 playerViewModel.setLikedReorderMode(false)
+            }
+            if (currentTabId != LibraryTabId.PLAYLISTS) {
+                playlistViewModel.setPlaylistReorderMode(false)
             }
         }
         LaunchedEffect(
@@ -976,9 +980,21 @@ fun LibraryScreen(
                             visible = currentTabId == LibraryTabId.LIKED &&
                                 !(isSelectionMode || isPlaylistSelectionMode || isAlbumSelectionMode)
                         ) {
-                            LikedReorderModeToggleRow(
+                            ReorderModeToggleRow(
                                 isReorderModeEnabled = isLikedReorderMode,
-                                onToggle = { playerViewModel.setLikedReorderMode(!isLikedReorderMode) }
+                                onToggle = { playerViewModel.setLikedReorderMode(!isLikedReorderMode) },
+                                reorderContentDescription = stringResource(R.string.presentation_batch_b_reorder_songs),
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = currentTabId == LibraryTabId.PLAYLISTS &&
+                                !(isSelectionMode || isPlaylistSelectionMode || isAlbumSelectionMode)
+                        ) {
+                            ReorderModeToggleRow(
+                                isReorderModeEnabled = isPlaylistReorderMode,
+                                onToggle = { playlistViewModel.setPlaylistReorderMode(!isPlaylistReorderMode) },
+                                reorderContentDescription = stringResource(R.string.presentation_batch_b_reorder_songs),
                             )
                         }
 
@@ -1247,7 +1263,9 @@ fun LibraryScreen(
                                             selectedPlaylistIds = selectedPlaylistIds,
                                             onPlaylistLongPress = onPlaylistLongPress,
                                             onPlaylistSelectionToggle = onPlaylistSelectionToggle,
-                                            onPlaylistOptionsClick = { showPlaylistMultiSelectionSheet = true }
+                                            onPlaylistOptionsClick = { showPlaylistMultiSelectionSheet = true },
+                                            isReorderModeEnabled = isPlaylistReorderMode,
+                                            onReorderPersist = playlistViewModel::reorderPlaylists,
                                         )
                                     }
 
@@ -3227,19 +3245,19 @@ fun AlbumListItem(
 }
 
 @Composable
-private fun LikedReorderModeToggleRow(
+private fun ReorderModeToggleRow(
     isReorderModeEnabled: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    reorderContentDescription: String,
 ) {
     val reorderLabel = stringResource(R.string.presentation_batch_b_reorder)
-    val reorderSongsCd = stringResource(R.string.presentation_batch_b_reorder_songs)
     val reorderButtonColor by animateColorAsState(
         targetValue = if (isReorderModeEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceContainerHigh,
-        label = "likedReorderButtonColor"
+        label = "reorderButtonColor"
     )
     val reorderIconColor by animateColorAsState(
         targetValue = if (isReorderModeEnabled) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
-        label = "likedReorderIconColor"
+        label = "reorderIconColor"
     )
 
     Row(
@@ -3265,7 +3283,7 @@ private fun LikedReorderModeToggleRow(
             Icon(
                 modifier = Modifier.size(20.dp),
                 painter = painterResource(R.drawable.drag_order_icon),
-                contentDescription = reorderSongsCd,
+                contentDescription = reorderContentDescription,
                 tint = reorderIconColor
             )
             Spacer(Modifier.width(6.dp))

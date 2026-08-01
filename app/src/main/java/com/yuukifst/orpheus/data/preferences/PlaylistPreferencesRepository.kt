@@ -226,11 +226,18 @@ class PlaylistPreferencesRepository @Inject constructor(
 
     private fun sortUserPlaylists(playlists: List<Playlist>, sortOption: SortOption): List<Playlist> {
         if (sortOption != SortOption.PlaylistManual) return playlists
-        return playlists.sortedWith(
+        val (userPlaylists, smartPlaylists) = playlists.partition { !it.isSmartPlaylist }
+        val sortedUserPlaylists = userPlaylists.sortedWith(
             compareBy<Playlist> { it.displayOrder }
                 .thenByDescending { it.lastModified }
                 .thenBy { it.id },
         )
+        val sortedSmartPlaylists = smartPlaylists.sortedWith(
+            compareBy<Playlist> { it.name.lowercase() }
+                .thenByDescending { it.lastModified }
+                .thenBy { it.id },
+        )
+        return sortedUserPlaylists + sortedSmartPlaylists
     }
 
     private suspend fun ensureMigratedIfNeeded() {

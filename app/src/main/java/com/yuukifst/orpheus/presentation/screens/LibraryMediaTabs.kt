@@ -660,7 +660,9 @@ fun LibraryPlaylistsTab(
     selectedPlaylistIds: Set<String> = emptySet(),
     onPlaylistLongPress: (com.yuukifst.orpheus.data.model.Playlist) -> Unit = {},
     onPlaylistSelectionToggle: (com.yuukifst.orpheus.data.model.Playlist) -> Unit = {},
-    onPlaylistOptionsClick: () -> Unit = {}
+    onPlaylistOptionsClick: () -> Unit = {},
+    isReorderModeEnabled: Boolean = false,
+    onReorderPersist: (List<String>) -> Unit = {},
 ) {
     PlaylistContainer(
         playlistUiState = playlistUiState,
@@ -674,6 +676,8 @@ fun LibraryPlaylistsTab(
         isSelectionMode = isSelectionMode,
         selectedPlaylistIds = selectedPlaylistIds,
         onPlaylistLongPress = onPlaylistLongPress,
-        onPlaylistSelectionToggle = onPlaylistSelectionToggle
+        onPlaylistSelectionToggle = onPlaylistSelectionToggle,
+        isReorderModeEnabled = isReorderModeEnabled,
+        onReorderPersist = onReorderPersist,
     )
 }
