@@ -3,8 +3,12 @@ package com.yuukifst.orpheus.presentation.viewmodel
 import android.content.Context
 import com.yuukifst.orpheus.MainCoroutineExtension
 import com.yuukifst.orpheus.data.DailyMixManager
+import com.yuukifst.orpheus.data.database.LocalPlaylistDao
+import com.yuukifst.orpheus.data.database.PlaylistSongEntity
+import com.yuukifst.orpheus.data.database.PlaylistYouTubeTrackEntity
 import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.model.Playlist
+import com.yuukifst.orpheus.data.model.PlaylistMixedTrack
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.playlist.M3uManager
 import com.yuukifst.orpheus.data.playlist.PlaylistMixedTrackResolver
@@ -19,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -26,6 +31,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import com.yuukifst.orpheus.presentation.viewmodel.toPlaybackSong
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MainCoroutineExtension::class)
@@ -46,6 +52,7 @@ class PlaylistViewModelYouTubeMembershipTest {
 
     private val playlistId = "pl-1"
     private val mediaId = "youtube_vid1"
+
     private val cachedSong = Song(
         id = mediaId,
         title = "YT Title",
@@ -61,6 +68,22 @@ class PlaylistViewModelYouTubeMembershipTest {
         bitrate = null,
         sampleRate = null,
     )
+
+    private fun PlaylistViewModel.seedCurrentMixedPlaylist(
+        songs: List<Song>,
+        mixedTracks: List<PlaylistMixedTrack>,
+    ) {
+        val field = PlaylistViewModel::class.java.getDeclaredField("_uiState")
+        field.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        val stateFlow = field.get(this) as MutableStateFlow<PlaylistUiState>
+        stateFlow.value = stateFlow.value.copy(
+            currentPlaylistDetails = Playlist(id = playlistId, name = "Mixed", songIds = listOf("local-a")),
+            currentPlaylistSongs = songs,
+            currentPlaylistMixedTracks = mixedTracks,
+            playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
+        )
+    }
 
     @BeforeEach
     fun setUp() {
@@ -217,5 +240,93 @@ class PlaylistViewModelYouTubeMembershipTest {
         val ids = viewModel.playlistIdsContainingSong(mediaId)
 
         assertEquals(setOf(playlistId), ids)
+    }
+
+    @Test
+    fun reorderSongsInPlaylist_mixedPlaylist_persistsYouTubeSortOrderAtNewIndex() = runTest {
+        val localPlaylistDao = mockk<LocalPlaylistDao>(relaxed = true)
+        val localSong = Song(
+            id = "local-a",
+            title = "Local",
+            artist = "Artist",
+            artistId = 1L,
+            album = "Album",
+            albumId = 1L,
+            path = "/music/local.mp3",
+            contentUriString = "content://local",
+            albumArtUriString = null,
+            duration = 200_000L,
+            mimeType = null,
+            bitrate = null,
+            sampleRate = null,
+        )
+        val youtubeTrack = YouTubeTrack(
+            videoId = "vid1",
+            title = "YT Title",
+            channelName = "Channel",
+            thumbnailUrl = "https://thumb",
+            durationMs = 180_000L,
+        )
+        val mixedTracks = listOf(
+            PlaylistMixedTrack.Local(localSong, sortOrder = 0),
+            PlaylistMixedTrack.YouTube(youtubeTrack, sortOrder = 1),
+        )
+        val songs = mixedTracks.map { track ->
+            when (track) {
+                is PlaylistMixedTrack.Local -> track.song
+                is PlaylistMixedTrack.YouTube -> track.track.toPlaybackSong()
+            }
+        }
+        val youtubeEntity = PlaylistYouTubeTrackEntity(
+            playlistId = playlistId,
+            videoId = "vid1",
+            sortOrder = 1,
+            title = youtubeTrack.title,
+            channelName = youtubeTrack.channelName,
+            thumbnailUrl = youtubeTrack.thumbnailUrl,
+            durationMs = youtubeTrack.durationMs,
+            displayTitle = null,
+        )
+
+        coEvery { localPlaylistDao.observePlaylistSongs(playlistId) } returns flowOf(
+            listOf(PlaylistSongEntity(playlistId, "local-a", 0)),
+        )
+        coEvery { youTubePlaylistDao.observeForPlaylist(playlistId) } returns flowOf(listOf(youtubeEntity))
+        val youtubeSlot = slot<List<PlaylistYouTubeTrackEntity>>()
+        coEvery { youTubePlaylistDao.replaceForPlaylist(playlistId, capture(youtubeSlot)) } returns Unit
+
+        val realMembership = PlaylistYouTubeMembership(
+            localPlaylistDao = localPlaylistDao,
+            youTubePlaylistDao = youTubePlaylistDao,
+            mixedTrackResolver = mixedTrackResolver,
+        )
+        viewModel = PlaylistViewModel(
+            playlistPreferencesRepository = playlistPreferencesRepository,
+            musicRepository = musicRepository,
+            dailyMixManager = dailyMixManager,
+            m3uManager = m3uManager,
+            mixedTrackResolver = mixedTrackResolver,
+            youTubePlaylistDao = youTubePlaylistDao,
+            playlistYouTubeMembership = realMembership,
+            youTubeCachedTrackRepository = youTubeCachedTrackRepository,
+            playbackController = playbackController,
+            context = context,
+        )
+        viewModel.seedCurrentMixedPlaylist(songs, mixedTracks)
+
+        viewModel.reorderSongsInPlaylist(playlistId, fromIndex = 1, toIndex = 0)
+        advanceUntilIdle()
+
+        assertEquals(0, youtubeSlot.captured.single().sortOrder)
+        coVerify(exactly = 1) {
+            playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, listOf("local-a"))
+        }
+        coVerify(exactly = 1) {
+            playlistPreferencesRepository.setPlaylistSongOrderMode(playlistId, "manual")
+        }
+        assertEquals(
+            listOf("youtube_vid1", "local-a"),
+            viewModel.uiState.value.currentPlaylistSongs.map { it.id },
+        )
     }
 }

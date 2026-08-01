@@ -731,23 +731,38 @@ class PlaylistViewModel @Inject constructor(
         if (currentPlaylist.id != playlistId || currentPlaylist.isSmartPlaylist) return
         viewModelScope.launch {
             val currentSongs = _uiState.value.currentPlaylistSongs.toMutableList()
-            if (fromIndex in currentSongs.indices && toIndex in currentSongs.indices) {
-                val item = currentSongs.removeAt(fromIndex)
-                currentSongs.add(toIndex, item)
-                val newSongOrderIds = currentSongs.map { it.id }
-                playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, newSongOrderIds)
-                playlistPreferencesRepository.setPlaylistSongOrderMode(
-                    playlistId,
-                    MANUAL_ORDER_MODE
-                )
-                _uiState.update {
-                    val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
-                    it.copy(
-                        currentPlaylistSongs = currentSongs,
-                        playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
-                        playlistOrderModes = updatedModes
-                    )
+            val currentMixedTracks = _uiState.value.currentPlaylistMixedTracks.toMutableList()
+            if (fromIndex !in currentSongs.indices || toIndex !in currentSongs.indices) return@launch
+
+            val item = currentSongs.removeAt(fromIndex)
+            currentSongs.add(toIndex, item)
+            if (currentMixedTracks.size == currentSongs.size) {
+                val mixedItem = currentMixedTracks.removeAt(fromIndex)
+                currentMixedTracks.add(toIndex, mixedItem)
+            }
+
+            val newOrderIds = currentSongs.map { it.id }
+            val localOrderIds = newOrderIds.filterNot { it.isYouTubeMediaId() }
+
+            playlistYouTubeMembership.applyMixedOrder(playlistId, newOrderIds)
+            playlistPreferencesRepository.reorderSongsInPlaylist(playlistId, localOrderIds)
+            playlistPreferencesRepository.setPlaylistSongOrderMode(playlistId, MANUAL_ORDER_MODE)
+
+            val reindexedMixedTracks = currentMixedTracks.mapIndexed { index, track ->
+                when (track) {
+                    is PlaylistMixedTrack.Local -> track.copy(sortOrder = index)
+                    is PlaylistMixedTrack.YouTube -> track.copy(sortOrder = index)
                 }
+            }
+
+            _uiState.update {
+                val updatedModes = it.playlistOrderModes + (playlistId to PlaylistSongsOrderMode.Manual)
+                it.copy(
+                    currentPlaylistSongs = currentSongs,
+                    currentPlaylistMixedTracks = reindexedMixedTracks,
+                    playlistSongsOrderMode = PlaylistSongsOrderMode.Manual,
+                    playlistOrderModes = updatedModes,
+                )
             }
         }
     }
