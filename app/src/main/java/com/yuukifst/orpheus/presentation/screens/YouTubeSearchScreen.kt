@@ -402,7 +402,7 @@ private fun YouTubeSearchHistorySection(
             )
             if (historyItems.isNotEmpty()) {
                 OrpheusTextButton(onClick = onClearAllHistory) {
-                    Text("Clear all")
+                    Text(stringResource(R.string.clear_all))
                 }
             }
         }
