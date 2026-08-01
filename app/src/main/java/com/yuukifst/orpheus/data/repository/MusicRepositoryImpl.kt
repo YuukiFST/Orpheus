@@ -19,6 +19,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.net.toUri
 import com.yuukifst.orpheus.data.database.FavoritesDao
+import com.yuukifst.orpheus.data.database.LikedOrderDao
+import com.yuukifst.orpheus.data.database.LikedOrderEntity
 import com.yuukifst.orpheus.data.database.MusicDao
 import com.yuukifst.orpheus.data.database.SearchHistoryDao
 import com.yuukifst.orpheus.data.database.SearchHistoryEntity
@@ -41,6 +43,7 @@ import com.yuukifst.orpheus.data.model.FolderSource
 import com.yuukifst.orpheus.data.model.StorageFilter
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.library.mergeLikedManualOrder
 import com.yuukifst.orpheus.ui.theme.GenreThemeUtils
 import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
 import com.yuukifst.orpheus.utils.DirectoryFilterUtils
@@ -88,6 +91,7 @@ class MusicRepositoryImpl @Inject constructor(
     private val lyricsRepository: LyricsRepository,
     private val songRepository: SongRepository,
     private val favoritesDao: FavoritesDao,
+    private val likedOrderDao: LikedOrderDao,
     private val artistImageRepository: ArtistImageRepository,
     private val folderTreeBuilder: FolderTreeBuilder,
     private val youTubeCachedTrackRepository: YouTubeCachedTrackRepository,
@@ -778,6 +782,11 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun setFavoriteStatus(songId: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         if (songId.isYouTubeMediaId()) {
             youTubeCachedTrackRepository.setFavoriteByMediaId(songId, isFavorite)
+            if (isFavorite) {
+                ensureLikedOrderEntryInternal(songId)
+            } else {
+                removeLikedOrderEntryInternal(songId)
+            }
             return@withContext
         }
         val id = songId.toLongOrNull() ?: return@withContext
@@ -788,13 +797,74 @@ class MusicRepositoryImpl @Inject constructor(
                     isFavorite = true
                 )
             )
+            ensureLikedOrderEntryInternal(songId)
         } else {
             favoritesDao.removeFavorite(id)
+            removeLikedOrderEntryInternal(songId)
         }
     }
 
     override suspend fun setYouTubeFavorite(song: Song, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         youTubeCachedTrackRepository.setFavoriteFromSong(song, isFavorite)
+        if (isFavorite) {
+            ensureLikedOrderEntryInternal(song.id)
+        } else {
+            removeLikedOrderEntryInternal(song.id)
+        }
+    }
+
+    override suspend fun reorderLikedSongs(orderedMediaIds: List<String>) = withContext(Dispatchers.IO) {
+        likedOrderDao.replaceAllOrdered(orderedMediaIds)
+    }
+
+    override suspend fun ensureLikedOrderEntry(mediaId: String) = withContext(Dispatchers.IO) {
+        ensureLikedOrderEntryInternal(mediaId)
+    }
+
+    override suspend fun removeLikedOrderEntry(mediaId: String) = withContext(Dispatchers.IO) {
+        removeLikedOrderEntryInternal(mediaId)
+    }
+
+    override suspend fun getLikedSongsInManualOrder(storageFilter: StorageFilter): List<Song> =
+        withContext(Dispatchers.IO) {
+            val favoriteIds = favoriteMediaIdsForStorageFilter(storageFilter)
+            val orderedIds = likedOrderDao.getAllOrdered().map { it.mediaId }
+            val dateLikedById = buildDateLikedByIdMap()
+            val mergedIds = mergeLikedManualOrder(favoriteIds, orderedIds, dateLikedById)
+            if (mergedIds.isEmpty()) {
+                emptyList()
+            } else {
+                getSongsByIds(mergedIds).first()
+            }
+        }
+
+    private suspend fun favoriteMediaIdsForStorageFilter(storageFilter: StorageFilter): Set<String> =
+        when (storageFilter) {
+            StorageFilter.OFFLINE ->
+                favoritesDao.getFavoriteSongIdsOnce().map { it.toString() }.toSet()
+            StorageFilter.ONLINE ->
+                youTubeCachedTrackRepository.getFavoriteMediaIdsOnce()
+            StorageFilter.ALL ->
+                getFavoriteSongIdsOnce()
+        }
+
+    private suspend fun buildDateLikedByIdMap(): Map<String, Long> {
+        val local = favoritesDao.getAllFavoritesOnce()
+            .filter { it.isFavorite }
+            .associate { it.songId.toString() to it.timestamp }
+        val youtube = youTubeCachedTrackRepository.getFavoriteDateLikedByMediaId()
+        return local + youtube
+    }
+
+    private suspend fun ensureLikedOrderEntryInternal(mediaId: String) {
+        val existing = likedOrderDao.getAllOrdered()
+        if (existing.any { it.mediaId == mediaId }) return
+        val maxOrder = existing.maxOfOrNull { it.sortOrder } ?: -1
+        likedOrderDao.insertAll(listOf(LikedOrderEntity(mediaId, maxOrder + 1)))
+    }
+
+    private suspend fun removeLikedOrderEntryInternal(mediaId: String) {
+        likedOrderDao.delete(mediaId)
     }
 
     override suspend fun getFavoriteSongIdsOnce(): Set<String> = withContext(Dispatchers.IO) {
@@ -816,6 +886,11 @@ class MusicRepositoryImpl @Inject constructor(
             val isFav = youTubeCachedTrackRepository.getFavoriteMediaIdsOnce().contains(songId)
             val newFav = !isFav
             youTubeCachedTrackRepository.setFavoriteByMediaId(songId, newFav)
+            if (newFav) {
+                ensureLikedOrderEntryInternal(songId)
+            } else {
+                removeLikedOrderEntryInternal(songId)
+            }
             return@withContext newFav
         }
         val id = songId.toLongOrNull() ?: return@withContext false

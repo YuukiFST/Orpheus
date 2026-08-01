@@ -271,6 +271,16 @@ interface MusicRepository {
 
     suspend fun setYouTubeFavorite(song: Song, isFavorite: Boolean)
 
+    suspend fun reorderLikedSongs(orderedMediaIds: List<String>)
+
+    suspend fun ensureLikedOrderEntry(mediaId: String)
+
+    suspend fun removeLikedOrderEntry(mediaId: String)
+
+    suspend fun getLikedSongsInManualOrder(
+        storageFilter: com.yuukifst.orpheus.data.model.StorageFilter = com.yuukifst.orpheus.data.model.StorageFilter.ALL,
+    ): List<Song>
+
     /**
      * Returns favorite song IDs directly from Room (favorites table).
      */

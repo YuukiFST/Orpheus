@@ -93,6 +93,9 @@ class PlaylistViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PlaylistUiState())
     val uiState: StateFlow<PlaylistUiState> = _uiState.asStateFlow()
 
+    private val _isPlaylistReorderMode = MutableStateFlow(false)
+    val isPlaylistReorderMode: StateFlow<Boolean> = _isPlaylistReorderMode.asStateFlow()
+
     private val _playlistCreationEvent = MutableSharedFlow<Boolean>(
         extraBufferCapacity = 1,
         onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
@@ -768,10 +771,38 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
+    fun setPlaylistReorderMode(enabled: Boolean) {
+        if (_isPlaylistReorderMode.value == enabled) return
+        _isPlaylistReorderMode.value = enabled
+    }
+
+    fun reorderPlaylists(orderedUserPlaylistIds: List<String>) {
+        val currentPlaylists = _uiState.value.playlists
+        val smartPlaylists = currentPlaylists.filter { it.isSmartPlaylist }
+        val userById = currentPlaylists.filterNot { it.isSmartPlaylist }.associateBy { it.id }
+        val reorderedUserPlaylists = orderedUserPlaylistIds.mapNotNull { userById[it] }
+
+        _uiState.update {
+            it.copy(
+                currentPlaylistSortOption = SortOption.PlaylistManual,
+                playlists = (reorderedUserPlaylists + smartPlaylists).toImmutableList(),
+            )
+        }
+
+        viewModelScope.launch {
+            playlistPreferencesRepository.reorderPlaylists(orderedUserPlaylistIds)
+            playlistPreferencesRepository.setPlaylistsSortOption(SortOption.PlaylistManual.storageKey)
+        }
+    }
+
     //Sort funs
     fun sortPlaylists(sortOption: SortOption) {
         if (_uiState.value.currentPlaylistSortOption.storageKey == sortOption.storageKey) {
             return
+        }
+
+        if (sortOption != SortOption.PlaylistManual) {
+            _isPlaylistReorderMode.value = false
         }
 
         _uiState.update { it.copy(currentPlaylistSortOption = sortOption) }
@@ -889,12 +920,30 @@ class PlaylistViewModel @Inject constructor(
                     .thenBy { it.name.lowercase() }
                     .thenBy { it.id }
             )
+            SortOption.PlaylistManual -> sortPlaylistsManual(playlists)
             else -> playlists.sortedWith(
                 compareBy<com.yuukifst.orpheus.data.model.Playlist> { it.name.lowercase() }
                     .thenByDescending { it.lastModified }
                     .thenBy { it.id }
             )
         }
+    }
+
+    private fun sortPlaylistsManual(
+        playlists: List<com.yuukifst.orpheus.data.model.Playlist>,
+    ): List<com.yuukifst.orpheus.data.model.Playlist> {
+        val (userPlaylists, smartPlaylists) = playlists.partition { !it.isSmartPlaylist }
+        val sortedUserPlaylists = userPlaylists.sortedWith(
+            compareBy<com.yuukifst.orpheus.data.model.Playlist> { it.displayOrder }
+                .thenByDescending { it.lastModified }
+                .thenBy { it.id },
+        )
+        val sortedSmartPlaylists = smartPlaylists.sortedWith(
+            compareBy<com.yuukifst.orpheus.data.model.Playlist> { it.name.lowercase() }
+                .thenByDescending { it.lastModified }
+                .thenBy { it.id },
+        )
+        return sortedUserPlaylists + sortedSmartPlaylists
     }
 
     private fun sortSongsList(

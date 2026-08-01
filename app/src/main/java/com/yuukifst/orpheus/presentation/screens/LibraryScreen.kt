@@ -18,6 +18,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -727,6 +728,30 @@ fun LibraryScreen(
         val libraryPrefs by remember(playerViewModel) {
             playerViewModel.libraryPrefsUiState
         }.collectAsStateWithLifecycle(initialValue = LibraryPrefsUiState())
+        val isLikedReorderMode by playerViewModel.isLikedReorderMode.collectAsStateWithLifecycle()
+        val likedSongsFullList by playerViewModel.likedSongsFullList.collectAsStateWithLifecycle()
+        val isPlaylistReorderMode by playlistViewModel.isPlaylistReorderMode.collectAsStateWithLifecycle()
+        LaunchedEffect(currentTabId) {
+            if (currentTabId != LibraryTabId.LIKED) {
+                playerViewModel.setLikedReorderMode(false)
+            }
+            if (currentTabId != LibraryTabId.PLAYLISTS) {
+                playlistViewModel.setPlaylistReorderMode(false)
+            }
+        }
+        LaunchedEffect(
+            currentTabId,
+            libraryPrefs.currentFavoriteSortOption,
+            libraryPrefs.currentStorageFilter,
+            isLikedReorderMode
+        ) {
+            if (
+                currentTabId == LibraryTabId.LIKED &&
+                (isLikedReorderMode || libraryPrefs.currentFavoriteSortOption == SortOption.LikedSongManual)
+            ) {
+                playerViewModel.refreshLikedSongsFullList()
+            }
+        }
         val isLibraryContentEmpty by remember(playerViewModel) {
             combine(
                 playerViewModel.songCountFlow,
@@ -949,6 +974,28 @@ fun LibraryScreen(
                                     onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
                                 )
                             }
+                        }
+
+                        AnimatedVisibility(
+                            visible = currentTabId == LibraryTabId.LIKED &&
+                                !(isSelectionMode || isPlaylistSelectionMode || isAlbumSelectionMode)
+                        ) {
+                            ReorderModeToggleRow(
+                                isReorderModeEnabled = isLikedReorderMode,
+                                onToggle = { playerViewModel.setLikedReorderMode(!isLikedReorderMode) },
+                                reorderContentDescription = stringResource(R.string.presentation_batch_b_reorder_songs),
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = currentTabId == LibraryTabId.PLAYLISTS &&
+                                !(isSelectionMode || isPlaylistSelectionMode || isAlbumSelectionMode)
+                        ) {
+                            ReorderModeToggleRow(
+                                isReorderModeEnabled = isPlaylistReorderMode,
+                                onToggle = { playlistViewModel.setPlaylistReorderMode(!isPlaylistReorderMode) },
+                                reorderContentDescription = stringResource(R.string.presentation_batch_b_reorder_songs),
+                            )
                         }
 
                         // Slim inline sync indicator. Automatic startup syncs use this
@@ -1216,7 +1263,9 @@ fun LibraryScreen(
                                             selectedPlaylistIds = selectedPlaylistIds,
                                             onPlaylistLongPress = onPlaylistLongPress,
                                             onPlaylistSelectionToggle = onPlaylistSelectionToggle,
-                                            onPlaylistOptionsClick = { showPlaylistMultiSelectionSheet = true }
+                                            onPlaylistOptionsClick = { showPlaylistMultiSelectionSheet = true },
+                                            isReorderModeEnabled = isPlaylistReorderMode,
+                                            onReorderPersist = playlistViewModel::reorderPlaylists,
                                         )
                                     }
 
@@ -1228,6 +1277,7 @@ fun LibraryScreen(
                                         LibraryFavoritesTab(
                                             favoriteSongs = favoritePagingItems,
                                             youtubeFavoriteSongs = youtubeFavoriteSongs,
+                                            fullListSongs = likedSongsFullList,
                                             playerViewModel = playerViewModel,
                                             bottomBarHeight = bottomBarHeightDp,
                                             onMoreOptionsClick = stableOnMoreOptionsClick,
@@ -1235,6 +1285,9 @@ fun LibraryScreen(
                                             onRefresh = {
                                                 onRefresh()
                                                 favoritePagingItems.refresh()
+                                                scope.launch {
+                                                    playerViewModel.refreshLikedSongsFullList()
+                                                }
                                             },
                                             isSelectionMode = isSelectionMode,
                                             selectedSongIds = selectedSongIds,
@@ -1242,6 +1295,8 @@ fun LibraryScreen(
                                             onSongSelectionToggle = onSongSelectionToggle,
                                             getSelectionIndex = playerViewModel.multiSelectionStateHolder::getSelectionIndex,
                                             sortOption = libraryPrefs.currentFavoriteSortOption,
+                                            isReorderModeEnabled = isLikedReorderMode,
+                                            onReorderPersist = playerViewModel::reorderLikedSongs,
                                             onLocateCurrentSongVisibilityChanged = { likedShowLocateButton = it },
                                             onRegisterLocateCurrentSongAction = { likedLocateAction = it },
                                             storageFilter = libraryPrefs.currentStorageFilter,
@@ -3185,6 +3240,58 @@ fun AlbumListItem(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ReorderModeToggleRow(
+    isReorderModeEnabled: Boolean,
+    onToggle: () -> Unit,
+    reorderContentDescription: String,
+) {
+    val reorderLabel = stringResource(R.string.presentation_batch_b_reorder)
+    val reorderButtonColor by animateColorAsState(
+        targetValue = if (isReorderModeEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        label = "reorderButtonColor"
+    )
+    val reorderIconColor by animateColorAsState(
+        targetValue = if (isReorderModeEnabled) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
+        label = "reorderIconColor"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 14.dp, end = 14.dp, bottom = 6.dp, top = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OrpheusButton(
+            onClick = onToggle,
+            shape = TerminalCornerShape,
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = reorderButtonColor,
+                contentColor = reorderIconColor
+            ),
+            modifier = Modifier
+                .height(42.dp)
+                .animateContentSize()
+                .clip(TerminalCornerShape)
+        ) {
+            Icon(
+                modifier = Modifier.size(20.dp),
+                painter = painterResource(R.drawable.drag_order_icon),
+                contentDescription = reorderContentDescription,
+                tint = reorderIconColor
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = reorderLabel,
+                color = reorderIconColor,
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     }
 }

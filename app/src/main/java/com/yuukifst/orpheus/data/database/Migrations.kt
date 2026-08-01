@@ -118,3 +118,22 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         )
     }
 }
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+                CREATE TABLE IF NOT EXISTS `liked_order` (
+                    `media_id` TEXT NOT NULL,
+                    `sort_order` INTEGER NOT NULL,
+                    PRIMARY KEY(`media_id`)
+                )
+            """.trimIndent(),
+        )
+        db.addColumnIfMissing(
+            "playlists",
+            "display_order",
+            "`display_order` INTEGER NOT NULL DEFAULT 0",
+        )
+    }
+}

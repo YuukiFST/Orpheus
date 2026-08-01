@@ -3,6 +3,8 @@ package com.yuukifst.orpheus.data.backup.module
 import com.google.gson.GsonBuilder
 import com.yuukifst.orpheus.data.database.FavoritesDao
 import com.yuukifst.orpheus.data.database.FavoritesEntity
+import com.yuukifst.orpheus.data.database.LikedOrderDao
+import com.yuukifst.orpheus.data.database.LikedOrderEntity
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackEntity
 import io.mockk.coEvery
@@ -20,9 +22,11 @@ class FavoritesModuleHandlerTest {
 
     private val favoritesDao: FavoritesDao = mockk(relaxed = true)
     private val youTubeCachedTrackDao: YouTubeCachedTrackDao = mockk(relaxed = true)
+    private val likedOrderDao: LikedOrderDao = mockk(relaxed = true)
     private val handler = FavoritesModuleHandler(
         favoritesDao = favoritesDao,
         youTubeCachedTrackDao = youTubeCachedTrackDao,
+        likedOrderDao = likedOrderDao,
         gson = GsonBuilder().serializeNulls().create()
     )
 
@@ -67,15 +71,57 @@ class FavoritesModuleHandlerTest {
                 favoritedAt = 1_700_000_000_000L
             )
         )
+        coEvery { likedOrderDao.getAllOrdered() } returns listOf(
+            LikedOrderEntity(mediaId = "123", sortOrder = 0),
+            LikedOrderEntity(mediaId = "youtube_abc", sortOrder = 1),
+        )
 
         val payload = handler.export()
 
         assertTrue(payload.contains("\"version\""))
         assertTrue(payload.contains("\"local\""))
         assertTrue(payload.contains("\"youtube\""))
+        assertTrue(payload.contains("\"order\""))
+        assertTrue(payload.contains("\"123\""))
+        assertTrue(payload.contains("\"youtube_abc\""))
         assertTrue(payload.contains("\"videoId\""))
         assertTrue(payload.contains("\"songId\""))
         assertFalse(payload.contains("\"song_id\""))
+    }
+
+    @Test
+    fun `restore v2 merges liked order when present`() = runTest {
+        coEvery { favoritesDao.getAllFavoritesOnce() } returns listOf(
+            FavoritesEntity(songId = 123L, isFavorite = true, timestamp = 1L),
+        )
+        coEvery { youTubeCachedTrackDao.getFavoriteTracksOnce() } returns emptyList()
+        coEvery { likedOrderDao.getAllOrdered() } returns emptyList()
+        val payload = """
+            {
+              "version": 2,
+              "local": [{"songId": 123, "isFavorite": true, "timestamp": 1}],
+              "youtube": [],
+              "order": ["123", "456"]
+            }
+        """.trimIndent()
+
+        handler.restore(payload)
+
+        coVerify {
+            likedOrderDao.replaceAllOrdered(listOf("123"))
+        }
+    }
+
+    @Test
+    fun `restore v2 without order leaves liked order untouched`() = runTest {
+        val payload = """
+            {"version":2,"local":[{"songId":123,"isFavorite":true,"timestamp":1}],"youtube":[]}
+        """.trimIndent()
+
+        handler.restore(payload)
+
+        coVerify(exactly = 0) { likedOrderDao.replaceAllOrdered(any()) }
+        coVerify(exactly = 0) { likedOrderDao.clear() }
     }
 
     @Test
@@ -139,7 +185,31 @@ class FavoritesModuleHandlerTest {
     }
 
     @Test
-    fun `rollback replaces local favorites from snapshot`() = runTest {
+    fun `rollback replaces local favorites and liked order from snapshot`() = runTest {
+        val snapshot = """
+            {
+              "version": 2,
+              "local": [{"songId": 1, "isFavorite": true, "timestamp": 1}],
+              "youtube": [],
+              "order": ["1", "youtube_abc"]
+            }
+        """.trimIndent()
+        coEvery { youTubeCachedTrackDao.getFavoriteTracksOnce() } returns emptyList()
+
+        handler.rollback(snapshot)
+
+        coVerify {
+            favoritesDao.replaceAll(
+                listOf(FavoritesEntity(songId = 1L, isFavorite = true, timestamp = 1L))
+            )
+        }
+        coVerify {
+            likedOrderDao.replaceAllOrdered(listOf("1", "youtube_abc"))
+        }
+    }
+
+    @Test
+    fun `rollback clears liked order when snapshot has no order field`() = runTest {
         val snapshot = """
             {"version":2,"local":[{"songId":1,"isFavorite":true,"timestamp":1}],"youtube":[]}
         """.trimIndent()
@@ -152,5 +222,6 @@ class FavoritesModuleHandlerTest {
                 listOf(FavoritesEntity(songId = 1L, isFavorite = true, timestamp = 1L))
             )
         }
+        coVerify { likedOrderDao.clear() }
     }
 }

@@ -8,8 +8,8 @@ import com.yuukifst.orpheus.data.model.isSmartPlaylist
 import com.yuukifst.orpheus.data.model.SortOption
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -25,19 +25,27 @@ class PlaylistPreferencesRepository @Inject constructor(
     @Volatile
     private var migrationChecked = false
 
-    val userPlaylistsFlow: Flow<List<Playlist>> = localPlaylistDao.observePlaylistsWithSongs()
-        .onStart { ensureMigratedIfNeeded() }
-        .map { rows ->
-            rows.map { row ->
-                row.playlist.toPlaylist(
-                    songIds = row.songs.sortedBy { it.sortOrder }.map { it.songId }
-                )
-            }
-        }
-
     val playlistSongOrderModesFlow: Flow<Map<String, String>> =
         userPreferencesRepository.playlistSongOrderModesFlow
     val playlistsSortOptionFlow: Flow<String> = userPreferencesRepository.playlistsSortOptionFlow
+
+    val userPlaylistsFlow: Flow<List<Playlist>> =
+        combine(
+            localPlaylistDao.observePlaylistsWithSongs(),
+            playlistsSortOptionFlow,
+        ) { rows, sortKey ->
+            val playlists = rows.map { row ->
+                row.playlist.toPlaylist(
+                    songIds = row.songs.sortedBy { it.sortOrder }.map { it.songId },
+                )
+            }
+            val sortOption = SortOption.fromStorageKey(
+                sortKey,
+                SortOption.PLAYLISTS,
+                SortOption.PlaylistNameAZ,
+            )
+            sortUserPlaylists(playlists, sortOption)
+        }.onStart { ensureMigratedIfNeeded() }
 
     suspend fun createPlaylist(
         name: String,
@@ -52,7 +60,8 @@ class PlaylistPreferencesRepository @Inject constructor(
         coverShapeDetail3: Float? = null,
         coverShapeDetail4: Float? = null,
         customId: String? = null,
-        source: String = "LOCAL"
+        source: String = "LOCAL",
+        displayOrder: Int = 0,
     ): Playlist {
         ensureMigratedIfNeeded()
         val now = System.currentTimeMillis()
@@ -72,6 +81,7 @@ class PlaylistPreferencesRepository @Inject constructor(
             coverShapeDetail3 = coverShapeDetail3,
             coverShapeDetail4 = coverShapeDetail4,
             source = source,
+            displayOrder = displayOrder,
         )
         localPlaylistDao.upsertPlaylist(newPlaylist.toEntity())
         localPlaylistDao.replacePlaylistSongs(newPlaylist.id, newPlaylist.songIds)
@@ -171,6 +181,19 @@ class PlaylistPreferencesRepository @Inject constructor(
     suspend fun setPlaylistsSortOption(optionKey: String) =
         userPreferencesRepository.setPlaylistsSortOption(optionKey)
 
+    suspend fun reorderPlaylists(orderedPlaylistIds: List<String>) {
+        ensureMigratedIfNeeded()
+        val existingById = userPlaylistsFlow.first().associateBy { it.id }
+        val now = System.currentTimeMillis()
+        orderedPlaylistIds.forEachIndexed { index, playlistId ->
+            val existing = existingById[playlistId] ?: return@forEachIndexed
+            if (existing.isSmartPlaylist) return@forEachIndexed
+            localPlaylistDao.upsertPlaylist(
+                existing.copy(displayOrder = index, lastModified = now).toEntity(),
+            )
+        }
+    }
+
     suspend fun getPlaylistsOnce(): List<Playlist> {
         ensureMigratedIfNeeded()
         return userPlaylistsFlow.first()
@@ -201,6 +224,22 @@ class PlaylistPreferencesRepository @Inject constructor(
     suspend fun resetPlaylistPreferencesToDefaults() {
         setPlaylistSongOrderModes(emptyMap())
         setPlaylistsSortOption(SortOption.PlaylistNameAZ.storageKey)
+    }
+
+    private fun sortUserPlaylists(playlists: List<Playlist>, sortOption: SortOption): List<Playlist> {
+        if (sortOption != SortOption.PlaylistManual) return playlists
+        val (userPlaylists, smartPlaylists) = playlists.partition { !it.isSmartPlaylist }
+        val sortedUserPlaylists = userPlaylists.sortedWith(
+            compareBy<Playlist> { it.displayOrder }
+                .thenByDescending { it.lastModified }
+                .thenBy { it.id },
+        )
+        val sortedSmartPlaylists = smartPlaylists.sortedWith(
+            compareBy<Playlist> { it.name.lowercase() }
+                .thenByDescending { it.lastModified }
+                .thenBy { it.id },
+        )
+        return sortedUserPlaylists + sortedSmartPlaylists
     }
 
     private suspend fun ensureMigratedIfNeeded() {

@@ -22,8 +22,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         YouTubeDownloadEntity::class,
         PlaylistYouTubeTrackEntity::class,
         YouTubeCachedTrackEntity::class,
+        LikedOrderEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class OrpheusDatabase : RoomDatabase() {
@@ -38,6 +39,7 @@ abstract class OrpheusDatabase : RoomDatabase() {
     abstract fun youTubeDownloadDao(): YouTubeDownloadDao
     abstract fun youTubePlaylistDao(): YouTubePlaylistDao
     abstract fun youTubeCachedTrackDao(): YouTubeCachedTrackDao
+    abstract fun likedOrderDao(): LikedOrderDao
 
     companion object {
         fun installFavoriteSyncTriggers(db: SupportSQLiteDatabase) {
