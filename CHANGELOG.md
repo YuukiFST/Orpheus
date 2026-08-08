@@ -2,6 +2,14 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [1.0.33] - 2026-08-08
+
+### Fixed
+- Explicit Add to queue trims playlist continuation after the current track, plays queued items next, and stops when the user queue ends (no Liked wrap-back).
+- Playlist backup export/restore round-trips YouTube Search tracks in `playlist_youtube_tracks`.
+- Liked/library fast-start queue attach no longer storms timeline listeners mid-playback (pause/resume around ~00:11).
+- Playlists Import button outline settles faster when switching from Liked.
+
 ## [1.0.32] - 2026-08-01
 
 ### Added
