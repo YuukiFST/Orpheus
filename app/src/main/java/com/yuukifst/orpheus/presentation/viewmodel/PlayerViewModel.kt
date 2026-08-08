@@ -3119,11 +3119,14 @@ class PlayerViewModel @Inject constructor(
             }
             override fun onRepeatModeChanged(repeatMode: Int) {
                 playbackStateHolder.updateStablePlayerState { it.copy(repeatMode = repeatMode) }
-                if (!suppressRepeatModePersistence) {
+                if (!suppressRepeatModePersistence &&
+                    !playbackStateHolder.suppressRepeatModePersistence
+                ) {
                     viewModelScope.launch { userPreferencesRepository.setRepeatMode(repeatMode) }
                 }
             }
             override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                if (dualPlayerEngine.suppressPlaylistChangedSideEffects) return
                 syncDisplayedMediaItemIfChanged(playerCtrl)
                 // Skip updates during crossfade transitions to prevent UI freeze and jumpy state.
                 if (dualPlayerEngine.isTransitionRunning()) return
@@ -3449,33 +3452,26 @@ class PlayerViewModel @Inject constructor(
         if (player.mediaItemCount != 1) return
         if (player.getMediaItemAt(0).mediaId != startSongId) return
 
-        val batchSize = 200
-
-        if (preparedSegments.beforeCurrent.isNotEmpty()) {
-            var insertedCount = 0
-            while (insertedCount < preparedSegments.beforeCurrent.size) {
-                val end = (insertedCount + batchSize).coerceAtMost(preparedSegments.beforeCurrent.size)
-                val batch = preparedSegments.beforeCurrent.subList(insertedCount, end)
-                player.addMediaItems(insertedCount, batch)
-                insertedCount = end
-                yield()
+        // At most two PLAYLIST_CHANGED events. Batched addMediaItems + yield() used to
+        // storm timeline listeners (crossfade cancel/reschedule, queue snapshot, UI sync)
+        // mid-playback and could surface as a brief pause/resume around ~10s on large Liked.
+        dualPlayerEngine.runWithoutPlaylistChangedSideEffects {
+            if (preparedSegments.beforeCurrent.isNotEmpty()) {
+                player.addMediaItems(0, preparedSegments.beforeCurrent)
             }
-        }
-
-        if (preparedSegments.afterCurrent.isNotEmpty()) {
-            var insertedCount = 0
-            while (insertedCount < preparedSegments.afterCurrent.size) {
-                val end = (insertedCount + batchSize).coerceAtMost(preparedSegments.afterCurrent.size)
-                val batch = preparedSegments.afterCurrent.subList(insertedCount, end)
-                player.addMediaItems(preparedSegments.beforeCurrent.size + 1 + insertedCount, batch)
-                insertedCount = end
-                yield()
+            if (preparedSegments.afterCurrent.isNotEmpty()) {
+                player.addMediaItems(
+                    preparedSegments.beforeCurrent.size + 1,
+                    preparedSegments.afterCurrent,
+                )
             }
         }
 
         playbackStateHolder.updateStablePlayerState {
             it.copy(currentMediaItemIndex = preparedSegments.currentIndex)
         }
+        // Timeline listener was suppressed during attach — sync queue UI once.
+        updateCurrentPlaybackQueueFromPlayer(mediaController)
     }
 
 
@@ -3509,6 +3505,7 @@ class PlayerViewModel @Inject constructor(
         }
 
         reconcileRepeatModeForQueueChange(queueName, previousQueueName)
+        playbackStateHolder.clearUserQueueTail()
 
         applyImmediatePlaybackUi(
             song = effectiveStartSong,
@@ -3571,6 +3568,7 @@ class PlayerViewModel @Inject constructor(
         }
 
         reconcileRepeatModeForQueueChange(queueName, previousQueueName)
+        playbackStateHolder.clearUserQueueTail()
 
         val startIndex = songsToPlay.indexOfFirst { it.id == startSong.id }.coerceAtLeast(0)
         applyImmediatePlaybackUi(
@@ -3773,7 +3771,29 @@ class PlayerViewModel @Inject constructor(
     fun addSongToQueue(song: Song) {
         mediaController?.let { controller ->
             val mediaItem = buildPlaybackMediaItem(song)
-            controller.addMediaItem(mediaItem)
+            if (controller.mediaItemCount == 0) {
+                controller.addMediaItem(mediaItem)
+                return@let
+            }
+            val currentIndex = controller.currentMediaItemIndex.coerceAtLeast(0)
+            val plan = planUserQueueInsert(
+                mediaItemCount = controller.mediaItemCount,
+                currentIndex = currentIndex,
+                userQueueTailActive = playbackStateHolder.userQueueTailActive,
+            )
+            dualPlayerEngine.cancelNext()
+            pendingQueueSegmentsJob?.cancel()
+            plan.removeFromIndex?.let { from ->
+                val toExclusive = plan.removeToExclusive ?: return@let
+                controller.removeMediaItems(from, toExclusive)
+            }
+            controller.addMediaItem(plan.insertIndex, mediaItem)
+            if (plan.forceRepeatOff) {
+                applyControllerRepeatModeWithoutPersist(Player.REPEAT_MODE_OFF)
+            }
+            if (plan.markUserQueueTailActive) {
+                playbackStateHolder.userQueueTailActive = true
+            }
             // Queue UI is synced via onTimelineChanged listener
         }
     }

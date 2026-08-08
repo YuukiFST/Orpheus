@@ -60,6 +60,9 @@ interface YouTubePlaylistDao {
     @Query("SELECT * FROM playlist_youtube_tracks WHERE playlist_id = :playlistId ORDER BY sort_order ASC")
     fun observeForPlaylist(playlistId: String): Flow<List<PlaylistYouTubeTrackEntity>>
 
+    @Query("SELECT * FROM playlist_youtube_tracks ORDER BY playlist_id ASC, sort_order ASC")
+    suspend fun getAllOnce(): List<PlaylistYouTubeTrackEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(entities: List<PlaylistYouTubeTrackEntity>)
 

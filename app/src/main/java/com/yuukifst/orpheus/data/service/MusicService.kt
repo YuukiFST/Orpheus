@@ -1123,6 +1123,7 @@ class MusicService : MediaLibraryService() {
         }
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            if (engine.suppressPlaylistChangedSideEffects) return
             requestWidgetFullUpdate(force = true)
             schedulePlaybackSnapshotPersist(immediate = timeline.isEmpty)
             // Pre-fetch RG for the next track so the cache is warm before playback starts

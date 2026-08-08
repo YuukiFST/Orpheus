@@ -91,6 +91,12 @@ class TransitionController @Inject constructor(
             scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
         }
 
+        engine.addPlaylistAttachCompleteListener {
+            transitionSchedulerJob?.cancel()
+            engine.cancelNext()
+            engine.masterPlayer.currentMediaItem?.let { scheduleTransitionFor(it) }
+        }
+
         transitionListener = object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 Timber.tag("TransitionDebug").d("onMediaItemTransition: %s (reason=%d)", mediaItem?.mediaId, reason)
@@ -110,6 +116,7 @@ class TransitionController @Inject constructor(
             }
 
             override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                if (engine.suppressPlaylistChangedSideEffects) return
                 if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED) {
                     // The queue has changed (e.g., reordered, item removed).
                     Timber.tag("TransitionDebug").d("Timeline changed (reason=%d). Cancelling pending transition.", reason)

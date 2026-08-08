@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder
 import com.yuukifst.orpheus.data.backup.model.PlaylistConflictAction
 import com.yuukifst.orpheus.data.backup.model.PlaylistConflictMatchReason
 import com.yuukifst.orpheus.data.database.MusicDao
+import com.yuukifst.orpheus.data.database.PlaylistYouTubeTrackEntity
+import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
@@ -27,11 +29,13 @@ class PlaylistsModuleHandlerTest {
     private val playlistPreferencesRepository: PlaylistPreferencesRepository = mockk(relaxed = true)
     private val userPreferencesRepository: UserPreferencesRepository = mockk(relaxed = true)
     private val musicDao: MusicDao = mockk(relaxed = true)
+    private val youTubePlaylistDao: YouTubePlaylistDao = mockk(relaxed = true)
     private val handler = PlaylistsModuleHandler(
         context = context,
         playlistPreferencesRepository = playlistPreferencesRepository,
         userPreferencesRepository = userPreferencesRepository,
         musicDao = musicDao,
+        youTubePlaylistDao = youTubePlaylistDao,
         gson = GsonBuilder().serializeNulls().create()
     )
 
@@ -304,5 +308,148 @@ class PlaylistsModuleHandlerTest {
             )
         }
         assertTrue(true)
+    }
+
+    @Test
+    fun `export includes youtube playlist tracks`() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns listOf(
+            Playlist(id = "p1", name = "YT Only", songIds = emptyList(), source = "LOCAL"),
+        )
+        every { playlistPreferencesRepository.playlistSongOrderModesFlow } returns flowOf(emptyMap())
+        every { playlistPreferencesRepository.playlistsSortOptionFlow } returns flowOf("playlist_name_az")
+        coEvery { musicDao.getAllLocalSongSummaries() } returns emptyList()
+        coEvery { musicDao.getAllNavidromeSongIds() } returns emptyList()
+        coEvery { musicDao.getAllJellyfinSongIds() } returns emptyList()
+        coEvery { youTubePlaylistDao.getAllOnce() } returns listOf(
+            PlaylistYouTubeTrackEntity(
+                playlistId = "p1",
+                videoId = "abc123",
+                sortOrder = 0,
+                title = "Song",
+                channelName = "Channel",
+                thumbnailUrl = "https://example.com/t.jpg",
+                durationMs = 180_000L,
+                displayTitle = null,
+            )
+        )
+
+        val payload = handler.export()
+
+        assertTrue(payload.contains("\"youtubeTracks\""))
+        assertTrue(payload.contains("\"abc123\""))
+        assertTrue(payload.contains("\"videoId\""))
+    }
+
+    @Test
+    fun `restore upserts youtube tracks for new playlist`() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns emptyList()
+        coEvery { musicDao.getAllLocalSongSummaries() } returns emptyList()
+        coEvery {
+            playlistPreferencesRepository.createPlaylist(
+                name = any(),
+                songIds = any(),
+                isQueueGenerated = any(),
+                coverImageUri = any(),
+                coverColorArgb = any(),
+                coverIconName = any(),
+                coverShapeType = any(),
+                coverShapeDetail1 = any(),
+                coverShapeDetail2 = any(),
+                coverShapeDetail3 = any(),
+                coverShapeDetail4 = any(),
+                customId = any(),
+                source = any(),
+                displayOrder = any(),
+            )
+        } returns Playlist(id = "p1", name = "YT Only", songIds = emptyList())
+
+        val payload = """
+            {
+              "playlists": [{
+                "id": "p1",
+                "name": "YT Only",
+                "songIds": [],
+                "source": "LOCAL"
+              }],
+              "youtubeTracks": [{
+                "playlistId": "p1",
+                "videoId": "abc123",
+                "sortOrder": 0,
+                "title": "Song",
+                "channelName": "Channel",
+                "thumbnailUrl": "https://example.com/t.jpg",
+                "durationMs": 180000
+              }]
+            }
+        """.trimIndent()
+
+        handler.restore(payload, emptyMap())
+
+        coVerify {
+            youTubePlaylistDao.replaceForPlaylist(
+                "p1",
+                match { tracks ->
+                    tracks.size == 1 &&
+                        tracks[0].videoId == "abc123" &&
+                        tracks[0].playlistId == "p1" &&
+                        tracks[0].title == "Song"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `restore merge unions youtube tracks onto device playlist id`() = runTest {
+        coEvery { playlistPreferencesRepository.getPlaylistsOnce() } returns listOf(
+            Playlist(id = "device-1", name = "Mix", songIds = listOf("a"))
+        )
+        coEvery { musicDao.getAllLocalSongSummaries() } returns emptyList()
+        coEvery { youTubePlaylistDao.observeForPlaylist("device-1") } returns flowOf(
+            listOf(
+                PlaylistYouTubeTrackEntity(
+                    playlistId = "device-1",
+                    videoId = "existing",
+                    sortOrder = 0,
+                    title = "Old",
+                    channelName = "Ch",
+                    thumbnailUrl = "",
+                    durationMs = 1L,
+                )
+            )
+        )
+        coEvery { playlistPreferencesRepository.updatePlaylist(any()) } returns Unit
+
+        val payload = """
+            {
+              "playlists": [{
+                "id": "backup-1",
+                "name": "Mix",
+                "songIds": ["b"],
+                "source": "LOCAL"
+              }],
+              "youtubeTracks": [{
+                "playlistId": "backup-1",
+                "videoId": "newvid",
+                "sortOrder": 1,
+                "title": "New",
+                "channelName": "Ch",
+                "thumbnailUrl": "",
+                "durationMs": 2
+              }]
+            }
+        """.trimIndent()
+
+        handler.restore(
+            payload,
+            mapOf("backup-1" to PlaylistConflictAction.MERGE)
+        )
+
+        coVerify {
+            youTubePlaylistDao.upsertAll(
+                match { tracks ->
+                    tracks.any { it.videoId == "newvid" && it.playlistId == "device-1" }
+                }
+            )
+        }
     }
 }

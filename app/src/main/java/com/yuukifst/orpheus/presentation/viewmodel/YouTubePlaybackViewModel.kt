@@ -41,6 +41,52 @@ internal fun shouldReplaceQueueForSearchPlay(
 internal fun isSearchQueueName(queueName: String): Boolean =
     queueName.startsWith("Search")
 
+/**
+ * Where to place an explicit "Add to queue" item on the flat player timeline.
+ *
+ * Playlist continuation after the current track is not user-selected; first add
+ * trims that tail and inserts after current, then playback stops at queue end.
+ */
+internal data class UserQueueInsertPlan(
+    val removeFromIndex: Int?,
+    val removeToExclusive: Int?,
+    val insertIndex: Int,
+    val forceRepeatOff: Boolean,
+    val enableStopOnEnd: Boolean,
+    val markUserQueueTailActive: Boolean,
+)
+
+internal fun planUserQueueInsert(
+    mediaItemCount: Int,
+    currentIndex: Int,
+    userQueueTailActive: Boolean,
+): UserQueueInsertPlan {
+    require(mediaItemCount > 0) { "Empty timeline uses playOnce, not queue insert" }
+    val safeCurrent = currentIndex.coerceIn(0, mediaItemCount - 1)
+
+    if (userQueueTailActive) {
+        return UserQueueInsertPlan(
+            removeFromIndex = null,
+            removeToExclusive = null,
+            insertIndex = mediaItemCount,
+            forceRepeatOff = true,
+            enableStopOnEnd = true,
+            markUserQueueTailActive = true,
+        )
+    }
+
+    val insertIndex = safeCurrent + 1
+    val needsTrim = insertIndex < mediaItemCount
+    return UserQueueInsertPlan(
+        removeFromIndex = if (needsTrim) insertIndex else null,
+        removeToExclusive = if (needsTrim) mediaItemCount else null,
+        insertIndex = insertIndex,
+        forceRepeatOff = true,
+        enableStopOnEnd = true,
+        markUserQueueTailActive = true,
+    )
+}
+
 internal fun YouTubeTrack.toPlaybackSong(filePath: String? = null): Song = Song(
     id = mediaId,
     title = effectiveTitle,
@@ -116,6 +162,7 @@ class YouTubePlaybackController @Inject constructor(
     private fun beginPlaybackGeneration(): Long {
         queueFillJob?.cancel()
         queueFillJob = null
+        playbackStateHolder.clearUserQueueTail()
         return playGeneration.incrementAndGet()
     }
 
@@ -165,17 +212,49 @@ class YouTubePlaybackController @Inject constructor(
                     playOnce(track)
                     return@withContext
                 }
-                if (sessionStopOnEnd) {
-                    sessionStopOnEnd = false
-                    attachPlaybackListener(player, stopOnEnd = false)
+                val currentIndex = player.currentMediaItemIndex.coerceAtLeast(0)
+                val ownsQueue = currentMixedTracks.isNotEmpty() &&
+                    player.mediaItemCount == currentMixedTracks.size
+                val plan = planUserQueueInsert(
+                    mediaItemCount = player.mediaItemCount,
+                    currentIndex = currentIndex,
+                    userQueueTailActive = playbackStateHolder.userQueueTailActive,
+                )
+
+                dualPlayerEngine.cancelNext()
+                plan.removeFromIndex?.let { from ->
+                    val toExclusive = plan.removeToExclusive ?: return@let
+                    player.removeMediaItems(from, toExclusive)
+                    if (ownsQueue) {
+                        currentMixedTracks = currentMixedTracks.take(from)
+                    }
                 }
+
                 val entry = PlaylistMixedTrack.YouTube(
                     track = track,
-                    sortOrder = currentMixedTracks.size,
+                    sortOrder = if (ownsQueue) currentMixedTracks.size else 0,
                 )
-                currentMixedTracks = currentMixedTracks + entry
-                player.addMediaItem(mediaItem)
-                publishQueueUpdate(player.currentMediaItemIndex)
+                if (ownsQueue) {
+                    currentMixedTracks = currentMixedTracks + entry
+                }
+                player.addMediaItem(plan.insertIndex, mediaItem)
+
+                if (plan.forceRepeatOff) {
+                    playbackStateHolder.applyRepeatModeWithoutPersist(Player.REPEAT_MODE_OFF)
+                }
+                if (plan.enableStopOnEnd) {
+                    sessionStopOnEnd = true
+                    attachPlaybackListener(player, stopOnEnd = true)
+                }
+                if (plan.markUserQueueTailActive) {
+                    playbackStateHolder.userQueueTailActive = true
+                }
+
+                // Foreign sessions (Liked/local) keep UI via PlayerViewModel timeline sync.
+                // Publishing here would replace the queue with only YouTube mixed-track state.
+                if (ownsQueue) {
+                    publishQueueUpdate(player.currentMediaItemIndex)
+                }
             }
         }.onFailure { error ->
             if (error is CancellationException) throw error
@@ -422,6 +501,7 @@ class YouTubePlaybackController @Inject constructor(
         Timber.w("Rolling back optimistic YouTube playback for videoId=%s", track.videoId)
         currentMixedTracks = emptyList()
         sessionStopOnEnd = false
+        playbackStateHolder.clearUserQueueTail()
         playbackStateHolder.updateStablePlayerState {
             it.copy(
                 currentSong = previousSong,
