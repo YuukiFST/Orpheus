@@ -208,8 +208,38 @@ class DualPlayerEngine @Inject constructor(
     private val onPlayerSwappedListeners = mutableListOf<(Player) -> Unit>()
     private val onTransitionDisplayPlayerListeners = mutableListOf<(Player) -> Unit>()
     private val onTransitionFinishedListeners = mutableListOf<() -> Unit>()
+    private val onPlaylistAttachCompleteListeners = mutableListOf<() -> Unit>()
 
     private var onPlayerAboutToBeReleasedListener: ((Player) -> Unit)? = null
+
+    /**
+     * When true, [Player.Listener.onTimelineChanged] for playlist mutations skips expensive
+     * side effects (queue snapshot refresh, crossfade cancel/reschedule). Used while attaching
+     * the fast-start Liked/library segments so mid-playback timeline storms do not glitch audio.
+     */
+    @Volatile
+    var suppressPlaylistChangedSideEffects: Boolean = false
+        private set
+
+    fun addPlaylistAttachCompleteListener(listener: () -> Unit) {
+        onPlaylistAttachCompleteListeners.add(listener)
+    }
+
+    fun runWithoutPlaylistChangedSideEffects(block: () -> Unit) {
+        suppressPlaylistChangedSideEffects = true
+        try {
+            block()
+        } finally {
+            suppressPlaylistChangedSideEffects = false
+            if (::playerA.isInitialized && !transitionRunning) {
+                refreshQueueSnapshotFromMaster(
+                    windowStartIndex = activeWindowStartIndex,
+                    usesWindowedQueue = activePlayerUsesWindowedQueue,
+                )
+            }
+            onPlaylistAttachCompleteListeners.forEach { it() }
+        }
+    }
 
     fun setOnPlayerAboutToBeReleasedListener(listener: (Player) -> Unit) {
         onPlayerAboutToBeReleasedListener = listener
@@ -378,6 +408,7 @@ class DualPlayerEngine @Inject constructor(
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
             if (transitionRunning) return
+            if (suppressPlaylistChangedSideEffects) return
             if (reason == Player.TIMELINE_CHANGE_REASON_PLAYLIST_CHANGED || queueSnapshot.isEmpty()) {
                 refreshQueueSnapshotFromMaster(windowStartIndex = 0, usesWindowedQueue = false)
             }

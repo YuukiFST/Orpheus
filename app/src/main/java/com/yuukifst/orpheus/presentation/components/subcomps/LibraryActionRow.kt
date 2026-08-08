@@ -210,17 +210,21 @@ fun LibraryActionRow(
 
                     AnimatedVisibility(
                         visible = shouldShowImport,
-                        enter = fadeIn() + expandHorizontally(
+                        enter = fadeIn(
+                            animationSpec = tween(durationMillis = 120)
+                        ) + expandHorizontally(
                             expandFrom = Alignment.Start,
-                            clip = false, // <— avoids the 「clipping」 during the expansion
+                            clip = false,
                             animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
                             )
                         ),
-                        exit = fadeOut() + shrinkHorizontally(
+                        exit = fadeOut(
+                            animationSpec = tween(durationMillis = 90)
+                        ) + shrinkHorizontally(
                             shrinkTowards = Alignment.Start,
-                            clip = false, // <— avoids the 「clipping」 during the expansion
+                            clip = false,
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioNoBouncy,
                                 stiffness = Spring.StiffnessMedium

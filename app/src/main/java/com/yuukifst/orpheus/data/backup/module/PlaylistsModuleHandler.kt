@@ -12,8 +12,11 @@ import com.yuukifst.orpheus.data.backup.model.BackupSection
 import com.yuukifst.orpheus.data.backup.model.PlaylistConflict
 import com.yuukifst.orpheus.data.backup.model.PlaylistConflictAction
 import com.yuukifst.orpheus.data.backup.model.PlaylistConflictMatchReason
+import com.yuukifst.orpheus.data.backup.model.PlaylistYouTubeBackupEntry
 import com.yuukifst.orpheus.data.database.MusicDao
+import com.yuukifst.orpheus.data.database.PlaylistYouTubeTrackEntity
 import com.yuukifst.orpheus.data.database.SongSummary
+import com.yuukifst.orpheus.data.database.YouTubePlaylistDao
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.PreferenceBackupEntry
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
@@ -33,6 +36,7 @@ class PlaylistsModuleHandler @Inject constructor(
     private val playlistPreferencesRepository: PlaylistPreferencesRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val musicDao: MusicDao,
+    private val youTubePlaylistDao: YouTubePlaylistDao,
     @BackupGson private val gson: Gson
 ) : BackupModuleHandler {
 
@@ -79,30 +83,40 @@ class PlaylistsModuleHandler @Inject constructor(
             readFileAsBase64(uri)?.let { coverImages[playlist.id] = it }
         }
 
+        val backedUpIds = filteredPlaylists.map { it.id }.toSet()
+        val youtubeTracks = youTubePlaylistDao.getAllOnce()
+            .filter { it.playlistId in backedUpIds }
+            .map { it.toBackupEntry() }
+
         val payload = PlaylistsBackupPayload(
             playlists = filteredPlaylists,
             playlistSongOrderModes = playlistPreferencesRepository.playlistSongOrderModesFlow.first(),
             playlistsSortOption = playlistPreferencesRepository.playlistsSortOptionFlow.first(),
             songMetadata = songMetadata.ifEmpty { null },
-            coverImages = coverImages.ifEmpty { null }
+            coverImages = coverImages.ifEmpty { null },
+            youtubeTracks = youtubeTracks.ifEmpty { null },
         )
         gson.toJson(payload)
     }
 
     override suspend fun countEntries(): Int = withContext(Dispatchers.IO) {
         val playlists = playlistPreferencesRepository.getPlaylistsOnce()
-            .count { isBackedUpPlaylistSource(it.source) }
+            .filter { isBackedUpPlaylistSource(it.source) }
+        val backedUpIds = playlists.map { it.id }.toSet()
+        val youtubeCount = youTubePlaylistDao.getAllOnce().count { it.playlistId in backedUpIds }
         val orderModes = playlistPreferencesRepository.playlistSongOrderModesFlow.first()
         val sortOption = playlistPreferencesRepository.playlistsSortOptionFlow.first()
-        playlists + orderModes.size + if (sortOption.isNotBlank()) 1 else 0
+        playlists.size + youtubeCount + orderModes.size + if (sortOption.isNotBlank()) 1 else 0
     }
 
     override suspend fun snapshot(): String = withContext(Dispatchers.IO) {
         // Snapshot captures the current state as-is (including cloud songs) for rollback
+        val playlists = playlistPreferencesRepository.getPlaylistsOnce()
         val payload = PlaylistsBackupPayload(
-            playlists = playlistPreferencesRepository.getPlaylistsOnce(),
+            playlists = playlists,
             playlistSongOrderModes = playlistPreferencesRepository.playlistSongOrderModesFlow.first(),
-            playlistsSortOption = playlistPreferencesRepository.playlistsSortOptionFlow.first()
+            playlistsSortOption = playlistPreferencesRepository.playlistsSortOptionFlow.first(),
+            youtubeTracks = youTubePlaylistDao.getAllOnce().map { it.toBackupEntry() }.ifEmpty { null },
         )
         gson.toJson(payload)
     }
@@ -135,6 +149,7 @@ class PlaylistsModuleHandler @Inject constructor(
             backupPlaylists = parsed.playlists.orEmpty(),
             songMetadata = parsed.songMetadata,
             coverImages = parsed.coverImages,
+            youtubeTracks = parsed.youtubeTracks.orEmpty(),
             decisions = decisions
         )
         userPreferencesRepository.clearLegacyUserPlaylists()
@@ -155,6 +170,7 @@ class PlaylistsModuleHandler @Inject constructor(
         playlistPreferencesRepository.setPlaylistsSortOption(
             parsed.playlistsSortOption ?: SortOption.PlaylistNameAZ.storageKey
         )
+        replaceAllYouTubeTracks(parsed.youtubeTracks.orEmpty())
         userPreferencesRepository.clearLegacyUserPlaylists()
     }
 
@@ -353,6 +369,7 @@ class PlaylistsModuleHandler @Inject constructor(
         backupPlaylists: List<Playlist>,
         songMetadata: Map<String, SongMetadataEntry>?,
         coverImages: Map<String, String>?,
+        youtubeTracks: List<PlaylistYouTubeBackupEntry>,
         decisions: Map<String, PlaylistConflictAction>
     ) {
         val resolvedPlaylists = if (songMetadata != null && songMetadata.isNotEmpty()) {
@@ -366,13 +383,15 @@ class PlaylistsModuleHandler @Inject constructor(
             resolvedPlaylists
         }
 
+        val youtubeByBackupPlaylistId = youtubeTracks.groupBy { it.playlistId }
         val devicePlaylists = playlistPreferencesRepository.getPlaylistsOnce()
         val claimedDeviceIds = mutableSetOf<String>()
 
         withCovers.forEach { backupPlaylist ->
             val match = findDeviceMatch(backupPlaylist, devicePlaylists, claimedDeviceIds)
+            val backupYoutube = youtubeByBackupPlaylistId[backupPlaylist.id].orEmpty()
             if (match == null) {
-                playlistPreferencesRepository.createPlaylist(
+                val created = playlistPreferencesRepository.createPlaylist(
                     name = backupPlaylist.name,
                     songIds = backupPlaylist.songIds,
                     isQueueGenerated = backupPlaylist.isQueueGenerated,
@@ -388,6 +407,7 @@ class PlaylistsModuleHandler @Inject constructor(
                     source = backupPlaylist.source,
                     displayOrder = backupPlaylist.displayOrder,
                 )
+                replaceYouTubeForPlaylist(created.id, backupYoutube)
                 return@forEach
             }
 
@@ -402,6 +422,7 @@ class PlaylistsModuleHandler @Inject constructor(
                     val mergedSongs = (match.playlist.songIds + backupPlaylist.songIds).distinct()
                     val merged = mergeMetadata(match.playlist, backupPlaylist).copy(songIds = mergedSongs)
                     playlistPreferencesRepository.updatePlaylist(merged)
+                    mergeYouTubeForPlaylist(match.playlist.id, backupYoutube)
                 }
                 PlaylistConflictAction.REPLACE -> {
                     val replaced = backupPlaylist.copy(
@@ -410,8 +431,43 @@ class PlaylistsModuleHandler @Inject constructor(
                         lastModified = System.currentTimeMillis()
                     )
                     playlistPreferencesRepository.updatePlaylist(replaced)
+                    replaceYouTubeForPlaylist(match.playlist.id, backupYoutube)
                 }
             }
+        }
+    }
+
+    private suspend fun replaceYouTubeForPlaylist(
+        playlistId: String,
+        entries: List<PlaylistYouTubeBackupEntry>,
+    ) {
+        val entities = entries.mapNotNull { it.toEntity(playlistId) }
+        youTubePlaylistDao.replaceForPlaylist(playlistId, entities)
+    }
+
+    private suspend fun mergeYouTubeForPlaylist(
+        playlistId: String,
+        entries: List<PlaylistYouTubeBackupEntry>,
+    ) {
+        if (entries.isEmpty()) return
+        val existingIds = youTubePlaylistDao.observeForPlaylist(playlistId).first()
+            .map { it.videoId }
+            .toSet()
+        val toInsert = entries
+            .filter { it.videoId.isNotBlank() && it.videoId !in existingIds }
+            .mapNotNull { it.toEntity(playlistId) }
+        if (toInsert.isNotEmpty()) {
+            youTubePlaylistDao.upsertAll(toInsert)
+        }
+    }
+
+    private suspend fun replaceAllYouTubeTracks(entries: List<PlaylistYouTubeBackupEntry>) {
+        val current = youTubePlaylistDao.getAllOnce()
+        val targetPlaylistIds = entries.map { it.playlistId }.toSet() +
+            current.map { it.playlistId }.toSet()
+        targetPlaylistIds.forEach { playlistId ->
+            val forPlaylist = entries.filter { it.playlistId == playlistId }
+            replaceYouTubeForPlaylist(playlistId, forPlaylist)
         }
     }
 
@@ -497,6 +553,7 @@ class PlaylistsModuleHandler @Inject constructor(
             backupPlaylists = playlists,
             songMetadata = null,
             coverImages = null,
+            youtubeTracks = emptyList(),
             decisions = decisions
         )
         userPreferencesRepository.clearLegacyUserPlaylists()
@@ -549,7 +606,9 @@ class PlaylistsModuleHandler @Inject constructor(
         /** Song metadata for cross-device matching. Key = songId from backup. Null in legacy/snapshot payloads. */
         val songMetadata: Map<String, SongMetadataEntry>? = null,
         /** Base64-encoded cover images. Key = playlist ID. Null if no custom covers. */
-        val coverImages: Map<String, String>? = null
+        val coverImages: Map<String, String>? = null,
+        /** YouTube Search tracks stored outside playlist.songIds. Null when none / legacy. */
+        val youtubeTracks: List<PlaylistYouTubeBackupEntry>? = null,
     )
 
     companion object {
@@ -559,6 +618,32 @@ class PlaylistsModuleHandler @Inject constructor(
         /** Playlist sources that are backed up. Cloud-sourced playlists are excluded. */
         private fun isBackedUpPlaylistSource(source: String): Boolean =
             source == "LOCAL" || isSmartPlaylistSource(source)
+
+        private fun PlaylistYouTubeTrackEntity.toBackupEntry(): PlaylistYouTubeBackupEntry =
+            PlaylistYouTubeBackupEntry(
+                playlistId = playlistId,
+                videoId = videoId,
+                sortOrder = sortOrder,
+                title = title,
+                channelName = channelName,
+                thumbnailUrl = thumbnailUrl,
+                durationMs = durationMs,
+                displayTitle = displayTitle,
+            )
+
+        private fun PlaylistYouTubeBackupEntry.toEntity(targetPlaylistId: String): PlaylistYouTubeTrackEntity? {
+            if (videoId.isBlank()) return null
+            return PlaylistYouTubeTrackEntity(
+                playlistId = targetPlaylistId,
+                videoId = videoId,
+                sortOrder = sortOrder,
+                title = title,
+                channelName = channelName,
+                thumbnailUrl = thumbnailUrl,
+                durationMs = durationMs,
+                displayTitle = displayTitle,
+            )
+        }
 
         const val LEGACY_USER_PLAYLISTS_KEY = "user_playlists_json_v1"
         const val LEGACY_PLAYLIST_ORDER_MODES_KEY = "playlist_song_order_modes"

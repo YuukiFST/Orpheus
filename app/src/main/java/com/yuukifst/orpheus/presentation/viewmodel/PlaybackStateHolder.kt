@@ -454,6 +454,36 @@ class PlaybackStateHolder @Inject constructor(
         _stablePlayerState.update { it.copy(repeatMode = mode) }
     }
 
+    /**
+     * Temporary repeat override (e.g. stop after explicit user-queue) that must not
+     * clobber the user's saved repeat preference.
+     */
+    @Volatile
+    var suppressRepeatModePersistence: Boolean = false
+        private set
+
+    /**
+     * After an explicit Add-to-queue, playlist continuation was trimmed; further
+     * adds append to that user-queue tail until a new playback session starts.
+     */
+    @Volatile
+    var userQueueTailActive: Boolean = false
+
+    fun applyRepeatModeWithoutPersist(@Player.RepeatMode mode: Int) {
+        suppressRepeatModePersistence = true
+        try {
+            dualPlayerEngine.masterPlayer.repeatMode = mode
+            mediaController?.repeatMode = mode
+            _stablePlayerState.update { it.copy(repeatMode = mode) }
+        } finally {
+            suppressRepeatModePersistence = false
+        }
+    }
+
+    fun clearUserQueueTail() {
+        userQueueTailActive = false
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                               Progress Updates                             */
     /* -------------------------------------------------------------------------- */
