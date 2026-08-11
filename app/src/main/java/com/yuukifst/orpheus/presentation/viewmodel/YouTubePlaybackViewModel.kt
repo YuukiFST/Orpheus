@@ -42,6 +42,49 @@ internal fun isSearchQueueName(queueName: String): Boolean =
     queueName.startsWith("Search")
 
 /**
+ * How to attach a fully resolved mixed Liked/YouTube queue once the start item
+ * is already playing. Replacing via [Player.setMediaItems] + prepare mid-playback
+ * causes a brief stall near 00:00; add-around keeps the current item playing.
+ */
+internal sealed class MixedQueueAttachPlan {
+    data class AddAroundCurrent(
+        val beforeMediaIds: List<String>,
+        val afterMediaIds: List<String>,
+    ) : MixedQueueAttachPlan()
+
+    data class ReplaceAll(
+        val mediaIds: List<String>,
+        val startIndex: Int,
+    ) : MixedQueueAttachPlan()
+
+    data object Skip : MixedQueueAttachPlan()
+}
+
+internal fun planMixedQueueAttach(
+    currentMediaItemCount: Int,
+    currentMediaId: String?,
+    resolvedMediaIds: List<String>,
+    startIndex: Int,
+): MixedQueueAttachPlan {
+    if (resolvedMediaIds.isEmpty()) return MixedQueueAttachPlan.Skip
+    val safeIndex = startIndex.coerceIn(0, resolvedMediaIds.lastIndex)
+    if (currentMediaItemCount <= 0) return MixedQueueAttachPlan.Skip
+    if (currentMediaItemCount > 1) return MixedQueueAttachPlan.Skip
+
+    val startId = resolvedMediaIds[safeIndex]
+    if (currentMediaId == startId) {
+        return MixedQueueAttachPlan.AddAroundCurrent(
+            beforeMediaIds = resolvedMediaIds.subList(0, safeIndex),
+            afterMediaIds = resolvedMediaIds.subList(safeIndex + 1, resolvedMediaIds.size),
+        )
+    }
+    return MixedQueueAttachPlan.ReplaceAll(
+        mediaIds = resolvedMediaIds,
+        startIndex = safeIndex,
+    )
+}
+
+/**
  * Where to place an explicit "Add to queue" item on the flat player timeline.
  *
  * Playlist continuation after the current track is not user-selected; first add
@@ -164,6 +207,24 @@ class YouTubePlaybackController @Inject constructor(
         queueFillJob = null
         playbackStateHolder.clearUserQueueTail()
         return playGeneration.incrementAndGet()
+    }
+
+    /**
+     * Warms NewPipe + stream cache for Likely-tapped Liked YouTube tracks so cold-start
+     * taps spend less time stuck at 00:00 waiting on first extract.
+     */
+    fun prefetchStreams(videoIds: List<String>) {
+        if (videoIds.isEmpty()) return
+        scope.launch(Dispatchers.IO) {
+            videoIds.asSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .take(3)
+                .forEach { videoId ->
+                    streamExtractor.prefetchBestAudio(videoId)
+                }
+        }
     }
 
     private fun throwIfPlaybackGenerationStale(expectedGeneration: Long) {
@@ -383,11 +444,32 @@ class YouTubePlaybackController @Inject constructor(
                     withContext(Dispatchers.Main.immediate) {
                         throwIfPlaybackGenerationStale(fillGeneration)
                         val player = dualPlayerEngine.masterPlayer
-                        if (player.mediaItemCount <= 1) {
-                            val position = player.currentPosition
-                            player.setMediaItems(allItems, safeIndex, position)
-                            player.prepare()
-                            if (player.playWhenReady) player.play()
+                        val plan = planMixedQueueAttach(
+                            currentMediaItemCount = player.mediaItemCount,
+                            currentMediaId = player.currentMediaItem?.mediaId,
+                            resolvedMediaIds = allItems.map { it.mediaId },
+                            startIndex = safeIndex,
+                        )
+                        when (plan) {
+                            is MixedQueueAttachPlan.AddAroundCurrent -> {
+                                val before = allItems.subList(0, safeIndex)
+                                val after = allItems.subList(safeIndex + 1, allItems.size)
+                                dualPlayerEngine.runWithoutPlaylistChangedSideEffects {
+                                    if (before.isNotEmpty()) {
+                                        player.addMediaItems(0, before)
+                                    }
+                                    if (after.isNotEmpty()) {
+                                        player.addMediaItems(before.size + 1, after)
+                                    }
+                                }
+                            }
+                            is MixedQueueAttachPlan.ReplaceAll -> {
+                                val position = player.currentPosition
+                                player.setMediaItems(allItems, plan.startIndex, position)
+                                player.prepare()
+                                if (player.playWhenReady) player.play()
+                            }
+                            MixedQueueAttachPlan.Skip -> Unit
                         }
                     }
                 }.onFailure { error ->

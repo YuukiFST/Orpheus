@@ -2,6 +2,14 @@
 
 All notable changes to Orpheus will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- YouTube Search history only records explicit searches (IME submit / suggestion tap), not intermediate typing debounce queries.
+- Liked backup restore applies manual order in the UI (`liked_manual` sort) so reordered Liked lists survive import.
+- Launcher icon uses a light adaptive background and monochrome layer so the Orpheus logo is visible on the home screen (not only on splash).
+- Liked/YouTube mixed playback attaches the rest of the queue with `addMediaItems` instead of mid-play `setMediaItems`+`prepare`, avoiding the early pause/resume; Liked tab prefetches the first YouTube streams for faster cold-start taps.
+
 ## [1.0.33] - 2026-08-08
 
 ### Fixed

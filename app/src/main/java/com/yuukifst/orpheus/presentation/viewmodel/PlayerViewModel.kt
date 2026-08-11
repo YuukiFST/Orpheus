@@ -4476,6 +4476,16 @@ class PlayerViewModel @Inject constructor(
         libraryStateHolder.refreshLikedSongsFullList()
     }
 
+    fun prefetchLikedYouTubeStreams(songs: List<Song>) {
+        val videoIds = songs.asSequence()
+            .filter { it.id.isYouTubeMediaId() }
+            .map { it.id.removePrefix("youtube_") }
+            .take(3)
+            .toList()
+        if (videoIds.isEmpty()) return
+        youTubePlaybackController.prefetchStreams(videoIds)
+    }
+
     fun reorderLikedSongs(orderedMediaIds: List<String>) {
         libraryStateHolder.reorderLikedSongs(orderedMediaIds)
     }

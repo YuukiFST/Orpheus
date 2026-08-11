@@ -78,19 +78,52 @@ class YouTubeSearchViewModelHistoryTest {
     }
 
     @Test
-    fun `debounced successful search persists history`() = runTest {
+    fun `debounced typing does not persist incomplete query history`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        coEvery { searchRepository.search(any()) } returns listOf(sampleTrack)
+        val viewModel = createViewModel()
+
+        viewModel.updateQuery("ne")
+        advanceTimeBy(260L)
+        runCurrent()
+        viewModel.updateQuery("nev")
+        advanceTimeBy(260L)
+        runCurrent()
+        viewModel.updateQuery("never gonna")
+        advanceTimeBy(260L)
+        runCurrent()
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { searchHistoryDao.insert(any()) }
+    }
+
+    @Test
+    fun `explicit search persists final query history`() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val query = "never gonna"
         coEvery { searchRepository.search(query) } returns listOf(sampleTrack)
         val viewModel = createViewModel()
 
-        viewModel.updateQuery(query)
-        advanceTimeBy(260L)
-        runCurrent()
+        viewModel.search(query)
         advanceUntilIdle()
 
         coVerify(timeout = 1_000) {
             searchHistoryDao.deleteByQuery(query)
+            searchHistoryDao.insert(match { it.query == query })
+        }
+    }
+
+    @Test
+    fun `suggestion search persists history`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val query = "never gonna give"
+        coEvery { searchRepository.search(query) } returns listOf(sampleTrack)
+        val viewModel = createViewModel()
+
+        viewModel.searchSuggestion(query)
+        advanceUntilIdle()
+
+        coVerify(timeout = 1_000) {
             searchHistoryDao.insert(match { it.query == query })
         }
     }

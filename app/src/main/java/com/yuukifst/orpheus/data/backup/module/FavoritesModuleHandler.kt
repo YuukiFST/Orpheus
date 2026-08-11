@@ -13,8 +13,11 @@ import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackEntity
 import com.yuukifst.orpheus.data.database.mediaId
 import com.yuukifst.orpheus.data.library.mergeLikedManualOrder
+import com.yuukifst.orpheus.data.model.SortOption
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.di.BackupGson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +27,7 @@ class FavoritesModuleHandler @Inject constructor(
     private val favoritesDao: FavoritesDao,
     private val youTubeCachedTrackDao: YouTubeCachedTrackDao,
     private val likedOrderDao: LikedOrderDao,
+    private val userPreferencesRepository: UserPreferencesRepository,
     @BackupGson private val gson: Gson
 ) : BackupModuleHandler {
 
@@ -44,6 +48,7 @@ class FavoritesModuleHandler @Inject constructor(
         mergeLocal(parsed.local)
         mergeYouTube(parsed.youtube)
         mergeOrder(parsed.order)
+        restoreLikedSortOption(parsed.sortOption, parsed.order)
     }
 
     override suspend fun rollback(snapshot: String) = withContext(Dispatchers.IO) {
@@ -55,6 +60,7 @@ class FavoritesModuleHandler @Inject constructor(
         } else {
             likedOrderDao.clear()
         }
+        restoreLikedSortOption(parsed.sortOption, parsed.order)
     }
 
     private suspend fun currentPayload(): LikedBackupPayload {
@@ -71,7 +77,15 @@ class FavoritesModuleHandler @Inject constructor(
             )
         }
         val order = likedOrderDao.getAllOrdered().map { it.mediaId }
-        return LikedBackupPayload(version = 2, local = local, youtube = youtube, order = order)
+        val sortOption = userPreferencesRepository.likedSongsSortOptionFlow.first()
+            .takeIf { it.isNotBlank() }
+        return LikedBackupPayload(
+            version = 2,
+            local = local,
+            youtube = youtube,
+            order = order,
+            sortOption = sortOption,
+        )
     }
 
     private fun parsePayload(payload: String): LikedBackupPayload {
@@ -123,6 +137,16 @@ class FavoritesModuleHandler @Inject constructor(
             dateLikedById = currentDateLikedById(),
         )
         likedOrderDao.replaceAllOrdered(mergedOrder)
+    }
+
+    private suspend fun restoreLikedSortOption(sortOption: String?, order: List<String>) {
+        val resolved = when {
+            !sortOption.isNullOrBlank() ->
+                SortOption.LIKED.find { it.storageKey == sortOption }?.storageKey
+            order.isNotEmpty() -> SortOption.LikedSongManual.storageKey
+            else -> null
+        } ?: return
+        userPreferencesRepository.setLikedSongsSortOption(resolved)
     }
 
     private suspend fun currentFavoriteMediaIds(): Set<String> {

@@ -7,14 +7,18 @@ import com.yuukifst.orpheus.data.database.LikedOrderDao
 import com.yuukifst.orpheus.data.database.LikedOrderEntity
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackDao
 import com.yuukifst.orpheus.data.database.YouTubeCachedTrackEntity
+import com.yuukifst.orpheus.data.model.SortOption
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -23,12 +27,22 @@ class FavoritesModuleHandlerTest {
     private val favoritesDao: FavoritesDao = mockk(relaxed = true)
     private val youTubeCachedTrackDao: YouTubeCachedTrackDao = mockk(relaxed = true)
     private val likedOrderDao: LikedOrderDao = mockk(relaxed = true)
+    private val userPreferencesRepository: UserPreferencesRepository = mockk(relaxed = true)
     private val handler = FavoritesModuleHandler(
         favoritesDao = favoritesDao,
         youTubeCachedTrackDao = youTubeCachedTrackDao,
         likedOrderDao = likedOrderDao,
+        userPreferencesRepository = userPreferencesRepository,
         gson = GsonBuilder().serializeNulls().create()
     )
+
+    @BeforeEach
+    fun setUpPrefs() {
+        coEvery { userPreferencesRepository.likedSongsSortOptionFlow } returns flowOf(
+            SortOption.LikedSongDateLiked.storageKey,
+        )
+        coEvery { userPreferencesRepository.setLikedSongsSortOption(any()) } returns Unit
+    }
 
     @Test
     fun `countEntries sums local and youtube favorites`() = runTest {
@@ -75,6 +89,9 @@ class FavoritesModuleHandlerTest {
             LikedOrderEntity(mediaId = "123", sortOrder = 0),
             LikedOrderEntity(mediaId = "youtube_abc", sortOrder = 1),
         )
+        coEvery { userPreferencesRepository.likedSongsSortOptionFlow } returns flowOf(
+            SortOption.LikedSongManual.storageKey,
+        )
 
         val payload = handler.export()
 
@@ -82,6 +99,8 @@ class FavoritesModuleHandlerTest {
         assertTrue(payload.contains("\"local\""))
         assertTrue(payload.contains("\"youtube\""))
         assertTrue(payload.contains("\"order\""))
+        assertTrue(payload.contains("\"sortOption\""))
+        assertTrue(payload.contains("liked_manual"))
         assertTrue(payload.contains("\"123\""))
         assertTrue(payload.contains("\"youtube_abc\""))
         assertTrue(payload.contains("\"videoId\""))
@@ -101,7 +120,8 @@ class FavoritesModuleHandlerTest {
               "version": 2,
               "local": [{"songId": 123, "isFavorite": true, "timestamp": 1}],
               "youtube": [],
-              "order": ["123", "456"]
+              "order": ["123", "456"],
+              "sortOption": "liked_manual"
             }
         """.trimIndent()
 
@@ -109,6 +129,32 @@ class FavoritesModuleHandlerTest {
 
         coVerify {
             likedOrderDao.replaceAllOrdered(listOf("123"))
+        }
+        coVerify {
+            userPreferencesRepository.setLikedSongsSortOption(SortOption.LikedSongManual.storageKey)
+        }
+    }
+
+    @Test
+    fun `restore v2 with order but no sortOption still enables manual sort`() = runTest {
+        coEvery { favoritesDao.getAllFavoritesOnce() } returns listOf(
+            FavoritesEntity(songId = 123L, isFavorite = true, timestamp = 1L),
+        )
+        coEvery { youTubeCachedTrackDao.getFavoriteTracksOnce() } returns emptyList()
+        coEvery { likedOrderDao.getAllOrdered() } returns emptyList()
+        val payload = """
+            {
+              "version": 2,
+              "local": [{"songId": 123, "isFavorite": true, "timestamp": 1}],
+              "youtube": [],
+              "order": ["123"]
+            }
+        """.trimIndent()
+
+        handler.restore(payload)
+
+        coVerify {
+            userPreferencesRepository.setLikedSongsSortOption(SortOption.LikedSongManual.storageKey)
         }
     }
 

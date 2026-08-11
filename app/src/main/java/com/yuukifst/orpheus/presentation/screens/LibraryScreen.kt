@@ -1274,6 +1274,9 @@ fun LibraryScreen(
                                             libraryViewModel.favoritesPagingFlow.collectAsLazyPagingItems()
                                         val youtubeFavoriteSongs by libraryViewModel.youtubeFavoriteSongsFlow
                                             .collectAsStateWithLifecycle(initialValue = persistentListOf())
+                                        LaunchedEffect(youtubeFavoriteSongs) {
+                                            playerViewModel.prefetchLikedYouTubeStreams(youtubeFavoriteSongs)
+                                        }
                                         LibraryFavoritesTab(
                                             favoriteSongs = favoritePagingItems,
                                             youtubeFavoriteSongs = youtubeFavoriteSongs,
