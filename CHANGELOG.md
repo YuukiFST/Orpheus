@@ -4,6 +4,8 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.34] - 2026-08-11
+
 ### Fixed
 - YouTube Search history only records explicit searches (IME submit / suggestion tap), not intermediate typing debounce queries.
 - Liked backup restore applies manual order in the UI (`liked_manual` sort) so reordered Liked lists survive import.
