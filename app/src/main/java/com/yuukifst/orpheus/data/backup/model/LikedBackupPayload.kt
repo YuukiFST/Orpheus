@@ -25,6 +25,12 @@ data class LikedBackupPayload(
     val youtube: List<YouTubeLikedBackupEntry> = emptyList(),
     /** Manual liked order as mixed media ids (local numeric + youtube_*). Absent in legacy backups. */
     val order: List<String> = emptyList(),
+    /**
+     * Liked sort preference storage key (e.g. liked_manual). Absent in older backups;
+     * restore with a non-empty [order] still switches UI to Manual so order is visible.
+     */
+    @SerializedName(value = "sortOption", alternate = ["sort_option"])
+    val sortOption: String? = null,
 ) {
     fun entryCount(): Int = local.size + youtube.size
 }

@@ -241,11 +241,22 @@ class LibraryStateHolder @Inject constructor(
             val folderSortKey = userPreferencesRepository.foldersSortOptionFlow.first()
             _currentFolderSortOption.value = SortOption.FOLDERS.find { it.storageKey == folderSortKey } ?: SortOption.FolderNameAZ
 
-            val likedSortKey = userPreferencesRepository.likedSongsSortOptionFlow.first()
-            _currentFavoriteSortOption.value = SortOption.LIKED.find { it.storageKey == likedSortKey } ?: SortOption.LikedSongDateLiked
-
             // Restore last storage filter (All / Cloud / Local)
             _currentStorageFilter.value = userPreferencesRepository.lastStorageFilterFlow.first()
+        }
+
+        // Keep Liked sort in sync with DataStore (backup restore writes liked_manual here).
+        scope.launch {
+            userPreferencesRepository.likedSongsSortOptionFlow.collect { likedSortKey ->
+                val resolved = SortOption.LIKED.find { it.storageKey == likedSortKey }
+                    ?: SortOption.LikedSongDateLiked
+                if (_currentFavoriteSortOption.value != resolved) {
+                    _currentFavoriteSortOption.value = resolved
+                    if (resolved == SortOption.LikedSongManual || _isLikedReorderMode.value) {
+                        refreshLikedSongsFullList()
+                    }
+                }
+            }
         }
     }
 
