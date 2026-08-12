@@ -4,6 +4,8 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.37] - 2026-08-12
+
 ### Fixed
 - Splash/install/recents no longer use light-mode chrome: dark splash always, composed gold-on-black splash glyph, monochrome themed-icon layer removed, recents uses decoded composed bitmap.
 
