@@ -4,6 +4,8 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.38] - 2026-08-12
+
 ### Fixed
 - App launch crash on Android 13+: `TaskDescription.Builder.setIcon` rejected `Icon.createWithBitmap` (`TYPE_RESOURCE` only); use drawable resource id instead.
 
