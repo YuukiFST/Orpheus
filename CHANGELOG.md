@@ -4,6 +4,8 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.36] - 2026-08-12
+
 ### Fixed
 - Launcher icon restored to gold logo on black (brand asset); splash uses transparent gold with black icon plate; overview/recents forced to composed `ic_launcher` via TaskDescription.
 
