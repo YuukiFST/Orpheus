@@ -205,20 +205,30 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        // Keep overview/recents on the composed launcher icon (gold on black), not a
-        // washed themed/monochrome substitute some OEMs apply from the adaptive layers.
+        // Overview/recents: decode composed gold-on-black drawable. @mipmap/ic_launcher
+        // resolves to adaptive-anydpi XML (and OEMs may theme it light); a Bitmap/Icon bypasses that.
+        val recentsIcon = android.graphics.BitmapFactory.decodeResource(
+            resources,
+            R.drawable.ic_splash,
+        )
         setTaskDescription(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ActivityManager.TaskDescription.Builder()
+                val builder = ActivityManager.TaskDescription.Builder()
                     .setLabel(getString(R.string.app_name))
-                    .setIcon(R.mipmap.ic_launcher)
-                    .build()
+                if (recentsIcon != null) {
+                    builder.setIcon(android.graphics.drawable.Icon.createWithBitmap(recentsIcon))
+                }
+                builder.build()
             } else {
                 @Suppress("DEPRECATION")
-                ActivityManager.TaskDescription(
-                    getString(R.string.app_name),
-                    R.mipmap.ic_launcher,
-                )
+                if (recentsIcon != null) {
+                    ActivityManager.TaskDescription(
+                        getString(R.string.app_name),
+                        recentsIcon,
+                    )
+                } else {
+                    ActivityManager.TaskDescription(getString(R.string.app_name))
+                }
             }
         )
 
