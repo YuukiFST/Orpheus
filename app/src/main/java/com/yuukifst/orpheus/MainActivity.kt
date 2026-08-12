@@ -107,6 +107,8 @@ import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.service.MusicService
 import com.yuukifst.orpheus.data.worker.SyncManager
 import com.yuukifst.orpheus.data.worker.SyncProgress
+import com.yuukifst.orpheus.presentation.RecentsTaskDescriptionIcon
+import com.yuukifst.orpheus.presentation.chooseRecentsTaskDescriptionIcon
 import com.yuukifst.orpheus.presentation.components.AllFilesAccessDialog
 import com.yuukifst.orpheus.presentation.components.AppSidebarDrawer
 import com.yuukifst.orpheus.presentation.components.CrashReportDialog
@@ -205,32 +207,34 @@ class MainActivity : ComponentActivity() {
         }
         super.onCreate(savedInstanceState)
 
-        // Overview/recents: decode composed gold-on-black drawable. @mipmap/ic_launcher
-        // resolves to adaptive-anydpi XML (and OEMs may theme it light); a Bitmap/Icon bypasses that.
-        val recentsIcon = android.graphics.BitmapFactory.decodeResource(
-            resources,
-            R.drawable.ic_splash,
-        )
-        setTaskDescription(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val builder = ActivityManager.TaskDescription.Builder()
-                    .setLabel(getString(R.string.app_name))
-                if (recentsIcon != null) {
-                    builder.setIcon(android.graphics.drawable.Icon.createWithBitmap(recentsIcon))
+        // Overview/recents: composed gold-on-black @drawable/ic_splash (not adaptive mipmap).
+        // API 33+ Builder.setIcon(Icon) ONLY accepts TYPE_RESOURCE — createWithBitmap crashes launch.
+        runCatching {
+            val label = getString(R.string.app_name)
+            val description = when (chooseRecentsTaskDescriptionIcon(Build.VERSION.SDK_INT)) {
+                RecentsTaskDescriptionIcon.ResourceId -> {
+                    ActivityManager.TaskDescription.Builder()
+                        .setLabel(label)
+                        .setIcon(R.drawable.ic_splash)
+                        .build()
                 }
-                builder.build()
-            } else {
-                @Suppress("DEPRECATION")
-                if (recentsIcon != null) {
-                    ActivityManager.TaskDescription(
-                        getString(R.string.app_name),
-                        recentsIcon,
+                RecentsTaskDescriptionIcon.DecodedBitmap -> {
+                    val bitmap = android.graphics.BitmapFactory.decodeResource(
+                        resources,
+                        R.drawable.ic_splash,
                     )
-                } else {
-                    ActivityManager.TaskDescription(getString(R.string.app_name))
+                    @Suppress("DEPRECATION")
+                    if (bitmap != null) {
+                        ActivityManager.TaskDescription(label, bitmap)
+                    } else {
+                        ActivityManager.TaskDescription(label)
+                    }
                 }
             }
-        )
+            setTaskDescription(description)
+        }.onFailure { error ->
+            Timber.w(error, "Failed to set TaskDescription for recents icon")
+        }
 
         // MD3 Optimization: Release Splash Screen immediately to render UI skeleton.
         // Data loading is handled via optimistic UI and smooth transitions.
