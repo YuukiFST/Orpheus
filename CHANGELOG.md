@@ -4,6 +4,9 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- Launcher/splash/recents icon contrast: dark ink on light adaptive plate, dedicated splash drawable (no washed-out light-on-light logo).
+
 ## [1.0.34] - 2026-08-11
 
 ### Fixed
