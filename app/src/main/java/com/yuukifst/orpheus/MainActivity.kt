@@ -3,6 +3,7 @@ package com.yuukifst.orpheus
 import com.yuukifst.orpheus.presentation.navigation.navigateSafely
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
@@ -203,6 +204,23 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         super.onCreate(savedInstanceState)
+
+        // Keep overview/recents on the composed launcher icon (gold on black), not a
+        // washed themed/monochrome substitute some OEMs apply from the adaptive layers.
+        setTaskDescription(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityManager.TaskDescription.Builder()
+                    .setLabel(getString(R.string.app_name))
+                    .setIcon(R.mipmap.ic_launcher)
+                    .build()
+            } else {
+                @Suppress("DEPRECATION")
+                ActivityManager.TaskDescription(
+                    getString(R.string.app_name),
+                    R.mipmap.ic_launcher,
+                )
+            }
+        )
 
         // MD3 Optimization: Release Splash Screen immediately to render UI skeleton.
         // Data loading is handled via optimistic UI and smooth transitions.
