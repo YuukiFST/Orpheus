@@ -107,8 +107,6 @@ import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.service.MusicService
 import com.yuukifst.orpheus.data.worker.SyncManager
 import com.yuukifst.orpheus.data.worker.SyncProgress
-import com.yuukifst.orpheus.presentation.RecentsTaskDescriptionIcon
-import com.yuukifst.orpheus.presentation.chooseRecentsTaskDescriptionIcon
 import com.yuukifst.orpheus.presentation.components.AllFilesAccessDialog
 import com.yuukifst.orpheus.presentation.components.AppSidebarDrawer
 import com.yuukifst.orpheus.presentation.components.CrashReportDialog
