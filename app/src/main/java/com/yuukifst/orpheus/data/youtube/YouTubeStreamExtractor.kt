@@ -1,9 +1,13 @@
 package com.yuukifst.orpheus.data.youtube
 
 import android.util.LruCache
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.schabi.newpipe.extractor.stream.AudioStream
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import timber.log.Timber
 import javax.inject.Inject
@@ -17,30 +21,37 @@ data class YouTubeStreamResult(
 @Singleton
 class YouTubeStreamExtractor @Inject constructor(
     private val youTubeInitializer: YouTubeInitializer,
+    private val youTubeDownloader: YouTubeDownloaderImpl,
+    private val userPreferencesRepository: UserPreferencesRepository?,
 ) {
 
     private val streamCache = LruCache<String, CachedStreamResult>(64)
 
     suspend fun extractBestAudio(videoId: String): YouTubeStreamResult = withContext(Dispatchers.IO) {
+        val quality = currentQuality()
+        val cacheKey = streamCacheKey(videoId, quality)
         val now = System.currentTimeMillis()
-        streamCache.get(videoId)?.takeIf { it.isValid(now) }?.result?.let { return@withContext it }
+        streamCache.get(cacheKey)?.takeIf { it.isValid(now) }?.result?.let { return@withContext it }
 
         youTubeInitializer.ensureInitialized()
-        val info = StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
-        val best = info.audioStreams
-            .maxByOrNull { it.averageBitrate }
+        val info = youTubeDownloader.runAsStream {
+            StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
+        }
+        val best = selectYouTubeAudioStream(info.audioStreams, quality)
             ?: throw IllegalStateException("No audio stream available for $videoId")
         val result = YouTubeStreamResult(
             streamUrl = best.content,
             mimeType = best.format?.mimeType,
         )
-        streamCache.put(videoId, CachedStreamResult(result, now))
+        streamCache.put(cacheKey, CachedStreamResult(result, now))
         result
     }
 
     suspend fun extractBestAudioWithRetry(videoId: String): YouTubeStreamResult {
         return try {
             extractBestAudio(videoId)
+        } catch (error: CancellationException) {
+            throw error
         } catch (_: Exception) {
             kotlinx.coroutines.delay(250)
             extractBestAudio(videoId)
@@ -63,15 +74,27 @@ class YouTubeStreamExtractor @Inject constructor(
             .isSuccess
     }
 
-    internal fun isCached(videoId: String): Boolean =
-        streamCache.get(videoId)?.isValid(System.currentTimeMillis()) == true
+    internal fun isCached(videoId: String): Boolean {
+        val now = System.currentTimeMillis()
+        return YouTubeAudioQuality.entries.any { quality ->
+            streamCache.get(streamCacheKey(videoId, quality))?.isValid(now) == true
+        }
+    }
 
     internal fun clearStreamCacheForTests() {
         streamCache.evictAll()
     }
 
     internal fun seedStreamCacheForTests(videoId: String, result: YouTubeStreamResult) {
-        streamCache.put(videoId, CachedStreamResult(result, System.currentTimeMillis()))
+        streamCache.put(
+            streamCacheKey(videoId, YouTubeAudioQuality.HIGH),
+            CachedStreamResult(result, System.currentTimeMillis()),
+        )
+    }
+
+    private suspend fun currentQuality(): YouTubeAudioQuality {
+        return userPreferencesRepository?.youtubeAudioQualityFlow?.first()
+            ?: YouTubeAudioQuality.HIGH
     }
 
     private data class CachedStreamResult(
@@ -83,11 +106,46 @@ class YouTubeStreamExtractor @Inject constructor(
 
     internal companion object {
         fun createForTests(): YouTubeStreamExtractor {
+            val downloader = YouTubeDownloaderImpl.createStandalone()
             return YouTubeStreamExtractor(
-                youTubeInitializer = YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()),
+                youTubeInitializer = YouTubeInitializer(downloader),
+                youTubeDownloader = downloader,
+                userPreferencesRepository = null,
             )
         }
 
         private const val STREAM_CACHE_TTL_MS = 2 * 60 * 60 * 1000L
     }
+}
+
+internal fun streamCacheKey(videoId: String, quality: YouTubeAudioQuality): String =
+    "${videoId.trim()}:${quality.name}"
+
+internal fun youtubeBitrateKbps(averageBitrate: Int): Int {
+    if (averageBitrate <= 0) return 0
+    return if (averageBitrate >= 1000) (averageBitrate + 500) / 1000 else averageBitrate
+}
+
+internal fun chooseYouTubeAudioBitrate(
+    bitrates: List<Int>,
+    quality: YouTubeAudioQuality,
+): Int? {
+    val usable = bitrates.filter { youtubeBitrateKbps(it) > 0 }
+    if (usable.isEmpty()) return bitrates.firstOrNull()
+    val capKbps = quality.maxBitrateKbps
+    if (capKbps == null) {
+        return usable.maxByOrNull { youtubeBitrateKbps(it) }
+    }
+    return usable
+        .filter { youtubeBitrateKbps(it) <= capKbps }
+        .maxByOrNull { youtubeBitrateKbps(it) }
+        ?: usable.minByOrNull { youtubeBitrateKbps(it) }
+}
+
+internal fun selectYouTubeAudioStream(
+    streams: List<AudioStream>,
+    quality: YouTubeAudioQuality,
+): AudioStream? {
+    val chosen = chooseYouTubeAudioBitrate(streams.map { it.averageBitrate }, quality) ?: return streams.firstOrNull()
+    return streams.firstOrNull { it.averageBitrate == chosen } ?: streams.firstOrNull()
 }

@@ -343,6 +343,9 @@ class PlaylistViewModelYouTubeMembershipTest {
         coVerify(exactly = 1) {
             userPreferencesRepository.setPlaylistSongOrderMode(playlistId, "manual")
         }
+        coVerify(exactly = 1) {
+            playbackController.applyPlayingPlaylistReorder(playlistId, any())
+        }
         assertEquals(
             listOf("youtube_vid1", "local-a"),
             viewModel.uiState.value.currentPlaylistSongs.map { it.id },

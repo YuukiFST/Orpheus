@@ -6,6 +6,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import com.yuukifst.orpheus.data.model.PlaylistMixedTrack
+import com.yuukifst.orpheus.data.model.playbackMediaId
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.service.player.DualPlayerEngine
 import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
@@ -40,6 +41,63 @@ internal fun shouldReplaceQueueForSearchPlay(
 
 internal fun isSearchQueueName(queueName: String): Boolean =
     queueName.startsWith("Search")
+
+internal fun userFacingYouTubePlaybackError(error: Throwable): String {
+    val message = error.message.orEmpty()
+    if (error is CancellationException) return ""
+    if (isCanceledNetworkFailure(error)) return ""
+    return when {
+        error is UnknownHostException ||
+            message.contains("Unable to resolve host", ignoreCase = true) ->
+            "No internet connection. Check your network and try again."
+        message.contains("cancel", ignoreCase = true) -> ""
+        else -> message.ifBlank { "Playback failed" }
+    }
+}
+
+internal fun isCanceledNetworkFailure(error: Throwable): Boolean {
+    var current: Throwable? = error
+    while (current != null) {
+        val message = current.message.orEmpty()
+        if (
+            message.contains("Canceled", ignoreCase = true) ||
+            message.contains("Socket closed", ignoreCase = true)
+        ) {
+            return true
+        }
+        current = current.cause
+    }
+    return false
+}
+
+internal fun nextMediaItemMove(
+    currentOrder: List<String>,
+    desiredOrder: List<String>,
+): Pair<Int, Int>? {
+    if (currentOrder.size != desiredOrder.size) return null
+    if (currentOrder.toSet() != desiredOrder.toSet()) return null
+    for (index in desiredOrder.indices) {
+        if (currentOrder[index] != desiredOrder[index]) {
+            val from = currentOrder.indexOf(desiredOrder[index])
+            if (from < 0) return null
+            return from to index
+        }
+    }
+    return null
+}
+
+internal fun applyMediaItemMoves(
+    currentOrder: MutableList<String>,
+    desiredOrder: List<String>,
+    move: (from: Int, to: Int) -> Unit,
+) {
+    while (true) {
+        val step = nextMediaItemMove(currentOrder, desiredOrder) ?: return
+        move(step.first, step.second)
+        val item = currentOrder.removeAt(step.first)
+        currentOrder.add(step.second, item)
+    }
+}
 
 /**
  * How to attach a fully resolved mixed Liked/YouTube queue once the start item
@@ -186,6 +244,7 @@ class YouTubePlaybackController @Inject constructor(
     private var playbackListener: Player.Listener? = null
     private var retryCountForCurrentItem = 0
     private var currentMixedTracks: List<PlaylistMixedTrack> = emptyList()
+    private var playingPlaylistId: String? = null
     private var sessionStopOnEnd = false
     private var queueFillJob: kotlinx.coroutines.Job? = null
     private val playGeneration = AtomicLong(0L)
@@ -206,6 +265,7 @@ class YouTubePlaybackController @Inject constructor(
         queueFillJob?.cancel()
         queueFillJob = null
         playbackStateHolder.clearUserQueueTail()
+        playingPlaylistId = null
         return playGeneration.incrementAndGet()
     }
 
@@ -258,7 +318,7 @@ class YouTubePlaybackController @Inject constructor(
         }.onFailure { error ->
             if (error is CancellationException) throw error
             rollbackOptimisticPlaybackState(track, previousSong)
-            _playbackErrors.emit(userFacingPlaybackError(error))
+            _playbackErrors.emit(userFacingYouTubePlaybackError(error))
         }.isSuccess
     }
 
@@ -319,7 +379,7 @@ class YouTubePlaybackController @Inject constructor(
             }
         }.onFailure { error ->
             if (error is CancellationException) throw error
-            _playbackErrors.emit(userFacingPlaybackError(error))
+            _playbackErrors.emit(userFacingYouTubePlaybackError(error))
         }.isSuccess
     }
 
@@ -338,9 +398,7 @@ class YouTubePlaybackController @Inject constructor(
                 PlaylistMixedTrack.YouTube(track = track, sortOrder = index)
             }
             mixed.forEach { entry ->
-                if (entry is PlaylistMixedTrack.YouTube) {
-                    cachedTrackRepository.recordPlayed(entry.track)
-                }
+                cachedTrackRepository.recordPlayed(entry.track)
             }
             sessionStopOnEnd = false
             startPlayback(
@@ -353,7 +411,7 @@ class YouTubePlaybackController @Inject constructor(
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
-            _playbackErrors.emit(userFacingPlaybackError(error))
+            _playbackErrors.emit(userFacingYouTubePlaybackError(error))
         }
     }
 
@@ -362,9 +420,11 @@ class YouTubePlaybackController @Inject constructor(
         startIndex: Int = 0,
         repeatMode: Int = Player.REPEAT_MODE_ALL,
         stopOnEnd: Boolean = false,
+        playlistId: String? = null,
     ) {
         if (tracks.isEmpty()) return
         val generation = beginPlaybackGeneration()
+        playingPlaylistId = playlistId
         val safeIndex = startIndex.coerceIn(0, tracks.lastIndex)
         currentMixedTracks = tracks
         withContext(Dispatchers.Main.immediate) {
@@ -398,7 +458,45 @@ class YouTubePlaybackController @Inject constructor(
             )
         }.onFailure { error ->
             if (error is CancellationException) throw error
-            _playbackErrors.emit(userFacingPlaybackError(error))
+            _playbackErrors.emit(userFacingYouTubePlaybackError(error))
+        }
+    }
+
+    fun applyPlayingPlaylistReorder(
+        playlistId: String,
+        reorderedTracks: List<PlaylistMixedTrack>,
+    ) {
+        if (playingPlaylistId != playlistId || reorderedTracks.isEmpty()) return
+        currentMixedTracks = reorderedTracks
+        val generation = playGeneration.get()
+        scope.launch {
+            val player = dualPlayerEngine.masterPlayer
+            val desiredIds = reorderedTracks.map { it.playbackMediaId() }
+            val currentIds = (0 until player.mediaItemCount).map { index ->
+                player.getMediaItemAt(index).mediaId
+            }
+            if (
+                currentIds.size == desiredIds.size &&
+                currentIds.toSet() == desiredIds.toSet()
+            ) {
+                dualPlayerEngine.runWithoutPlaylistChangedSideEffects {
+                    applyMediaItemMoves(currentIds.toMutableList(), desiredIds) { from, to ->
+                        player.moveMediaItem(from, to)
+                    }
+                }
+                publishQueueUpdate(player.currentMediaItemIndex, "Queue")
+                return@launch
+            }
+            val currentId = player.currentMediaItem?.mediaId
+                ?: playbackStateHolder.stablePlayerState.value.currentSong?.id
+            val startIndex = desiredIds.indexOf(currentId).takeIf { it >= 0 } ?: 0
+            queueFillJob?.cancel()
+            if (reorderedTracks.size > 1) {
+                queueFillJob = scope.launch {
+                    fillQueueAroundCurrent(reorderedTracks, startIndex, generation)
+                }
+            }
+            publishQueueUpdate(startIndex, "Queue")
         }
     }
 
@@ -434,49 +532,56 @@ class YouTubePlaybackController @Inject constructor(
         }
 
         if (tracks.size > 1) {
-            val fillGeneration = expectedGeneration
             queueFillJob = scope.launch {
-                runCatching {
-                    throwIfPlaybackGenerationStale(fillGeneration)
-                    val allItems = withContext(Dispatchers.IO) {
-                        tracks.map { resolveMixedEntry(it) }
-                    }
-                    withContext(Dispatchers.Main.immediate) {
-                        throwIfPlaybackGenerationStale(fillGeneration)
-                        val player = dualPlayerEngine.masterPlayer
-                        val plan = planMixedQueueAttach(
-                            currentMediaItemCount = player.mediaItemCount,
-                            currentMediaId = player.currentMediaItem?.mediaId,
-                            resolvedMediaIds = allItems.map { it.mediaId },
-                            startIndex = safeIndex,
-                        )
-                        when (plan) {
-                            is MixedQueueAttachPlan.AddAroundCurrent -> {
-                                val before = allItems.subList(0, safeIndex)
-                                val after = allItems.subList(safeIndex + 1, allItems.size)
-                                dualPlayerEngine.runWithoutPlaylistChangedSideEffects {
-                                    if (before.isNotEmpty()) {
-                                        player.addMediaItems(0, before)
-                                    }
-                                    if (after.isNotEmpty()) {
-                                        player.addMediaItems(before.size + 1, after)
-                                    }
-                                }
+                fillQueueAroundCurrent(tracks, safeIndex, expectedGeneration)
+            }
+        }
+    }
+
+    private suspend fun fillQueueAroundCurrent(
+        tracks: List<PlaylistMixedTrack>,
+        startIndex: Int,
+        expectedGeneration: Long,
+    ) {
+        runCatching {
+            throwIfPlaybackGenerationStale(expectedGeneration)
+            val allItems = withContext(Dispatchers.IO) {
+                tracks.map { resolveMixedEntry(it) }
+            }
+            withContext(Dispatchers.Main.immediate) {
+                throwIfPlaybackGenerationStale(expectedGeneration)
+                val player = dualPlayerEngine.masterPlayer
+                val plan = planMixedQueueAttach(
+                    currentMediaItemCount = player.mediaItemCount,
+                    currentMediaId = player.currentMediaItem?.mediaId,
+                    resolvedMediaIds = allItems.map { it.mediaId },
+                    startIndex = startIndex,
+                )
+                when (plan) {
+                    is MixedQueueAttachPlan.AddAroundCurrent -> {
+                        val before = allItems.subList(0, startIndex)
+                        val after = allItems.subList(startIndex + 1, allItems.size)
+                        dualPlayerEngine.runWithoutPlaylistChangedSideEffects {
+                            if (before.isNotEmpty()) {
+                                player.addMediaItems(0, before)
                             }
-                            is MixedQueueAttachPlan.ReplaceAll -> {
-                                val position = player.currentPosition
-                                player.setMediaItems(allItems, plan.startIndex, position)
-                                player.prepare()
-                                if (player.playWhenReady) player.play()
+                            if (after.isNotEmpty()) {
+                                player.addMediaItems(before.size + 1, after)
                             }
-                            MixedQueueAttachPlan.Skip -> Unit
                         }
                     }
-                }.onFailure { error ->
-                    if (error !is CancellationException) {
-                        _playbackErrors.emit(userFacingPlaybackError(error))
+                    is MixedQueueAttachPlan.ReplaceAll -> {
+                        val position = player.currentPosition
+                        player.setMediaItems(allItems, plan.startIndex, position)
+                        player.prepare()
+                        if (player.playWhenReady) player.play()
                     }
+                    MixedQueueAttachPlan.Skip -> Unit
                 }
+            }
+        }.onFailure { error ->
+            if (error !is CancellationException) {
+                _playbackErrors.emit(userFacingYouTubePlaybackError(error))
             }
         }
     }
@@ -547,7 +652,7 @@ class YouTubePlaybackController @Inject constructor(
                             player.play()
                         }.onFailure { failure ->
                             if (failure !is CancellationException) {
-                                _playbackErrors.emit(userFacingPlaybackError(failure))
+                                _playbackErrors.emit(userFacingYouTubePlaybackError(failure))
                             }
                             skipToNextOrStop(player)
                         }
@@ -678,17 +783,6 @@ class YouTubePlaybackController @Inject constructor(
             is PlaylistMixedTrack.Local -> entry.song
             is PlaylistMixedTrack.YouTube -> entry.track.toPlaybackSong()
             null -> null
-        }
-    }
-
-    private fun userFacingPlaybackError(error: Throwable): String {
-        val message = error.message.orEmpty()
-        return when {
-            error is UnknownHostException ||
-                message.contains("Unable to resolve host", ignoreCase = true) ->
-                "No internet connection. Check your network and try again."
-            message.contains("cancel", ignoreCase = true) -> ""
-            else -> message.ifBlank { "Playback failed" }
         }
     }
 }

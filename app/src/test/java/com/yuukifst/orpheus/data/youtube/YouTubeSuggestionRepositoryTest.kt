@@ -7,9 +7,7 @@ import org.junit.jupiter.api.Test
 class YouTubeSuggestionRepositoryTest {
     @Test
     fun suggestions_blankQuery_returnsEmpty() = runBlocking {
-        val repo = YouTubeSuggestionRepository(
-            youTubeInitializer = YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()),
-        )
+        val repo = YouTubeSuggestionRepository.createForTests()
         assertEquals(emptyList<String>(), repo.suggestions("  "))
     }
 }

@@ -68,13 +68,33 @@ class YouTubeSearchRepository @Inject constructor(
 
     private fun performSearch(trimmedQuery: String, cacheKey: String): List<YouTubeTrack> {
         youTubeInitializer.ensureInitialized()
-        val handler = YoutubeSearchQueryHandlerFactory.getInstance()
-            .fromQuery(trimmedQuery, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
-        val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
-        val results = searchInfo.relatedItems
-            .mapNotNull { item -> item.toYouTubeTrack() }
-        searchCache.put(cacheKey, results)
-        return results
+        return youTubeDownloader.runAsSearch {
+            val handler = YoutubeSearchQueryHandlerFactory.getInstance()
+                .fromQuery(trimmedQuery, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
+            val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
+            val seenIds = linkedSetOf<String>()
+            val results = mutableListOf<YouTubeTrack>()
+            fun consume(items: List<InfoItem>) {
+                items.mapNotNull { item -> item.toYouTubeTrack() }.forEach { track ->
+                    if (seenIds.add(track.videoId)) {
+                        results.add(track)
+                    }
+                }
+            }
+            consume(searchInfo.relatedItems)
+            var nextPage = searchInfo.nextPage
+            var pagesFetched = 1
+            while (nextPage != null && pagesFetched < MAX_SEARCH_PAGES) {
+                val more = runCatching {
+                    SearchInfo.getMoreItems(ServiceList.YouTube, handler, nextPage)
+                }.getOrNull() ?: break
+                consume(more.items)
+                nextPage = more.nextPage
+                pagesFetched++
+            }
+            searchCache.put(cacheKey, results)
+            results
+        }
     }
 
     internal fun clearSearchCacheForTests() {
@@ -90,6 +110,8 @@ class YouTubeSearchRepository @Inject constructor(
     }
 
     internal companion object {
+        private const val MAX_SEARCH_PAGES = 3
+
         fun createForTests(): YouTubeSearchRepository {
             val downloader = YouTubeDownloaderImpl.createStandalone()
             return YouTubeSearchRepository(

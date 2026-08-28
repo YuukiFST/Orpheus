@@ -19,3 +19,8 @@ sealed class PlaylistMixedTrack {
         override val sortOrder: Int,
     ) : PlaylistMixedTrack()
 }
+
+fun PlaylistMixedTrack.playbackMediaId(): String = when (this) {
+    is PlaylistMixedTrack.Local -> song.id
+    is PlaylistMixedTrack.YouTube -> track.mediaId
+}

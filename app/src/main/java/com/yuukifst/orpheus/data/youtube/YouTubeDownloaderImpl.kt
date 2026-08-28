@@ -6,7 +6,6 @@ import org.schabi.newpipe.extractor.downloader.Downloader
 import org.schabi.newpipe.extractor.downloader.Request
 import org.schabi.newpipe.extractor.downloader.Response
 import org.schabi.newpipe.extractor.exceptions.ReCaptchaException
-import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -23,9 +22,8 @@ class YouTubeDownloaderImpl @Inject constructor(
         .writeTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    private val activeCalls = Collections.newSetFromMap(
-        ConcurrentHashMap<okhttp3.Call, Boolean>(),
-    )
+    private val requestScope = ThreadLocal.withInitial { YouTubeHttpScope.STREAM }
+    private val activeCalls = ConcurrentHashMap<okhttp3.Call, YouTubeHttpScope>()
 
     override fun execute(request: Request): Response {
         val httpRequest = okhttp3.Request.Builder()
@@ -39,7 +37,8 @@ class YouTubeDownloaderImpl @Inject constructor(
             .build()
 
         val call = client.newCall(httpRequest)
-        activeCalls.add(call)
+        val scope = requestScope.get() ?: YouTubeHttpScope.STREAM
+        activeCalls[call] = scope
         try {
             val httpResponse = call.execute()
             if (httpResponse.code == 429) {
@@ -65,16 +64,36 @@ class YouTubeDownloaderImpl @Inject constructor(
         }
     }
 
+    fun <T> runAsSearch(block: () -> T): T = runAs(YouTubeHttpScope.SEARCH, block)
+
+    fun <T> runAsStream(block: () -> T): T = runAs(YouTubeHttpScope.STREAM, block)
+
+    private fun <T> runAs(scope: YouTubeHttpScope, block: () -> T): T {
+        val previous = requestScope.get()
+        requestScope.set(scope)
+        return try {
+            block()
+        } finally {
+            requestScope.set(previous)
+        }
+    }
+
     /**
      * Coroutine cancellation does not interrupt a blocking OkHttp `execute()`,
      * so a superseded query's HTTP work has to be cancelled explicitly.
-     * Cancels all in-flight NewPipe calls; only invoked when the caller knows
-     * every outstanding request is stale.
+     * Only search/suggestion calls are cancelled so in-flight stream extracts
+     * (play/prefetch) are not torn down.
      */
     fun cancelActiveRequest() {
-        val snapshot = activeCalls.toList()
-        activeCalls.clear()
-        snapshot.forEach { runCatching { it.cancel() } }
+        cancelCalls(YouTubeHttpScope.SEARCH)
+    }
+
+    internal fun cancelCalls(scope: YouTubeHttpScope) {
+        val snapshot = activeCalls.entries.filter { it.value == scope }
+        snapshot.forEach { (call, _) ->
+            activeCalls.remove(call)
+            runCatching { call.cancel() }
+        }
     }
 
     fun warmUpConnection() {
@@ -99,4 +118,9 @@ class YouTubeDownloaderImpl @Inject constructor(
             )
         }
     }
+}
+
+internal enum class YouTubeHttpScope {
+    SEARCH,
+    STREAM,
 }

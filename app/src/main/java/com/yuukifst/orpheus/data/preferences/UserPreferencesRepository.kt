@@ -75,6 +75,19 @@ enum class AlbumArtQuality(val maxSize: Int, val label: String) {
     ORIGINAL(0, "Original - Maximum quality")
 }
 
+enum class YouTubeAudioQuality(val maxBitrateKbps: Int?) {
+    HIGH(null),
+    MEDIUM(128),
+    LOW(64),
+}
+
+const val MIN_YOUTUBE_SEARCH_DEBOUNCE_MS = 200
+const val MAX_YOUTUBE_SEARCH_DEBOUNCE_MS = 1500
+const val DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS = 260
+
+internal fun sanitizeYouTubeSearchDebounceMs(debounceMs: Int): Int =
+    debounceMs.coerceIn(MIN_YOUTUBE_SEARCH_DEBOUNCE_MS, MAX_YOUTUBE_SEARCH_DEBOUNCE_MS)
+
 @Singleton
 class UserPreferencesRepository
 @Inject
@@ -145,6 +158,9 @@ constructor(
         val FOLDER_BACK_GESTURE_NAVIGATION = booleanPreferencesKey("folder_back_gesture_navigation")
         val USE_SMOOTH_CORNERS = booleanPreferencesKey("use_smooth_corners")
         val KEEP_PLAYING_IN_BACKGROUND = booleanPreferencesKey("keep_playing_in_background")
+        val YOUTUBE_AUDIO_QUALITY = stringPreferencesKey("youtube_audio_quality")
+        val YOUTUBE_SEARCH_AS_YOU_TYPE = booleanPreferencesKey("youtube_search_as_you_type")
+        val YOUTUBE_SEARCH_DEBOUNCE_MS = intPreferencesKey("youtube_search_debounce_ms")
         val IS_CROSSFADE_ENABLED = booleanPreferencesKey("is_crossfade_enabled")
         val HI_FI_MODE_ENABLED = booleanPreferencesKey("hi_fi_mode_enabled")
         val CROSSFADE_DURATION = intPreferencesKey("crossfade_duration")
@@ -852,6 +868,24 @@ constructor(
                 preferences[PreferencesKeys.KEEP_PLAYING_IN_BACKGROUND] ?: true
             }
 
+    val youtubeAudioQualityFlow: Flow<YouTubeAudioQuality> =
+            dataStore.data.map { preferences ->
+                parseYouTubeAudioQuality(preferences[PreferencesKeys.YOUTUBE_AUDIO_QUALITY])
+            }.distinctUntilChanged()
+
+    val youtubeSearchAsYouTypeFlow: Flow<Boolean> =
+            dataStore.data.map { preferences ->
+                preferences[PreferencesKeys.YOUTUBE_SEARCH_AS_YOU_TYPE] ?: true
+            }.distinctUntilChanged()
+
+    val youtubeSearchDebounceMsFlow: Flow<Int> =
+            dataStore.data.map { preferences ->
+                sanitizeYouTubeSearchDebounceMs(
+                    preferences[PreferencesKeys.YOUTUBE_SEARCH_DEBOUNCE_MS]
+                        ?: DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS,
+                )
+            }.distinctUntilChanged()
+
     val resumeOnHeadsetReconnectFlow: Flow<Boolean> =
             dataStore.data.map { preferences ->
                 preferences[PreferencesKeys.RESUME_ON_HEADSET_RECONNECT] ?: false
@@ -1380,6 +1414,25 @@ constructor(
         }
     }
 
+    suspend fun setYouTubeAudioQuality(quality: YouTubeAudioQuality) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.YOUTUBE_AUDIO_QUALITY] = quality.name
+        }
+    }
+
+    suspend fun setYouTubeSearchAsYouType(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.YOUTUBE_SEARCH_AS_YOU_TYPE] = enabled
+        }
+    }
+
+    suspend fun setYouTubeSearchDebounceMs(debounceMs: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.YOUTUBE_SEARCH_DEBOUNCE_MS] =
+                sanitizeYouTubeSearchDebounceMs(debounceMs)
+        }
+    }
+
     suspend fun setResumeOnHeadsetReconnect(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.RESUME_ON_HEADSET_RECONNECT] = enabled
@@ -1894,4 +1947,9 @@ constructor(
             it.remove(PreferencesKeys.LAST_PLAYLIST_NAME)
         }
     }
+}
+
+internal fun parseYouTubeAudioQuality(raw: String?): YouTubeAudioQuality {
+    if (raw.isNullOrBlank()) return YouTubeAudioQuality.HIGH
+    return runCatching { YouTubeAudioQuality.valueOf(raw) }.getOrDefault(YouTubeAudioQuality.HIGH)
 }

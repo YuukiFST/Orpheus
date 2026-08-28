@@ -10,6 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class YouTubeSuggestionRepository @Inject constructor(
     private val youTubeInitializer: YouTubeInitializer,
+    private val youTubeDownloader: YouTubeDownloaderImpl,
 ) {
 
     private val suggestionCache = LruCache<String, List<String>>(64)
@@ -21,11 +22,13 @@ class YouTubeSuggestionRepository @Inject constructor(
         suggestionCache.get(key)?.let { return@withContext it }
         youTubeInitializer.ensureInitialized()
         val fetched = runCatching {
-            ServiceList.YouTube.suggestionExtractor
-                .suggestionList(trimmed)
-                .filter { it.isNotBlank() }
-                .distinct()
-                .take(MAX_SUGGESTIONS)
+            youTubeDownloader.runAsSearch {
+                ServiceList.YouTube.suggestionExtractor
+                    .suggestionList(trimmed)
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .take(MAX_SUGGESTIONS)
+            }
         }.getOrDefault(emptyList())
         if (fetched.isNotEmpty()) {
             suggestionCache.put(key, fetched)
@@ -46,8 +49,10 @@ class YouTubeSuggestionRepository @Inject constructor(
 
     internal companion object {
         fun createForTests(): YouTubeSuggestionRepository {
+            val downloader = YouTubeDownloaderImpl.createStandalone()
             return YouTubeSuggestionRepository(
-                youTubeInitializer = YouTubeInitializer(YouTubeDownloaderImpl.createStandalone()),
+                youTubeInitializer = YouTubeInitializer(downloader),
+                youTubeDownloader = downloader,
             )
         }
 

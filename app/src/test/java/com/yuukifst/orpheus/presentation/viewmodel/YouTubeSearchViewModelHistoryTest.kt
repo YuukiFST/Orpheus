@@ -3,6 +3,7 @@ package com.yuukifst.orpheus.presentation.viewmodel
 import com.yuukifst.orpheus.data.database.SearchHistoryDao
 import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
@@ -40,6 +41,7 @@ class YouTubeSearchViewModelHistoryTest {
     private val playlistYouTubeMembership: PlaylistYouTubeMembership = mockk(relaxed = true)
     private val playbackController: YouTubePlaybackController = mockk(relaxed = true)
     private val streamExtractor: YouTubeStreamExtractor = mockk(relaxed = true)
+    private val userPreferencesRepository: UserPreferencesRepository = mockk(relaxed = true)
 
     private val sampleTrack = YouTubeTrack(
         videoId = "dQw4w9WgXcQ",
@@ -57,6 +59,8 @@ class YouTubeSearchViewModelHistoryTest {
         coEvery { searchHistoryDao.deleteByQuery(any()) } just runs
         coEvery { searchHistoryDao.insert(any()) } just runs
         every { searchRepository.searchCachedOnly(any()) } returns null
+        every { userPreferencesRepository.youtubeSearchAsYouTypeFlow } returns flowOf(true)
+        every { userPreferencesRepository.youtubeSearchDebounceMsFlow } returns flowOf(260)
     }
 
     @AfterEach
@@ -74,6 +78,7 @@ class YouTubeSearchViewModelHistoryTest {
             playlistYouTubeMembership = playlistYouTubeMembership,
             playbackController = playbackController,
             streamExtractor = streamExtractor,
+            userPreferencesRepository = userPreferencesRepository,
         )
     }
 
@@ -137,6 +142,40 @@ class YouTubeSearchViewModelHistoryTest {
         advanceTimeBy(260L)
         advanceUntilIdle()
 
+        coVerify(exactly = 0) { searchHistoryDao.insert(any()) }
+    }
+
+    @Test
+    fun `playing a result persists current query history`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        val query = "never gonna"
+        coEvery { searchRepository.search(query) } returns listOf(sampleTrack)
+        val viewModel = createViewModel()
+
+        viewModel.updateQuery(query)
+        advanceTimeBy(260L)
+        runCurrent()
+        advanceUntilIdle()
+        viewModel.playOnce(sampleTrack)
+        advanceUntilIdle()
+
+        coVerify(timeout = 1_000) {
+            searchHistoryDao.insert(match { it.query == query })
+        }
+    }
+
+    @Test
+    fun `search as you type disabled does not network search while typing`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        every { userPreferencesRepository.youtubeSearchAsYouTypeFlow } returns flowOf(false)
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.updateQuery("never gonna")
+        advanceTimeBy(1_000L)
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { searchRepository.search(any()) }
         coVerify(exactly = 0) { searchHistoryDao.insert(any()) }
     }
 }
