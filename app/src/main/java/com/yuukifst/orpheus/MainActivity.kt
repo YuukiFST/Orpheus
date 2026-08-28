@@ -211,24 +211,21 @@ class MainActivity : ComponentActivity() {
         // API 33+ Builder.setIcon(Icon) ONLY accepts TYPE_RESOURCE — createWithBitmap crashes launch.
         runCatching {
             val label = getString(R.string.app_name)
-            val description = when (chooseRecentsTaskDescriptionIcon(Build.VERSION.SDK_INT)) {
-                RecentsTaskDescriptionIcon.ResourceId -> {
-                    ActivityManager.TaskDescription.Builder()
-                        .setLabel(label)
-                        .setIcon(R.drawable.ic_splash)
-                        .build()
-                }
-                RecentsTaskDescriptionIcon.DecodedBitmap -> {
-                    val bitmap = android.graphics.BitmapFactory.decodeResource(
-                        resources,
-                        R.drawable.ic_splash,
-                    )
-                    @Suppress("DEPRECATION")
-                    if (bitmap != null) {
-                        ActivityManager.TaskDescription(label, bitmap)
-                    } else {
-                        ActivityManager.TaskDescription(label)
-                    }
+            val description = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityManager.TaskDescription.Builder()
+                    .setLabel(label)
+                    .setIcon(R.drawable.ic_splash)
+                    .build()
+            } else {
+                val bitmap = android.graphics.BitmapFactory.decodeResource(
+                    resources,
+                    R.drawable.ic_splash,
+                )
+                @Suppress("DEPRECATION")
+                if (bitmap != null) {
+                    ActivityManager.TaskDescription(label, bitmap)
+                } else {
+                    ActivityManager.TaskDescription(label)
                 }
             }
             setTaskDescription(description)
