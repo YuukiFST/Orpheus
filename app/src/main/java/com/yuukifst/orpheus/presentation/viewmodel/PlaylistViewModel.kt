@@ -720,7 +720,11 @@ class PlaylistViewModel @Inject constructor(
         viewModelScope.launch {
             val tracks = _uiState.value.currentPlaylistMixedTracks
             if (tracks.isEmpty()) return@launch
-            playbackController.playMixedPlaylist(tracks, startIndex)
+            playbackController.playMixedPlaylist(
+                tracks = tracks,
+                startIndex = startIndex,
+                playlistId = _uiState.value.currentPlaylistDetails?.id,
+            )
         }
     }
 
@@ -768,6 +772,7 @@ class PlaylistViewModel @Inject constructor(
                     playlistOrderModes = updatedModes,
                 )
             }
+            playbackController.applyPlayingPlaylistReorder(playlistId, reindexedMixedTracks)
         }
     }
 

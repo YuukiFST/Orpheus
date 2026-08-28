@@ -9,6 +9,8 @@ import com.yuukifst.orpheus.data.model.Playlist
 import com.yuukifst.orpheus.data.model.SearchHistoryItem
 import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
@@ -50,6 +52,7 @@ class YouTubeSearchViewModel @Inject constructor(
     private val playlistYouTubeMembership: PlaylistYouTubeMembership,
     private val playbackController: YouTubePlaybackController,
     private val streamExtractor: YouTubeStreamExtractor,
+    private val userPreferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(YouTubeSearchUiState())
@@ -59,9 +62,10 @@ class YouTubeSearchViewModel @Inject constructor(
     private var prefetchJob: Job? = null
     private val latestSearchRequestId = AtomicLong(0L)
     private var activeNetworkQuery: String? = null
+    @Volatile private var searchAsYouTypeEnabled = true
+    @Volatile private var searchDebounceMs = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS.toLong()
 
     private companion object {
-        const val SEARCH_DEBOUNCE_MS = 260L
         const val SEARCH_DEBOUNCE_CACHED_MS = 0L
         const val SUGGESTION_DEBOUNCE_MS = 150L
         const val MIN_QUERY_LENGTH = 2
@@ -81,6 +85,16 @@ class YouTubeSearchViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            userPreferencesRepository.youtubeSearchAsYouTypeFlow.collect { enabled ->
+                searchAsYouTypeEnabled = enabled
+            }
+        }
+        viewModelScope.launch {
+            userPreferencesRepository.youtubeSearchDebounceMsFlow.collect { debounceMs ->
+                searchDebounceMs = debounceMs.toLong()
+            }
+        }
     }
 
     fun updateQuery(query: String) {
@@ -98,6 +112,10 @@ class YouTubeSearchViewModel @Inject constructor(
                     hasSearched = false,
                 )
             }
+            return
+        }
+
+        if (!searchAsYouTypeEnabled) {
             return
         }
 
@@ -129,7 +147,7 @@ class YouTubeSearchViewModel @Inject constructor(
 
         debouncedSearchJob = viewModelScope.launch {
             val cachedAlready = searchRepository.searchCachedOnly(trimmed) != null
-            delay(if (cachedAlready) SEARCH_DEBOUNCE_CACHED_MS else SEARCH_DEBOUNCE_MS)
+            delay(if (cachedAlready) SEARCH_DEBOUNCE_CACHED_MS else searchDebounceMs)
             if (trimmed.length < MIN_QUERY_LENGTH) {
                 _uiState.update { it.copy(results = emptyList(), isLoading = false, hasSearched = false) }
                 return@launch
@@ -257,6 +275,10 @@ class YouTubeSearchViewModel @Inject constructor(
     }
 
     fun playOnce(track: YouTubeTrack) {
+        val query = _uiState.value.query.trim()
+        if (query.length >= MIN_QUERY_LENGTH) {
+            persistSearchHistory(query)
+        }
         viewModelScope.launch {
             playbackController.playOnce(track)
         }
