@@ -141,6 +141,15 @@
     <string name="setcat_headphones_resume_title">Resume when headphones reconnect</string>
     <string name="setcat_headphones_resume_subtitle">If playback paused because headphones were removed, resume automatically when they connect again.</string>
     <string name="setcat_queue_transitions">Queue and Transitions</string>
+    <string name="setcat_youtube_playback_section">YouTube Search</string>
+    <string name="setcat_youtube_audio_quality_label">YouTube audio quality</string>
+    <string name="setcat_youtube_audio_quality_desc">Higher quality uses more mobile data. Default is High (best available).</string>
+    <string name="setcat_youtube_audio_quality_high">High (best available)</string>
+    <string name="setcat_youtube_audio_quality_medium">Medium (~128 kbps)</string>
+    <string name="setcat_youtube_audio_quality_low">Low (~64 kbps)</string>
+    <string name="setcat_youtube_search_as_you_type_title">Search as you type</string>
+    <string name="setcat_youtube_search_as_you_type_subtitle">Fetch results while typing. Uses extra data for search, suggestions, and prefetch. Turn off to search only when you press Enter.</string>
+    <string name="setcat_youtube_search_debounce">Delay after typing</string>
     <string name="setcat_crossfade_label">Crossfade</string>
     <string name="setcat_crossfade_desc">Enable smooth transition between songs.</string>
     <string name="setcat_crossfade_duration">Crossfade Duration</string>

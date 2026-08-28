@@ -165,6 +165,9 @@ import com.yuukifst.orpheus.data.preferences.LaunchTab
 import com.yuukifst.orpheus.data.preferences.LibraryNavigationMode
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.data.preferences.ThemePreference
+import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
+import com.yuukifst.orpheus.data.preferences.MAX_YOUTUBE_SEARCH_DEBOUNCE_MS
+import com.yuukifst.orpheus.data.preferences.MIN_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.model.Song
 import com.yuukifst.orpheus.data.model.LyricsSourcePreference
 import com.yuukifst.orpheus.presentation.components.CollapsibleCommonTopBar
@@ -771,6 +774,42 @@ fun SettingsCategoryScreen(
                                     onCheckedChange = { settingsViewModel.setResumeOnHeadsetReconnect(it) },
                                     leadingIcon = { Icon(painterResource(R.drawable.rounded_headphones_24), null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
+                            }
+
+                            SettingsSubsection(title = stringResource(R.string.setcat_youtube_playback_section)) {
+                                ThemeSelectorItem(
+                                    label = stringResource(R.string.setcat_youtube_audio_quality_label),
+                                    description = stringResource(R.string.setcat_youtube_audio_quality_desc),
+                                    options = mapOf(
+                                        YouTubeAudioQuality.HIGH.name to stringResource(R.string.setcat_youtube_audio_quality_high),
+                                        YouTubeAudioQuality.MEDIUM.name to stringResource(R.string.setcat_youtube_audio_quality_medium),
+                                        YouTubeAudioQuality.LOW.name to stringResource(R.string.setcat_youtube_audio_quality_low),
+                                    ),
+                                    selectedKey = uiState.youtubeAudioQuality.name,
+                                    onSelectionChanged = { key ->
+                                        YouTubeAudioQuality.entries
+                                            .firstOrNull { it.name == key }
+                                            ?.let(settingsViewModel::setYouTubeAudioQuality)
+                                    },
+                                    leadingIcon = { Icon(painterResource(R.drawable.outline_high_quality_24), null, tint = MaterialTheme.colorScheme.secondary) }
+                                )
+                                SwitchSettingItem(
+                                    title = stringResource(R.string.setcat_youtube_search_as_you_type_title),
+                                    subtitle = stringResource(R.string.setcat_youtube_search_as_you_type_subtitle),
+                                    checked = uiState.youtubeSearchAsYouType,
+                                    onCheckedChange = { settingsViewModel.setYouTubeSearchAsYouType(it) },
+                                    leadingIcon = { Icon(Icons.Rounded.MusicNote, null, tint = MaterialTheme.colorScheme.secondary) }
+                                )
+                                if (uiState.youtubeSearchAsYouType) {
+                                    SliderSettingsItem(
+                                        label = stringResource(R.string.setcat_youtube_search_debounce),
+                                        value = uiState.youtubeSearchDebounceMs.toFloat(),
+                                        valueRange = MIN_YOUTUBE_SEARCH_DEBOUNCE_MS.toFloat()..MAX_YOUTUBE_SEARCH_DEBOUNCE_MS.toFloat(),
+                                        steps = ((MAX_YOUTUBE_SEARCH_DEBOUNCE_MS - MIN_YOUTUBE_SEARCH_DEBOUNCE_MS) / 50) - 1,
+                                        onValueChange = { settingsViewModel.setYouTubeSearchDebounceMs(it.toInt()) },
+                                        valueText = { value -> "${value.toInt()} ms" }
+                                    )
+                                }
                             }
 
                             SettingsSubsection(title = stringResource(R.string.setcat_queue_transitions)) {

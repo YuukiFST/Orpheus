@@ -18,6 +18,8 @@ import com.yuukifst.orpheus.data.preferences.CarouselStyle
 import com.yuukifst.orpheus.data.preferences.LibraryNavigationMode
 import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
+import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.AlbumArtQuality
 import com.yuukifst.orpheus.data.preferences.AlbumArtColorAccuracy
 import com.yuukifst.orpheus.data.preferences.AlbumArtPaletteStyle
@@ -63,6 +65,9 @@ data class SettingsUiState(
     val libraryNavigationMode: String = LibraryNavigationMode.TAB_ROW,
     val launchTab: String = LaunchTab.HOME,
     val keepPlayingInBackground: Boolean = true,
+    val youtubeAudioQuality: YouTubeAudioQuality = YouTubeAudioQuality.HIGH,
+    val youtubeSearchAsYouType: Boolean = true,
+    val youtubeSearchDebounceMs: Int = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS,
     val resumeOnHeadsetReconnect: Boolean = false,
     val showQueueHistory: Boolean = true,
     val isCrossfadeEnabled: Boolean = false,
@@ -438,6 +443,24 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(replayGainUseAlbumGain = useAlbum) }
             }
         }
+
+        viewModelScope.launch {
+            userPreferencesRepository.youtubeAudioQualityFlow.collect { quality ->
+                _uiState.update { it.copy(youtubeAudioQuality = quality) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.youtubeSearchAsYouTypeFlow.collect { enabled ->
+                _uiState.update { it.copy(youtubeSearchAsYouType = enabled) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.youtubeSearchDebounceMsFlow.collect { debounceMs ->
+                _uiState.update { it.copy(youtubeSearchDebounceMs = debounceMs) }
+            }
+        }
     }
 
     fun setAppRebrandDialogShown(wasShown: Boolean) {
@@ -585,6 +608,24 @@ class SettingsViewModel @Inject constructor(
     fun setKeepPlayingInBackground(enabled: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.setKeepPlayingInBackground(enabled)
+        }
+    }
+
+    fun setYouTubeAudioQuality(quality: YouTubeAudioQuality) {
+        viewModelScope.launch {
+            userPreferencesRepository.setYouTubeAudioQuality(quality)
+        }
+    }
+
+    fun setYouTubeSearchAsYouType(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setYouTubeSearchAsYouType(enabled)
+        }
+    }
+
+    fun setYouTubeSearchDebounceMs(debounceMs: Int) {
+        viewModelScope.launch {
+            userPreferencesRepository.setYouTubeSearchDebounceMs(debounceMs)
         }
     }
 
