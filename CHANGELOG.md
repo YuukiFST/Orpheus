@@ -4,6 +4,18 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.39] - 2026-08-28
+
+### Added
+- YouTube Search settings: audio quality (High default, Medium ~128 kbps, Low ~64 kbps), search-as-you-type toggle, and debounce delay. Prefs export with global settings backup.
+
+### Fixed
+- Tapping a YouTube Search result no longer reports a false offline error when search HTTP is cancelled.
+- Artist/title search loads up to three result pages (deduped).
+- Recent searches record playing a result, not only Enter.
+- Reordering the playlist that is playing updates the player queue so Next follows the new order.
+- Recents TaskDescription uses API 33 Builder behind an SDK check so lintDebug NewApi passes.
+
 ## [1.0.38] - 2026-08-12
 
 ### Fixed
