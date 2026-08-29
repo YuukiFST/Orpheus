@@ -677,23 +677,25 @@ class YouTubePlaybackController @Inject constructor(
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                val index = player.currentMediaItemIndex
-                songForMixedIndex(index)?.let { song ->
-                    syncListeningStats(player, song, forceNewSession = true)
-                    playbackStateHolder.updateStablePlayerState {
-                        it.copy(
-                            currentSong = song,
-                            currentMediaItemIndex = index,
-                            totalDuration = song.duration.coerceAtLeast(0L),
-                        )
+                val mixedIndex = mixedIndexForMediaId(mediaItem?.mediaId)
+                if (mixedIndex != null) {
+                    songForMixedIndex(mixedIndex)?.let { song ->
+                        syncListeningStats(player, song, forceNewSession = true)
+                        playbackStateHolder.updateStablePlayerState {
+                            it.copy(
+                                currentSong = song,
+                                currentMediaItemIndex = mixedIndex,
+                                totalDuration = song.duration.coerceAtLeast(0L),
+                            )
+                        }
+                        publishQueueUpdate(mixedIndex)
                     }
-                    publishQueueUpdate(index)
                 }
                 retryCountForCurrentItem = 0
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                songForMixedIndex(player.currentMediaItemIndex)?.let { song ->
+                songForPlaybackMediaId(player.currentMediaItem?.mediaId)?.let { song ->
                     listeningStatsTracker.onPlayStateChanged(isPlaying, player.currentPosition)
                 }
             }
@@ -842,6 +844,17 @@ class YouTubePlaybackController @Inject constructor(
     private fun detachListener(player: Player) {
         playbackListener?.let(player::removeListener)
         playbackListener = null
+    }
+
+    private fun mixedIndexForMediaId(mediaId: String?): Int? {
+        if (mediaId.isNullOrEmpty()) return null
+        val index = currentMixedTracks.indexOfFirst { it.playbackMediaId() == mediaId }
+        return index.takeIf { it >= 0 }
+    }
+
+    private fun songForPlaybackMediaId(mediaId: String?): Song? {
+        val index = mixedIndexForMediaId(mediaId) ?: return null
+        return songForMixedIndex(index)
     }
 
     private fun songForMixedIndex(index: Int): Song? {
