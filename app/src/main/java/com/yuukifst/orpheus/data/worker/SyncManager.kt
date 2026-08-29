@@ -399,6 +399,13 @@ class SyncManager @Inject constructor(
                 Timber.tag(TAG).d("Skipping foreground catch-up sync: initial setup not finished")
                 return@launch
             }
+            val lastSync = userPreferencesRepository.getLastSyncTimestamp()
+            if (!shouldEnqueueForegroundCatchUp(now, lastForegroundSyncTime, lastSync, true)) {
+                lastForegroundSyncTime = now
+                val ageSeconds = (now - lastSync) / 1000
+                Timber.tag(TAG).d("Skipping foreground catch-up (last sync ${ageSeconds}s ago)")
+                return@launch
+            }
             lastForegroundSyncTime = now
             Timber.tag(TAG).i("Foreground catch-up - scheduling local incremental sync")
             enqueueSyncWork(
@@ -428,9 +435,7 @@ class SyncManager @Inject constructor(
 
     companion object {
         private const val TAG = "SyncManager"
-        private const val MIN_SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000L // 6 hours
         private const val MEDIASTORE_CHANGE_DEBOUNCE_MS = 1_500L
-        private const val FOREGROUND_SYNC_COOLDOWN_MS = 60_000L
 
         private val CHANGE_PHASES = setOf(
             SyncProgress.SyncPhase.IDLE,
