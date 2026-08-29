@@ -59,6 +59,7 @@ class YouTubeSearchViewModelHistoryTest {
         coEvery { searchHistoryDao.deleteByQuery(any()) } just runs
         coEvery { searchHistoryDao.insert(any()) } just runs
         every { searchRepository.searchCachedOnly(any()) } returns null
+        every { searchRepository.searchProgressive(any()) } returns flowOf(listOf(sampleTrack))
         every { userPreferencesRepository.youtubeSearchAsYouTypeFlow } returns flowOf(true)
         every { userPreferencesRepository.youtubeSearchDebounceMsFlow } returns flowOf(260)
     }
@@ -175,7 +176,7 @@ class YouTubeSearchViewModelHistoryTest {
         advanceTimeBy(1_000L)
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { searchRepository.search(any()) }
+        coVerify(exactly = 0) { searchRepository.searchProgressive(any()) }
         coVerify(exactly = 0) { searchHistoryDao.insert(any()) }
     }
 }
