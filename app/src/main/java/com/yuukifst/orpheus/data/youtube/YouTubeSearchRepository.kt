@@ -5,7 +5,13 @@ import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -27,36 +33,49 @@ class YouTubeSearchRepository @Inject constructor(
     private val inFlightSearches = mutableMapOf<String, Deferred<List<YouTubeTrack>>>()
     private val inFlightMutex = Mutex()
 
-    suspend fun search(query: String): List<YouTubeTrack> = withContext(Dispatchers.IO) {
-        val key = youtubeQueryCacheKey(query)
-        if (key.isBlank()) return@withContext emptyList()
-        searchCache.get(key)?.let { return@withContext it }
+    suspend fun search(query: String): List<YouTubeTrack> = searchProgressive(query).last()
 
-        val shared = inFlightMutex.withLock {
-            inFlightSearches[key]?.takeIf { it.isActive }
-        }
-        if (shared != null) {
-            return@withContext shared.await()
-        }
+    fun searchProgressive(query: String): Flow<List<YouTubeTrack>> = channelFlow {
+        withContext(Dispatchers.IO) {
+            val key = youtubeQueryCacheKey(query)
+            if (key.isBlank()) {
+                send(emptyList())
+                return@withContext
+            }
+            searchCache.get(key)?.let { cached ->
+                send(cached)
+                return@withContext
+            }
 
-        coroutineScope {
-            val deferred = async {
-                performSearch(query.trim(), key)
+            val shared = inFlightMutex.withLock {
+                inFlightSearches[key]?.takeIf { it.isActive }
             }
-            inFlightMutex.withLock {
-                inFlightSearches[key] = deferred
+            if (shared != null) {
+                send(shared.await())
+                return@withContext
             }
-            try {
-                deferred.await()
-            } finally {
+
+            coroutineScope {
+                val deferred = async {
+                    performSearch(query.trim(), key) { firstPage ->
+                        trySend(firstPage)
+                    }
+                }
                 inFlightMutex.withLock {
-                    if (inFlightSearches[key] === deferred) {
-                        inFlightSearches.remove(key)
+                    inFlightSearches[key] = deferred
+                }
+                try {
+                    send(deferred.await())
+                } finally {
+                    inFlightMutex.withLock {
+                        if (inFlightSearches[key] === deferred) {
+                            inFlightSearches.remove(key)
+                        }
                     }
                 }
             }
         }
-    }
+    }.buffer(Channel.UNLIMITED).distinctUntilChanged()
 
     fun cancelActiveRequest() {
         youTubeDownloader.cancelActiveRequest()
@@ -66,22 +85,27 @@ class YouTubeSearchRepository @Inject constructor(
         youTubeDownloader.warmUpConnection()
     }
 
-    private fun performSearch(trimmedQuery: String, cacheKey: String): List<YouTubeTrack> {
+    private fun performSearch(
+        trimmedQuery: String,
+        cacheKey: String,
+        onFirstPage: ((List<YouTubeTrack>) -> Unit)? = null,
+    ): List<YouTubeTrack> {
         youTubeInitializer.ensureInitialized()
         return youTubeDownloader.runAsSearch {
             val handler = YoutubeSearchQueryHandlerFactory.getInstance()
                 .fromQuery(trimmedQuery, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
             val searchInfo = SearchInfo.getInfo(ServiceList.YouTube, handler)
-            val seenIds = linkedSetOf<String>()
             val results = mutableListOf<YouTubeTrack>()
             fun consume(items: List<InfoItem>) {
-                items.mapNotNull { item -> item.toYouTubeTrack() }.forEach { track ->
-                    if (seenIds.add(track.videoId)) {
-                        results.add(track)
-                    }
-                }
+                val incoming = items.mapNotNull { item -> item.toYouTubeTrack() }
+                val merged = mergeYouTubeSearchTracks(results, incoming)
+                results.clear()
+                results.addAll(merged)
             }
             consume(searchInfo.relatedItems)
+            val page1 = results.toList()
+            searchCache.put(cacheKey, page1)
+            onFirstPage?.invoke(page1)
             var nextPage = searchInfo.nextPage
             var pagesFetched = 1
             while (nextPage != null && pagesFetched < MAX_SEARCH_PAGES) {
@@ -124,6 +148,18 @@ class YouTubeSearchRepository @Inject constructor(
 
 /** Shared cache key for YouTube search/suggestion memory caches. */
 internal fun youtubeQueryCacheKey(query: String): String = query.trim().lowercase()
+
+internal fun mergeYouTubeSearchTracks(
+    existing: List<YouTubeTrack>,
+    incoming: List<YouTubeTrack>,
+): List<YouTubeTrack> {
+    val seen = existing.map { it.videoId }.toMutableSet()
+    val out = existing.toMutableList()
+    for (track in incoming) {
+        if (seen.add(track.videoId)) out.add(track)
+    }
+    return out
+}
 
 internal fun extractYouTubeVideoId(url: String?): String? {
     if (url.isNullOrBlank()) return null

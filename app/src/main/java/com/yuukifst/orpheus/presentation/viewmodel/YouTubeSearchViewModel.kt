@@ -221,12 +221,19 @@ class YouTubeSearchViewModel @Inject constructor(
         activeNetworkQuery = trimmed
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
         try {
-            val results = searchRepository.search(trimmed)
-            if (requestId != latestSearchRequestId.get()) return
-            _uiState.update {
-                it.copy(results = results, isLoading = false, suggestions = emptyList())
+            var prefetchedVideoId: String? = null
+            searchRepository.searchProgressive(trimmed).collect { results ->
+                if (requestId != latestSearchRequestId.get()) return@collect
+                _uiState.update {
+                    it.copy(results = results, isLoading = false, suggestions = emptyList())
+                }
+                val firstId = results.firstOrNull()?.videoId
+                if (firstId != null && firstId != prefetchedVideoId) {
+                    prefetchedVideoId = firstId
+                    prefetchTopResult(results)
+                }
             }
-            prefetchTopResult(results)
+            if (requestId != latestSearchRequestId.get()) return
             if (saveHistory) {
                 persistSearchHistory(trimmed)
             }
