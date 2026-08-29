@@ -4,7 +4,9 @@ import android.util.LruCache
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.extractor.stream.AudioStream
@@ -26,6 +28,8 @@ class YouTubeStreamExtractor @Inject constructor(
 ) {
 
     private val streamCache = LruCache<String, CachedStreamResult>(64)
+    private val extractScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val inFlightExtracts = YouTubeInFlightShare<String, YouTubeStreamResult>()
 
     suspend fun extractBestAudio(videoId: String): YouTubeStreamResult = withContext(Dispatchers.IO) {
         val quality = currentQuality()
@@ -33,6 +37,16 @@ class YouTubeStreamExtractor @Inject constructor(
         val now = System.currentTimeMillis()
         streamCache.get(cacheKey)?.takeIf { it.isValid(now) }?.result?.let { return@withContext it }
 
+        inFlightExtracts.share(cacheKey, extractScope) {
+            performExtract(videoId, quality, cacheKey)
+        }
+    }
+
+    private suspend fun performExtract(
+        videoId: String,
+        quality: YouTubeAudioQuality,
+        cacheKey: String,
+    ): YouTubeStreamResult {
         youTubeInitializer.ensureInitialized()
         val info = youTubeDownloader.runAsStream {
             StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
@@ -43,8 +57,8 @@ class YouTubeStreamExtractor @Inject constructor(
             streamUrl = best.content,
             mimeType = best.format?.mimeType,
         )
-        streamCache.put(cacheKey, CachedStreamResult(result, now))
-        result
+        streamCache.put(cacheKey, CachedStreamResult(result, System.currentTimeMillis()))
+        return result
     }
 
     suspend fun extractBestAudioWithRetry(videoId: String): YouTubeStreamResult {
