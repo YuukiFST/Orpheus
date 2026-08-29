@@ -4,6 +4,15 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.40] - 2026-08-29
+
+### Changed
+- YouTube Search paints after the first NewPipe page; later pages still merge in without duplicate videoIds.
+- YouTube playlist start no longer waits on Room `recordPlayed` before extract; history still records in the background.
+- Prefetch and play share one in-flight stream extract per video and quality.
+- Skip/next neighbors attach as each stream resolves instead of after the full queue extract.
+- Foreground library catch-up uses the same 6 hour interval as startup sync (60s flap guard and MediaStore-change sync unchanged).
+
 ## [1.0.39] - 2026-08-28
 
 ### Added
