@@ -55,4 +55,18 @@ class YouTubeMixedQueueAttachTest {
         )
         assertTrue(multi is MixedQueueAttachPlan.Skip)
     }
+
+    @Test
+    fun `fill order prefers next then prev then rest`() {
+        assertEquals(listOf(3, 1, 4, 0), youtubeQueueFillOrder(5, 2))
+        assertEquals(listOf(1, 2, 3, 4), youtubeQueueFillOrder(5, 0))
+        assertEquals(listOf(3, 2, 1, 0), youtubeQueueFillOrder(5, 4))
+        assertEquals(emptyList<Int>(), youtubeQueueFillOrder(1, 0))
+    }
+
+    @Test
+    fun `fill order coerces start index into range`() {
+        assertEquals(listOf(1, 2, 3, 4), youtubeQueueFillOrder(5, -3))
+        assertEquals(listOf(3, 2, 1, 0), youtubeQueueFillOrder(5, 99))
+    }
 }
