@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.extractor.stream.AudioStream
+import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import timber.log.Timber
 import javax.inject.Inject
@@ -160,6 +161,22 @@ internal fun selectYouTubeAudioStream(
     streams: List<AudioStream>,
     quality: YouTubeAudioQuality,
 ): AudioStream? {
-    val chosen = chooseYouTubeAudioBitrate(streams.map { it.averageBitrate }, quality) ?: return streams.firstOrNull()
-    return streams.firstOrNull { it.averageBitrate == chosen } ?: streams.firstOrNull()
+    val candidates = originalAudioTrackStreams(streams)
+    val chosen = chooseYouTubeAudioBitrate(candidates.map { it.averageBitrate }, quality)
+        ?: return candidates.firstOrNull()
+    return candidates.firstOrNull { it.averageBitrate == chosen } ?: candidates.firstOrNull()
+}
+
+/**
+ * Videos with YouTube's multi-language audio (incl. AI auto-dubbing) expose one stream set per
+ * track; picking by bitrate alone could land on a dubbed track. Keep the ORIGINAL track; when no
+ * stream is tagged ORIGINAL, drop only the tracks known to be non-original.
+ */
+internal fun originalAudioTrackStreams(streams: List<AudioStream>): List<AudioStream> {
+    val original = streams.filter { it.audioTrackType == AudioTrackType.ORIGINAL }
+    if (original.isNotEmpty()) return original
+    val notAltered = streams.filter {
+        it.audioTrackType != AudioTrackType.DUBBED && it.audioTrackType != AudioTrackType.DESCRIPTIVE
+    }
+    return notAltered.ifEmpty { streams }
 }
