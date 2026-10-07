@@ -198,6 +198,7 @@ class MusicService : MediaLibraryService() {
     }
     private var playbackSnapshotPersistJob: Job? = null
     private var playbackSnapshotUnloadWriteJob: Job? = null
+    private var playbackSnapshotTickerJob: Job? = null
     private var isRestoringPlaybackSnapshot = false
     private var isPlaybackUnloadInProgress = false
     private val audioManager by lazy {
@@ -230,6 +231,11 @@ class MusicService : MediaLibraryService() {
         // JSON+DataStore rewrite on every Media3 event (track transition fires 3-4 listeners
         // within ~200ms) is unnecessary work. 1500ms coalesces those without harming restore.
         private const val PLAYBACK_SNAPSHOT_DEBOUNCE_MS = 1500L
+        // While playing nothing else triggers a save, so a process kill would restore a stale
+        // position (long podcasts). Bounded so the queue JSON is not rewritten constantly.
+        private const val PLAYBACK_SNAPSHOT_PLAYING_INTERVAL_MS = 20_000L
+        // Recents swipe: the process may die right after stopSelf(), so wait for the write.
+        private const val PLAYBACK_SNAPSHOT_UNLOAD_WRITE_TIMEOUT_MS = 750L
         private const val FORCED_WIDGET_STATE_DEBOUNCE_MS = 250L
         private const val MEDIA_SESSION_BUTTON_DEBOUNCE_MS = 250L
         private const val DEFERRED_SERVICE_STARTUP_WORK_DELAY_MS = 1_000L
@@ -1020,9 +1026,12 @@ class MusicService : MediaLibraryService() {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = mediaSession
 
     override fun onTaskRemoved(rootIntent: Intent?) {
+        // Still stops audio (Recents swipe = close), but keeps the queue and position so the
+        // next launch shows the same track paused where it was.
         stopPlaybackAndUnload(
             reason = "task_removed",
-            preservePlaybackSnapshot = false,
+            preservePlaybackSnapshot = true,
+            awaitSnapshotWrite = true,
         )
         super.onTaskRemoved(rootIntent)
     }
@@ -1031,6 +1040,7 @@ class MusicService : MediaLibraryService() {
         PlaybackActivityTracker.setPlaybackActive(false)
         listeningStatsTracker.finalizeCurrentSession(forceSynchronousPersistence = true)
         playbackSnapshotPersistJob?.cancel()
+        playbackSnapshotTickerJob?.cancel()
         mediaSessionButtonRefreshJob?.cancel()
         followUpMediaSessionUiRefreshJob?.cancel()
         debouncedWidgetUpdateJob?.cancel()
@@ -1095,6 +1105,7 @@ class MusicService : MediaLibraryService() {
             requestWidgetFullUpdate(force = true)
             mediaSession?.let { refreshMediaSessionUi(it) }
             schedulePlaybackSnapshotPersist()
+            updatePlaybackSnapshotTicker(isPlaying)
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
@@ -1155,6 +1166,9 @@ class MusicService : MediaLibraryService() {
             newPosition: Player.PositionInfo,
             reason: Int
         ) {
+            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                schedulePlaybackSnapshotPersist()
+            }
             if (reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION ||
                 reason == Player.DISCONTINUITY_REASON_SEEK
             ) {
@@ -1228,6 +1242,9 @@ class MusicService : MediaLibraryService() {
         override fun onPlayerError(error: PlaybackException) {
             val player = mediaSession?.player ?: engine.masterPlayer
             Timber.tag(TAG).e(error, "Player error on item %s", player.currentMediaItem?.mediaId)
+            // A paused (e.g. just-restored) item failing to preload, typically while offline,
+            // must not move the queue: pressing play re-prepares the same item and position.
+            if (!player.playWhenReady) return
             // Skip a single unplayable track instead of halting the whole queue, but
             // bail out after several consecutive failures to avoid an infinite skip loop.
             if (player.hasNextMediaItem() && consecutivePlaybackErrors < maxConsecutivePlaybackErrors) {
@@ -1476,6 +1493,17 @@ class MusicService : MediaLibraryService() {
         }
     }
 
+    private fun updatePlaybackSnapshotTicker(isPlaying: Boolean) {
+        playbackSnapshotTickerJob?.cancel()
+        if (!isPlaying) return
+        playbackSnapshotTickerJob = serviceScope.launch {
+            while (isActive) {
+                delay(PLAYBACK_SNAPSHOT_PLAYING_INTERVAL_MS)
+                schedulePlaybackSnapshotPersist(immediate = true)
+            }
+        }
+    }
+
     private suspend fun persistPlaybackSnapshot(playWhenReadyOverride: Boolean? = null) {
         if (isRestoringPlaybackSnapshot) return
         val snapshot = capturePlaybackSnapshot(playWhenReadyOverride)
@@ -1680,7 +1708,7 @@ class MusicService : MediaLibraryService() {
 
         return MediaItem.Builder()
             .setMediaId(snapshotItem.mediaId)
-            .setUri(MediaItemBuilder.playbackUri(snapshotItem.uri))
+            .setUri(MediaItemBuilder.playbackUri(snapshotPlaybackUriString(snapshotItem)))
             .setMediaMetadata(metadataBuilder.build())
             .build()
     }
@@ -2331,6 +2359,7 @@ class MusicService : MediaLibraryService() {
     private fun stopPlaybackAndUnload(
         reason: String,
         preservePlaybackSnapshot: Boolean = true,
+        awaitSnapshotWrite: Boolean = false,
     ) {
         Timber.tag(TAG).d(
             "Stopping playback and unloading service. reason=%s",
@@ -2341,6 +2370,7 @@ class MusicService : MediaLibraryService() {
         mediaSessionButtonRefreshJob?.cancel()
         debouncedWidgetUpdateJob?.cancel()
         playbackSnapshotPersistJob?.cancel()
+        playbackSnapshotTickerJob?.cancel()
 
         val sessionToRelease = mediaSession
         val player = sessionToRelease?.player ?: engine.masterPlayer
@@ -2352,6 +2382,14 @@ class MusicService : MediaLibraryService() {
             persistPlaybackSnapshotOnUnload()
         } else {
             clearPlaybackSnapshotOnUnload()
+        }
+        if (awaitSnapshotWrite) {
+            // appScope runs on IO, so blocking main here cannot deadlock the write.
+            runBlocking {
+                withTimeoutOrNull(PLAYBACK_SNAPSHOT_UNLOAD_WRITE_TIMEOUT_MS) {
+                    playbackSnapshotUnloadWriteJob?.join()
+                }
+            }
         }
 
         listeningStatsTracker.finalizeCurrentSession(forceSynchronousPersistence = true)

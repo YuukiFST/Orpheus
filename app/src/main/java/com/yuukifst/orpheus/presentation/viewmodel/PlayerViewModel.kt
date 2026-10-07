@@ -2898,6 +2898,8 @@ class PlayerViewModel @Inject constructor(
         mediaControllerPlaybackListener = object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 // The service auto-skips the bad track; let the user know why playback jumped.
+                // Paused items are not skipped (see MusicService.onPlayerError), so stay quiet.
+                if (!playerCtrl.playWhenReady) return
                 viewModelScope.launch {
                     _toastEvents.emit(context.getString(R.string.player_error_skipping))
                 }
