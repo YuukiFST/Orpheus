@@ -2,6 +2,7 @@ package com.yuukifst.orpheus.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -13,6 +14,7 @@ import com.yuukifst.orpheus.data.youtube.YouTubeCachedTrackRepository
 import com.yuukifst.orpheus.data.youtube.YouTubePlaybackResolver
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
+import com.yuukifst.orpheus.data.youtube.youtubeVideoIdFromPlaybackUri
 import com.yuukifst.orpheus.utils.MediaItemBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -44,6 +46,9 @@ internal fun isSearchQueueName(queueName: String): Boolean =
 
 internal fun youtubeTracksToRecord(tracks: List<PlaylistMixedTrack>): List<YouTubeTrack> =
     tracks.mapNotNull { (it as? PlaylistMixedTrack.YouTube)?.track }
+
+/** Queue-fill entries (next, then previous) whose stream is extracted before attaching. */
+private const val WARM_NEIGHBOUR_COUNT = 2
 
 internal fun youtubeQueueFillOrder(trackCount: Int, startIndex: Int): List<Int> {
     if (trackCount <= 1) return emptyList()
@@ -570,10 +575,13 @@ class YouTubePlaybackController @Inject constructor(
             throwIfPlaybackGenerationStale(expectedGeneration)
             val startMediaId = tracks[startIndex].playbackMediaId()
             val resolved = arrayOfNulls<MediaItem>(tracks.size)
-            for (index in youtubeQueueFillOrder(tracks.size, startIndex)) {
+            val fillOrder = youtubeQueueFillOrder(tracks.size, startIndex)
+            for ((position, index) in fillOrder.withIndex()) {
                 throwIfPlaybackGenerationStale(expectedGeneration)
+                // Only next/prev (first in fill order) are extracted up front so a skip starts
+                // from the stream cache; the rest resolve when the player reaches them.
                 val item = withContext(Dispatchers.IO) {
-                    resolveMixedEntry(tracks[index])
+                    resolveMixedEntry(tracks[index], warmStream = position < WARM_NEIGHBOUR_COUNT)
                 }
                 resolved[index] = item
                 throwIfPlaybackGenerationStale(expectedGeneration)
@@ -619,7 +627,7 @@ class YouTubePlaybackController @Inject constructor(
             if (resolved[index] != null) continue
             throwIfPlaybackGenerationStale(expectedGeneration)
             resolved[index] = withContext(Dispatchers.IO) {
-                resolveMixedEntry(tracks[index])
+                resolveMixedEntry(tracks[index], warmStream = false)
             }
         }
         val allItems = resolved.map { item -> requireNotNull(item) }
@@ -643,7 +651,12 @@ class YouTubePlaybackController @Inject constructor(
                 MixedQueueAttachPlan.Skip,
                 -> {
                     val position = player.currentPosition
-                    val safeIndex = startIndex.coerceIn(0, allItems.lastIndex)
+                    // The user may have skipped since the fill started: stay on what is playing
+                    // instead of jumping back to the original start track.
+                    val currentId = player.currentMediaItem?.mediaId
+                    val safeIndex = allItems.indexOfFirst { it.mediaId == currentId }
+                        .takeIf { it >= 0 }
+                        ?: startIndex.coerceIn(0, allItems.lastIndex)
                     player.setMediaItems(allItems, safeIndex, position)
                     player.prepare()
                     if (player.playWhenReady) player.play()
@@ -652,10 +665,24 @@ class YouTubePlaybackController @Inject constructor(
         }
     }
 
-    private suspend fun resolveMixedEntry(entry: PlaylistMixedTrack): MediaItem {
+    private suspend fun resolveMixedEntry(
+        entry: PlaylistMixedTrack,
+        warmStream: Boolean = true,
+    ): MediaItem {
         return when (entry) {
             is PlaylistMixedTrack.Local -> MediaItemBuilder.build(entry.song)
-            is PlaylistMixedTrack.YouTube -> playbackResolver.resolveMediaItem(entry.track)
+            is PlaylistMixedTrack.YouTube -> playbackResolver.resolveMediaItem(entry.track, warmStream)
+        }
+    }
+
+    /** Warms the stream cache for the item after the current one so the next skip starts instantly. */
+    private fun prefetchNextStream(player: Player) {
+        val nextIndex = player.nextMediaItemIndex
+        if (nextIndex == C.INDEX_UNSET) return
+        val nextUri = player.getMediaItemAt(nextIndex).localConfiguration?.uri?.toString()
+        val videoId = youtubeVideoIdFromPlaybackUri(nextUri) ?: return
+        scope.launch(Dispatchers.IO) {
+            streamExtractor.prefetchBestAudio(videoId)
         }
     }
 
@@ -692,6 +719,7 @@ class YouTubePlaybackController @Inject constructor(
                     }
                 }
                 retryCountForCurrentItem = 0
+                prefetchNextStream(player)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -702,20 +730,18 @@ class YouTubePlaybackController @Inject constructor(
 
             override fun onPlayerError(error: PlaybackException) {
                 val currentItem = player.currentMediaItem ?: return
-                val videoId = currentItem.mediaMetadata.extras
-                    ?.getString(MediaItemBuilder.EXTERNAL_EXTRA_YOUTUBE_VIDEO_ID)
+                // Downloaded files carry the extra too but a fresh stream URL cannot fix them.
+                val videoId = youtubeVideoIdFromPlaybackUri(currentItem.localConfiguration?.uri?.toString())
                 if (videoId != null && retryCountForCurrentItem < 1) {
                     retryCountForCurrentItem++
                     scope.launch {
                         runCatching {
-                            val stream = withContext(Dispatchers.IO) {
+                            // A cached URL can still be rejected (expired, IP change): drop it so
+                            // the data source resolves a fresh one when the item is re-prepared.
+                            streamExtractor.invalidate(videoId)
+                            withContext(Dispatchers.IO) {
                                 streamExtractor.extractBestAudioWithRetry(videoId)
                             }
-                            val retried = currentItem.buildUpon()
-                                .setUri(stream.streamUrl)
-                                .setMimeType(stream.mimeType)
-                                .build()
-                            player.replaceMediaItem(player.currentMediaItemIndex, retried)
                             player.prepare()
                             player.play()
                         }.onFailure { failure ->

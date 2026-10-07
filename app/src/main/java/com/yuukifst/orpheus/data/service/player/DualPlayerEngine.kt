@@ -17,7 +17,11 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -32,6 +36,7 @@ import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.extractor.flac.FlacExtractor
 import com.yuukifst.orpheus.data.model.TransitionSettings
+import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.utils.envelope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +50,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -168,7 +174,8 @@ internal fun shouldDisableAudioOffloadOnEarlyBuffering(
 @OptIn(UnstableApi::class)
 @Singleton
 class DualPlayerEngine @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val youTubeStreamExtractor: dagger.Lazy<YouTubeStreamExtractor>,
 ) {
     private companion object {
         private const val AUDIO_OFFLOAD_STALL_FALLBACK_MS = 4_000L
@@ -181,6 +188,26 @@ class DualPlayerEngine @Inject constructor(
         private const val MAX_AUXILIARY_TIMELINE_ITEMS = 200
         private val LOCAL_MEDIA_SCHEMES = setOf("content", "file", "android.resource")
         private val REMOTE_MEDIA_SCHEMES = setOf("http", "https")
+        private const val YOUTUBE_AUDIO_CACHE_DIR = "youtube_audio"
+        // ~50 tracks at 160 kbps; in cacheDir so the OS can reclaim it under storage pressure.
+        private const val YOUTUBE_AUDIO_CACHE_BYTES = 256L * 1024 * 1024
+    }
+
+    // One SimpleCache per directory per process: DualPlayerEngine is the only owner.
+    private val youTubeAudioCache: Cache by lazy {
+        SimpleCache(
+            File(context.cacheDir, YOUTUBE_AUDIO_CACHE_DIR),
+            LeastRecentlyUsedCacheEvictor(YOUTUBE_AUDIO_CACHE_BYTES),
+            StandaloneDatabaseProvider(context),
+        )
+    }
+
+    private val mediaDataSourceFactory: YouTubeStreamDataSourceFactory by lazy {
+        YouTubeStreamDataSourceFactory(
+            upstreamFactory = DefaultDataSource.Factory(context),
+            streamExtractor = { youTubeStreamExtractor.get() },
+            cacheProvider = { youTubeAudioCache },
+        )
     }
 
     data class TransitionTarget(
@@ -898,7 +925,7 @@ class DualPlayerEngine @Inject constructor(
             .setUsage(C.USAGE_MEDIA)
             .build()
             
-        val dataSourceFactory = DefaultDataSource.Factory(context)
+        val dataSourceFactory = mediaDataSourceFactory
         val extractorsFactory = DefaultExtractorsFactory()
             // FLAG_WORKAROUND_IGNORE_EDIT_LISTS intentionally removed: it breaks Opus files
             // by discarding the edit list that encodes the pre-skip (encoder delay), causing

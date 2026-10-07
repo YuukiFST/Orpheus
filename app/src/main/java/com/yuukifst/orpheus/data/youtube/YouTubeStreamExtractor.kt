@@ -19,6 +19,8 @@ import javax.inject.Singleton
 data class YouTubeStreamResult(
     val streamUrl: String,
     val mimeType: String?,
+    /** Stable per-format id (YouTube itag); keys the on-disk audio cache across URL refreshes. */
+    val formatId: String = "",
 )
 
 @Singleton
@@ -57,6 +59,7 @@ class YouTubeStreamExtractor @Inject constructor(
         val result = YouTubeStreamResult(
             streamUrl = best.content,
             mimeType = best.format?.mimeType,
+            formatId = best.id.orEmpty(),
         )
         streamCache.put(cacheKey, CachedStreamResult(result, System.currentTimeMillis()))
         return result
@@ -87,6 +90,13 @@ class YouTubeStreamExtractor @Inject constructor(
                 Timber.tag("YouTubeStreamExtractor").w("Prefetch failed for %s", videoId)
             }
             .isSuccess
+    }
+
+    /** Drops cached URLs for [videoId] so the next extract fetches fresh ones (e.g. after HTTP 403). */
+    fun invalidate(videoId: String) {
+        YouTubeAudioQuality.entries.forEach { quality ->
+            streamCache.remove(streamCacheKey(videoId, quality))
+        }
     }
 
     internal fun isCached(videoId: String): Boolean {

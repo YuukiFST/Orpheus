@@ -20,7 +20,15 @@ class YouTubePlaybackResolver @Inject constructor(
     private val downloadDao: YouTubeDownloadDao,
     private val streamExtractor: YouTubeStreamExtractor,
 ) {
-    suspend fun resolveMediaItem(track: YouTubeTrack): MediaItem {
+    /**
+     * Downloaded tracks play from disk; streamed ones get a placeholder URI that the player's
+     * data source resolves at load time. [warmStream] extracts now so failures surface to the
+     * caller and the first load hits the in-memory stream cache; queue fill passes false so
+     * tracks the user never reaches cost no network.
+     *
+     * Example: `resolveMediaItem(track, warmStream = false)` for a queue neighbour.
+     */
+    suspend fun resolveMediaItem(track: YouTubeTrack, warmStream: Boolean = true): MediaItem {
         val download = downloadDao.getByVideoId(track.videoId)
         if (download != null) {
             val file = File(download.filePath)
@@ -28,8 +36,10 @@ class YouTubePlaybackResolver @Inject constructor(
                 return buildLocalMediaItem(track, file.toUri())
             }
         }
-        val stream = streamExtractor.extractBestAudioWithRetry(track.videoId)
-        return buildStreamMediaItem(track, stream.streamUrl, stream.mimeType)
+        if (warmStream) {
+            streamExtractor.extractBestAudioWithRetry(track.videoId)
+        }
+        return buildStreamMediaItem(track)
     }
 
     private fun buildLocalMediaItem(track: YouTubeTrack, uri: Uri): MediaItem {
@@ -50,11 +60,10 @@ class YouTubePlaybackResolver @Inject constructor(
             .build()
     }
 
-    private fun buildStreamMediaItem(track: YouTubeTrack, url: String, mimeType: String?): MediaItem {
+    private fun buildStreamMediaItem(track: YouTubeTrack): MediaItem {
         return MediaItem.Builder()
             .setMediaId(track.mediaId)
-            .setUri(url)
-            .setMimeType(mimeType)
+            .setUri(youtubePlaybackUri(track.videoId))
             .setMediaMetadata(
                 MediaMetadata.Builder()
                     .setTitle(track.effectiveTitle)
