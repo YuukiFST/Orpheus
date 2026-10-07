@@ -62,9 +62,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import com.yuukifst.orpheus.data.equalizer.EqualizerManager
 import com.yuukifst.orpheus.data.model.WidgetThemeColors
@@ -433,6 +438,17 @@ class MusicService : MediaLibraryService() {
                     equalizerManager.attachToAudioSessionIfNeeded(newSessionId)
                 }
             }
+        }
+
+        serviceScope.launch {
+            combine(
+                equalizerManager.isEnabled,
+                equalizerManager.bassBoostEnabled,
+                equalizerManager.virtualizerEnabled,
+                equalizerManager.loudnessEnhancerEnabled,
+            ) { eq, bass, virtualizer, loudness -> eq || bass || virtualizer || loudness }
+                .distinctUntilChanged()
+                .collect { anyEffectOn -> engine.setAudioEffectsActive(anyEffectOn) }
         }
 
         serviceScope.launch {

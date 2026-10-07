@@ -193,6 +193,12 @@ class DualPlayerEngine @Inject constructor(
     var hiFiModeEnabled: Boolean = false
         private set
     private var audioOffloadEnabled = !shouldDisableAudioOffloadByDefault()
+    // Session audio effects (EQ, bass boost, virtualizer, loudness) only process PCM output.
+    // Attaching one to an offloaded track left it silent on some devices (Bass Boost bug), so
+    // offload is suspended while any effect is on.
+    private var audioEffectsActive = false
+    private val isOffloadInUse: Boolean
+        get() = audioOffloadEnabled && !audioEffectsActive
     private var transitionJob: Job? = null
     private var bufferingFallbackJob: Job? = null
     private var transitionRunning = false
@@ -428,7 +434,7 @@ class DualPlayerEngine @Inject constructor(
                     val isPostMediaItemTransition = lastMediaItemTransitionAtMs > 0L &&
                         timeSinceMediaItemTransitionMs < 2_000L
                     if (shouldDisableAudioOffloadOnEarlyBuffering(
-                            audioOffloadEnabled = audioOffloadEnabled,
+                            audioOffloadEnabled = isOffloadInUse,
                             transitionRunning = transitionRunning,
                             lastPlayingAtMs = lastPlayingAtMs,
                             timeSincePlayingMs = timeSincePlayingMs,
@@ -648,7 +654,7 @@ class DualPlayerEngine @Inject constructor(
 
     private fun scheduleAudioOffloadFallbackIfNeeded(player: ExoPlayer) {
         cancelAudioOffloadFallback()
-        if (!audioOffloadEnabled || transitionRunning || !player.playWhenReady || player.isPlaying) return
+        if (!isOffloadInUse || transitionRunning || !player.playWhenReady || player.isPlaying) return
         if (!isLikelyLocalMedia(player.currentMediaItem)) return
 
         val watchedMediaId = player.currentMediaItem?.mediaId ?: return
@@ -658,7 +664,7 @@ class DualPlayerEngine @Inject constructor(
 
             val currentMediaId = player.currentMediaItem?.mediaId
             val shouldFallback = shouldTriggerAudioOffloadStallFallback(
-                audioOffloadEnabled = audioOffloadEnabled,
+                audioOffloadEnabled = isOffloadInUse,
                 transitionRunning = transitionRunning,
                 isCurrentMasterPlayer = player === playerA,
                 mediaIdMatches = currentMediaId == watchedMediaId,
@@ -910,18 +916,7 @@ class DualPlayerEngine @Inject constructor(
             .setLoadControl(loadControl)
             .build().apply {
             setAudioAttributes(audioAttributes, false)
-            val offloadPreferences = TrackSelectionParameters.AudioOffloadPreferences.Builder()
-                .setAudioOffloadMode(
-                    if (audioOffloadEnabled) {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
-                    } else {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
-                    }
-                )
-                .build()
-            trackSelectionParameters = trackSelectionParameters.buildUpon()
-                .setAudioOffloadPreferences(offloadPreferences)
-                .build()
+            applyAudioOffloadMode(this)
             setHandleAudioBecomingNoisy(true)
             setWakeMode(C.WAKE_MODE_LOCAL)
             playWhenReady = false
@@ -963,6 +958,35 @@ class DualPlayerEngine @Inject constructor(
             absoluteIndex = targetIndex,
             queueSize = snapshot.size
         )
+    }
+
+    private fun applyAudioOffloadMode(player: ExoPlayer) {
+        val offloadPreferences = TrackSelectionParameters.AudioOffloadPreferences.Builder()
+            .setAudioOffloadMode(
+                if (isOffloadInUse) {
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
+                } else {
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
+                }
+            )
+            .build()
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setAudioOffloadPreferences(offloadPreferences)
+            .build()
+    }
+
+    /**
+     * Call with true before session audio effects are enabled and false once all are off.
+     * Switches live players between offload and PCM output without rebuilding them.
+     */
+    fun setAudioEffectsActive(active: Boolean) {
+        if (audioEffectsActive == active) return
+        audioEffectsActive = active
+        if (!audioOffloadEnabled) return
+        cancelAudioOffloadFallback()
+        if (::playerA.isInitialized) applyAudioOffloadMode(playerA)
+        playerB?.let(::applyAudioOffloadMode)
+        Timber.tag("DualPlayerEngine").d("Audio effects active=%b, offload in use=%b", active, isOffloadInUse)
     }
 
     fun setHiFiMode(enabled: Boolean) {
