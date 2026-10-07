@@ -224,6 +224,8 @@ class DualPlayerEngine @Inject constructor(
     // Attaching one to an offloaded track left it silent on some devices (Bass Boost bug), so
     // offload is suspended while any effect is on.
     private var audioEffectsActive = false
+    // Set when effects toggle mid-crossfade; reselecting tracks then would glitch the fade.
+    private var offloadModeChangePending = false
     private val isOffloadInUse: Boolean
         get() = audioOffloadEnabled && !audioEffectsActive
     private var transitionJob: Job? = null
@@ -1003,17 +1005,27 @@ class DualPlayerEngine @Inject constructor(
     }
 
     /**
-     * Call with true before session audio effects are enabled and false once all are off.
-     * Switches live players between offload and PCM output without rebuilding them.
+     * Call whenever the set of enabled session audio effects changes (true = at least one on).
+     * Switches live players between offload and PCM output without rebuilding them; an effect
+     * enabled just before this runs is silent only until the PCM track takes over.
      */
     fun setAudioEffectsActive(active: Boolean) {
         if (audioEffectsActive == active) return
         audioEffectsActive = active
         if (!audioOffloadEnabled) return
+        if (transitionRunning) {
+            offloadModeChangePending = true
+            return
+        }
+        applyAudioOffloadModeToLivePlayers()
+    }
+
+    private fun applyAudioOffloadModeToLivePlayers() {
+        offloadModeChangePending = false
         cancelAudioOffloadFallback()
         if (::playerA.isInitialized) applyAudioOffloadMode(playerA)
         playerB?.let(::applyAudioOffloadMode)
-        Timber.tag("DualPlayerEngine").d("Audio effects active=%b, offload in use=%b", active, isOffloadInUse)
+        Timber.tag("DualPlayerEngine").d("Audio effects active=%b, offload in use=%b", audioEffectsActive, isOffloadInUse)
     }
 
     fun setHiFiMode(enabled: Boolean) {
@@ -1114,6 +1126,7 @@ class DualPlayerEngine @Inject constructor(
             } finally {
                 transitionRunning = false
                 lastTransitionFinishedAtMs = SystemClock.elapsedRealtime()
+                if (offloadModeChangePending) applyAudioOffloadModeToLivePlayers()
                 onTransitionFinishedListeners.forEach { it() }
             }
         }
