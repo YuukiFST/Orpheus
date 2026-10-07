@@ -85,6 +85,18 @@ class YouTubeSearchRepository @Inject constructor(
         youTubeDownloader.warmUpConnection()
     }
 
+    @Volatile
+    private var contentCountryCode: String? = null
+
+    /** Applies the Settings region hint; cached results ranked for the old region are dropped. */
+    fun setContentCountry(code: String) {
+        if (contentCountryCode == code) return
+        val hadPrevious = contentCountryCode != null
+        contentCountryCode = code
+        youTubeInitializer.setContentCountry(code)
+        if (hadPrevious) searchCache.evictAll()
+    }
+
     private fun performSearch(
         trimmedQuery: String,
         cacheKey: String,

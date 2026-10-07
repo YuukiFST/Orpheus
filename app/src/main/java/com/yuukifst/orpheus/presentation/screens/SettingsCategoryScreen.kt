@@ -83,6 +83,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.Search
@@ -166,6 +168,7 @@ import com.yuukifst.orpheus.data.preferences.LibraryNavigationMode
 import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
+import com.yuukifst.orpheus.data.preferences.YOUTUBE_SEARCH_REGION_CODES
 import com.yuukifst.orpheus.data.preferences.MAX_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.MIN_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.model.Song
@@ -810,6 +813,28 @@ fun SettingsCategoryScreen(
                                         valueText = { value -> "${value.toInt()} ms" }
                                     )
                                 }
+                                val regionDefaultLabel = stringResource(R.string.setcat_youtube_search_region_default)
+                                ThemeSelectorItem(
+                                    label = stringResource(R.string.setcat_youtube_search_region_label),
+                                    description = stringResource(R.string.setcat_youtube_search_region_desc),
+                                    options = YOUTUBE_SEARCH_REGION_CODES.associateWith { code ->
+                                        if (code.isBlank()) {
+                                            regionDefaultLabel
+                                        } else {
+                                            java.util.Locale.Builder().setRegion(code).build().displayCountry
+                                        }
+                                    },
+                                    selectedKey = uiState.youtubeSearchRegion,
+                                    onSelectionChanged = { key -> settingsViewModel.setYouTubeSearchRegion(key) },
+                                    leadingIcon = { Icon(Icons.Rounded.Public, null, tint = MaterialTheme.colorScheme.secondary) }
+                                )
+                                SwitchSettingItem(
+                                    title = stringResource(R.string.setcat_youtube_hide_portuguese_title),
+                                    subtitle = stringResource(R.string.setcat_youtube_hide_portuguese_subtitle),
+                                    checked = uiState.youtubeHidePortuguese,
+                                    onCheckedChange = { settingsViewModel.setYouTubeHidePortuguese(it) },
+                                    leadingIcon = { Icon(Icons.Rounded.Translate, null, tint = MaterialTheme.colorScheme.secondary) }
+                                )
                             }
 
                             SettingsSubsection(title = stringResource(R.string.setcat_queue_transitions)) {
