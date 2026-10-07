@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever
 import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.Animatable
 import androidx.core.content.ContextCompat
+import com.yuukifst.orpheus.data.youtube.youtubeVideoIdFromPlaybackUri
 import com.yuukifst.orpheus.data.model.LibraryTabId
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -2722,6 +2723,8 @@ class PlayerViewModel @Inject constructor(
         val mediaItem = player.currentMediaItem ?: return
         val mediaId = mediaItem.mediaId
         val uri = mediaItem.localConfiguration?.uri ?: return
+        // Streamed YouTube items hold a placeholder only the player's data source can resolve.
+        if (youtubeVideoIdFromPlaybackUri(uri.toString()) != null) return
 
         if (metadataProbeMediaId == mediaId && metadataProbeJob?.isActive == true) return
 

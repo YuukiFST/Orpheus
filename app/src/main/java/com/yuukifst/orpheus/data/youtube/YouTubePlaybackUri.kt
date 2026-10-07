@@ -23,9 +23,9 @@ fun youtubeVideoIdFromMediaId(mediaId: String?): String? =
         ?.removePrefix(YOUTUBE_MEDIA_ID_PREFIX)
         ?.takeIf { it.isNotBlank() }
 
-/** Disk-cache key that stays stable across URL refreshes; includes the format so quality changes never mix bytes. */
-fun youtubeAudioCacheKey(videoId: String, formatId: String): String =
-    "$YOUTUBE_AUDIO_CACHE_KEY_PREFIX$videoId:$formatId"
+/** Disk-cache key stable across URL refreshes; [fileId] must identify the exact bytes (itag + size). */
+fun youtubeAudioCacheKey(videoId: String, fileId: String): String =
+    "$YOUTUBE_AUDIO_CACHE_KEY_PREFIX$videoId:$fileId"
 
 fun isYouTubeAudioCacheKey(key: String?): Boolean =
     key?.startsWith(YOUTUBE_AUDIO_CACHE_KEY_PREFIX) == true

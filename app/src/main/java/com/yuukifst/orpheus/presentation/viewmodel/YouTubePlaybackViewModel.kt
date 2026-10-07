@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import com.yuukifst.orpheus.data.model.PlaylistMixedTrack
 import com.yuukifst.orpheus.data.model.playbackMediaId
@@ -267,7 +266,6 @@ class YouTubePlaybackController @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var playbackListener: Player.Listener? = null
-    private var retryCountForCurrentItem = 0
     private var currentMixedTracks: List<PlaylistMixedTrack> = emptyList()
     private var playingPlaylistId: String? = null
     private var sessionStopOnEnd = false
@@ -538,7 +536,6 @@ class YouTubePlaybackController @Inject constructor(
     ) {
         val safeIndex = startIndex.coerceIn(0, tracks.lastIndex)
         currentMixedTracks = tracks
-        retryCountForCurrentItem = 0
         queueFillJob?.cancel()
         throwIfPlaybackGenerationStale(expectedGeneration)
 
@@ -718,7 +715,6 @@ class YouTubePlaybackController @Inject constructor(
                         publishQueueUpdate(mixedIndex)
                     }
                 }
-                retryCountForCurrentItem = 0
                 prefetchNextStream(player)
             }
 
@@ -726,34 +722,6 @@ class YouTubePlaybackController @Inject constructor(
                 songForPlaybackMediaId(player.currentMediaItem?.mediaId)?.let { song ->
                     listeningStatsTracker.onPlayStateChanged(isPlaying, player.currentPosition)
                 }
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                val currentItem = player.currentMediaItem ?: return
-                // Downloaded files carry the extra too but a fresh stream URL cannot fix them.
-                val videoId = youtubeVideoIdFromPlaybackUri(currentItem.localConfiguration?.uri?.toString())
-                if (videoId != null && retryCountForCurrentItem < 1) {
-                    retryCountForCurrentItem++
-                    scope.launch {
-                        runCatching {
-                            // A cached URL can still be rejected (expired, IP change): drop it so
-                            // the data source resolves a fresh one when the item is re-prepared.
-                            streamExtractor.invalidate(videoId)
-                            withContext(Dispatchers.IO) {
-                                streamExtractor.extractBestAudioWithRetry(videoId)
-                            }
-                            player.prepare()
-                            player.play()
-                        }.onFailure { failure ->
-                            if (failure !is CancellationException) {
-                                _playbackErrors.emit(userFacingYouTubePlaybackError(failure))
-                            }
-                            skipToNextOrStop(player)
-                        }
-                    }
-                    return
-                }
-                skipToNextOrStop(player)
             }
         }
         playbackListener = listener
@@ -852,18 +820,6 @@ class YouTubePlaybackController @Inject constructor(
                 fallbackDurationMs = song.duration,
                 isPlaying = player.isPlaying,
             )
-        }
-    }
-
-    private fun skipToNextOrStop(player: Player) {
-        retryCountForCurrentItem = 0
-        if (player.hasNextMediaItem()) {
-            player.seekToNextMediaItem()
-            player.prepare()
-            player.play()
-        } else {
-            player.pause()
-            player.playWhenReady = false
         }
     }
 

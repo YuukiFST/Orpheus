@@ -72,6 +72,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import com.yuukifst.orpheus.data.equalizer.EqualizerManager
+import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
+import com.yuukifst.orpheus.data.youtube.youtubeVideoIdFromPlaybackUri
 import com.yuukifst.orpheus.data.model.WidgetThemeColors
 import com.yuukifst.orpheus.data.preferences.AlbumArtColorAccuracy
 import com.yuukifst.orpheus.data.preferences.AlbumArtPaletteStyle
@@ -163,6 +165,8 @@ class MusicService : MediaLibraryService() {
     lateinit var replayGainManager: com.yuukifst.orpheus.data.media.ReplayGainManager
     @Inject
     lateinit var listeningStatsTracker: ListeningStatsTracker
+    @Inject
+    lateinit var youTubeStreamExtractor: dagger.Lazy<YouTubeStreamExtractor>
     @Inject
     @AppScope
     lateinit var appScope: CoroutineScope
@@ -1070,6 +1074,8 @@ class MusicService : MediaLibraryService() {
     // Guards against an infinite skip loop when many consecutive tracks fail to play.
     private var consecutivePlaybackErrors = 0
     private val maxConsecutivePlaybackErrors = 5
+    // YouTube item already retried with a fresh stream URL; a second failure skips it.
+    private var youTubeRetriedMediaId: String? = null
 
     private val playerListener = object : Player.Listener {
         override fun onVolumeChanged(volume: Float) {
@@ -1138,6 +1144,7 @@ class MusicService : MediaLibraryService() {
             if (playbackState == Player.STATE_READY) {
                 // A track started successfully; reset the consecutive-error guard.
                 consecutivePlaybackErrors = 0
+                youTubeRetriedMediaId = null
             }
             if (playbackState == Player.STATE_ENDED) {
                 listeningStatsTracker.finalizeCurrentSession()
@@ -1245,6 +1252,16 @@ class MusicService : MediaLibraryService() {
             // A paused (e.g. just-restored) item failing to preload, typically while offline,
             // must not move the queue: pressing play re-prepares the same item and position.
             if (!player.playWhenReady) return
+            val failedItem = player.currentMediaItem
+            val youTubeVideoId = youtubeVideoIdFromPlaybackUri(failedItem?.localConfiguration?.uri?.toString())
+            if (youTubeVideoId != null && youTubeRetriedMediaId != failedItem?.mediaId) {
+                // The cached signed URL can be rejected (expired, IP change): drop it and
+                // re-prepare so the data source resolves a fresh one, same item and position.
+                youTubeRetriedMediaId = failedItem?.mediaId
+                youTubeStreamExtractor.get().invalidate(youTubeVideoId)
+                player.prepare()
+                return
+            }
             // Skip a single unplayable track instead of halting the whole queue, but
             // bail out after several consecutive failures to avoid an infinite skip loop.
             if (player.hasNextMediaItem() && consecutivePlaybackErrors < maxConsecutivePlaybackErrors) {

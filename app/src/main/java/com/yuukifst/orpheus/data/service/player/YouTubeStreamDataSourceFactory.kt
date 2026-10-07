@@ -21,7 +21,8 @@ import java.io.InterruptedIOException
 /**
  * Player data source: resolves YouTube placeholder URIs (see `youtubePlaybackUri`) into a fresh
  * stream URL when the player loads them, and serves those streams through an on-disk cache so a
- * replayed or re-seeked track costs no mobile data. Every other URI goes straight to [upstreamFactory].
+ * replayed or re-seeked track re-downloads no audio (a stream lookup still runs once the in-memory
+ * URL cache expires, so cached tracks need a connection). Other URIs go straight to [upstreamFactory].
  *
  * Example: `ExoPlayer.Builder(context).setMediaSourceFactory(DefaultMediaSourceFactory(YouTubeStreamDataSourceFactory(DefaultDataSource.Factory(context), { extractor }, { cache })))`.
  */
@@ -63,10 +64,16 @@ class YouTubeStreamDataSourceFactory(
         } catch (error: Exception) {
             throw IOException("Could not resolve YouTube stream for $videoId: ${error.message}", error)
         }
-        return dataSpec.buildUpon()
-            .setUri(stream.streamUrl.toUri())
-            .setKey(youtubeAudioCacheKey(videoId, stream.formatId))
-            .build()
+        val streamUri = stream.streamUrl.toUri()
+        // One itag can serve different bytes (DRC variant, other audio track), so the cache key
+        // needs the exact file size; without `clen` the stream bypasses the cache.
+        val contentLength = runCatching { streamUri.getQueryParameter("clen") }.getOrNull()
+            ?.takeIf { it.isNotBlank() }
+        val resolved = dataSpec.buildUpon().setUri(streamUri)
+        if (contentLength != null) {
+            resolved.setKey(youtubeAudioCacheKey(videoId, "${stream.formatId}-$contentLength"))
+        }
+        return resolved.build()
     }
 }
 
