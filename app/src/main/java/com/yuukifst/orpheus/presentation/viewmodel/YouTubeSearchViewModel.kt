@@ -11,10 +11,12 @@ import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
+import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
+import com.yuukifst.orpheus.data.youtube.filterOutPortuguese
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -53,6 +55,7 @@ class YouTubeSearchViewModel @Inject constructor(
     private val playbackController: YouTubePlaybackController,
     private val streamExtractor: YouTubeStreamExtractor,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val searchFilterPreferences: YouTubeSearchFilterPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(YouTubeSearchUiState())
@@ -64,6 +67,9 @@ class YouTubeSearchViewModel @Inject constructor(
     private var activeNetworkQuery: String? = null
     @Volatile private var searchAsYouTypeEnabled = true
     @Volatile private var searchDebounceMs = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS.toLong()
+    @Volatile private var hidePortugueseResults = false
+    // Unfiltered list behind `results`, so toggling the filter re-filters what is on screen.
+    private var lastRawResults: List<YouTubeTrack> = emptyList()
 
     private companion object {
         const val SEARCH_DEBOUNCE_CACHED_MS = 0L
@@ -95,6 +101,24 @@ class YouTubeSearchViewModel @Inject constructor(
                 searchDebounceMs = debounceMs.toLong()
             }
         }
+        viewModelScope.launch {
+            searchFilterPreferences.searchRegionFlow.collect { code ->
+                searchRepository.setContentCountry(code)
+            }
+        }
+        viewModelScope.launch {
+            searchFilterPreferences.hidePortugueseFlow.collect { enabled ->
+                hidePortugueseResults = enabled
+                if (lastRawResults.isNotEmpty()) {
+                    _uiState.update { it.copy(results = visibleResults(lastRawResults)) }
+                }
+            }
+        }
+    }
+
+    private fun visibleResults(results: List<YouTubeTrack>): List<YouTubeTrack> {
+        lastRawResults = results
+        return if (hidePortugueseResults) filterOutPortuguese(results) else results
     }
 
     fun updateQuery(query: String) {
@@ -120,7 +144,7 @@ class YouTubeSearchViewModel @Inject constructor(
         }
 
         if (trimmed.length >= MIN_QUERY_LENGTH) {
-            searchRepository.searchCachedOnly(trimmed)?.let { cached ->
+            searchRepository.searchCachedOnly(trimmed)?.let(::visibleResults)?.let { cached ->
                 _uiState.update {
                     it.copy(
                         results = cached,
@@ -197,7 +221,7 @@ class YouTubeSearchViewModel @Inject constructor(
     private suspend fun executeSearch(trimmed: String, saveHistory: Boolean) {
         val requestId = latestSearchRequestId.incrementAndGet()
 
-        searchRepository.searchCachedOnly(trimmed)?.let { cached ->
+        searchRepository.searchCachedOnly(trimmed)?.let(::visibleResults)?.let { cached ->
             if (requestId != latestSearchRequestId.get()) return
             _uiState.update {
                 it.copy(
@@ -222,8 +246,9 @@ class YouTubeSearchViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true, error = null, hasSearched = true) }
         try {
             var prefetchedVideoId: String? = null
-            searchRepository.searchProgressive(trimmed).collect { results ->
+            searchRepository.searchProgressive(trimmed).collect { rawResults ->
                 if (requestId != latestSearchRequestId.get()) return@collect
+                val results = visibleResults(rawResults)
                 _uiState.update {
                     it.copy(results = results, isLoading = false, suggestions = emptyList())
                 }

@@ -4,6 +4,7 @@ import com.yuukifst.orpheus.data.database.SearchHistoryDao
 import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
@@ -42,6 +43,7 @@ class YouTubeSearchViewModelHistoryTest {
     private val playbackController: YouTubePlaybackController = mockk(relaxed = true)
     private val streamExtractor: YouTubeStreamExtractor = mockk(relaxed = true)
     private val userPreferencesRepository: UserPreferencesRepository = mockk(relaxed = true)
+    private val searchFilterPreferences: YouTubeSearchFilterPreferences = mockk(relaxed = true)
 
     private val sampleTrack = YouTubeTrack(
         videoId = "dQw4w9WgXcQ",
@@ -62,6 +64,8 @@ class YouTubeSearchViewModelHistoryTest {
         every { searchRepository.searchProgressive(any()) } returns flowOf(listOf(sampleTrack))
         every { userPreferencesRepository.youtubeSearchAsYouTypeFlow } returns flowOf(true)
         every { userPreferencesRepository.youtubeSearchDebounceMsFlow } returns flowOf(260)
+        every { searchFilterPreferences.searchRegionFlow } returns flowOf("")
+        every { searchFilterPreferences.hidePortugueseFlow } returns flowOf(false)
     }
 
     @AfterEach
@@ -80,6 +84,7 @@ class YouTubeSearchViewModelHistoryTest {
             playbackController = playbackController,
             streamExtractor = streamExtractor,
             userPreferencesRepository = userPreferencesRepository,
+            searchFilterPreferences = searchFilterPreferences,
         )
     }
 

@@ -254,7 +254,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
-            val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.LIGHT)
+            val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = themePreferencesRepository.readAppThemeModeSync())
             val useSmoothCorners by userPreferencesRepository.useSmoothCornersFlow
                 .collectAsStateWithLifecycle(initialValue = true)
             val resolvedTheme = resolveAppTheme(appThemeMode, systemDarkTheme)

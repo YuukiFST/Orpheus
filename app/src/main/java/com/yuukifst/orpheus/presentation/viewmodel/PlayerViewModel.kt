@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever
 import kotlinx.coroutines.withContext
 import androidx.compose.animation.core.Animatable
 import androidx.core.content.ContextCompat
+import com.yuukifst.orpheus.data.youtube.youtubeVideoIdFromPlaybackUri
 import com.yuukifst.orpheus.data.model.LibraryTabId
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -111,6 +112,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -983,17 +985,19 @@ class PlayerViewModel @Inject constructor(
             )
         }
 
-        stablePlayerState
-            .map { it.currentSong?.albumArtUriString?.takeIf { uri -> uri.isNotBlank() } }
-            .distinctUntilChanged()
-            .onEach { artworkUri ->
-                themeStateHolder.extractAndGenerateColorScheme(
-                    albumArtUriAsUri = artworkUri?.toUri(),
-                    currentSongUriString = artworkUri,
-                    isPreload = false
-                )
-            }
-            .launchIn(viewModelScope)
+        // collectLatest: during rapid skips only the newest track's palette is extracted.
+        viewModelScope.launch {
+            stablePlayerState
+                .map { it.currentSong?.albumArtUriString?.takeIf { uri -> uri.isNotBlank() } }
+                .distinctUntilChanged()
+                .collectLatest { artworkUri ->
+                    themeStateHolder.extractAndGenerateColorScheme(
+                        albumArtUriAsUri = artworkUri?.toUri(),
+                        currentSongUriString = artworkUri,
+                        isPreload = false
+                    )
+                }
+        }
 
         viewModelScope.launch {
             lyricsStateHolder.songUpdates.collect { update: Pair<com.yuukifst.orpheus.data.model.Song, com.yuukifst.orpheus.data.model.Lyrics?> ->
@@ -2719,6 +2723,8 @@ class PlayerViewModel @Inject constructor(
         val mediaItem = player.currentMediaItem ?: return
         val mediaId = mediaItem.mediaId
         val uri = mediaItem.localConfiguration?.uri ?: return
+        // Streamed YouTube items hold a placeholder only the player's data source can resolve.
+        if (youtubeVideoIdFromPlaybackUri(uri.toString()) != null) return
 
         if (metadataProbeMediaId == mediaId && metadataProbeJob?.isActive == true) return
 
@@ -2898,6 +2904,8 @@ class PlayerViewModel @Inject constructor(
         mediaControllerPlaybackListener = object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 // The service auto-skips the bad track; let the user know why playback jumped.
+                // Paused items are not skipped (see MusicService.onPlayerError), so stay quiet.
+                if (!playerCtrl.playWhenReady) return
                 viewModelScope.launch {
                     _toastEvents.emit(context.getString(R.string.player_error_skipping))
                 }

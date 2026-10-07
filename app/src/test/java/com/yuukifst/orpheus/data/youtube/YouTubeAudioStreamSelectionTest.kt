@@ -3,6 +3,8 @@ package com.yuukifst.orpheus.data.youtube
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.schabi.newpipe.extractor.stream.AudioStream
+import org.schabi.newpipe.extractor.stream.AudioTrackType
 
 class YouTubeAudioStreamSelectionTest {
 
@@ -39,4 +41,33 @@ class YouTubeAudioStreamSelectionTest {
         assertEquals(128, youtubeBitrateKbps(128))
         assertEquals(128, youtubeBitrateKbps(128_000))
     }
+
+    @Test
+    fun dubbedTrackIsNeverPickedWhenOriginalExists() {
+        val streams = listOf(
+            audioStream(id = "251-dubbed", kbps = 160, type = AudioTrackType.DUBBED),
+            audioStream(id = "251-original", kbps = 130, type = AudioTrackType.ORIGINAL),
+            audioStream(id = "140-original", kbps = 128, type = AudioTrackType.ORIGINAL),
+        )
+
+        assertEquals("251-original", selectYouTubeAudioStream(streams, YouTubeAudioQuality.HIGH)?.id)
+    }
+
+    @Test
+    fun untaggedStreamsWinOverDubbedWhenNothingIsTaggedOriginal() {
+        val streams = listOf(
+            audioStream(id = "dubbed", kbps = 160, type = AudioTrackType.DUBBED),
+            audioStream(id = "untagged", kbps = 128, type = null),
+        )
+
+        assertEquals("untagged", selectYouTubeAudioStream(streams, YouTubeAudioQuality.HIGH)?.id)
+    }
+
+    private fun audioStream(id: String, kbps: Int, type: AudioTrackType?): AudioStream =
+        AudioStream.Builder()
+            .setId(id)
+            .setContent("https://example.invalid/$id", true)
+            .setAverageBitrate(kbps)
+            .setAudioTrackType(type)
+            .build()
 }

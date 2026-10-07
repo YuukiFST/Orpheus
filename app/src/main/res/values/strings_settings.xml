@@ -150,6 +150,11 @@
     <string name="setcat_youtube_search_as_you_type_title">Search as you type</string>
     <string name="setcat_youtube_search_as_you_type_subtitle">Fetch results while typing. Uses extra data for search, suggestions, and prefetch. Turn off to search only when you press Enter.</string>
     <string name="setcat_youtube_search_debounce">Delay after typing</string>
+    <string name="setcat_youtube_search_region_label">Search region</string>
+    <string name="setcat_youtube_search_region_desc">Ranks YouTube results as if you searched from this country. Your network location still has some influence.</string>
+    <string name="setcat_youtube_search_region_default">Default</string>
+    <string name="setcat_youtube_hide_portuguese_title">Hide Portuguese results</string>
+    <string name="setcat_youtube_hide_portuguese_subtitle">Removes results whose title or channel reads as Portuguese. Detection is text-based, so a few may slip through.</string>
     <string name="setcat_crossfade_label">Crossfade</string>
     <string name="setcat_crossfade_desc">Enable smooth transition between songs.</string>
     <string name="setcat_crossfade_duration">Crossfade Duration</string>

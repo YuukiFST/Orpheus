@@ -17,7 +17,11 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -32,6 +36,7 @@ import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.extractor.flac.FlacExtractor
 import com.yuukifst.orpheus.data.model.TransitionSettings
+import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.utils.envelope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +50,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -168,7 +174,8 @@ internal fun shouldDisableAudioOffloadOnEarlyBuffering(
 @OptIn(UnstableApi::class)
 @Singleton
 class DualPlayerEngine @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val youTubeStreamExtractor: dagger.Lazy<YouTubeStreamExtractor>,
 ) {
     private companion object {
         private const val AUDIO_OFFLOAD_STALL_FALLBACK_MS = 4_000L
@@ -181,6 +188,26 @@ class DualPlayerEngine @Inject constructor(
         private const val MAX_AUXILIARY_TIMELINE_ITEMS = 200
         private val LOCAL_MEDIA_SCHEMES = setOf("content", "file", "android.resource")
         private val REMOTE_MEDIA_SCHEMES = setOf("http", "https")
+        private const val YOUTUBE_AUDIO_CACHE_DIR = "youtube_audio"
+        // ~50 tracks at 160 kbps; in cacheDir so the OS can reclaim it under storage pressure.
+        private const val YOUTUBE_AUDIO_CACHE_BYTES = 256L * 1024 * 1024
+    }
+
+    // One SimpleCache per directory per process: DualPlayerEngine is the only owner.
+    private val youTubeAudioCache: Cache by lazy {
+        SimpleCache(
+            File(context.cacheDir, YOUTUBE_AUDIO_CACHE_DIR),
+            LeastRecentlyUsedCacheEvictor(YOUTUBE_AUDIO_CACHE_BYTES),
+            StandaloneDatabaseProvider(context),
+        )
+    }
+
+    private val mediaDataSourceFactory: YouTubeStreamDataSourceFactory by lazy {
+        YouTubeStreamDataSourceFactory(
+            upstreamFactory = DefaultDataSource.Factory(context),
+            streamExtractor = { youTubeStreamExtractor.get() },
+            cacheProvider = { youTubeAudioCache },
+        )
     }
 
     data class TransitionTarget(
@@ -193,6 +220,14 @@ class DualPlayerEngine @Inject constructor(
     var hiFiModeEnabled: Boolean = false
         private set
     private var audioOffloadEnabled = !shouldDisableAudioOffloadByDefault()
+    // Session audio effects (EQ, bass boost, virtualizer, loudness) only process PCM output.
+    // Attaching one to an offloaded track left it silent on some devices (Bass Boost bug), so
+    // offload is suspended while any effect is on.
+    private var audioEffectsActive = false
+    // Set when effects toggle mid-crossfade; reselecting tracks then would glitch the fade.
+    private var offloadModeChangePending = false
+    private val isOffloadInUse: Boolean
+        get() = audioOffloadEnabled && !audioEffectsActive
     private var transitionJob: Job? = null
     private var bufferingFallbackJob: Job? = null
     private var transitionRunning = false
@@ -428,7 +463,7 @@ class DualPlayerEngine @Inject constructor(
                     val isPostMediaItemTransition = lastMediaItemTransitionAtMs > 0L &&
                         timeSinceMediaItemTransitionMs < 2_000L
                     if (shouldDisableAudioOffloadOnEarlyBuffering(
-                            audioOffloadEnabled = audioOffloadEnabled,
+                            audioOffloadEnabled = isOffloadInUse,
                             transitionRunning = transitionRunning,
                             lastPlayingAtMs = lastPlayingAtMs,
                             timeSincePlayingMs = timeSincePlayingMs,
@@ -648,7 +683,7 @@ class DualPlayerEngine @Inject constructor(
 
     private fun scheduleAudioOffloadFallbackIfNeeded(player: ExoPlayer) {
         cancelAudioOffloadFallback()
-        if (!audioOffloadEnabled || transitionRunning || !player.playWhenReady || player.isPlaying) return
+        if (!isOffloadInUse || transitionRunning || !player.playWhenReady || player.isPlaying) return
         if (!isLikelyLocalMedia(player.currentMediaItem)) return
 
         val watchedMediaId = player.currentMediaItem?.mediaId ?: return
@@ -658,7 +693,7 @@ class DualPlayerEngine @Inject constructor(
 
             val currentMediaId = player.currentMediaItem?.mediaId
             val shouldFallback = shouldTriggerAudioOffloadStallFallback(
-                audioOffloadEnabled = audioOffloadEnabled,
+                audioOffloadEnabled = isOffloadInUse,
                 transitionRunning = transitionRunning,
                 isCurrentMasterPlayer = player === playerA,
                 mediaIdMatches = currentMediaId == watchedMediaId,
@@ -892,7 +927,7 @@ class DualPlayerEngine @Inject constructor(
             .setUsage(C.USAGE_MEDIA)
             .build()
             
-        val dataSourceFactory = DefaultDataSource.Factory(context)
+        val dataSourceFactory = mediaDataSourceFactory
         val extractorsFactory = DefaultExtractorsFactory()
             // FLAG_WORKAROUND_IGNORE_EDIT_LISTS intentionally removed: it breaks Opus files
             // by discarding the edit list that encodes the pre-skip (encoder delay), causing
@@ -910,18 +945,7 @@ class DualPlayerEngine @Inject constructor(
             .setLoadControl(loadControl)
             .build().apply {
             setAudioAttributes(audioAttributes, false)
-            val offloadPreferences = TrackSelectionParameters.AudioOffloadPreferences.Builder()
-                .setAudioOffloadMode(
-                    if (audioOffloadEnabled) {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
-                    } else {
-                        TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
-                    }
-                )
-                .build()
-            trackSelectionParameters = trackSelectionParameters.buildUpon()
-                .setAudioOffloadPreferences(offloadPreferences)
-                .build()
+            applyAudioOffloadMode(this)
             setHandleAudioBecomingNoisy(true)
             setWakeMode(C.WAKE_MODE_LOCAL)
             playWhenReady = false
@@ -963,6 +987,45 @@ class DualPlayerEngine @Inject constructor(
             absoluteIndex = targetIndex,
             queueSize = snapshot.size
         )
+    }
+
+    private fun applyAudioOffloadMode(player: ExoPlayer) {
+        val offloadPreferences = TrackSelectionParameters.AudioOffloadPreferences.Builder()
+            .setAudioOffloadMode(
+                if (isOffloadInUse) {
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
+                } else {
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
+                }
+            )
+            .build()
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setAudioOffloadPreferences(offloadPreferences)
+            .build()
+    }
+
+    /**
+     * Call whenever the set of enabled session audio effects changes (true = at least one on).
+     * Switches live players between offload and PCM output without rebuilding them; an effect
+     * enabled just before this runs is silent only until the PCM track takes over.
+     */
+    fun setAudioEffectsActive(active: Boolean) {
+        if (audioEffectsActive == active) return
+        audioEffectsActive = active
+        if (!audioOffloadEnabled) return
+        if (transitionRunning) {
+            offloadModeChangePending = true
+            return
+        }
+        applyAudioOffloadModeToLivePlayers()
+    }
+
+    private fun applyAudioOffloadModeToLivePlayers() {
+        offloadModeChangePending = false
+        cancelAudioOffloadFallback()
+        if (::playerA.isInitialized) applyAudioOffloadMode(playerA)
+        playerB?.let(::applyAudioOffloadMode)
+        Timber.tag("DualPlayerEngine").d("Audio effects active=%b, offload in use=%b", audioEffectsActive, isOffloadInUse)
     }
 
     fun setHiFiMode(enabled: Boolean) {
@@ -1063,6 +1126,7 @@ class DualPlayerEngine @Inject constructor(
             } finally {
                 transitionRunning = false
                 lastTransitionFinishedAtMs = SystemClock.elapsedRealtime()
+                if (offloadModeChangePending) applyAudioOffloadModeToLivePlayers()
                 onTransitionFinishedListeners.forEach { it() }
             }
         }

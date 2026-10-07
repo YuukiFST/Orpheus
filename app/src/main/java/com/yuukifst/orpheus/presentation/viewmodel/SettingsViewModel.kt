@@ -18,6 +18,8 @@ import com.yuukifst.orpheus.data.preferences.CarouselStyle
 import com.yuukifst.orpheus.data.preferences.LibraryNavigationMode
 import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
+import com.yuukifst.orpheus.data.preferences.YOUTUBE_SEARCH_REGION_DEFAULT
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.AlbumArtQuality
@@ -68,6 +70,8 @@ data class SettingsUiState(
     val youtubeAudioQuality: YouTubeAudioQuality = YouTubeAudioQuality.HIGH,
     val youtubeSearchAsYouType: Boolean = true,
     val youtubeSearchDebounceMs: Int = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS,
+    val youtubeSearchRegion: String = YOUTUBE_SEARCH_REGION_DEFAULT,
+    val youtubeHidePortuguese: Boolean = false,
     val resumeOnHeadsetReconnect: Boolean = false,
     val showQueueHistory: Boolean = true,
     val isCrossfadeEnabled: Boolean = false,
@@ -176,6 +180,7 @@ class SettingsViewModel @Inject constructor(
     private val lyricsRepository: LyricsRepository,
     private val musicRepository: MusicRepository,
     private val backupManager: BackupManager,
+    private val youTubeSearchFilterPreferences: YouTubeSearchFilterPreferences,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -461,6 +466,18 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(youtubeSearchDebounceMs = debounceMs) }
             }
         }
+
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.searchRegionFlow.collect { code ->
+                _uiState.update { it.copy(youtubeSearchRegion = code) }
+            }
+        }
+
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.hidePortugueseFlow.collect { enabled ->
+                _uiState.update { it.copy(youtubeHidePortuguese = enabled) }
+            }
+        }
     }
 
     fun setAppRebrandDialogShown(wasShown: Boolean) {
@@ -620,6 +637,18 @@ class SettingsViewModel @Inject constructor(
     fun setYouTubeSearchAsYouType(enabled: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.setYouTubeSearchAsYouType(enabled)
+        }
+    }
+
+    fun setYouTubeSearchRegion(code: String) {
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.setSearchRegion(code)
+        }
+    }
+
+    fun setYouTubeHidePortuguese(enabled: Boolean) {
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.setHidePortuguese(enabled)
         }
     }
 

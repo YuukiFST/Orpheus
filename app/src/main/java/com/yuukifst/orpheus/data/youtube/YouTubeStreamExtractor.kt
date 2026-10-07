@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.extractor.stream.AudioStream
+import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import timber.log.Timber
 import javax.inject.Inject
@@ -18,6 +19,8 @@ import javax.inject.Singleton
 data class YouTubeStreamResult(
     val streamUrl: String,
     val mimeType: String?,
+    /** Stable per-format id (YouTube itag); keys the on-disk audio cache across URL refreshes. */
+    val formatId: String = "",
 )
 
 @Singleton
@@ -56,6 +59,7 @@ class YouTubeStreamExtractor @Inject constructor(
         val result = YouTubeStreamResult(
             streamUrl = best.content,
             mimeType = best.format?.mimeType,
+            formatId = best.id.orEmpty(),
         )
         streamCache.put(cacheKey, CachedStreamResult(result, System.currentTimeMillis()))
         return result
@@ -86,6 +90,13 @@ class YouTubeStreamExtractor @Inject constructor(
                 Timber.tag("YouTubeStreamExtractor").w("Prefetch failed for %s", videoId)
             }
             .isSuccess
+    }
+
+    /** Drops cached URLs for [videoId] so the next extract fetches fresh ones (e.g. after HTTP 403). */
+    fun invalidate(videoId: String) {
+        YouTubeAudioQuality.entries.forEach { quality ->
+            streamCache.remove(streamCacheKey(videoId, quality))
+        }
     }
 
     internal fun isCached(videoId: String): Boolean {
@@ -160,6 +171,22 @@ internal fun selectYouTubeAudioStream(
     streams: List<AudioStream>,
     quality: YouTubeAudioQuality,
 ): AudioStream? {
-    val chosen = chooseYouTubeAudioBitrate(streams.map { it.averageBitrate }, quality) ?: return streams.firstOrNull()
-    return streams.firstOrNull { it.averageBitrate == chosen } ?: streams.firstOrNull()
+    val candidates = originalAudioTrackStreams(streams)
+    val chosen = chooseYouTubeAudioBitrate(candidates.map { it.averageBitrate }, quality)
+        ?: return candidates.firstOrNull()
+    return candidates.firstOrNull { it.averageBitrate == chosen } ?: candidates.firstOrNull()
+}
+
+/**
+ * Videos with YouTube's multi-language audio (incl. AI auto-dubbing) expose one stream set per
+ * track; picking by bitrate alone could land on a dubbed track. Keep the ORIGINAL track; when no
+ * stream is tagged ORIGINAL, drop only the tracks known to be non-original.
+ */
+internal fun originalAudioTrackStreams(streams: List<AudioStream>): List<AudioStream> {
+    val original = streams.filter { it.audioTrackType == AudioTrackType.ORIGINAL }
+    if (original.isNotEmpty()) return original
+    val notAltered = streams.filter {
+        it.audioTrackType != AudioTrackType.DUBBED && it.audioTrackType != AudioTrackType.DESCRIPTIVE
+    }
+    return notAltered.ifEmpty { streams }
 }
