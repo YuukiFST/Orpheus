@@ -103,6 +103,11 @@ class YouTubeSearchRepository @Inject constructor(
         onFirstPage: ((List<YouTubeTrack>) -> Unit)? = null,
     ): List<YouTubeTrack> {
         youTubeInitializer.ensureInitialized()
+        val regionAtStart = contentCountryCode
+        // A region change mid-search must not re-cache results ranked for the old region.
+        fun cacheIfRegionUnchanged(tracks: List<YouTubeTrack>) {
+            if (contentCountryCode == regionAtStart) searchCache.put(cacheKey, tracks)
+        }
         return youTubeDownloader.runAsSearch {
             val handler = YoutubeSearchQueryHandlerFactory.getInstance()
                 .fromQuery(trimmedQuery, listOf(YoutubeSearchQueryHandlerFactory.VIDEOS), "")
@@ -116,7 +121,7 @@ class YouTubeSearchRepository @Inject constructor(
             }
             consume(searchInfo.relatedItems)
             val page1 = results.toList()
-            searchCache.put(cacheKey, page1)
+            cacheIfRegionUnchanged(page1)
             onFirstPage?.invoke(page1)
             var nextPage = searchInfo.nextPage
             var pagesFetched = 1
@@ -128,7 +133,7 @@ class YouTubeSearchRepository @Inject constructor(
                 nextPage = more.nextPage
                 pagesFetched++
             }
-            searchCache.put(cacheKey, results)
+            cacheIfRegionUnchanged(results)
             results
         }
     }

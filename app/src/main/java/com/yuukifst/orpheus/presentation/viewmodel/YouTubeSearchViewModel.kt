@@ -68,6 +68,8 @@ class YouTubeSearchViewModel @Inject constructor(
     @Volatile private var searchAsYouTypeEnabled = true
     @Volatile private var searchDebounceMs = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS.toLong()
     @Volatile private var hidePortugueseResults = false
+    // Unfiltered list behind `results`, so toggling the filter re-filters what is on screen.
+    private var lastRawResults: List<YouTubeTrack> = emptyList()
 
     private companion object {
         const val SEARCH_DEBOUNCE_CACHED_MS = 0L
@@ -107,12 +109,17 @@ class YouTubeSearchViewModel @Inject constructor(
         viewModelScope.launch {
             searchFilterPreferences.hidePortugueseFlow.collect { enabled ->
                 hidePortugueseResults = enabled
+                if (lastRawResults.isNotEmpty()) {
+                    _uiState.update { it.copy(results = visibleResults(lastRawResults)) }
+                }
             }
         }
     }
 
-    private fun visibleResults(results: List<YouTubeTrack>): List<YouTubeTrack> =
-        if (hidePortugueseResults) filterOutPortuguese(results) else results
+    private fun visibleResults(results: List<YouTubeTrack>): List<YouTubeTrack> {
+        lastRawResults = results
+        return if (hidePortugueseResults) filterOutPortuguese(results) else results
+    }
 
     fun updateQuery(query: String) {
         _uiState.update { it.copy(query = query, error = null) }
