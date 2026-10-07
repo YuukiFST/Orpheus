@@ -111,6 +111,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -983,17 +984,19 @@ class PlayerViewModel @Inject constructor(
             )
         }
 
-        stablePlayerState
-            .map { it.currentSong?.albumArtUriString?.takeIf { uri -> uri.isNotBlank() } }
-            .distinctUntilChanged()
-            .onEach { artworkUri ->
-                themeStateHolder.extractAndGenerateColorScheme(
-                    albumArtUriAsUri = artworkUri?.toUri(),
-                    currentSongUriString = artworkUri,
-                    isPreload = false
-                )
-            }
-            .launchIn(viewModelScope)
+        // collectLatest: during rapid skips only the newest track's palette is extracted.
+        viewModelScope.launch {
+            stablePlayerState
+                .map { it.currentSong?.albumArtUriString?.takeIf { uri -> uri.isNotBlank() } }
+                .distinctUntilChanged()
+                .collectLatest { artworkUri ->
+                    themeStateHolder.extractAndGenerateColorScheme(
+                        albumArtUriAsUri = artworkUri?.toUri(),
+                        currentSongUriString = artworkUri,
+                        isPreload = false
+                    )
+                }
+        }
 
         viewModelScope.launch {
             lyricsStateHolder.songUpdates.collect { update: Pair<com.yuukifst.orpheus.data.model.Song, com.yuukifst.orpheus.data.model.Lyrics?> ->
