@@ -153,8 +153,9 @@
     <string name="setcat_youtube_search_region_label">Search region</string>
     <string name="setcat_youtube_search_region_desc">Ranks YouTube results as if you searched from this country. Your network location still has some influence.</string>
     <string name="setcat_youtube_search_region_default">Default</string>
-    <string name="setcat_youtube_hide_portuguese_title">Hide Portuguese results</string>
-    <string name="setcat_youtube_hide_portuguese_subtitle">Removes results whose title or channel reads as Portuguese. Detection is text-based, so a few may slip through.</string>
+    <string name="setcat_youtube_result_language_label">Results language</string>
+    <string name="setcat_youtube_result_language_desc">Hides results whose title, channel or description reads as another language or script. Results with no clear language, like an artist name, stay. Detection is text-based, so a few may slip through.</string>
+    <string name="setcat_youtube_result_language_any">Any language</string>
     <string name="setcat_crossfade_label">Crossfade</string>
     <string name="setcat_crossfade_desc">Enable smooth transition between songs.</string>
     <string name="setcat_crossfade_duration">Crossfade Duration</string>

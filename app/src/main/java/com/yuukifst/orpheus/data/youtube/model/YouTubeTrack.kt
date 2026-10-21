@@ -10,6 +10,8 @@ data class YouTubeTrack(
     val thumbnailUrl: String,
     val durationMs: Long,
     val displayTitle: String? = null,
+    /** Search-result description excerpt; only search results carry it. */
+    val descriptionSnippet: String? = null,
 ) {
     val effectiveTitle: String get() = displayTitle?.takeIf { it.isNotBlank() } ?: title
 

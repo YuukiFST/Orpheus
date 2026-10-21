@@ -4,6 +4,7 @@ import com.yuukifst.orpheus.data.database.SearchHistoryDao
 import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
+import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
 import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
@@ -65,7 +66,7 @@ class YouTubeSearchViewModelHistoryTest {
         every { userPreferencesRepository.youtubeSearchAsYouTypeFlow } returns flowOf(true)
         every { userPreferencesRepository.youtubeSearchDebounceMsFlow } returns flowOf(260)
         every { searchFilterPreferences.searchRegionFlow } returns flowOf("")
-        every { searchFilterPreferences.hidePortugueseFlow } returns flowOf(false)
+        every { searchFilterPreferences.resultLanguageFlow } returns flowOf(YouTubeResultLanguage.ANY)
     }
 
     @AfterEach
