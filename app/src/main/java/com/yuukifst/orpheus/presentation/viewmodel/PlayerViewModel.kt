@@ -1292,10 +1292,21 @@ class PlayerViewModel @Inject constructor(
         mergeFavoriteOverrides(dbIds, overrides)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
+    private val likedQueueUnlikePruner = LikedQueueUnlikePruner()
+
     init {
         viewModelScope.launch {
             musicRepository.getFavoriteSongIdsFlow().collect { dbIds ->
                 favoriteOverrides.update { pruneAgreedFavoriteOverrides(dbIds, it) }
+            }
+        }
+        viewModelScope.launch {
+            favoriteSongIds.collect { ids ->
+                likedQueueUnlikePruner.onFavoriteIdsChanged(
+                    favoriteIds = ids,
+                    isLikedQueue = isLikedQueueName(_playerUiState.value.currentQueueSourceName),
+                    player = mediaController,
+                )
             }
         }
     }
@@ -2952,6 +2963,11 @@ class PlayerViewModel @Inject constructor(
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                likedQueueUnlikePruner.onMediaItemTransition(
+                    reason = reason,
+                    isLikedQueue = isLikedQueueName(_playerUiState.value.currentQueueSourceName),
+                    player = playerCtrl,
+                )
                 // New media after swipe-dismiss must revive the mini player; the early
                 // return below used to leave dismissJustCommitted stuck true forever.
                 clearDismissCommittedIfPlayingNewSong(mediaItem?.mediaId)
