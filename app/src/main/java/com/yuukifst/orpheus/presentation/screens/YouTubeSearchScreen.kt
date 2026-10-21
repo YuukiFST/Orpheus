@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
@@ -107,6 +108,7 @@ fun YouTubeSearchScreen(
     val navBarCompactMode by playerViewModel.navBarCompactMode.collectAsStateWithLifecycle()
     val favoriteSongIds by playerViewModel.favoriteSongIds.collectAsStateWithLifecycle()
     val bottomBarHeightDp = resolveNavBarOccupiedHeight(systemNavBarInset, navBarCompactMode)
+    val listenLaterPlaylistName = stringResource(R.string.listen_later_playlist_name)
 
     LaunchedEffect(Unit) {
         onSearchBarActiveChange(false)
@@ -261,6 +263,9 @@ fun YouTubeSearchScreen(
                                 },
                                 onAddToQueue = { viewModel.addToQueue(track) },
                                 onAddToPlaylist = { showPlaylistPickerForTrack = track },
+                                onSaveToListenLater = {
+                                    viewModel.saveToListenLater(track, listenLaterPlaylistName)
+                                },
                                 onDownload = { viewModel.download(track) },
                                 onChannelClick = { channelName ->
                                     searchQuery = channelName
@@ -463,6 +468,7 @@ private fun YouTubeSearchResultItem(
     onToggleFavorite: () -> Unit,
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
+    onSaveToListenLater: () -> Unit,
     onDownload: () -> Unit,
     onChannelClick: (String) -> Unit,
 ) {
@@ -567,6 +573,14 @@ private fun YouTubeSearchResultItem(
                         onAddToPlaylist()
                     },
                     leadingIcon = { Icon(Icons.Rounded.PlaylistAdd, contentDescription = null) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_save_to_listen_later)) },
+                    onClick = {
+                        showMenu = false
+                        onSaveToListenLater()
+                    },
+                    leadingIcon = { Icon(Icons.Rounded.Schedule, contentDescription = null) },
                 )
                 DropdownMenuItem(
                     text = { Text("Download") },

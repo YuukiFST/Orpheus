@@ -32,6 +32,9 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
+/** Reserved id of the "Listen later" playlist, so renaming it keeps it the save target. */
+internal const val LISTEN_LATER_PLAYLIST_ID = "listen_later"
+
 data class YouTubeSearchUiState(
     val query: String = "",
     val results: List<YouTubeTrack> = emptyList(),
@@ -334,6 +337,19 @@ class YouTubeSearchViewModel @Inject constructor(
             val trimmed = name.trim()
             if (trimmed.isEmpty()) return@launch
             val playlist = playlistPreferencesRepository.createPlaylist(trimmed, emptyList())
+            addToPlaylistInternal(track, playlist.id, playlist.name)
+        }
+    }
+
+    /** Saves [track] to the "Listen later" playlist, creating it as [defaultPlaylistName] on first use. */
+    fun saveToListenLater(track: YouTubeTrack, defaultPlaylistName: String) {
+        viewModelScope.launch {
+            val playlist = playlistPreferencesRepository.getPlaylistsOnce()
+                .find { it.id == LISTEN_LATER_PLAYLIST_ID }
+                ?: playlistPreferencesRepository.createPlaylist(
+                    name = defaultPlaylistName,
+                    customId = LISTEN_LATER_PLAYLIST_ID,
+                )
             addToPlaylistInternal(track, playlist.id, playlist.name)
         }
     }
