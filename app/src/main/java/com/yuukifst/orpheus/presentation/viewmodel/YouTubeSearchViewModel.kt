@@ -11,12 +11,13 @@ import com.yuukifst.orpheus.data.playlist.PlaylistYouTubeMembership
 import com.yuukifst.orpheus.data.preferences.PlaylistPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
+import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
 import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
-import com.yuukifst.orpheus.data.youtube.filterOutPortuguese
+import com.yuukifst.orpheus.data.youtube.filterByResultLanguage
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -67,7 +68,7 @@ class YouTubeSearchViewModel @Inject constructor(
     private var activeNetworkQuery: String? = null
     @Volatile private var searchAsYouTypeEnabled = true
     @Volatile private var searchDebounceMs = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS.toLong()
-    @Volatile private var hidePortugueseResults = false
+    @Volatile private var resultLanguage = YouTubeResultLanguage.ANY
     // Unfiltered list behind `results`, so toggling the filter re-filters what is on screen.
     private var lastRawResults: List<YouTubeTrack> = emptyList()
 
@@ -107,8 +108,8 @@ class YouTubeSearchViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            searchFilterPreferences.hidePortugueseFlow.collect { enabled ->
-                hidePortugueseResults = enabled
+            searchFilterPreferences.resultLanguageFlow.collect { language ->
+                resultLanguage = language
                 if (lastRawResults.isNotEmpty()) {
                     _uiState.update { it.copy(results = visibleResults(lastRawResults)) }
                 }
@@ -118,7 +119,7 @@ class YouTubeSearchViewModel @Inject constructor(
 
     private fun visibleResults(results: List<YouTubeTrack>): List<YouTubeTrack> {
         lastRawResults = results
-        return if (hidePortugueseResults) filterOutPortuguese(results) else results
+        return filterByResultLanguage(results, resultLanguage)
     }
 
     fun updateQuery(query: String) {

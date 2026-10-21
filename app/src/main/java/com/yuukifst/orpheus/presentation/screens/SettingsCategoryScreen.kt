@@ -169,6 +169,7 @@ import com.yuukifst.orpheus.data.preferences.NavBarStyle
 import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import com.yuukifst.orpheus.data.preferences.YOUTUBE_SEARCH_REGION_CODES
+import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
 import com.yuukifst.orpheus.data.preferences.MAX_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.MIN_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.model.Song
@@ -828,11 +829,21 @@ fun SettingsCategoryScreen(
                                     onSelectionChanged = { key -> settingsViewModel.setYouTubeSearchRegion(key) },
                                     leadingIcon = { Icon(Icons.Rounded.Public, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
-                                SwitchSettingItem(
-                                    title = stringResource(R.string.setcat_youtube_hide_portuguese_title),
-                                    subtitle = stringResource(R.string.setcat_youtube_hide_portuguese_subtitle),
-                                    checked = uiState.youtubeHidePortuguese,
-                                    onCheckedChange = { settingsViewModel.setYouTubeHidePortuguese(it) },
+                                val anyLanguageLabel = stringResource(R.string.setcat_youtube_result_language_any)
+                                ThemeSelectorItem(
+                                    label = stringResource(R.string.setcat_youtube_result_language_label),
+                                    description = stringResource(R.string.setcat_youtube_result_language_desc),
+                                    options = YouTubeResultLanguage.entries.associate { language ->
+                                        language.name to if (language == YouTubeResultLanguage.ANY) {
+                                            anyLanguageLabel
+                                        } else {
+                                            java.util.Locale.forLanguageTag(language.languageTag).displayLanguage
+                                        }
+                                    },
+                                    selectedKey = uiState.youtubeResultLanguage.name,
+                                    onSelectionChanged = { key ->
+                                        settingsViewModel.setYouTubeResultLanguage(YouTubeResultLanguage.valueOf(key))
+                                    },
                                     leadingIcon = { Icon(Icons.Rounded.Translate, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
                             }

@@ -25,6 +25,30 @@ internal fun sanitizeYouTubeSearchRegion(raw: String?): String {
     return if (code in YOUTUBE_SEARCH_REGION_CODES) code else YOUTUBE_SEARCH_REGION_DEFAULT
 }
 
+/** Language YouTube Search results are kept in; [languageTag] is the BCP 47 tag ("" for any). */
+enum class YouTubeResultLanguage(val languageTag: String) {
+    ANY(""),
+    ENGLISH("en"),
+    PORTUGUESE("pt"),
+    SPANISH("es"),
+    FRENCH("fr"),
+    GERMAN("de"),
+    ITALIAN("it"),
+    ;
+
+    companion object {
+        fun fromLanguageTag(tag: String?): YouTubeResultLanguage? = entries.find { it.languageTag == tag }
+    }
+}
+
+/**
+ * Stored result language; before it existed, "hide Portuguese" was the only filter, and its users
+ * asked for English-only results, so it maps to [YouTubeResultLanguage.ENGLISH].
+ */
+internal fun resolveYouTubeResultLanguage(storedTag: String?, legacyHidePortuguese: Boolean?): YouTubeResultLanguage =
+    YouTubeResultLanguage.fromLanguageTag(storedTag)
+        ?: if (legacyHidePortuguese == true) YouTubeResultLanguage.ENGLISH else YouTubeResultLanguage.ANY
+
 /**
  * YouTube Search result filters. Kept out of [UserPreferencesRepository] (already ~2k lines);
  * shares the same "settings" DataStore.
@@ -35,7 +59,8 @@ class YouTubeSearchFilterPreferences @Inject constructor(
 ) {
     private object Keys {
         val SEARCH_REGION = stringPreferencesKey("youtube_search_region")
-        val HIDE_PORTUGUESE = booleanPreferencesKey("youtube_search_hide_portuguese")
+        val LEGACY_HIDE_PORTUGUESE = booleanPreferencesKey("youtube_search_hide_portuguese")
+        val RESULT_LANGUAGE = stringPreferencesKey("youtube_search_result_language")
     }
 
     val searchRegionFlow: Flow<String> =
@@ -43,9 +68,12 @@ class YouTubeSearchFilterPreferences @Inject constructor(
             sanitizeYouTubeSearchRegion(preferences[Keys.SEARCH_REGION])
         }.distinctUntilChanged()
 
-    val hidePortugueseFlow: Flow<Boolean> =
+    val resultLanguageFlow: Flow<YouTubeResultLanguage> =
         dataStore.data.map { preferences ->
-            preferences[Keys.HIDE_PORTUGUESE] ?: false
+            resolveYouTubeResultLanguage(
+                storedTag = preferences[Keys.RESULT_LANGUAGE],
+                legacyHidePortuguese = preferences[Keys.LEGACY_HIDE_PORTUGUESE],
+            )
         }.distinctUntilChanged()
 
     suspend fun setSearchRegion(code: String) {
@@ -54,9 +82,10 @@ class YouTubeSearchFilterPreferences @Inject constructor(
         }
     }
 
-    suspend fun setHidePortuguese(enabled: Boolean) {
+    suspend fun setResultLanguage(language: YouTubeResultLanguage) {
         dataStore.edit { preferences ->
-            preferences[Keys.HIDE_PORTUGUESE] = enabled
+            preferences[Keys.RESULT_LANGUAGE] = language.languageTag
+            preferences.remove(Keys.LEGACY_HIDE_PORTUGUESE)
         }
     }
 }
