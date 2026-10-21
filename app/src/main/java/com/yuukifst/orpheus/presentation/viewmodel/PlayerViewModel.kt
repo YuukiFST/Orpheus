@@ -1304,7 +1304,7 @@ class PlayerViewModel @Inject constructor(
             favoriteSongIds.collect { ids ->
                 likedQueueUnlikePruner.onFavoriteIdsChanged(
                     favoriteIds = ids,
-                    isLikedQueue = isLikedQueueName(_playerUiState.value.currentQueueSourceName),
+                    isLikedQueue = isLikedSongsQueue(_playerUiState.value.currentQueueSourceName),
                     player = mediaController,
                 )
             }
@@ -2629,6 +2629,10 @@ class PlayerViewModel @Inject constructor(
 
     private fun isLikedQueueName(queueName: String): Boolean = queueName.contains("Liked Songs")
 
+    // Exact names: a user playlist called "Liked Songs backup" must not lose queue items on unlike.
+    private fun isLikedSongsQueue(queueName: String): Boolean =
+        queueName == "Liked Songs" || queueName == "Liked Songs (Shuffled)"
+
     private fun ensureLikedQueueRepeatWrap(queueName: String) {
         if (!isLikedQueueName(queueName)) return
         if (playbackStateHolder.stablePlayerState.value.repeatMode != Player.REPEAT_MODE_OFF) return
@@ -2965,7 +2969,7 @@ class PlayerViewModel @Inject constructor(
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 likedQueueUnlikePruner.onMediaItemTransition(
                     reason = reason,
-                    isLikedQueue = isLikedQueueName(_playerUiState.value.currentQueueSourceName),
+                    isLikedQueue = isLikedSongsQueue(_playerUiState.value.currentQueueSourceName),
                     player = playerCtrl,
                 )
                 // New media after swipe-dismiss must revive the mini player; the early
