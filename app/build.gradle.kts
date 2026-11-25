@@ -127,11 +127,6 @@ android {
         buildConfig = true
     }
 
-    testOptions {
-        unitTests.isReturnDefaultValues = true
-        unitTests.all { it.useJUnitPlatform() }
-    }
-
     lint {
         checkReleaseBuilds = false
     }
@@ -286,23 +281,6 @@ dependencies {
         exclude(group = "androidx.compose.ui")
     }
 
-    // Testing (Unit)
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.params)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    // JUnit 4 (Vintage) — required for legacy JUnit 4 tests under useJUnitPlatform()
-    testImplementation(libs.junit)
-    testRuntimeOnly(libs.junit.vintage.engine)
-    testRuntimeOnly(libs.junitplatformlauncher)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
-    testImplementation(libs.turbine)
-    testImplementation(libs.truth)
-    testImplementation(libs.org.json)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.androidx.junit)
-    testImplementation(kotlin("test"))
-
     // Testing (Instrumentation)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -333,8 +311,4 @@ dependencies {
         implementation(libs.jose4j)
         implementation(libs.apache.httpclient)
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

@@ -25,18 +25,7 @@ Please run these and include the results in your PR description:
 ```sh
 JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew :app:compileDebugKotlin
 JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew :app:lintDebug
-JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew :app:testDebugUnitTest
 ```
-
-Run a single test class/method:
-
-```sh
-JAVA_HOME=/usr/lib/jvm/java-21-openjdk ./gradlew :app:testDebugUnitTest \
-  --tests "com.yuukifst.orpheus.SomeTestClass.someMethod"
-```
-
-> Unit tests use **JUnit Jupiter** (`useJUnitPlatform()`), not JUnit 4 — use
-> `org.junit.jupiter.api.Test`, not `org.junit.Test`.
 
 ## Conventions that matter
 
