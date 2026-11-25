@@ -195,6 +195,9 @@ class DualPlayerEngine @Inject constructor(
         // an older ExoPlayer default and held audio back on every play, seek and skip.
         private const val BUFFER_FOR_PLAYBACK_MS = 1_000
         private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 2_000
+        // How much of the next playlist item the master player buffers ahead, so a skip
+        // starts from memory. 5 s of 160 kbps audio is about 100 KB.
+        private const val NEXT_ITEM_PRELOAD_DURATION_US = 5_000_000L
     }
 
     // One SimpleCache per directory per process: DualPlayerEngine is the only owner.
@@ -634,6 +637,7 @@ class DualPlayerEngine @Inject constructor(
         playerA = buildPlayer()
 
         addMasterPlayerListeners(playerA)
+        applyPreloadRoles()
 
         _activeAudioSessionId.value = playerA.audioSessionId
         isReleased = false
@@ -802,6 +806,7 @@ class DualPlayerEngine @Inject constructor(
         playerA = buildPlayer()
 
         addMasterPlayerListeners(playerA)
+        applyPreloadRoles()
         playerA.volume = volume
         playerA.pauseAtEndOfMediaItems = pauseAtEnd
         playerA.playbackParameters = playbackParameters
@@ -964,6 +969,17 @@ class DualPlayerEngine @Inject constructor(
             player.setWakeMode(currentWakeMode)
             playerB = player
         }
+    }
+
+    // Only the master preloads its next item; the auxiliary player already holds the
+    // crossfade target and would buffer one item further for nothing.
+    private fun applyPreloadRoles() {
+        if (::playerA.isInitialized) {
+            playerA.setPreloadConfiguration(
+                ExoPlayer.PreloadConfiguration(NEXT_ITEM_PRELOAD_DURATION_US)
+            )
+        }
+        playerB?.setPreloadConfiguration(ExoPlayer.PreloadConfiguration.DEFAULT)
     }
 
     suspend fun prepareNext(target: TransitionTarget, startPositionMs: Long = 0L) {
@@ -1200,6 +1216,7 @@ class DualPlayerEngine @Inject constructor(
         playerA.pauseAtEndOfMediaItems = false
         playerB?.pauseAtEndOfMediaItems = false
         addMasterPlayerListeners(playerA)
+        applyPreloadRoles()
         if (playerA.playWhenReady) requestAudioFocus()
 
         onPlayerSwappedListeners.forEach { it(playerA) }
