@@ -45,11 +45,14 @@ object AppThemeMode {
     const val FOLLOW_SYSTEM = "follow_system"
     const val LIGHT = "light"
     const val DARK = "dark"
-    const val PIXEL = "pixel"
-    const val ETHEREAL = "ethereal"
-    const val ROSE_PINE = "rose_pine"
-    const val CATPPUCCIN_MOCHA = "catppuccin_mocha"
     const val SAKURA = "sakura"
+
+    /** Maps a stored mode to a current one; removed dark themes become [DARK], anything else [LIGHT]. */
+    fun fromStored(stored: String?): String = when (stored) {
+        FOLLOW_SYSTEM, LIGHT, DARK, SAKURA -> stored
+        "terminal", "pixel", "ethereal", "catppuccin_mocha" -> DARK
+        else -> LIGHT
+    }
 }
 
 const val MIN_NAV_BAR_CORNER_RADIUS = 0

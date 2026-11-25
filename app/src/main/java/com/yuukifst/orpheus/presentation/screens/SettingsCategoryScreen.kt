@@ -560,10 +560,6 @@ fun SettingsCategoryScreen(
                                     options = mapOf(
                                         AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
                                         AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
-                                        AppThemeMode.PIXEL to stringResource(R.string.setcat_theme_pixel),
-                                        AppThemeMode.ETHEREAL to stringResource(R.string.setcat_theme_ethereal),
-                                        AppThemeMode.ROSE_PINE to stringResource(R.string.setcat_theme_rose_pine),
-                                        AppThemeMode.CATPPUCCIN_MOCHA to stringResource(R.string.setcat_theme_catppuccin_mocha),
                                         AppThemeMode.SAKURA to stringResource(R.string.setcat_theme_sakura),
                                         AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system)
                                     ),

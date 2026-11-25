@@ -1,13 +1,5 @@
 package com.yuukifst.orpheus.presentation.screens
 import com.yuukifst.orpheus.ui.theme.OrpheusFilledIconButton
-import com.yuukifst.orpheus.ui.theme.PixelOnPrimary
-import com.yuukifst.orpheus.ui.theme.PixelOnSecondary
-import com.yuukifst.orpheus.ui.theme.PixelOnSurface
-import com.yuukifst.orpheus.ui.theme.PixelOnTertiary
-import com.yuukifst.orpheus.ui.theme.PixelPrimary
-import com.yuukifst.orpheus.ui.theme.PixelSecondary
-import com.yuukifst.orpheus.ui.theme.PixelSurface
-import com.yuukifst.orpheus.ui.theme.PixelTertiary
 import com.yuukifst.orpheus.ui.theme.OrpheusSpacing
 import com.yuukifst.orpheus.ui.theme.TerminalCornerShape
 
@@ -63,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -196,7 +187,6 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxSize()
         ) {
             item {
-                val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
                 val mono = MaterialTheme.colorScheme.surfaceContainerLow to MaterialTheme.colorScheme.onSurface
                 ExpressiveSettingsGroup {
                     val mainCategories = SettingsCategory.entries.filter {
@@ -216,7 +206,7 @@ fun SettingsScreen(
                     var itemIndex = 0
 
                     mainCategories.forEach { category ->
-                        val colors = settingsCategoryColorsOrMono(category, isDark, uiState.appThemeMode, mono)
+                        val colors = settingsCategoryColorsOrMono(category, uiState.appThemeMode, mono)
 
                         ExpressiveCategoryItem(
                             category = category,
@@ -240,7 +230,6 @@ fun SettingsScreen(
                         category = SettingsCategory.DEVICE_CAPABILITIES,
                         customColors = settingsCategoryColorsOrMono(
                             SettingsCategory.DEVICE_CAPABILITIES,
-                            isDark,
                             uiState.appThemeMode,
                             mono
                         ),
@@ -257,7 +246,7 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.settings_accounts_row_subtitle),
                         icon = Icons.Rounded.AccountCircle,
                         colors = if (isColorfulAppThemeMode(uiState.appThemeMode)) {
-                            getAccountsColors(isDark)
+                            AccountsColors
                         } else {
                             mono
                         },
@@ -273,7 +262,6 @@ fun SettingsScreen(
                         category = SettingsCategory.ABOUT,
                         customColors = settingsCategoryColorsOrMono(
                             SettingsCategory.ABOUT,
-                            isDark,
                             uiState.appThemeMode,
                             mono
                         ),
@@ -434,13 +422,7 @@ fun ExpressiveCategoryItem(
     }
 }
 
-private fun getAccountsColors(isDark: Boolean): Pair<Color, Color> {
-    return if (isDark) {
-        PixelSecondary to PixelOnSecondary
-    } else {
-        Color(0xFFD6EAF5) to Color(0xFF103548)
-    }
-}
+private val AccountsColors = Color(0xFFD6EAF5) to Color(0xFF103548)
 
 @Composable
 fun ExpressiveSettingsGroup(content: @Composable () -> Unit) {
@@ -454,45 +436,24 @@ fun ExpressiveSettingsGroup(content: @Composable () -> Unit) {
     }
 }
 
-internal fun isColorfulAppThemeMode(appThemeMode: String): Boolean =
-    appThemeMode == AppThemeMode.PIXEL ||
-        appThemeMode == AppThemeMode.ETHEREAL ||
-        appThemeMode == AppThemeMode.ROSE_PINE ||
-        appThemeMode == AppThemeMode.CATPPUCCIN_MOCHA ||
-        appThemeMode == AppThemeMode.SAKURA
+internal fun isColorfulAppThemeMode(appThemeMode: String): Boolean = appThemeMode == AppThemeMode.SAKURA
 
 internal fun settingsCategoryColorsOrMono(
     category: SettingsCategory,
-    isDark: Boolean,
     appThemeMode: String,
     monoPair: Pair<Color, Color>,
 ): Pair<Color, Color> =
-    if (isColorfulAppThemeMode(appThemeMode)) getCategoryColors(category, isDark) else monoPair
+    if (isColorfulAppThemeMode(appThemeMode)) getCategoryColors(category) else monoPair
 
-private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair<Color, Color> {
-    return if (isDark) {
-        when (category) {
-            SettingsCategory.LIBRARY -> PixelPrimary to PixelOnPrimary
-            SettingsCategory.APPEARANCE -> PixelSecondary to PixelOnSecondary
-            SettingsCategory.PLAYBACK -> PixelTertiary to PixelOnTertiary
-            SettingsCategory.BEHAVIOR -> PixelPrimary to PixelOnSurface
-            SettingsCategory.BACKUP_RESTORE -> PixelSecondary to PixelOnSurface
-            SettingsCategory.DEVELOPER -> PixelTertiary to PixelOnTertiary
-            SettingsCategory.EQUALIZER -> PixelSecondary to PixelOnSecondary
-            SettingsCategory.DEVICE_CAPABILITIES -> PixelPrimary to PixelOnPrimary
-            SettingsCategory.ABOUT -> PixelSurface to PixelOnSurface
-        }
-    } else {
-        when (category) {
-            SettingsCategory.LIBRARY -> Color(0xFFD7E3FF) to Color(0xFF005AC1)
-            SettingsCategory.APPEARANCE -> Color(0xFFFFD8E4) to Color(0xFF631835)
-            SettingsCategory.PLAYBACK -> Color(0xFFFFD8EC) to Color(0xFF631B4B)
-            SettingsCategory.BEHAVIOR -> Color(0xFFD7E3FF) to Color(0xFF253347)
-            SettingsCategory.BACKUP_RESTORE -> Color(0xFFD9E2FF) to Color(0xFF27304E)
-            SettingsCategory.DEVELOPER -> Color(0xFFCBEFD0) to Color(0xFF042106)
-            SettingsCategory.EQUALIZER -> Color(0xFFFFDEAC) to Color(0xFF281900)
-            SettingsCategory.DEVICE_CAPABILITIES -> Color(0xFFACEFEE) to Color(0xFF002022)
-            SettingsCategory.ABOUT -> Color(0xFFEFF1F7) to Color(0xFF44474F)
-        }
+private fun getCategoryColors(category: SettingsCategory): Pair<Color, Color> =
+    when (category) {
+        SettingsCategory.LIBRARY -> Color(0xFFD7E3FF) to Color(0xFF005AC1)
+        SettingsCategory.APPEARANCE -> Color(0xFFFFD8E4) to Color(0xFF631835)
+        SettingsCategory.PLAYBACK -> Color(0xFFFFD8EC) to Color(0xFF631B4B)
+        SettingsCategory.BEHAVIOR -> Color(0xFFD7E3FF) to Color(0xFF253347)
+        SettingsCategory.BACKUP_RESTORE -> Color(0xFFD9E2FF) to Color(0xFF27304E)
+        SettingsCategory.DEVELOPER -> Color(0xFFCBEFD0) to Color(0xFF042106)
+        SettingsCategory.EQUALIZER -> Color(0xFFFFDEAC) to Color(0xFF281900)
+        SettingsCategory.DEVICE_CAPABILITIES -> Color(0xFFACEFEE) to Color(0xFF002022)
+        SettingsCategory.ABOUT -> Color(0xFFEFF1F7) to Color(0xFF44474F)
     }
-}
