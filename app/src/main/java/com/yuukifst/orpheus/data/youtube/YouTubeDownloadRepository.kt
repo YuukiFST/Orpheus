@@ -2,6 +2,7 @@ package com.yuukifst.orpheus.data.youtube
 
 import android.content.Context
 import com.yuukifst.orpheus.data.database.YouTubeDownloadDao
+import com.yuukifst.orpheus.data.database.YouTubeDownloadEntity
 import com.yuukifst.orpheus.data.database.toDownloadEntity
 import com.yuukifst.orpheus.data.media.SongMetadataEditor
 import com.yuukifst.orpheus.data.database.toYouTubeTrack
@@ -29,19 +30,26 @@ class YouTubeDownloadRepository @Inject constructor(
         .readTimeout(120, TimeUnit.SECONDS)
         .build()
 
-    suspend fun download(track: YouTubeTrack): Result<YouTubeTrack> = withContext(Dispatchers.IO) {
+    suspend fun download(track: YouTubeTrack): Result<YouTubeTrack> =
+        downloadEntity(track).map { it.toYouTubeTrack() }
+
+    /** The track's audio file on disk, downloading it first when it is not there yet. */
+    suspend fun downloadedFile(track: YouTubeTrack): Result<File> =
+        downloadEntity(track).map { File(it.filePath) }
+
+    private suspend fun downloadEntity(
+        track: YouTubeTrack,
+    ): Result<YouTubeDownloadEntity> = withContext(Dispatchers.IO) {
         runCatching {
             val existing = downloadDao.getByVideoId(track.videoId)
             if (existing != null && File(existing.filePath).exists()) {
-                return@runCatching existing.toYouTubeTrack()
+                return@runCatching existing
             }
 
-            val stream = streamExtractor.extractBestAudioWithRetry(track.videoId)
-            val ext = when {
-                stream.mimeType?.contains("mp4") == true -> "m4a"
-                stream.mimeType?.contains("webm") == true -> "webm"
-                else -> "m4a"
-            }
+            val stream = streamExtractor.extractDownloadAudioWithRetry(track.videoId)
+            // Android maps .webm to video/webm and rejects video files in Music/ with EPERM.
+            // WebM is a Matroska subset, and .mka maps to audio/x-matroska.
+            val ext = if (stream.mimeType?.contains("webm") == true) "mka" else "m4a"
             val safeName = track.effectiveTitle.replace(Regex("[^a-zA-Z0-9._-]"), "_").take(80)
             val outFile = File(playbackResolver.getOrpheusMusicDir(), "${safeName}_${track.videoId}.$ext")
 
@@ -61,7 +69,7 @@ class YouTubeDownloadRepository @Inject constructor(
 
             val entity = track.toDownloadEntity(outFile.absolutePath)
             downloadDao.upsert(entity)
-            entity.toYouTubeTrack()
+            entity
         }
     }
 
