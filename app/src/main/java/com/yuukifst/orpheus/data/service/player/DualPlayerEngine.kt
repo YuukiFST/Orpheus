@@ -191,6 +191,10 @@ class DualPlayerEngine @Inject constructor(
         private const val YOUTUBE_AUDIO_CACHE_DIR = "youtube_audio"
         // ~50 tracks at 160 kbps; in cacheDir so the OS can reclaim it under storage pressure.
         private const val YOUTUBE_AUDIO_CACHE_BYTES = 256L * 1024 * 1024
+        // Media3 1.10.1 defaults (DefaultLoadControl). The earlier 2 500 / 5 000 ms came from
+        // an older ExoPlayer default and held audio back on every play, seek and skip.
+        private const val BUFFER_FOR_PLAYBACK_MS = 1_000
+        private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 2_000
     }
 
     // One SimpleCache per directory per process: DualPlayerEngine is the only owner.
@@ -822,8 +826,8 @@ class DualPlayerEngine @Inject constructor(
      *
      * Low-RAM devices ([ActivityManager.isLowRamDevice]) receive halved buffer ceilings
      * to prevent memory pressure when both players co-exist during a crossfade.
-     * [bufferForPlaybackMs] is set to ExoPlayer's documented default of 2 500 ms on both
-     * tiers — the previous value of 5 000 ms doubled first-audio latency with no benefit.
+     * Start and rebuffer thresholds follow the Media3 defaults on both tiers
+     * ([BUFFER_FOR_PLAYBACK_MS], [BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS]).
      */
     private fun buildAdaptiveLoadControl(): DefaultLoadControl {
         val isLowRam = (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
@@ -841,8 +845,8 @@ class DualPlayerEngine @Inject constructor(
                 .setBufferDurationsMs(
                     /* minBufferMs                      */ 15_000,
                     /* maxBufferMs                      */ 30_000,
-                    /* bufferForPlaybackMs              */  2_500,
-                    /* bufferForPlaybackAfterRebufferMs */  5_000
+                    /* bufferForPlaybackMs              */ BUFFER_FOR_PLAYBACK_MS,
+                    /* bufferForPlaybackAfterRebufferMs */ BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
                 )
                 .setPrioritizeTimeOverSizeThresholds(true)
                 .build()
@@ -851,8 +855,8 @@ class DualPlayerEngine @Inject constructor(
                 .setBufferDurationsMs(
                     /* minBufferMs                      */ 30_000,
                     /* maxBufferMs                      */ 60_000,
-                    /* bufferForPlaybackMs              */  2_500,
-                    /* bufferForPlaybackAfterRebufferMs */  5_000
+                    /* bufferForPlaybackMs              */ BUFFER_FOR_PLAYBACK_MS,
+                    /* bufferForPlaybackAfterRebufferMs */ BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
                 )
                 .setPrioritizeTimeOverSizeThresholds(true)
                 .build()

@@ -37,7 +37,7 @@ update your row when done.
 | 009 | Share in-flight YouTube stream extracts (prefetch + tap) | P1 | S | LOW | — | DONE |
 | 010 | Honor 6h interval on foreground library catch-up sync | P2 | S | LOW | — | DONE |
 | 011 | Silence audio before the unload snapshot write (Recents swipe) | P1 | S | LOW | — | DONE |
-| 012 | Start playback after 1 s of buffer, not 2.5 s (Media3 defaults) | P1 | S | LOW | — | TODO |
+| 012 | Start playback after 1 s of buffer, not 2.5 s (Media3 defaults) | P1 | S | LOW | — | DONE |
 | 013 | Cut audio when the mini-player dismiss swipe commits | P1 | S | LOW | — | TODO |
 | 014 | Preload the next playlist item on the master player | P1 | S | MED | 012 | TODO |
 | 015 | A Library tap starts audio before the full queue is built | P2 | M | MED | 013 | TODO |
