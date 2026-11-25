@@ -2400,6 +2400,9 @@ class MusicService : MediaLibraryService() {
         } else {
             clearPlaybackSnapshotOnUnload()
         }
+        // The snapshot above already holds queue and position: go silent now so the
+        // disk wait below (up to 750 ms on a Recents swipe) is not heard as late audio.
+        engine.hushImmediateAudio()
         if (awaitSnapshotWrite) {
             // appScope runs on IO, so blocking main here cannot deadlock the write.
             runBlocking {
