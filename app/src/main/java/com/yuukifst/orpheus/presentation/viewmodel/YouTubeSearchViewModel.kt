@@ -13,12 +13,15 @@ import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
 import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
+import com.yuukifst.orpheus.data.youtube.BlockedYouTubeChannel
 import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeSearchRepository
 import com.yuukifst.orpheus.data.youtube.YouTubeStreamExtractor
 import com.yuukifst.orpheus.data.youtube.YouTubeSuggestionRepository
+import com.yuukifst.orpheus.data.youtube.filterBlockedChannels
 import com.yuukifst.orpheus.data.youtube.filterByResultLanguage
 import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
+import com.yuukifst.orpheus.data.youtube.toBlockedChannelOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +75,8 @@ class YouTubeSearchViewModel @Inject constructor(
     @Volatile private var searchAsYouTypeEnabled = true
     @Volatile private var searchDebounceMs = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS.toLong()
     @Volatile private var resultLanguage = YouTubeResultLanguage.ANY
-    // Unfiltered list behind `results`, so toggling the filter re-filters what is on screen.
+    @Volatile private var blockedChannels: List<BlockedYouTubeChannel> = emptyList()
+    // Unfiltered list behind `results`, so changing a filter re-filters what is on screen.
     private var lastRawResults: List<YouTubeTrack> = emptyList()
 
     private companion object {
@@ -113,16 +117,26 @@ class YouTubeSearchViewModel @Inject constructor(
         viewModelScope.launch {
             searchFilterPreferences.resultLanguageFlow.collect { language ->
                 resultLanguage = language
-                if (lastRawResults.isNotEmpty()) {
-                    _uiState.update { it.copy(results = visibleResults(lastRawResults)) }
-                }
+                refilterShownResults()
+            }
+        }
+        viewModelScope.launch {
+            searchFilterPreferences.blockedChannelsFlow.collect { channels ->
+                blockedChannels = channels
+                refilterShownResults()
             }
         }
     }
 
+    private fun refilterShownResults() {
+        // A cleared query shows no results even though the last search is still remembered.
+        if (lastRawResults.isEmpty() || _uiState.value.query.isBlank()) return
+        _uiState.update { it.copy(results = visibleResults(lastRawResults)) }
+    }
+
     private fun visibleResults(results: List<YouTubeTrack>): List<YouTubeTrack> {
         lastRawResults = results
-        return filterByResultLanguage(results, resultLanguage)
+        return filterByResultLanguage(filterBlockedChannels(results, blockedChannels), resultLanguage)
     }
 
     fun updateQuery(query: String) {
@@ -317,6 +331,15 @@ class YouTubeSearchViewModel @Inject constructor(
         }
         viewModelScope.launch {
             playbackController.playOnce(track)
+        }
+    }
+
+    /** Hides every result from the channel that published [track], now and in later searches. */
+    fun blockChannel(track: YouTubeTrack, confirmation: String) {
+        val channel = track.toBlockedChannelOrNull() ?: return
+        viewModelScope.launch {
+            searchFilterPreferences.blockChannel(channel)
+            _uiState.update { it.copy(snackbarMessage = confirmation) }
         }
     }
 

@@ -94,6 +94,8 @@
     <string name="cd_add_to_playlist">Add to playlist</string>
     <string name="action_add_to_queue">Add to queue</string>
     <string name="action_save_to_listen_later">Save to Listen later</string>
+    <string name="action_block_channel">Block channel</string>
+    <string name="youtube_channel_blocked">%1$s blocked. Unblock it in Settings.</string>
     <string name="listen_later_playlist_name">Listen later</string>
     <string name="action_queue_next">Next</string>
     <string name="song_info_set_as_short">Set as</string>

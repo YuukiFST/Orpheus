@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
@@ -267,6 +268,7 @@ fun YouTubeSearchScreen(
                                     viewModel.saveToListenLater(track, listenLaterPlaylistName)
                                 },
                                 onDownload = { viewModel.download(track) },
+                                onBlockChannel = { confirmation -> viewModel.blockChannel(track, confirmation) },
                                 onChannelClick = { channelName ->
                                     searchQuery = channelName
                                     viewModel.searchChannel(channelName)
@@ -470,6 +472,7 @@ private fun YouTubeSearchResultItem(
     onAddToPlaylist: () -> Unit,
     onSaveToListenLater: () -> Unit,
     onDownload: () -> Unit,
+    onBlockChannel: (confirmation: String) -> Unit,
     onChannelClick: (String) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -590,6 +593,17 @@ private fun YouTubeSearchResultItem(
                     },
                     leadingIcon = { Icon(Icons.Rounded.Download, contentDescription = null) },
                 )
+                if (track.channelName.isNotBlank()) {
+                    val blockedMessage = stringResource(R.string.youtube_channel_blocked, track.channelName)
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_block_channel)) },
+                        onClick = {
+                            showMenu = false
+                            onBlockChannel(blockedMessage)
+                        },
+                        leadingIcon = { Icon(Icons.Rounded.Block, contentDescription = null) },
+                    )
+                }
             }
         }
         }

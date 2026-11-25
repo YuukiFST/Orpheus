@@ -152,6 +152,10 @@
     <string name="setcat_youtube_result_language_label">Results language</string>
     <string name="setcat_youtube_result_language_desc">Hides results whose title, channel or description reads as another language or script. Results with no clear language, like an artist name, stay. Detection is text-based, so a few may slip through.</string>
     <string name="setcat_youtube_result_language_any">Any language</string>
+    <string name="setcat_youtube_blocked_channels_title">Blocked channels</string>
+    <string name="setcat_youtube_blocked_channels_subtitle">Hidden from search results: %1$d. Block one from a result\'s menu.</string>
+    <string name="setcat_youtube_blocked_channels_empty">No blocked channels.</string>
+    <string name="setcat_youtube_unblock_channel">Unblock %1$s</string>
     <string name="setcat_crossfade_label">Crossfade</string>
     <string name="setcat_crossfade_desc">Enable smooth transition between songs.</string>
     <string name="setcat_crossfade_duration">Crossfade Duration</string>

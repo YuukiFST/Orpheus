@@ -77,6 +77,7 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Close
@@ -170,6 +171,7 @@ import com.yuukifst.orpheus.data.preferences.ThemePreference
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import com.yuukifst.orpheus.data.preferences.YOUTUBE_SEARCH_REGION_CODES
 import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
+import com.yuukifst.orpheus.data.youtube.BlockedYouTubeChannel
 import com.yuukifst.orpheus.data.preferences.MAX_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.MIN_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.model.Song
@@ -224,6 +226,7 @@ fun SettingsCategoryScreen(
     var syncRequestObservedRunning by remember { mutableStateOf(false) }
     var syncIndicatorLabel by remember { mutableStateOf<String?>(null) }
     var showClearLyricsDialog by remember { mutableStateOf(false) }
+    var showBlockedChannelsDialog by remember { mutableStateOf(false) }
     var showRebuildDatabaseWarning by remember { mutableStateOf(false) }
     var showRegenerateDailyMixDialog by remember { mutableStateOf(false) }
     var showRegenerateStatsDialog by remember { mutableStateOf(false) }
@@ -842,6 +845,16 @@ fun SettingsCategoryScreen(
                                     },
                                     leadingIcon = { Icon(Icons.Rounded.Translate, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
+                                SettingsItem(
+                                    title = stringResource(R.string.setcat_youtube_blocked_channels_title),
+                                    subtitle = stringResource(
+                                        R.string.setcat_youtube_blocked_channels_subtitle,
+                                        uiState.blockedYouTubeChannels.size,
+                                    ),
+                                    leadingIcon = { Icon(Icons.Rounded.Block, null, tint = MaterialTheme.colorScheme.secondary) },
+                                    trailingIcon = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                    onClick = { showBlockedChannelsDialog = true }
+                                )
                             }
 
                             SettingsSubsection(title = stringResource(R.string.setcat_queue_transitions)) {
@@ -1287,6 +1300,14 @@ fun SettingsCategoryScreen(
     }
     
      // Dialogs logic (copied)
+    if (showBlockedChannelsDialog) {
+        BlockedChannelsDialog(
+            channels = uiState.blockedYouTubeChannels,
+            onUnblock = settingsViewModel::unblockYouTubeChannel,
+            onDismiss = { showBlockedChannelsDialog = false },
+        )
+    }
+
     if (showClearLyricsDialog) {
         AlertDialog(
             icon = { Icon(Icons.Outlined.Warning, null) },
@@ -2569,6 +2590,48 @@ private fun SettingsSubsectionHeader(title: String) {
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun BlockedChannelsDialog(
+    channels: ImmutableList<BlockedYouTubeChannel>,
+    onUnblock: (BlockedYouTubeChannel) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        icon = { Icon(Icons.Rounded.Block, null) },
+        title = { Text(stringResource(R.string.setcat_youtube_blocked_channels_title)) },
+        text = {
+            if (channels.isEmpty()) {
+                Text(stringResource(R.string.setcat_youtube_blocked_channels_empty))
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                    items(channels.size, key = { index -> channels[index].toString() }) { index ->
+                        val channel = channels[index]
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = channel.name,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            IconButton(onClick = { onUnblock(channel) }) {
+                                Icon(
+                                    Icons.Rounded.Close,
+                                    contentDescription = stringResource(R.string.setcat_youtube_unblock_channel, channel.name),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = { OrpheusTextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) } },
     )
 }
 
