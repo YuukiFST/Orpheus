@@ -4,6 +4,15 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.43] - 2026-11-25
+
+### Changed
+- Swiping the app away from Recents silences audio right away instead of after the playback position is saved.
+- Playback starts after 1 second of buffer instead of 2.5 seconds, and resumes after a rebuffer at 2 seconds instead of 5.
+- Swiping the mini player away cuts the audio when the swipe commits, not after the slide-out animation.
+- The player buffers the first seconds of the next queue item, so a skip starts from memory.
+- Tapping a Library song starts it before the full queue is built; the rest of the queue is attached while it plays.
+
 ## [1.0.40] - 2026-08-29
 
 ### Changed
