@@ -117,6 +117,7 @@
     <string name="song_info_ringtone_permission_prompt">Enable Modify system settings, then return to Orpheus to finish automatically.</string>
     <string name="song_info_ringtone_permission_missing">Modify system settings was not enabled.</string>
     <string name="song_info_ringtone_local_only">Only local songs can be used as ringtones.</string>
+    <string name="song_info_ringtone_downloading">Downloading the audio to set it as a sound…</string>
     <string name="song_info_ringtone_missing_file">Couldn\'t prepare this audio file for ringtone.</string>
     <string name="song_info_ringtone_failed">Couldn\'t set ringtone: %1$s</string>
     <string name="song_info_label_duration">Duration</string>
