@@ -40,7 +40,7 @@ update your row when done.
 | 012 | Start playback after 1 s of buffer, not 2.5 s (Media3 defaults) | P1 | S | LOW | — | DONE |
 | 013 | Cut audio when the mini-player dismiss swipe commits | P1 | S | LOW | — | DONE |
 | 014 | Preload the next playlist item on the master player | P1 | S | MED | 012 | DONE |
-| 015 | A Library tap starts audio before the full queue is built | P2 | M | MED | 013 | TODO |
+| 015 | A Library tap starts audio before the full queue is built | P2 | M | MED | 013 | DONE |
 
 ## Recommended execution order (round 3)
 

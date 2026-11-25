@@ -740,7 +740,8 @@ class PlayerViewModel @Inject constructor(
             song = song,
             queueName = queueName,
             isVoluntaryPlay = isVoluntaryPlay,
-            failureMessage = "Failed to build full library queue for songId=%s"
+            failureMessage = "Failed to build full library queue for songId=%s",
+            allowEarlyStart = true
         ) {
             val sortOption = playerUiState.value.currentSongSortOption
             val storageFilter = playerUiState.value.currentStorageFilter
@@ -786,20 +787,53 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    // A tapped local song can start alone, before its queue exists, only when the handoff
+    // is guaranteed to attach around it: shuffle off and a plain local item. A tap on the
+    // song that is already loaded keeps the resume-in-place path.
+    private fun canStartTappedSongAlone(song: Song): Boolean =
+        mediaController != null &&
+            !playbackStateHolder.stablePlayerState.value.isShuffleEnabled &&
+            !song.id.isYouTubeMediaId() &&
+            !song.requiresHydration() &&
+            isLocalPlaybackSong(song) &&
+            dualPlayerEngine.masterPlayer.currentMediaItem?.mediaId != song.id
+
+    // Engine player only: a MediaController command is queued by the session and would
+    // land after this play().
+    private fun startTappedSongAlone(song: Song) {
+        dualPlayerEngine.cancelNext()
+        val enginePlayer = dualPlayerEngine.masterPlayer
+        enginePlayer.setMediaItem(MediaItemBuilder.build(song), 0L)
+        enginePlayer.prepare()
+        enginePlayer.play()
+    }
+
+    private fun canAttachQueueAroundEarlyStart(song: Song, fullQueue: List<Song>): Boolean {
+        val enginePlayer = dualPlayerEngine.masterPlayer
+        return enginePlayer.mediaItemCount == 1 &&
+            enginePlayer.currentMediaItem?.mediaId == song.id &&
+            fullQueue.any { it.id == song.id } &&
+            fullQueue.none { it.id.isYouTubeMediaId() || it.requiresHydration() }
+    }
+
     private fun launchLatestFullQueuePlayback(
         song: Song,
         queueName: String,
         isVoluntaryPlay: Boolean,
         failureMessage: String,
+        allowEarlyStart: Boolean = false,
         queueProvider: suspend () -> List<Song>
     ) {
         cancelPendingFullQueuePlayback()
         cancelPendingDirectPlayback()
+        val earlyStarted = allowEarlyStart && canStartTappedSongAlone(song)
         applyImmediatePlaybackUi(
             song = song,
             queueSongs = listOf(song),
             queueName = queueName,
+            hushViaController = !earlyStarted,
         )
+        if (earlyStarted) startTappedSongAlone(song)
         val requestToken = fullQueuePlaybackToken
 
         fullQueuePlaybackJob = viewModelScope.launch {
@@ -810,7 +844,9 @@ class PlayerViewModel @Inject constructor(
                     song = song,
                     fullQueue = fullQueue,
                     queueName = queueName,
-                    isVoluntaryPlay = isVoluntaryPlay
+                    isVoluntaryPlay = isVoluntaryPlay,
+                    earlyStarted = earlyStarted,
+                    requestToken = requestToken,
                 )
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -827,21 +863,47 @@ class PlayerViewModel @Inject constructor(
                     song = song,
                     fullQueue = fallbackQueue,
                     queueName = queueName,
-                    isVoluntaryPlay = isVoluntaryPlay
+                    isVoluntaryPlay = isVoluntaryPlay,
+                    earlyStarted = earlyStarted,
+                    requestToken = requestToken,
                 )
             }
         }
     }
 
-    private fun handOffFullQueuePlayback(
+    private suspend fun handOffFullQueuePlayback(
         song: Song,
         fullQueue: List<Song>,
         queueName: String,
-        isVoluntaryPlay: Boolean
+        isVoluntaryPlay: Boolean,
+        earlyStarted: Boolean,
+        requestToken: Long,
     ) {
+        if (earlyStarted && canAttachQueueAroundEarlyStart(song, fullQueue)) {
+            attachFullQueueAroundEarlyStart(
+                song = song,
+                fullQueue = fullQueue,
+                queueName = queueName,
+                isVoluntaryPlay = isVoluntaryPlay,
+                requestToken = requestToken,
+            )
+            return
+        }
         // Clear the job ref before playSongs() cancels pending full-queue work;
         // otherwise this coroutine cancels itself and playback never starts.
         fullQueuePlaybackJob = null
+        if (earlyStarted) {
+            // The player holds only the early-started item, so showAndPlaySong would reuse
+            // it and never load the queue. playSongs rebuilds the queue unconditionally.
+            if (isVoluntaryPlay) incrementSongScore(song)
+            playSongs(
+                songsToPlay = fullQueue.takeIf { songs -> songs.any { it.id == song.id } } ?: listOf(song),
+                startSong = song,
+                queueName = queueName,
+            )
+            resetPredictiveBackState()
+            return
+        }
         showAndPlaySong(
             song = song,
             contextSongs = fullQueue.ifEmpty { listOf(song) },
@@ -849,6 +911,40 @@ class PlayerViewModel @Inject constructor(
             isVoluntaryPlay = isVoluntaryPlay,
             cancelPendingQueueBuild = false
         )
+    }
+
+    // The tapped song is already playing alone: attach the rest of the queue around it
+    // instead of restarting it.
+    private suspend fun attachFullQueueAroundEarlyStart(
+        song: Song,
+        fullQueue: List<Song>,
+        queueName: String,
+        isVoluntaryPlay: Boolean,
+        requestToken: Long,
+    ) {
+        if (isVoluntaryPlay) incrementSongScore(song)
+        // Same value showAndPlaySong reads at this point of the existing path.
+        val previousQueueName = _playerUiState.value.currentQueueSourceName
+        reconcileRepeatModeForQueueChange(queueName, previousQueueName)
+        throwIfFullQueuePlaybackRequestIsStale(requestToken)
+        playbackStateHolder.clearUserQueueTail()
+
+        pendingQueueSegmentsJob?.cancel()
+        pendingQueueSegmentsJob = viewModelScope.launch {
+            val preparedSegments = preparePlaybackQueueSegments(
+                songsToPlay = fullQueue,
+                startSongId = song.id,
+                playlistId = null
+            )
+            withContext(Dispatchers.Main.immediate) {
+                attachPreparedQueueSegmentsIfCurrent(
+                    player = dualPlayerEngine.masterPlayer,
+                    startSongId = song.id,
+                    preparedSegments = preparedSegments
+                )
+            }
+        }
+        resetPredictiveBackState()
     }
 
     private fun cancelPendingFullQueuePlayback() {
@@ -3348,9 +3444,11 @@ class PlayerViewModel @Inject constructor(
         )
     }
 
-    private fun hushCurrentAudioForTrackSwitch() {
-        mediaController?.playWhenReady = false
-        mediaController?.pause()
+    private fun hushCurrentAudioForTrackSwitch(viaController: Boolean = true) {
+        if (viaController) {
+            mediaController?.playWhenReady = false
+            mediaController?.pause()
+        }
         runCatching { dualPlayerEngine.hushImmediateAudio() }
     }
 
@@ -3359,10 +3457,11 @@ class PlayerViewModel @Inject constructor(
         queueSongs: List<Song>,
         queueName: String,
         mediaItemIndex: Int = queueSongs.indexOfFirst { it.id == song.id }.coerceAtLeast(0),
+        hushViaController: Boolean = true,
     ) {
         // Cut prior audio on the same main-thread turn as the tap, before queue
         // hydrate / MediaItem prepare can finish.
-        hushCurrentAudioForTrackSwitch()
+        hushCurrentAudioForTrackSwitch(viaController = hushViaController)
         // Invalidate any in-flight dismiss ACTION_CLEAR_PLAYBACK for the prior session.
         PlaybackClearGeneration.bump()
         _dismissJustCommitted.value = false
