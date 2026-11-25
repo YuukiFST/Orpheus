@@ -452,6 +452,13 @@ class PlayerViewModel @Inject constructor(
         _isMiniPlayerDismissing.value = dismissing
     }
 
+    // The swipe is past the dismiss threshold: go silent now instead of after the
+    // slide-out animation. The full clear still runs in dismissPlaylistAndShowUndo().
+    fun onMiniPlayerDismissStarted() {
+        setMiniPlayerDismissing(true)
+        hushCurrentAudioForTrackSwitch()
+    }
+
     private fun setSheetVisibleUnlessDismissUndoPending() {
         if (!_playerUiState.value.showDismissUndoBar && !_dismissJustCommitted.value) {
             _isSheetVisible.value = true
