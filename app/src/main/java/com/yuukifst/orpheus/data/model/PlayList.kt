@@ -25,7 +25,13 @@ data class Playlist(
     val source: String = "LOCAL", // Source: "LOCAL", "SMART:<rule>", or self-hosted service IDs.
     @SerializedName(value = "displayOrder", alternate = ["display_order"])
     val displayOrder: Int = 0,
-)
+    /** YouTube tracks stored outside [songIds]; derived from the database, never serialized. */
+    @kotlin.jvm.Transient
+    @kotlinx.serialization.Transient
+    val youtubeTrackCount: Int = 0,
+) {
+    val trackCount: Int get() = songIds.size + youtubeTrackCount
+}
 
 enum class PlaylistShapeType {
     Circle,

@@ -21,6 +21,7 @@ import com.yuukifst.orpheus.data.preferences.UserPreferencesRepository
 import com.yuukifst.orpheus.data.preferences.YouTubeSearchFilterPreferences
 import com.yuukifst.orpheus.data.preferences.YOUTUBE_SEARCH_REGION_DEFAULT
 import com.yuukifst.orpheus.data.preferences.YouTubeResultLanguage
+import com.yuukifst.orpheus.data.youtube.BlockedYouTubeChannel
 import com.yuukifst.orpheus.data.preferences.YouTubeAudioQuality
 import com.yuukifst.orpheus.data.preferences.DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS
 import com.yuukifst.orpheus.data.preferences.AlbumArtQuality
@@ -73,6 +74,7 @@ data class SettingsUiState(
     val youtubeSearchDebounceMs: Int = DEFAULT_YOUTUBE_SEARCH_DEBOUNCE_MS,
     val youtubeSearchRegion: String = YOUTUBE_SEARCH_REGION_DEFAULT,
     val youtubeResultLanguage: YouTubeResultLanguage = YouTubeResultLanguage.ANY,
+    val blockedYouTubeChannels: ImmutableList<BlockedYouTubeChannel> = persistentListOf(),
     val resumeOnHeadsetReconnect: Boolean = false,
     val showQueueHistory: Boolean = true,
     val isCrossfadeEnabled: Boolean = false,
@@ -479,6 +481,12 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(youtubeResultLanguage = language) }
             }
         }
+
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.blockedChannelsFlow.collect { channels ->
+                _uiState.update { it.copy(blockedYouTubeChannels = channels.toImmutableList()) }
+            }
+        }
     }
 
     fun setAppRebrandDialogShown(wasShown: Boolean) {
@@ -650,6 +658,12 @@ class SettingsViewModel @Inject constructor(
     fun setYouTubeResultLanguage(language: YouTubeResultLanguage) {
         viewModelScope.launch {
             youTubeSearchFilterPreferences.setResultLanguage(language)
+        }
+    }
+
+    fun unblockYouTubeChannel(channel: BlockedYouTubeChannel) {
+        viewModelScope.launch {
+            youTubeSearchFilterPreferences.unblockChannel(channel)
         }
     }
 

@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.yuukifst.orpheus.data.youtube.BlockedYouTubeChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -61,6 +63,7 @@ class YouTubeSearchFilterPreferences @Inject constructor(
         val SEARCH_REGION = stringPreferencesKey("youtube_search_region")
         val LEGACY_HIDE_PORTUGUESE = booleanPreferencesKey("youtube_search_hide_portuguese")
         val RESULT_LANGUAGE = stringPreferencesKey("youtube_search_result_language")
+        val BLOCKED_CHANNELS = stringSetPreferencesKey("youtube_blocked_channels")
     }
 
     val searchRegionFlow: Flow<String> =
@@ -75,6 +78,26 @@ class YouTubeSearchFilterPreferences @Inject constructor(
                 legacyHidePortuguese = preferences[Keys.LEGACY_HIDE_PORTUGUESE],
             )
         }.distinctUntilChanged()
+
+    /** Blocked channels, sorted by name. */
+    val blockedChannelsFlow: Flow<List<BlockedYouTubeChannel>> =
+        dataStore.data.map { preferences ->
+            preferences[Keys.BLOCKED_CHANNELS].orEmpty()
+                .mapNotNull(BlockedYouTubeChannel::fromStorage)
+                .sortedBy { it.name.lowercase() }
+        }.distinctUntilChanged()
+
+    suspend fun blockChannel(channel: BlockedYouTubeChannel) {
+        dataStore.edit { preferences ->
+            preferences[Keys.BLOCKED_CHANNELS] = preferences[Keys.BLOCKED_CHANNELS].orEmpty() + channel.toStorage()
+        }
+    }
+
+    suspend fun unblockChannel(channel: BlockedYouTubeChannel) {
+        dataStore.edit { preferences ->
+            preferences[Keys.BLOCKED_CHANNELS] = preferences[Keys.BLOCKED_CHANNELS].orEmpty() - channel.toStorage()
+        }
+    }
 
     suspend fun setSearchRegion(code: String) {
         dataStore.edit { preferences ->

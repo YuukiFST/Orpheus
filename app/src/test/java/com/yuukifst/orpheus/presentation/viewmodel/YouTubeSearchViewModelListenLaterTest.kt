@@ -52,6 +52,7 @@ class YouTubeSearchViewModelListenLaterTest {
         every { userPreferencesRepository.youtubeSearchDebounceMsFlow } returns flowOf(260)
         every { searchFilterPreferences.searchRegionFlow } returns flowOf("")
         every { searchFilterPreferences.resultLanguageFlow } returns flowOf(YouTubeResultLanguage.ANY)
+        every { searchFilterPreferences.blockedChannelsFlow } returns flowOf(emptyList())
         coEvery { playlistYouTubeMembership.playlistIdsContainingVideo(any()) } returns emptySet()
     }
 

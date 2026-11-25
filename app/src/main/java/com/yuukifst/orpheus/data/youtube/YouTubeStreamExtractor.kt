@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.schabi.newpipe.extractor.MediaFormat
 import org.schabi.newpipe.extractor.stream.AudioStream
 import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.StreamInfo
@@ -56,23 +57,37 @@ class YouTubeStreamExtractor @Inject constructor(
         }
         val best = selectYouTubeAudioStream(info.audioStreams, quality)
             ?: throw IllegalStateException("No audio stream available for $videoId")
-        val result = YouTubeStreamResult(
-            streamUrl = best.content,
-            mimeType = best.format?.mimeType,
-            formatId = best.id.orEmpty(),
-        )
+        val result = best.toStreamResult()
         streamCache.put(cacheKey, CachedStreamResult(result, System.currentTimeMillis()))
         return result
     }
 
-    suspend fun extractBestAudioWithRetry(videoId: String): YouTubeStreamResult {
+    suspend fun extractBestAudioWithRetry(videoId: String): YouTubeStreamResult =
+        retryOnce { extractBestAudio(videoId) }
+
+    /** Stream for saving to disk: M4A when offered, so it is taggable and usable as a ringtone. */
+    suspend fun extractDownloadAudioWithRetry(videoId: String): YouTubeStreamResult =
+        retryOnce { extractDownloadAudio(videoId) }
+
+    private suspend fun extractDownloadAudio(videoId: String): YouTubeStreamResult =
+        withContext(Dispatchers.IO) {
+            val quality = currentQuality()
+            youTubeInitializer.ensureInitialized()
+            val info = youTubeDownloader.runAsStream {
+                StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
+            }
+            selectYouTubeDownloadStream(info.audioStreams, quality)?.toStreamResult()
+                ?: throw IllegalStateException("No audio stream available for $videoId")
+        }
+
+    private suspend fun retryOnce(extract: suspend () -> YouTubeStreamResult): YouTubeStreamResult {
         return try {
-            extractBestAudio(videoId)
+            extract()
         } catch (error: CancellationException) {
             throw error
         } catch (_: Exception) {
             kotlinx.coroutines.delay(250)
-            extractBestAudio(videoId)
+            extract()
         }
     }
 
@@ -143,6 +158,12 @@ class YouTubeStreamExtractor @Inject constructor(
     }
 }
 
+private fun AudioStream.toStreamResult() = YouTubeStreamResult(
+    streamUrl = content,
+    mimeType = format?.mimeType,
+    formatId = id.orEmpty(),
+)
+
 internal fun streamCacheKey(videoId: String, quality: YouTubeAudioQuality): String =
     "${videoId.trim()}:${quality.name}"
 
@@ -175,6 +196,16 @@ internal fun selectYouTubeAudioStream(
     val chosen = chooseYouTubeAudioBitrate(candidates.map { it.averageBitrate }, quality)
         ?: return candidates.firstOrNull()
     return candidates.firstOrNull { it.averageBitrate == chosen } ?: candidates.firstOrNull()
+}
+
+internal fun selectYouTubeDownloadStream(
+    streams: List<AudioStream>,
+    quality: YouTubeAudioQuality,
+): AudioStream? {
+    // Language first: an original-language WebM beats a dubbed M4A.
+    val original = originalAudioTrackStreams(streams)
+    val m4a = original.filter { it.format == MediaFormat.M4A }
+    return selectYouTubeAudioStream(m4a.ifEmpty { original }, quality)
 }
 
 /**

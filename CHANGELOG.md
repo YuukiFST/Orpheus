@@ -4,6 +4,19 @@ All notable changes to Orpheus will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.44] - 2026-11-25
+
+### Added
+- Block a YouTube channel from a search result menu to hide its videos; unblock it in Settings under YouTube Search.
+
+### Changed
+- App themes are now Dark, Light, Sakura, or follow system. A removed dark theme falls back to Dark, and Rose Pine to Light.
+
+### Fixed
+- Downloading a YouTube search result no longer fails with EPERM when the audio is WebM.
+- Setting a YouTube track as a phone sound downloads it first instead of failing.
+- Playlists with YouTube tracks no longer show 0 songs.
+
 ## [1.0.43] - 2026-11-25
 
 ### Changed

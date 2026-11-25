@@ -8,18 +8,21 @@ fun String.isYouTubeMediaId(): Boolean = startsWith("youtube_")
 
 fun Song.isYouTubeSource(): Boolean = id.isYouTubeMediaId()
 
+/** The YouTube track behind this song; null for local songs. */
+fun Song.toYouTubeTrackOrNull(): YouTubeTrack? {
+    if (!id.isYouTubeMediaId()) return null
+    return YouTubeTrack(
+        videoId = id.removePrefix("youtube_"),
+        title = title,
+        channelName = artist,
+        thumbnailUrl = albumArtUriString.orEmpty(),
+        durationMs = duration,
+    )
+}
+
 fun Song.toPlaylistMixedTrack(sortOrder: Int): PlaylistMixedTrack {
-    if (id.isYouTubeMediaId()) {
-        return PlaylistMixedTrack.YouTube(
-            track = YouTubeTrack(
-                videoId = id.removePrefix("youtube_"),
-                title = title,
-                channelName = artist,
-                thumbnailUrl = albumArtUriString.orEmpty(),
-                durationMs = duration,
-            ),
-            sortOrder = sortOrder,
-        )
+    toYouTubeTrackOrNull()?.let { track ->
+        return PlaylistMixedTrack.YouTube(track = track, sortOrder = sortOrder)
     }
     return PlaylistMixedTrack.Local(song = this, sortOrder = sortOrder)
 }

@@ -17,12 +17,16 @@ import com.yuukifst.orpheus.data.database.MusicDao
 import com.yuukifst.orpheus.data.database.toArtist
 import com.yuukifst.orpheus.data.model.Artist
 import com.yuukifst.orpheus.data.model.Song
+import com.yuukifst.orpheus.data.youtube.YouTubeDownloadRepository
+import com.yuukifst.orpheus.data.youtube.model.YouTubeTrack
 import com.yuukifst.orpheus.utils.AudioMeta
 import com.yuukifst.orpheus.utils.AudioMetaUtils
+import com.yuukifst.orpheus.utils.toYouTubeTrackOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +42,7 @@ import kotlinx.collections.immutable.toImmutableList
 @HiltViewModel
 class SongInfoBottomSheetViewModel @Inject constructor(
     private val musicDao: MusicDao,
+    private val youTubeDownloadRepository: YouTubeDownloadRepository,
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
@@ -162,16 +167,28 @@ class SongInfoBottomSheetViewModel @Inject constructor(
             )
         }
 
-        val ringtoneUri = runCatching { resolveMediaStoreAudioUri(song) }.getOrNull()
-            ?: return ToneActionResult.Error(
-                appContext.getString(R.string.song_info_ringtone_missing_file)
-            )
-
-        if (!Settings.System.canWrite(appContext)) {
+        // Checked before resolving the file: a YouTube track is downloaded to resolve it.
+        if (!hasSystemWritePermission()) {
             return ToneActionResult.NeedsSystemWritePermission(
                 appContext.getString(R.string.song_info_ringtone_permission_prompt)
             )
         }
+
+        val youTubeTrack = song.toYouTubeTrackOrNull()
+        val ringtoneUri = runCatching {
+            if (youTubeTrack != null) resolveYouTubeAudioUri(youTubeTrack) else resolveMediaStoreAudioUri(song)
+        }.getOrElse { throwable ->
+            if (throwable is CancellationException) throw throwable
+            if (youTubeTrack == null) return@getOrElse null
+            return ToneActionResult.Error(
+                appContext.getString(
+                    R.string.song_info_ringtone_failed,
+                    throwable.localizedMessage ?: throwable.javaClass.simpleName
+                )
+            )
+        } ?: return ToneActionResult.Error(
+            appContext.getString(R.string.song_info_ringtone_missing_file)
+        )
 
         return runCatching {
             markAsToneCandidate(ringtoneUri, target)
@@ -220,6 +237,13 @@ class SongInfoBottomSheetViewModel @Inject constructor(
         return scanAudioFile(file, song.mimeType)
             ?.takeIf { it.authority == MediaStore.AUTHORITY }
             ?: findMediaStoreAudioUriByPath(song.path)
+    }
+
+    private suspend fun resolveYouTubeAudioUri(track: YouTubeTrack): Uri? {
+        val file = youTubeDownloadRepository.downloadedFile(track).getOrThrow()
+        return findMediaStoreAudioUriByPath(file.absolutePath)
+            ?: scanAudioFile(file, mimeType = null)
+                ?.takeIf { it.authority == MediaStore.AUTHORITY }
     }
 
     private fun findMediaStoreAudioUriByPath(path: String): Uri? {

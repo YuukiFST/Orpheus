@@ -11,13 +11,6 @@ import org.junit.Test
 
 class AppThemeModeResolutionTest {
     @Test
-    fun pixelForcesDarkFlagAndPixelSchemeKey() {
-        val r = resolveAppTheme(AppThemeMode.PIXEL, systemDark = false)
-        assertTrue(r.darkTheme)
-        assertEquals(AppThemeScheme.PIXEL, r.scheme)
-    }
-
-    @Test
     fun legacyTerminalMapsToDark() {
         val r = resolveAppTheme("terminal", systemDark = false)
         assertTrue(r.darkTheme)
@@ -25,34 +18,13 @@ class AppThemeModeResolutionTest {
     }
 
     @Test
-    fun followSystemNeverSelectsPixel() {
+    fun followSystemMatchesSystemDark() {
         val light = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = false)
         val dark = resolveAppTheme(AppThemeMode.FOLLOW_SYSTEM, systemDark = true)
         assertEquals(AppThemeScheme.LIGHT, light.scheme)
         assertEquals(AppThemeScheme.DARK, dark.scheme)
         assertFalse(light.darkTheme)
         assertTrue(dark.darkTheme)
-    }
-
-    @Test
-    fun etherealForcesDarkAndEtherealScheme() {
-        val r = resolveAppTheme(AppThemeMode.ETHEREAL, systemDark = false)
-        assertTrue(r.darkTheme)
-        assertEquals(AppThemeScheme.ETHEREAL, r.scheme)
-    }
-
-    @Test
-    fun rosePineForcesLightAndRosePineScheme() {
-        val r = resolveAppTheme(AppThemeMode.ROSE_PINE, systemDark = true)
-        assertFalse(r.darkTheme)
-        assertEquals(AppThemeScheme.ROSE_PINE, r.scheme)
-    }
-
-    @Test
-    fun catppuccinMochaForcesDarkAndScheme() {
-        val r = resolveAppTheme(AppThemeMode.CATPPUCCIN_MOCHA, systemDark = false)
-        assertTrue(r.darkTheme)
-        assertEquals(AppThemeScheme.CATPPUCCIN_MOCHA, r.scheme)
     }
 
     @Test
@@ -78,10 +50,9 @@ class AppThemeModeResolutionTest {
     }
 
     @Test
-    fun settingsCategoryColors_monoWhenNotPixel() {
+    fun settingsCategoryColors_monoWhenDark() {
         val mono = settingsCategoryColorsOrMono(
             category = SettingsCategory.APPEARANCE,
-            isDark = true,
             appThemeMode = AppThemeMode.DARK,
             monoPair = Color.Black to Color.White
         )
@@ -89,32 +60,12 @@ class AppThemeModeResolutionTest {
     }
 
     @Test
-    fun settingsCategoryColors_pastelWhenPixel() {
+    fun settingsCategoryColors_pastelWhenSakura() {
         val pair = settingsCategoryColorsOrMono(
             category = SettingsCategory.APPEARANCE,
-            isDark = true,
-            appThemeMode = AppThemeMode.PIXEL,
+            appThemeMode = AppThemeMode.SAKURA,
             monoPair = Color.Black to Color.White
         )
         assertTrue(pair.first != Color.Black)
-    }
-
-    @Test
-    fun settingsCategoryColors_pastelWhenColorfulThemes() {
-        listOf(
-            AppThemeMode.PIXEL,
-            AppThemeMode.ETHEREAL,
-            AppThemeMode.ROSE_PINE,
-            AppThemeMode.CATPPUCCIN_MOCHA,
-            AppThemeMode.SAKURA,
-        ).forEach { mode ->
-            val pair = settingsCategoryColorsOrMono(
-                category = SettingsCategory.APPEARANCE,
-                isDark = mode != AppThemeMode.ROSE_PINE && mode != AppThemeMode.SAKURA,
-                appThemeMode = mode,
-                monoPair = Color.Black to Color.White
-            )
-            assertTrue("expected pastel for $mode", pair.first != Color.Black)
-        }
     }
 }

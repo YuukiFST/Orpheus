@@ -30,33 +30,7 @@ data class OrpheusShapeSet(
     val expressiveHero: Shape,
 )
 
-val pixelThemeMaterialShapes = Shapes(
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(24.dp),
-)
-
 object OrpheusShapeSets {
-    val Pixel = OrpheusShapeSet(
-        terminal = RoundedCornerShape(12.dp),
-        button = RoundedCornerShape(8.dp),
-        iconButton = RoundedCornerShape(16.dp),
-        searchBar = RoundedCornerShape(28.dp),
-        smooth8 = RoundedCornerShape(8.dp),
-        smooth10 = RoundedCornerShape(10.dp),
-        smooth12 = RoundedCornerShape(12.dp),
-        smooth14 = RoundedCornerShape(14.dp),
-        smooth16 = RoundedCornerShape(16.dp),
-        smooth20 = RoundedCornerShape(20.dp),
-        smooth24 = RoundedCornerShape(24.dp),
-        smooth28 = RoundedCornerShape(28.dp),
-        smooth32 = RoundedCornerShape(32.dp),
-        smoothPill = RoundedCornerShape(50),
-        expressiveAvatar = RoundedCornerShape(16.dp),
-        expressiveClover = RoundedCornerShape(20.dp),
-        expressiveHero = RoundedCornerShape(24.dp),
-    )
-
     val Square = OrpheusShapeSet(
         terminal = RoundedCornerShape(0.dp),
         button = RoundedCornerShape(0.dp),
@@ -77,7 +51,7 @@ object OrpheusShapeSets {
         expressiveHero = RectangleShape,
     )
 
-    /** Pixel copy with +4.dp on medium radii for petal-soft chrome. */
+    /** [Rounded] with larger medium radii and tighter buttons for petal-soft chrome. */
     val Sakura = OrpheusShapeSet(
         terminal = RoundedCornerShape(12.dp),
         button = RoundedCornerShape(8.dp),

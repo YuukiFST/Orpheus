@@ -30,7 +30,7 @@ class ThemePreferencesRepository @Inject constructor(
     }
 
     val appThemeModeFlow: Flow<String> = dataStore.data.map { preferences ->
-        preferences[Keys.APP_THEME_MODE] ?: AppThemeMode.LIGHT
+        AppThemeMode.fromStored(preferences[Keys.APP_THEME_MODE])
     }.onEach { mode ->
         if (startupMirror.getString(KEY_APP_THEME_MODE, null) != mode) {
             startupMirror.edit().putString(KEY_APP_THEME_MODE, mode).apply()
@@ -44,7 +44,7 @@ class ThemePreferencesRepository @Inject constructor(
      * Example: `collectAsStateWithLifecycle(initialValue = themePreferencesRepository.readAppThemeModeSync())`.
      */
     fun readAppThemeModeSync(): String =
-        startupMirror.getString(KEY_APP_THEME_MODE, null) ?: AppThemeMode.LIGHT
+        AppThemeMode.fromStored(startupMirror.getString(KEY_APP_THEME_MODE, null))
 
     val playerThemePreferenceFlow: Flow<String> = dataStore.data.map { preferences ->
         preferences[Keys.PLAYER_THEME_PREFERENCE] ?: ThemePreference.DEFAULT
