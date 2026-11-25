@@ -195,6 +195,7 @@ private fun InfoItem.toYouTubeTrack(): YouTubeTrack? {
         thumbnailUrl = selectBestThumbnailUrl(thumbnails, id),
         durationMs = duration * 1000L,
         descriptionSnippet = shortDescription?.takeIf { it.isNotBlank() },
+        channelUrl = uploaderUrl?.takeIf { it.isNotBlank() },
     )
 }
 

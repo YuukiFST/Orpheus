@@ -35,8 +35,11 @@ class PlaylistPreferencesRepository @Inject constructor(
             playlistsSortOptionFlow,
         ) { rows, sortKey ->
             val playlists = rows.map { row ->
-                row.playlist.toPlaylist(
-                    songIds = row.songs.sortedBy { it.sortOrder }.map { it.songId },
+                val songIds = row.songs.sortedBy { it.sortOrder }.map { it.songId }
+                // Older versions also stored YouTube tracks as song rows; count those once.
+                val songIdSet = songIds.toSet()
+                row.playlist.toPlaylist(songIds).copy(
+                    youtubeTrackCount = row.youtubeVideoIds.count { "youtube_$it" !in songIdSet },
                 )
             }
             val sortOption = SortOption.fromStorageKey(

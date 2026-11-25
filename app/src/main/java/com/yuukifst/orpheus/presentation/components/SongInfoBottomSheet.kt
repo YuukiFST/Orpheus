@@ -147,6 +147,7 @@ fun SongInfoBottomSheet(
             return@rememberLauncherForActivityResult
         }
         if (songInfoViewModel.hasSystemWritePermission()) {
+            if (isYouTube) showYouTubeTonePreparingToast(context)
             songInfoViewModel.setSongAsTone(pendingSong, pendingTarget) { result ->
                 val message = when (result) {
                     is SongInfoBottomSheetViewModel.ToneActionResult.Success -> result.message
@@ -207,6 +208,9 @@ fun SongInfoBottomSheet(
     }
 
     fun setCurrentSongAsTone(target: ToneTarget) {
+        if (isYouTube && songInfoViewModel.hasSystemWritePermission()) {
+            showYouTubeTonePreparingToast(context)
+        }
         songInfoViewModel.setSongAsTone(song, target) { result ->
             handleToneResult(song, target, result)
         }
@@ -1013,6 +1017,14 @@ private fun ToneDialogIcon(
             )
         }
     }
+}
+
+private fun showYouTubeTonePreparingToast(context: Context) {
+    Toast.makeText(
+        context,
+        context.getString(R.string.song_info_ringtone_downloading),
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 @Composable

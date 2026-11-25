@@ -11,5 +11,12 @@ data class PlaylistWithSongsEntity(
         entityColumn = "playlist_id",
         entity = PlaylistSongEntity::class
     )
-    val songs: List<PlaylistSongEntity>
+    val songs: List<PlaylistSongEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "playlist_id",
+        entity = PlaylistYouTubeTrackEntity::class,
+        projection = ["video_id"]
+    )
+    val youtubeVideoIds: List<String> = emptyList()
 )
